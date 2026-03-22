@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,6 +14,7 @@ public class Packet52MultiBlockChange extends Packet {
     public byte[] d;
     public byte[] e;
     public int f;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet52MultiBlockChange() {
         this.k = true;
@@ -39,32 +42,20 @@ public class Packet52MultiBlockChange extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readInt();
-        this.f = datainputstream.readShort() & '\uffff';
-        this.c = new short[this.f];
-        this.d = new byte[this.f];
-        this.e = new byte[this.f];
-
-        for (int i = 0; i < this.f; ++i) {
-            this.c[i] = datainputstream.readShort();
-        }
-
-        datainputstream.readFully(this.d);
-        datainputstream.readFully(this.e);
+        PacketDataCodec.Packet52Data packetData = packetDataCodec.readPacket52(datainputstream);
+        this.a = packetData.getChunkX();
+        this.b = packetData.getChunkZ();
+        this.f = packetData.getRecordCount();
+        this.c = packetData.getCoordinates();
+        this.d = packetData.getTypeIds();
+        this.e = packetData.getMetadata();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeInt(this.b);
-        dataoutputstream.writeShort((short) this.f);
-
-        for (int i = 0; i < this.f; ++i) {
-            dataoutputstream.writeShort(this.c[i]);
-        }
-
-        dataoutputstream.write(this.d);
-        dataoutputstream.write(this.e);
+        packetDataCodec.writePacket52(
+                new PacketDataCodec.Packet52Data(this.a, this.b, this.c, this.d, this.e, this.f),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -72,6 +63,6 @@ public class Packet52MultiBlockChange extends Packet {
     }
 
     public int a() {
-        return 10 + this.f * 4;
+        return packetDataCodec.packet52Length(this.f);
     }
 }

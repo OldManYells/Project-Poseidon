@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 public class Packet2Handshake extends Packet {
 
     public String a;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet2Handshake() {}
 
@@ -15,11 +18,11 @@ public class Packet2Handshake extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = a(datainputstream, 32);
+        this.a = packetDataCodec.readPacket2(datainputstream).getHandshake();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        a(this.a, dataoutputstream);
+        packetDataCodec.writePacket2(new PacketDataCodec.Packet2Data(this.a), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -27,6 +30,6 @@ public class Packet2Handshake extends Packet {
     }
 
     public int a() {
-        return 4 + this.a.length() + 4;
+        return packetDataCodec.packet2Length(this.a);
     }
 }

@@ -144,7 +144,6 @@ public class ServerLogRotator {
         logger.log(Level.INFO, "[Poseidon] Log rotation task scheduled for run in " + initialDelay + " seconds, and then every " + period + " seconds.");
         logger.log(Level.INFO, "[Poseidon] If latest.log contains logs from earlier, not previously archived dates, they will be archived to the appropriate log files " +
                                "upon first run of the log rotation task. If log files already exist for these dates, the logs will be appended to the existing log files!");
-        Bukkit.getScheduler().scheduleAsyncRepeatingTask(new PoseidonPlugin(), this::buildHistoricalLogsFromLatestLogFile, (initialDelay + 1) * 20, period * 20);
+        Bukkit.getScheduler().scheduleAsyncRepeatingTask(PoseidonPlugin.getInstance(), this::buildHistoricalLogsFromLatestLogFile, (initialDelay + 1) * 20, period * 20);
     }
 }
-

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +10,7 @@ public class Packet38EntityStatus extends Packet {
 
     public int a;
     public byte b;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet38EntityStatus() {}
 
@@ -17,13 +20,13 @@ public class Packet38EntityStatus extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readByte();
+        PacketDataCodec.Packet38Data packetData = packetDataCodec.readPacket38(datainputstream);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getStatusByte();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeByte(this.b);
+        packetDataCodec.writePacket38(new PacketDataCodec.Packet38Data(this.a, this.b), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -31,6 +34,6 @@ public class Packet38EntityStatus extends Packet {
     }
 
     public int a() {
-        return 5;
+        return packetDataCodec.packet38Length();
     }
 }

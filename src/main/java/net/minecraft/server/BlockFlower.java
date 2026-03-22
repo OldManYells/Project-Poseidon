@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.FlowerStateBehaviour;
+
 import java.util.Random;
 
 public class BlockFlower extends Block {
+    private final FlowerStateBehaviour flowerStateService = FlowerStateBehaviour.getInstance();
 
     protected BlockFlower(int i, int j) {
         super(i, Material.PLANT);
@@ -14,11 +17,11 @@ public class BlockFlower extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return super.canPlace(world, i, j, k) && this.c(world.getTypeId(i, j - 1, k));
+        return flowerStateService.canPlace(super.canPlace(world, i, j, k), this.c(world.getTypeId(i, j - 1, k)));
     }
 
     protected boolean c(int i) {
-        return i == Block.GRASS.id || i == Block.DIRT.id || i == Block.SOIL.id;
+        return flowerStateService.canPlantOn(i, Block.GRASS.id, Block.DIRT.id, Block.SOIL.id);
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
@@ -31,14 +34,18 @@ public class BlockFlower extends Block {
     }
 
     protected final void g(World world, int i, int j, int k) {
-        if (!this.f(world, i, j, k)) {
+        if (flowerStateService.shouldDropForInvalidPlacement(this.f(world, i, j, k))) {
             this.g(world, i, j, k, world.getData(i, j, k));
             world.setTypeId(i, j, k, 0);
         }
     }
 
     public boolean f(World world, int i, int j, int k) {
-        return (world.k(i, j, k) >= 8 || world.isChunkLoaded(i, j, k)) && this.c(world.getTypeId(i, j - 1, k));
+        return flowerStateService.canStay(
+                world.k(i, j, k),
+                world.isChunkLoaded(i, j, k),
+                this.c(world.getTypeId(i, j - 1, k))
+        );
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {

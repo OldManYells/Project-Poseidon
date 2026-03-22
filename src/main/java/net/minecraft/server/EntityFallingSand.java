@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.FallingSandBehaviour;
+
 public class EntityFallingSand extends Entity {
+    private static final FallingSandBehaviour FALLING_SAND_BEHAVIOUR = FallingSandBehaviour.getInstance();
 
     public int a;
     public int b = 0;
@@ -11,17 +14,7 @@ public class EntityFallingSand extends Entity {
 
     public EntityFallingSand(World world, double d0, double d1, double d2, int i) {
         super(world);
-        this.a = i;
-        this.aI = true;
-        this.b(0.98F, 0.98F);
-        this.height = this.width / 2.0F;
-        this.setPosition(d0, d1, d2);
-        this.motX = 0.0D;
-        this.motY = 0.0D;
-        this.motZ = 0.0D;
-        this.lastX = d0;
-        this.lastY = d1;
-        this.lastZ = d2;
+        FALLING_SAND_BEHAVIOUR.initializeSpawn(this, d0, d1, d2, i);
     }
 
     protected boolean n() {
@@ -35,35 +28,26 @@ public class EntityFallingSand extends Entity {
     }
 
     public void m_() {
-        if (this.a == 0) {
+        if (FALLING_SAND_BEHAVIOUR.shouldDieForMissingBlock(this.a)) {
             this.die();
         } else {
-            this.lastX = this.locX;
-            this.lastY = this.locY;
-            this.lastZ = this.locZ;
-            ++this.b;
-            this.motY -= 0.03999999910593033D;
+            FALLING_SAND_BEHAVIOUR.tickPreMove(this);
             this.move(this.motX, this.motY, this.motZ);
-            this.motX *= 0.9800000190734863D;
-            this.motY *= 0.9800000190734863D;
-            this.motZ *= 0.9800000190734863D;
-            int i = MathHelper.floor(this.locX);
-            int j = MathHelper.floor(this.locY);
-            int k = MathHelper.floor(this.locZ);
+            FALLING_SAND_BEHAVIOUR.tickPostMove(this);
+            FallingSandBehaviour.BlockPos blockPos = FALLING_SAND_BEHAVIOUR.resolveBlockPos(this.locX, this.locY, this.locZ);
+            int i = blockPos.x;
+            int j = blockPos.y;
+            int k = blockPos.z;
 
-            if (this.world.getTypeId(i, j, k) == this.a) {
-                this.world.setTypeId(i, j, k, 0);
-            }
+            FALLING_SAND_BEHAVIOUR.clearSourceBlockIfMatching(this, i, j, k);
 
             if (this.onGround) {
-                this.motX *= 0.699999988079071D;
-                this.motZ *= 0.699999988079071D;
-                this.motY *= -0.5D;
+                FallingSandBehaviour.GroundImpactResult impactResult = FALLING_SAND_BEHAVIOUR.handleGroundImpact(this, i, j, k);
                 this.die();
-                if ((!this.world.a(this.a, i, j, k, true, 1) || BlockSand.c_(this.world, i, j - 1, k) || !this.world.setTypeId(i, j, k, this.a)) && !this.world.isStatic) {
+                if (impactResult.shouldDropItem) {
                     this.b(this.a, 1);
                 }
-            } else if (this.b > 100 && !this.world.isStatic) {
+            } else if (FALLING_SAND_BEHAVIOUR.shouldDropForTimeout(this.b, this.world.isStatic)) {
                 this.b(this.a, 1);
                 this.die();
             }
@@ -71,10 +55,15 @@ public class EntityFallingSand extends Entity {
     }
 
     protected void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Tile", (byte) this.a);
+        FALLING_SAND_BEHAVIOUR.writeTileNbt(nbttagcompound, this.a);
     }
 
     protected void a(NBTTagCompound nbttagcompound) {
-        this.a = nbttagcompound.c("Tile") & 255;
+        this.a = FALLING_SAND_BEHAVIOUR.readTileNbt(nbttagcompound);
+    }
+
+    public void poseidonInitializeBounds() {
+        this.b(0.98F, 0.98F);
+        this.height = this.width / 2.0F;
     }
 }

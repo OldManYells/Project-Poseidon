@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.ArmorSlotAcceptanceBehaviour;
+
 class SlotArmor extends Slot {
+    private static final ArmorSlotAcceptanceBehaviour ARMOR_SLOT_ACCEPTANCE_BEHAVIOUR = ArmorSlotAcceptanceBehaviour.getInstance();
 
     final int d;
 
@@ -13,10 +16,10 @@ class SlotArmor extends Slot {
     }
 
     public int d() {
-        return 1;
+        return ARMOR_SLOT_ACCEPTANCE_BEHAVIOUR.maxStackSize();
     }
 
     public boolean isAllowed(ItemStack itemstack) {
-        return itemstack.getItem() instanceof ItemArmor ? ((ItemArmor) itemstack.getItem()).bk == this.d : (itemstack.getItem().id == Block.PUMPKIN.id ? this.d == 0 : false);
+        return ARMOR_SLOT_ACCEPTANCE_BEHAVIOUR.isAllowed(itemstack, this.d);
     }
 }

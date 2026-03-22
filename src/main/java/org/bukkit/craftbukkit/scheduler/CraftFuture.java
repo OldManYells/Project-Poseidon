@@ -1,17 +1,18 @@
 package org.bukkit.craftbukkit.scheduler;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SchedulerFutureLifecycleBehaviour;
+
 import java.util.concurrent.*;
 
 public class CraftFuture<T> implements Runnable, Future<T> {
 
+    private final SchedulerFutureLifecycleBehaviour schedulerFutureLifecycleBehaviour =
+            SchedulerFutureLifecycleBehaviour.getInstance();
     private final CraftScheduler craftScheduler;
     private final Callable<T> callable;
     private final ObjectContainer<T> returnStore = new ObjectContainer<T>();
-    private boolean done = false;
-    private boolean running = false;
-    private boolean cancelled = false;
-    private Exception e = null;
-    private int taskId = -1;
+    private final SchedulerFutureLifecycleBehaviour.FutureState futureState =
+            new SchedulerFutureLifecycleBehaviour.FutureState();
 
     CraftFuture(CraftScheduler craftScheduler, Callable callable) {
         this.callable = callable;
@@ -19,22 +20,7 @@ public class CraftFuture<T> implements Runnable, Future<T> {
     }
 
     public void run() {
-        synchronized (this) {
-            if (cancelled) {
-                return;
-            }
-            running = true;
-        }
-        try {
-            returnStore.setObject(callable.call());
-        } catch (Exception e) {
-            this.e = e;
-        }
-        synchronized (this) {
-            running = false;
-            done = true;
-            this.notify();
-        }
+        schedulerFutureLifecycleBehaviour.runCallable(this, futureState, callable, returnStore);
     }
 
     public T get() throws InterruptedException, ExecutionException {
@@ -45,57 +31,31 @@ public class CraftFuture<T> implements Runnable, Future<T> {
     }
 
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        synchronized (this) {
-            if (isDone()) {
-                return getResult();
-            }
-            this.wait(TimeUnit.MILLISECONDS.convert(timeout, unit));
-            return getResult();
-        }
+        return schedulerFutureLifecycleBehaviour.awaitResult(this, futureState, returnStore, timeout, unit);
     }
 
     public T getResult() throws ExecutionException {
-        if (cancelled) {
-            throw new CancellationException();
-        }
-        if (e != null) {
-            throw new ExecutionException(e);
-        }
-        return returnStore.getObject();
+        return schedulerFutureLifecycleBehaviour.getResult(futureState, returnStore);
     }
 
     public boolean isDone() {
-        synchronized (this) {
-            return done;
-        }
+        return schedulerFutureLifecycleBehaviour.isDone(this, futureState);
     }
 
     public boolean isCancelled() {
-        synchronized (this) {
-            return cancelled;
-        }
+        return schedulerFutureLifecycleBehaviour.isCancelled(this, futureState);
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
-        synchronized (this) {
-            if (cancelled) {
-                return false;
-            }
-            cancelled = true;
-            if (taskId != -1) {
-                craftScheduler.cancelTask(taskId);
-            }
-            if (!running && !done) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return schedulerFutureLifecycleBehaviour.cancel(
+                this,
+                futureState,
+                mayInterruptIfRunning,
+                craftScheduler::cancelTask
+        );
     }
 
     public void setTaskId(int taskId) {
-        synchronized (this) {
-            this.taskId = taskId;
-        }
+        schedulerFutureLifecycleBehaviour.setTaskId(this, futureState, taskId);
     }
 }

@@ -1,42 +1,40 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.HellWorldProviderBehaviour;
+import com.legacyminecraft.poseidon.world.WorldProviderBehaviour;
+
 public class WorldProviderHell extends WorldProvider {
+    private static final HellWorldProviderBehaviour HELL_WORLD_PROVIDER_BEHAVIOUR = HellWorldProviderBehaviour.getInstance();
+    private static final WorldProviderBehaviour WORLD_PROVIDER_BEHAVIOUR = WorldProviderBehaviour.getInstance();
 
     public WorldProviderHell() {}
 
     public void a() {
-        this.b = new WorldChunkManagerHell(BiomeBase.HELL, 1.0D, 0.0D);
-        this.c = true;
-        this.d = true;
-        this.e = true;
-        this.dimension = -1;
+        HellWorldProviderBehaviour.HellConfiguration config = HELL_WORLD_PROVIDER_BEHAVIOUR.configure(this.a);
+        this.b = config.chunkManager;
+        this.c = config.c;
+        this.d = config.d;
+        this.e = config.e;
+        this.dimension = config.dimension;
     }
 
     protected void c() {
-        float f = 0.1F;
-
-        for (int i = 0; i <= 15; ++i) {
-            float f1 = 1.0F - (float) i / 15.0F;
-
-            this.f[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * (1.0F - f) + f;
-        }
+        this.f = WORLD_PROVIDER_BEHAVIOUR.buildLightBrightnessTable(0.1F);
     }
 
     public IChunkProvider getChunkProvider() {
-        return new ChunkProviderHell(this.a, this.a.getSeed());
+        return HELL_WORLD_PROVIDER_BEHAVIOUR.createChunkProvider(this.a);
     }
 
     public boolean canSpawn(int i, int j) {
-        int k = this.a.a(i, j);
-
-        return k == Block.BEDROCK.id ? false : (k == 0 ? false : Block.o[k]);
+        return HELL_WORLD_PROVIDER_BEHAVIOUR.canSpawn(this.a, i, j);
     }
 
     public float a(long i, float f) {
-        return 0.5F;
+        return HELL_WORLD_PROVIDER_BEHAVIOUR.celestialAngle(i, f);
     }
 
     public boolean d() {
-        return false;
+        return HELL_WORLD_PROVIDER_BEHAVIOUR.hasSkyLight();
     }
 }

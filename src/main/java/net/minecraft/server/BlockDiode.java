@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.DiodeStateBehaviour;
+
 import java.util.Random;
 
 public class BlockDiode extends Block {
@@ -7,6 +9,7 @@ public class BlockDiode extends Block {
     public static final double[] a = new double[] { -0.0625D, 0.0625D, 0.1875D, 0.3125D};
     private static final int[] b = new int[] { 1, 2, 3, 4};
     private final boolean c;
+    private final DiodeStateBehaviour diodeStateService = DiodeStateBehaviour.getInstance();
 
     protected BlockDiode(int i, boolean flag) {
         super(i, 6, Material.ORIENTABLE);
@@ -19,31 +22,29 @@ public class BlockDiode extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return !world.e(i, j - 1, k) ? false : super.canPlace(world, i, j, k);
+        return diodeStateService.canPlaceOnSupport(world.e(i, j - 1, k), super.canPlace(world, i, j, k));
     }
 
     public boolean f(World world, int i, int j, int k) {
-        return !world.e(i, j - 1, k) ? false : super.f(world, i, j, k);
+        return diodeStateService.canRemainOnSupport(world.e(i, j - 1, k), super.f(world, i, j, k));
     }
 
     public void a(World world, int i, int j, int k, Random random) {
         int l = world.getData(i, j, k);
         boolean flag = this.f(world, i, j, k, l);
 
-        if (this.c && !flag) {
+        if (diodeStateService.shouldTurnOffOnTick(this.c, flag)) {
             world.setTypeIdAndData(i, j, k, Block.DIODE_OFF.id, l);
-        } else if (!this.c) {
+        } else if (diodeStateService.shouldTurnOnOnTick(this.c)) {
             world.setTypeIdAndData(i, j, k, Block.DIODE_ON.id, l);
-            if (!flag) {
-                int i1 = (l & 12) >> 2;
-
-                world.c(i, j, k, Block.DIODE_ON.id, b[i1] * 2);
+            if (diodeStateService.shouldScheduleRecheckAfterTurnOn(flag)) {
+                world.c(i, j, k, Block.DIODE_ON.id, diodeStateService.resolveTickDelayFromData(l, b));
             }
         }
     }
 
     public int a(int i, int j) {
-        return i == 0 ? (this.c ? 99 : 115) : (i == 1 ? (this.c ? 147 : 131) : 5);
+        return diodeStateService.resolveTextureBySideAndLit(i, this.c);
     }
 
     public int a(int i) {
@@ -60,54 +61,42 @@ public class BlockDiode extends Block {
         } else {
             int i1 = iblockaccess.getData(i, j, k) & 3;
 
-            return i1 == 0 && l == 3 ? true : (i1 == 1 && l == 4 ? true : (i1 == 2 && l == 2 ? true : i1 == 3 && l == 5));
+            return diodeStateService.isPoweringSide(this.c, i1, l);
         }
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        if (!this.f(world, i, j, k)) {
+        if (diodeStateService.shouldDropForInvalidSupport(this.f(world, i, j, k))) {
             this.g(world, i, j, k, world.getData(i, j, k));
             world.setTypeId(i, j, k, 0);
         } else {
             int i1 = world.getData(i, j, k);
             boolean flag = this.f(world, i, j, k, i1);
-            int j1 = (i1 & 12) >> 2;
 
-            if (this.c && !flag) {
-                world.c(i, j, k, this.id, b[j1] * 2);
-            } else if (!this.c && flag) {
-                world.c(i, j, k, this.id, b[j1] * 2);
+            if (diodeStateService.shouldScheduleStateCheck(this.c, flag)) {
+                world.c(i, j, k, this.id, diodeStateService.resolveTickDelayFromData(i1, b));
             }
         }
     }
 
     private boolean f(World world, int i, int j, int k, int l) {
-        int i1 = l & 3;
+        return diodeStateService.isInputPowered(new DiodeStateBehaviour.InputPowerQuery() {
+            public boolean isBlockFaceIndirectlyPowered(int x, int y, int z, int face) {
+                return world.isBlockFaceIndirectlyPowered(x, y, z, face);
+            }
 
-        switch (i1) {
-        case 0:
-            return world.isBlockFaceIndirectlyPowered(i, j, k + 1, 3) || world.getTypeId(i, j, k + 1) == Block.REDSTONE_WIRE.id && world.getData(i, j, k + 1) > 0;
+            public int getTypeId(int x, int y, int z) {
+                return world.getTypeId(x, y, z);
+            }
 
-        case 1:
-            return world.isBlockFaceIndirectlyPowered(i - 1, j, k, 4) || world.getTypeId(i - 1, j, k) == Block.REDSTONE_WIRE.id && world.getData(i - 1, j, k) > 0;
-
-        case 2:
-            return world.isBlockFaceIndirectlyPowered(i, j, k - 1, 2) || world.getTypeId(i, j, k - 1) == Block.REDSTONE_WIRE.id && world.getData(i, j, k - 1) > 0;
-
-        case 3:
-            return world.isBlockFaceIndirectlyPowered(i + 1, j, k, 5) || world.getTypeId(i + 1, j, k) == Block.REDSTONE_WIRE.id && world.getData(i + 1, j, k) > 0;
-
-        default:
-            return false;
-        }
+            public int getData(int x, int y, int z) {
+                return world.getData(x, y, z);
+            }
+        }, i, j, k, l, Block.REDSTONE_WIRE.id);
     }
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {
-        int l = world.getData(i, j, k);
-        int i1 = (l & 12) >> 2;
-
-        i1 = i1 + 1 << 2 & 12;
-        world.setData(i, j, k, i1 | l & 3);
+        world.setData(i, j, k, diodeStateService.cycleDelayBits(world.getData(i, j, k)));
         return true;
     }
 
@@ -116,23 +105,22 @@ public class BlockDiode extends Block {
     }
 
     public void postPlace(World world, int i, int j, int k, EntityLiving entityliving) {
-        int l = ((MathHelper.floor((double) (entityliving.yaw * 4.0F / 360.0F) + 0.5D) & 3) + 2) % 4;
+        int l = diodeStateService.resolvePlacementDataFromYaw(entityliving.yaw);
 
         world.setData(i, j, k, l);
         boolean flag = this.f(world, i, j, k, l);
 
-        if (flag) {
+        if (diodeStateService.shouldScheduleImmediateTickOnPlace(flag)) {
             world.c(i, j, k, this.id, 1);
         }
     }
 
     public void c(World world, int i, int j, int k) {
-        world.applyPhysics(i + 1, j, k, this.id);
-        world.applyPhysics(i - 1, j, k, this.id);
-        world.applyPhysics(i, j, k + 1, this.id);
-        world.applyPhysics(i, j, k - 1, this.id);
-        world.applyPhysics(i, j - 1, k, this.id);
-        world.applyPhysics(i, j + 1, k, this.id);
+        diodeStateService.applyNeighborPhysics(new DiodeStateBehaviour.NeighborPhysicsApplier() {
+            public void applyPhysics(int x, int y, int z, int blockId) {
+                world.applyPhysics(x, y, z, blockId);
+            }
+        }, i, j, k, this.id);
     }
 
     public boolean a() {
@@ -140,6 +128,6 @@ public class BlockDiode extends Block {
     }
 
     public int a(int i, Random random) {
-        return Item.DIODE.id;
+        return diodeStateService.resolveDropItemId(Item.DIODE.id);
     }
 }

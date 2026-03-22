@@ -1,9 +1,11 @@
 package com.projectposeidon.api;
 
-import com.projectposeidon.johnymuffin.UUIDManager;
-
 import java.util.UUID;
 
+/**
+ * @deprecated Use {@link com.legacyminecraft.poseidon.api.uuid.PoseidonUUID}.
+ */
+@Deprecated
 public final class PoseidonUUID {
 
     private PoseidonUUID() {
@@ -15,7 +17,7 @@ public final class PoseidonUUID {
      * @return A Mojang UUID if known, otherwise null
      */
     public static UUID getPlayerMojangUUID(String username) {
-        return UUIDManager.getInstance().getUUIDFromUsername(username, true);
+        return com.legacyminecraft.poseidon.api.uuid.PoseidonUUID.getPlayerMojangUUID(username);
     }
 
     /**
@@ -23,7 +25,7 @@ public final class PoseidonUUID {
      * @return A Mojang UUID if known, otherwise a offline uuid
      */
     public static UUID getPlayerGracefulUUID(String username) {
-        return UUIDManager.getInstance().getUUIDGraceful(username);
+        return com.legacyminecraft.poseidon.api.uuid.PoseidonUUID.getPlayerGracefulUUID(username);
     }
 
     /**
@@ -34,7 +36,7 @@ public final class PoseidonUUID {
      * @return Returns a UUID if known in cache, otherwise null
      */
     public static UUID getPlayerUUIDFromCache(String username, boolean onlineUUID) {
-        return UUIDManager.getInstance().getUUIDFromUsername(username, onlineUUID);
+        return com.legacyminecraft.poseidon.api.uuid.PoseidonUUID.getPlayerUUIDFromCache(username, onlineUUID);
     }
 
     /**
@@ -42,7 +44,7 @@ public final class PoseidonUUID {
      * @return A offline UUID for a player
      */
     public static UUID getPlayerOfflineUUID(String username) {
-        return UUIDManager.generateOfflineUUID(username);
+        return com.legacyminecraft.poseidon.api.uuid.PoseidonUUID.getPlayerOfflineUUID(username);
     }
 
     /**
@@ -50,13 +52,7 @@ public final class PoseidonUUID {
      * @return A UUIDType enum.
      */
     public static UUIDType getPlayerUUIDCacheStatus(String username) {
-        if (getPlayerUUIDFromCache(username, true) != null) {
-            return UUIDType.ONLINE;
-        }
-        if (getPlayerUUIDFromCache(username, false) != null) {
-            return UUIDType.OFFLINE;
-        }
-        return UUIDType.UNKNOWN;
+        return UUIDType.fromCanonical(com.legacyminecraft.poseidon.api.uuid.PoseidonUUID.getPlayerUUIDCacheStatus(username));
     }
 
     /**
@@ -64,7 +60,7 @@ public final class PoseidonUUID {
      * @return A corresponding username if known, otherwise null
      */
     public static String getPlayerUsernameFromUUID(UUID uuid) {
-        return UUIDManager.getInstance().getUsernameFromUUID(uuid);
+        return com.legacyminecraft.poseidon.api.uuid.PoseidonUUID.getPlayerUsernameFromUUID(uuid);
     }
 
 

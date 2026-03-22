@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.FireballStateBehaviour;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Explosive;
@@ -15,6 +16,7 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntityFireball extends Entity {
+    private static final FireballStateBehaviour FIREBALL_STATE_BEHAVIOUR = FireballStateBehaviour.getInstance();
 
     private int f = -1;
     private int g = -1;
@@ -52,14 +54,13 @@ public class EntityFireball extends Entity {
     }
 
     public void setDirection(double d0, double d1, double d2) {
-        d0 += this.random.nextGaussian() * 0.4D;
-        d1 += this.random.nextGaussian() * 0.4D;
-        d2 += this.random.nextGaussian() * 0.4D;
-        double d3 = (double) MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
-
-        this.c = d0 / d3 * 0.1D;
-        this.d = d1 / d3 * 0.1D;
-        this.e = d2 / d3 * 0.1D;
+        double noisyX = d0 + this.random.nextGaussian() * 0.4D;
+        double noisyY = d1 + this.random.nextGaussian() * 0.4D;
+        double noisyZ = d2 + this.random.nextGaussian() * 0.4D;
+        FireballStateBehaviour.DirectionVector direction = FIREBALL_STATE_BEHAVIOUR.computeDirectionFromNoisyVector(noisyX, noisyY, noisyZ);
+        this.c = direction.x;
+        this.d = direction.y;
+        this.e = direction.z;
     }
 
     public void m_() {
@@ -222,21 +223,17 @@ public class EntityFireball extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.f);
-        nbttagcompound.a("yTile", (short) this.g);
-        nbttagcompound.a("zTile", (short) this.h);
-        nbttagcompound.a("inTile", (byte) this.i);
-        nbttagcompound.a("shake", (byte) this.a);
-        nbttagcompound.a("inGround", (byte) (this.j ? 1 : 0));
+        FIREBALL_STATE_BEHAVIOUR.writeTileAndGroundState(nbttagcompound, this.f, this.g, this.h, this.i, this.a, this.j);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.f = nbttagcompound.d("xTile");
-        this.g = nbttagcompound.d("yTile");
-        this.h = nbttagcompound.d("zTile");
-        this.i = nbttagcompound.c("inTile") & 255;
-        this.a = nbttagcompound.c("shake") & 255;
-        this.j = nbttagcompound.c("inGround") == 1;
+        FireballStateBehaviour.LoadedTileState loadedState = FIREBALL_STATE_BEHAVIOUR.readTileAndGroundState(nbttagcompound);
+        this.f = loadedState.tileX;
+        this.g = loadedState.tileY;
+        this.h = loadedState.tileZ;
+        this.i = loadedState.inTileId;
+        this.a = loadedState.shake;
+        this.j = loadedState.inGround;
     }
 
     public boolean l_() {
@@ -245,21 +242,6 @@ public class EntityFireball extends Entity {
 
     public boolean damageEntity(Entity entity, int i) {
         this.af();
-        if (entity != null) {
-            Vec3D vec3d = entity.Z();
-
-            if (vec3d != null) {
-                this.motX = vec3d.a;
-                this.motY = vec3d.b;
-                this.motZ = vec3d.c;
-                this.c = this.motX * 0.1D;
-                this.d = this.motY * 0.1D;
-                this.e = this.motZ * 0.1D;
-            }
-
-            return true;
-        } else {
-            return false;
-        }
+        return FIREBALL_STATE_BEHAVIOUR.onDamagedByEntity(this, entity);
     }
 }

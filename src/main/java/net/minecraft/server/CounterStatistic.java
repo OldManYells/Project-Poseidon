@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.stats.CounterStatisticRegistry;
+
 public class CounterStatistic extends Statistic {
+    private final CounterStatisticRegistry counterStatisticRegistry = CounterStatisticRegistry.getInstance();
 
     public CounterStatistic(int i, String s, Counter counter) {
         super(i, s, counter);
@@ -12,7 +15,6 @@ public class CounterStatistic extends Statistic {
 
     public Statistic d() {
         super.d();
-        StatisticList.c.add(this);
-        return this;
+        return counterStatisticRegistry.registerInCounterList(this, StatisticList.c);
     }
 }

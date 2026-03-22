@@ -1,11 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.biome.BiomeSpawnListBehaviour;
+
 public class BiomeSky extends BiomeBase {
+    private final BiomeSpawnListBehaviour biomeSpawnListService = BiomeSpawnListBehaviour.getInstance();
 
     public BiomeSky() {
-        this.s.clear();
-        this.t.clear();
-        this.u.clear();
-        this.t.add(new BiomeMeta(EntityChicken.class, 10));
+        biomeSpawnListService.configureSkyBiomeSpawns(this.s, this.t, this.u);
     }
 }

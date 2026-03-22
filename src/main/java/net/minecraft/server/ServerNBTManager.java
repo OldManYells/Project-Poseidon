@@ -1,33 +1,27 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.ServerNbtManagerBehaviour;
+
 import java.io.File;
 import java.util.List;
 
 public class ServerNBTManager extends PlayerNBTManager {
+    private static final ServerNbtManagerBehaviour SERVER_NBT_MANAGER_BEHAVIOUR = ServerNbtManagerBehaviour.getInstance();
 
     public ServerNBTManager(File file1, String s, boolean flag) {
         super(file1, s, flag);
     }
 
     public IChunkLoader a(WorldProvider worldprovider) {
-        File file1 = this.a();
-
-        if (worldprovider instanceof WorldProviderHell) {
-            File file2 = new File(file1, "DIM-1");
-
-            file2.mkdirs();
-            return new ChunkRegionLoader(file2);
-        } else {
-            return new ChunkRegionLoader(file1);
-        }
+        return SERVER_NBT_MANAGER_BEHAVIOUR.createChunkLoader(this.a(), worldprovider);
     }
 
     public void a(WorldData worlddata, List list) {
-        worlddata.a(19132);
+        SERVER_NBT_MANAGER_BEHAVIOUR.stampWorldVersion(worlddata, list);
         super.a(worlddata, list);
     }
 
     public void e() {
-        RegionFileCache.a();
+        SERVER_NBT_MANAGER_BEHAVIOUR.flushRegionCache();
     }
 }

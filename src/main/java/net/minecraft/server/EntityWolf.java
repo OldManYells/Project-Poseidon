@@ -1,19 +1,18 @@
 package net.minecraft.server;
 
-import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.entity.EntityTargetEvent;
-
-import java.util.Iterator;
-import java.util.List;
+import com.legacyminecraft.poseidon.entity.WolfStateBehaviour;
+import com.legacyminecraft.poseidon.entity.WolfFollowOwnerBehaviour;
+import com.legacyminecraft.poseidon.entity.WolfCombatInteractionBehaviour;
+import com.legacyminecraft.poseidon.entity.WolfAiBehaviour;
 
 // CraftBukkit start
 // CraftBukkit end
 
 public class EntityWolf extends EntityAnimal {
+    private static final WolfStateBehaviour WOLF_STATE_BEHAVIOUR = WolfStateBehaviour.getInstance();
+    private static final WolfFollowOwnerBehaviour WOLF_FOLLOW_OWNER_BEHAVIOUR = WolfFollowOwnerBehaviour.getInstance();
+    private static final WolfCombatInteractionBehaviour WOLF_COMBAT_INTERACTION_BEHAVIOUR = WolfCombatInteractionBehaviour.getInstance();
+    private static final WolfAiBehaviour WOLF_AI_BEHAVIOUR = WolfAiBehaviour.getInstance();
 
     private boolean a = false;
     private float b;
@@ -33,9 +32,9 @@ public class EntityWolf extends EntityAnimal {
 
     protected void b() {
         super.b();
-        this.datawatcher.a(16, Byte.valueOf((byte) 0));
-        this.datawatcher.a(17, "");
-        this.datawatcher.a(18, new Integer(this.health));
+        this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(WOLF_STATE_BEHAVIOUR.createInitialFlags()));
+        this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getOwnerWatcherIndex(), WOLF_STATE_BEHAVIOUR.createInitialOwnerName());
+        this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getHealthWatcherIndex(), Integer.valueOf(WOLF_STATE_BEHAVIOUR.createInitialHealthValue(this.health)));
     }
 
     protected boolean n() {
@@ -46,11 +45,7 @@ public class EntityWolf extends EntityAnimal {
         super.b(nbttagcompound);
         nbttagcompound.a("Angry", this.isAngry());
         nbttagcompound.a("Sitting", this.isSitting());
-        if (this.getOwnerName() == null) {
-            nbttagcompound.setString("Owner", "");
-        } else {
-            nbttagcompound.setString("Owner", this.getOwnerName());
-        }
+        nbttagcompound.setString("Owner", WOLF_STATE_BEHAVIOUR.toStoredOwnerName(this.getOwnerName()));
     }
 
     public void a(NBTTagCompound nbttagcompound) {
@@ -66,68 +61,32 @@ public class EntityWolf extends EntityAnimal {
     }
 
     protected boolean h_() {
-        return !this.isTamed();
+        return WOLF_STATE_BEHAVIOUR.shouldStayHostileToPlayers(this.isTamed());
     }
 
     protected String g() {
-        return this.isAngry() ? "mob.wolf.growl" : (this.random.nextInt(3) == 0 ? (this.isTamed() && this.datawatcher.b(18) < 10 ? "mob.wolf.whine" : "mob.wolf.panting") : "mob.wolf.bark");
+        return WOLF_STATE_BEHAVIOUR.resolveAmbientSound(this.isAngry(), this.random.nextInt(3), this.isTamed(), this.datawatcher.b(WOLF_STATE_BEHAVIOUR.getHealthWatcherIndex()));
     }
 
     protected String h() {
-        return "mob.wolf.hurt";
+        return WOLF_STATE_BEHAVIOUR.getHurtSound();
     }
 
     protected String i() {
-        return "mob.wolf.death";
+        return WOLF_STATE_BEHAVIOUR.getDeathSound();
     }
 
     protected float k() {
-        return 0.4F;
+        return WOLF_STATE_BEHAVIOUR.getSoundVolume();
     }
 
     protected int j() {
-        return -1;
+        return WOLF_STATE_BEHAVIOUR.getDropItemId();
     }
 
     protected void c_() {
         super.c_();
-        if (!this.e && !this.C() && this.isTamed() && this.vehicle == null) {
-            EntityHuman entityhuman = this.world.a(this.getOwnerName());
-
-            if (entityhuman != null) {
-                float f = entityhuman.f(this);
-
-                if (f > 5.0F) {
-                    this.c(entityhuman, f);
-                }
-            } else if (!this.ad()) {
-                this.setSitting(true);
-            }
-        } else if (this.target == null && !this.C() && !this.isTamed() && this.world.random.nextInt(100) == 0) {
-            List list = this.world.a(EntitySheep.class, AxisAlignedBB.b(this.locX, this.locY, this.locZ, this.locX + 1.0D, this.locY + 1.0D, this.locZ + 1.0D).b(16.0D, 4.0D, 16.0D));
-
-            if (!list.isEmpty()) {
-                // CraftBukkit start
-                Entity entity = (Entity) list.get(this.world.random.nextInt(list.size()));
-                org.bukkit.entity.Entity bukkitTarget = entity == null ? null : entity.getBukkitEntity();
-
-                EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.RANDOM_TARGET);
-                this.world.getServer().getPluginManager().callEvent(event);
-
-                if (!event.isCancelled() || event.getTarget() != null ) {
-                    this.setTarget(entity);
-                }
-                // CraftBukkit end
-            }
-        }
-
-        if (this.ad()) {
-            this.setSitting(false);
-        }
-
-        if (!this.world.isStatic) {
-            this.datawatcher.watch(18, Integer.valueOf(this.health));
-        }
+        WOLF_AI_BEHAVIOUR.tickAi(this, this.e, WOLF_STATE_BEHAVIOUR.getHealthWatcherIndex(), WOLF_FOLLOW_OWNER_BEHAVIOUR);
     }
 
     public void v() {
@@ -136,18 +95,8 @@ public class EntityWolf extends EntityAnimal {
         if (this.V() && !this.C() && !this.isAngry()) {
             Entity entity = this.W();
 
-            if (entity instanceof EntityHuman) {
-                EntityHuman entityhuman = (EntityHuman) entity;
-                ItemStack itemstack = entityhuman.inventory.getItemInHand();
-
-                if (itemstack != null) {
-                    if (!this.isTamed() && itemstack.id == Item.BONE.id) {
-                        this.a = true;
-                    } else if (this.isTamed() && Item.byId[itemstack.id] instanceof ItemFood) {
-                        this.a = ((ItemFood) Item.byId[itemstack.id]).l();
-                    }
-                }
-            }
+            ItemStack itemInHand = entity instanceof EntityHuman ? ((EntityHuman) entity).inventory.getItemInHand() : null;
+            this.a = WOLF_STATE_BEHAVIOUR.shouldBegForItem(this.V(), this.C(), this.isAngry(), entity, this.isTamed(), itemInHand, this.datawatcher.b(WOLF_STATE_BEHAVIOUR.getHealthWatcherIndex()));
         }
 
         if (!this.Y && this.f && !this.g && !this.C() && this.onGround) {
@@ -168,7 +117,7 @@ public class EntityWolf extends EntityAnimal {
         }
 
         if (this.a) {
-            this.aF = 10;
+            this.aF = WOLF_STATE_BEHAVIOUR.updateTailAngleTimer(true, this.b);
         }
 
         if (this.ac()) {
@@ -213,213 +162,51 @@ public class EntityWolf extends EntityAnimal {
     }
 
     private void c(Entity entity, float f) {
-        PathEntity pathentity = this.world.findPath(this, entity, 16.0F);
-
-        if (pathentity == null && f > 12.0F) {
-            int i = MathHelper.floor(entity.locX) - 2;
-            int j = MathHelper.floor(entity.locZ) - 2;
-            int k = MathHelper.floor(entity.boundingBox.b);
-
-            for (int l = 0; l <= 4; ++l) {
-                for (int i1 = 0; i1 <= 4; ++i1) {
-                    if ((l < 1 || i1 < 1 || l > 3 || i1 > 3) && this.world.e(i + l, k - 1, j + i1) && !this.world.e(i + l, k, j + i1) && !this.world.e(i + l, k + 1, j + i1)) {
-                        this.setPositionRotation((double) ((float) (i + l) + 0.5F), (double) k, (double) ((float) (j + i1) + 0.5F), this.yaw, this.pitch);
-                        return;
-                    }
-                }
-            }
-        } else {
-            this.setPathEntity(pathentity);
-        }
+        WOLF_FOLLOW_OWNER_BEHAVIOUR.followOwnerOrTeleport(this, entity, f);
     }
 
     protected boolean w() {
-        return this.isSitting() || this.g;
+        return WOLF_FOLLOW_OWNER_BEHAVIOUR.shouldPausePathing(this.isSitting(), this.g);
     }
 
     public boolean damageEntity(Entity entity, int i) {
         this.setSitting(false);
-        if (entity != null && !(entity instanceof EntityHuman) && !(entity instanceof EntityArrow)) {
-            i = (i + 1) / 2;
-        }
+        i = WOLF_COMBAT_INTERACTION_BEHAVIOUR.adjustIncomingDamage(entity, i);
 
         if (!super.damageEntity((Entity) entity, i)) {
             return false;
-        } else {
-            if (!this.isTamed() && !this.isAngry()) {
-                if (entity instanceof EntityHuman) {
-                    // CraftBukkit start
-                    org.bukkit.entity.Entity bukkitTarget = entity == null ? null : entity.getBukkitEntity();
-
-                    EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY);
-                    this.world.getServer().getPluginManager().callEvent(event);
-
-                    if (!event.isCancelled()) {
-                        if (event.getTarget() == null) {
-                            this.target = null;
-                        } else {
-                            this.setAngry(true);
-                            this.target = ((CraftEntity) event.getTarget()).getHandle();
-                        }
-                    }
-                    // CraftBukkit end
-                }
-
-                if (entity instanceof EntityArrow && ((EntityArrow) entity).shooter != null) {
-                    entity = ((EntityArrow) entity).shooter;
-                }
-
-                if (entity instanceof EntityLiving) {
-                    List list = this.world.a(EntityWolf.class, AxisAlignedBB.b(this.locX, this.locY, this.locZ, this.locX + 1.0D, this.locY + 1.0D, this.locZ + 1.0D).b(16.0D, 4.0D, 16.0D));
-                    Iterator iterator = list.iterator();
-
-                    while (iterator.hasNext()) {
-                        Entity entity1 = (Entity) iterator.next();
-                        EntityWolf entitywolf = (EntityWolf) entity1;
-
-                        if (!entitywolf.isTamed() && entitywolf.target == null) {
-                            // CraftBukkit start
-                            org.bukkit.entity.Entity bukkitTarget = entity == null ? null : entity.getBukkitEntity();
-
-                            EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY);
-                            this.world.getServer().getPluginManager().callEvent(event);
-
-                            if (!event.isCancelled()) {
-                                if (event.getTarget() == null) {
-                                    this.target = null;
-                                } else {
-                                    entitywolf.target = (Entity) entity;
-                                    if (entity instanceof EntityHuman) {
-                                        entitywolf.setAngry(true);
-                                    }
-                                }
-                            }
-                            // CraftBukkit end
-                        }
-                    }
-                }
-            } else if (entity != this && entity != null) {
-                if (this.isTamed() && entity instanceof EntityHuman && ((EntityHuman) entity).name.equalsIgnoreCase(this.getOwnerName())) {
-                    return true;
-                }
-
-                this.target = (Entity) entity;
-            }
-
-            return true;
         }
+
+        WOLF_COMBAT_INTERACTION_BEHAVIOUR.onDamaged(this, entity);
+        return true;
     }
 
     protected Entity findTarget() {
-        return this.isAngry() ? this.world.findNearbyPlayer(this, 16.0D) : null;
+        return WOLF_COMBAT_INTERACTION_BEHAVIOUR.findTarget(this);
     }
 
     protected void a(Entity entity, float f) {
-        if (f > 2.0F && f < 6.0F && this.random.nextInt(10) == 0) {
-            if (this.onGround) {
-                double d0 = entity.locX - this.locX;
-                double d1 = entity.locZ - this.locZ;
-                float f1 = MathHelper.a(d0 * d0 + d1 * d1);
-
-                this.motX = d0 / (double) f1 * 0.5D * 0.800000011920929D + this.motX * 0.20000000298023224D;
-                this.motZ = d1 / (double) f1 * 0.5D * 0.800000011920929D + this.motZ * 0.20000000298023224D;
-                this.motY = 0.4000000059604645D;
-            }
-        } else if ((double) f < 1.5D && entity.boundingBox.e > this.boundingBox.b && entity.boundingBox.b < this.boundingBox.e) {
-            this.attackTicks = 20;
-            byte b0 = 2;
-
-            if (this.isTamed()) {
-                b0 = 4;
-            }
-            // CraftBukkit start
-            org.bukkit.entity.Entity damager = this.getBukkitEntity();
-            org.bukkit.entity.Entity damagee = entity == null ? null : entity.getBukkitEntity();
-
-            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(damager, damagee, EntityDamageEvent.DamageCause.ENTITY_ATTACK, b0);
-            this.world.getServer().getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) {
-                return;
-            }
-            // CraftBukkit end
-
-            entity.damageEntity(this, b0);
-        }
+        WOLF_COMBAT_INTERACTION_BEHAVIOUR.attackTarget(this, entity, f, this.random);
     }
 
     public boolean a(EntityHuman entityhuman) {
-        ItemStack itemstack = entityhuman.inventory.getItemInHand();
-
-        if (!this.isTamed()) {
-            if (itemstack != null && itemstack.id == Item.BONE.id && !this.isAngry()) {
-                --itemstack.count;
-                if (itemstack.count <= 0) {
-                    entityhuman.inventory.setItem(entityhuman.inventory.itemInHandIndex, (ItemStack) null);
-                }
-
-                if (!this.world.isStatic) {
-                    // CraftBukkit - added event call and isCancelled check.
-                    if (this.random.nextInt(3) == 0 && !CraftEventFactory.callEntityTameEvent(this, entityhuman).isCancelled()) {
-                        // CraftBukkit end
-                        this.setTamed(true);
-                        this.setPathEntity((PathEntity) null);
-                        this.setSitting(true);
-                        this.health = 20;
-                        this.setOwnerName(entityhuman.name);
-                        this.a(true);
-                        this.world.a(this, (byte) 7);
-                    } else {
-                        this.a(false);
-                        this.world.a(this, (byte) 6);
-                    }
-                }
-
-                return true;
-            }
-        } else {
-            if (itemstack != null && Item.byId[itemstack.id] instanceof ItemFood) {
-                ItemFood itemfood = (ItemFood) Item.byId[itemstack.id];
-
-                if (itemfood.l() && this.datawatcher.b(18) < 20) {
-                    --itemstack.count;
-                    if (itemstack.count <= 0) {
-                        entityhuman.inventory.setItem(entityhuman.inventory.itemInHandIndex, (ItemStack) null);
-                    }
-
-                    this.b(((ItemFood) Item.PORK).k(), RegainReason.EATING);
-                    return true;
-                }
-            }
-
-            if (entityhuman.name.equalsIgnoreCase(this.getOwnerName())) {
-                if (!this.world.isStatic) {
-                    this.setSitting(!this.isSitting());
-                    this.aC = false;
-                    this.setPathEntity((PathEntity) null);
-                }
-
-                return true;
-            }
-        }
-
-        return false;
+        return WOLF_COMBAT_INTERACTION_BEHAVIOUR.interact(this, entityhuman, this.datawatcher.b(WOLF_STATE_BEHAVIOUR.getHealthWatcherIndex()), WOLF_STATE_BEHAVIOUR.getHealthWatcherIndex(), this.random);
     }
 
     void a(boolean flag) {
-        String s = "heart";
+        WOLF_COMBAT_INTERACTION_BEHAVIOUR.spawnTameEffectParticles(this.world, this, flag, this.random);
+    }
 
-        if (!flag) {
-            s = "smoke";
-        }
+    public void poseidonShowTameEffect(boolean success) {
+        this.a(success);
+    }
 
-        for (int i = 0; i < 7; ++i) {
-            double d0 = this.random.nextGaussian() * 0.02D;
-            double d1 = this.random.nextGaussian() * 0.02D;
-            double d2 = this.random.nextGaussian() * 0.02D;
+    public void poseidonClearMovementIntent() {
+        this.aC = false;
+    }
 
-            this.world.a(s, this.locX + (double) (this.random.nextFloat() * this.length * 2.0F) - (double) this.length, this.locY + 0.5D + (double) (this.random.nextFloat() * this.width), this.locZ + (double) (this.random.nextFloat() * this.length * 2.0F) - (double) this.length, d0, d1, d2);
-        }
+    public void poseidonSyncHealthWatcher(int healthWatcherIndex) {
+        this.datawatcher.watch(healthWatcherIndex, Integer.valueOf(this.health));
     }
 
     public int l() {
@@ -427,52 +214,37 @@ public class EntityWolf extends EntityAnimal {
     }
 
     public String getOwnerName() {
-        return this.datawatcher.c(17);
+        return this.datawatcher.c(WOLF_STATE_BEHAVIOUR.getOwnerWatcherIndex());
     }
 
     public void setOwnerName(String s) {
-        this.datawatcher.watch(17, s);
+        this.datawatcher.watch(WOLF_STATE_BEHAVIOUR.getOwnerWatcherIndex(), s);
     }
 
     public boolean isSitting() {
-        return (this.datawatcher.a(16) & 1) != 0;
+        return WOLF_STATE_BEHAVIOUR.isSitting(this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex()));
     }
 
     public void setSitting(boolean flag) {
-        byte b0 = this.datawatcher.a(16);
-
-        if (flag) {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 | 1)));
-        } else {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 & -2)));
-        }
+        byte flags = this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex());
+        this.datawatcher.watch(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(WOLF_STATE_BEHAVIOUR.withSitting(flags, flag)));
     }
 
     public boolean isAngry() {
-        return (this.datawatcher.a(16) & 2) != 0;
+        return WOLF_STATE_BEHAVIOUR.isAngry(this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex()));
     }
 
     public void setAngry(boolean flag) {
-        byte b0 = this.datawatcher.a(16);
-
-        if (flag) {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 | 2)));
-        } else {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 & -3)));
-        }
+        byte flags = this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex());
+        this.datawatcher.watch(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(WOLF_STATE_BEHAVIOUR.withAngry(flags, flag)));
     }
 
     public boolean isTamed() {
-        return (this.datawatcher.a(16) & 4) != 0;
+        return WOLF_STATE_BEHAVIOUR.isTamed(this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex()));
     }
 
     public void setTamed(boolean flag) {
-        byte b0 = this.datawatcher.a(16);
-
-        if (flag) {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 | 4)));
-        } else {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 & -5)));
-        }
+        byte flags = this.datawatcher.a(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex());
+        this.datawatcher.watch(WOLF_STATE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(WOLF_STATE_BEHAVIOUR.withTamed(flags, flag)));
     }
 }

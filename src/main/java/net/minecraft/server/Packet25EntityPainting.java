@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,34 +14,35 @@ public class Packet25EntityPainting extends Packet {
     public int d;
     public int e;
     public String f;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet25EntityPainting() {}
 
     public Packet25EntityPainting(EntityPainting entitypainting) {
-        this.a = entitypainting.id;
-        this.b = entitypainting.b;
-        this.c = entitypainting.c;
-        this.d = entitypainting.d;
-        this.e = entitypainting.a;
-        this.f = entitypainting.e.A;
+        PacketDataCodec.Packet25Data packetData = packetDataCodec.packet25FromPainting(entitypainting);
+        this.a = packetData.getEntityId();
+        this.f = packetData.getArtName();
+        this.b = packetData.getTileX();
+        this.c = packetData.getTileY();
+        this.d = packetData.getTileZ();
+        this.e = packetData.getDirection();
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.f = a(datainputstream, EnumArt.z);
-        this.b = datainputstream.readInt();
-        this.c = datainputstream.readInt();
-        this.d = datainputstream.readInt();
-        this.e = datainputstream.readInt();
+        PacketDataCodec.Packet25Data packetData = packetDataCodec.readPacket25(datainputstream);
+        this.a = packetData.getEntityId();
+        this.f = packetData.getArtName();
+        this.b = packetData.getTileX();
+        this.c = packetData.getTileY();
+        this.d = packetData.getTileZ();
+        this.e = packetData.getDirection();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        a(this.f, dataoutputstream);
-        dataoutputstream.writeInt(this.b);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.writeInt(this.d);
-        dataoutputstream.writeInt(this.e);
+        packetDataCodec.writePacket25(
+                new PacketDataCodec.Packet25Data(this.a, this.f, this.b, this.c, this.d, this.e),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -47,6 +50,6 @@ public class Packet25EntityPainting extends Packet {
     }
 
     public int a() {
-        return 24;
+        return packetDataCodec.packet25Length(this.f);
     }
 }

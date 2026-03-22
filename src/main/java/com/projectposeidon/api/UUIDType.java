@@ -1,9 +1,19 @@
 package com.projectposeidon.api;
 
+/**
+ * @deprecated Use {@link com.legacyminecraft.poseidon.api.uuid.UUIDType}.
+ */
+@Deprecated
 public enum UUIDType {
-    //I was not sure about the coding conventions regarding capitalization. I have followed the ALL caps example in the Java Docs: https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html
     ONLINE,
     OFFLINE,
-    UNKNOWN
+    UNKNOWN;
 
+    public com.legacyminecraft.poseidon.api.uuid.UUIDType toCanonical() {
+        return com.legacyminecraft.poseidon.api.uuid.UUIDType.valueOf(this.name());
+    }
+
+    public static UUIDType fromCanonical(com.legacyminecraft.poseidon.api.uuid.UUIDType type) {
+        return UUIDType.valueOf(type.name());
+    }
 }

@@ -1,26 +1,42 @@
 package net.minecraft.server;
 
-import com.projectposeidon.ConnectionType;
+import com.legacyminecraft.poseidon.api.network.ConnectionType;
+import com.legacyminecraft.poseidon.auth.login.LoginConnectionLifecycleSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginConnectionLossExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginAuthenticatedSessionExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginCompletionStateApplySystem;
+import com.legacyminecraft.poseidon.auth.login.LoginDisconnectExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginFlowStartExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginGatekeepingExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginIdentityPolicy;
+import com.legacyminecraft.poseidon.auth.login.LoginPacketGatekeepingPolicy;
+import com.legacyminecraft.poseidon.auth.login.LoginPacketExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginPendingPacketExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginProtocolErrorExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginTickExecutionSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginTickOrchestrationSystem;
+import com.legacyminecraft.poseidon.auth.login.LoginTickPolicy;
+import com.legacyminecraft.poseidon.auth.login.LoginTransitionSystem;
+import com.legacyminecraft.poseidon.network.LoginHandshakePacketHandler;
+import com.legacyminecraft.poseidon.network.LoginHandshakeExecutionSystem;
+import com.legacyminecraft.poseidon.network.LoginProxyAssignmentSystem;
+import com.legacyminecraft.poseidon.network.LoginProxySessionApplySystem;
+import com.legacyminecraft.poseidon.network.LoginSessionStateSystem;
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.projectposeidon.johnymuffin.LoginProcessHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.Server;
 
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
 import java.util.logging.Logger;
-
-import static com.legacyminecraft.poseidon.util.Release2Beta.deserializeAddress;
 
 public class NetLoginHandler extends NetHandler {
 
     public static Logger a = Logger.getLogger("Minecraft");
     private static Random d = new Random();
+    private static final int LOGIN_TIMEOUT_TICKS = 600;
     public NetworkManager networkManager;
     public boolean c = false;
-    private MinecraftServer server;
+    private MinecraftServer minecraftServer;
     private int f = 0;
     private String g = null;
     private Packet1Login h = null;
@@ -30,11 +46,224 @@ public class NetLoginHandler extends NetHandler {
     private boolean receivedLoginPacket = false;
     private int rawConnectionType;
     private boolean receivedKeepAlive = false;
+    private final LoginConnectionLifecycleSystem loginConnectionLifecycleSystem = LoginConnectionLifecycleSystem.getInstance();
+    private final LoginHandshakePacketHandler loginHandshakePacketHandler = LoginHandshakePacketHandler.getInstance();
+    private final LoginHandshakeExecutionSystem loginHandshakeExecutionSystem = LoginHandshakeExecutionSystem.getInstance();
+    private final LoginSessionStateSystem loginSessionStateSystem = LoginSessionStateSystem.getInstance();
+    private final LoginGatekeepingExecutionSystem loginGatekeepingExecutionSystem = LoginGatekeepingExecutionSystem.getInstance();
+    private final LoginPacketExecutionSystem loginPacketExecutionSystem = LoginPacketExecutionSystem.getInstance();
+    private final LoginIdentityPolicy loginIdentityPolicy = LoginIdentityPolicy.getInstance();
+    private final LoginPacketGatekeepingPolicy loginPacketGatekeepingPolicy = LoginPacketGatekeepingPolicy.getInstance();
+    private final LoginProxyAssignmentSystem loginProxyAssignmentSystem = LoginProxyAssignmentSystem.getInstance();
+    private final LoginProxySessionApplySystem loginProxySessionApplySystem = LoginProxySessionApplySystem.getInstance();
+    private final LoginFlowStartExecutionSystem loginFlowStartExecutionSystem = LoginFlowStartExecutionSystem.getInstance();
+    private final LoginTickExecutionSystem loginTickExecutionSystem = LoginTickExecutionSystem.getInstance();
+    private final LoginTickOrchestrationSystem loginTickOrchestrationSystem = LoginTickOrchestrationSystem.getInstance();
+    private final LoginTickPolicy loginTickPolicy = LoginTickPolicy.getInstance();
+    private final LoginTransitionSystem loginTransitionSystem = LoginTransitionSystem.getInstance();
+    private final LoginAuthenticatedSessionExecutionSystem loginAuthenticatedSessionExecutionSystem =
+            LoginAuthenticatedSessionExecutionSystem.getInstance();
+    private final LoginDisconnectExecutionSystem loginDisconnectExecutionSystem = LoginDisconnectExecutionSystem.getInstance();
+    private final LoginConnectionLossExecutionSystem loginConnectionLossExecutionSystem = LoginConnectionLossExecutionSystem.getInstance();
+    private final LoginCompletionStateApplySystem loginCompletionStateApplySystem = LoginCompletionStateApplySystem.getInstance();
+    private final LoginPendingPacketExecutionSystem loginPendingPacketExecutionSystem =
+            LoginPendingPacketExecutionSystem.getInstance();
+    private final LoginProtocolErrorExecutionSystem loginProtocolErrorExecutionSystem = LoginProtocolErrorExecutionSystem.getInstance();
+    private Packet1Login pendingLoginFlowPacket;
+    private Packet1Login pendingAuthenticatedSessionPacket;
+    private final LoginTickExecutionSystem.TickActions loginTickActions = new LoginTickExecutionSystem.TickActions() {
+        @Override
+        public void processDeferredLogin() {
+            NetLoginHandler.this.b(NetLoginHandler.this.h);
+            NetLoginHandler.this.h = null;
+        }
+
+        @Override
+        public void disconnect(String message) {
+            NetLoginHandler.this.disconnect(message);
+        }
+
+        @Override
+        public void pollNetwork() {
+            NetLoginHandler.this.networkManager.b();
+        }
+    };
+    private final LoginProxySessionApplySystem.SessionStateSink loginProxySessionStateSink =
+            new LoginProxySessionApplySystem.SessionStateSink() {
+                @Override
+                public void apply(ConnectionType connectionType, int rawConnectionType, boolean usingReleaseToBeta) {
+                    NetLoginHandler.this.connectionType = connectionType;
+                    NetLoginHandler.this.rawConnectionType = rawConnectionType;
+                    NetLoginHandler.this.usingReleaseToBeta = usingReleaseToBeta;
+                }
+            };
+    private final LoginGatekeepingExecutionSystem.GatekeepingActions loginGatekeepingActions =
+            new LoginGatekeepingExecutionSystem.GatekeepingActions() {
+                @Override
+                public void markLoginPacketReceived() {
+                    NetLoginHandler.this.receivedLoginPacket = true;
+                }
+
+                @Override
+                public void updateUsername(String username) {
+                    NetLoginHandler.this.g = username;
+                }
+
+                @Override
+                public void disconnect(String message) {
+                    NetLoginHandler.this.disconnect(message);
+                }
+            };
+    private final LoginHandshakeExecutionSystem.HandshakeActions loginHandshakeActions =
+            new LoginHandshakeExecutionSystem.HandshakeActions() {
+                @Override
+                public void queueResponsePacket(Packet responsePacket) {
+                    NetLoginHandler.this.networkManager.queue(responsePacket);
+                }
+            };
+    private final LoginCompletionStateApplySystem.CompletionStateSink loginCompletionStateSink =
+            new LoginCompletionStateApplySystem.CompletionStateSink() {
+                @Override
+                public void markLoginComplete(boolean loginComplete) {
+                    NetLoginHandler.this.c = loginComplete;
+                }
+            };
+    private final LoginConnectionLossExecutionSystem.ConnectionLossActions loginConnectionLossActions =
+            new LoginConnectionLossExecutionSystem.ConnectionLossActions() {
+                @Override
+                public void reportConnectionLost() {
+                    loginConnectionLifecycleSystem.reportConnectionLost(a, NetLoginHandler.this.b());
+                }
+
+                @Override
+                public void markLoginComplete() {
+                    NetLoginHandler.this.c = true;
+                }
+            };
+    private final LoginProtocolErrorExecutionSystem.ProtocolErrorActions loginProtocolErrorActions =
+            new LoginProtocolErrorExecutionSystem.ProtocolErrorActions() {
+                @Override
+                public void disconnect(String message) {
+                    NetLoginHandler.this.disconnect(message);
+                }
+            };
+    private final LoginDisconnectExecutionSystem.DisconnectActions loginDisconnectActions =
+            new LoginDisconnectExecutionSystem.DisconnectActions() {
+                @Override
+                public void disconnect(String message) {
+                    loginConnectionLifecycleSystem.disconnect(
+                            NetLoginHandler.this.networkManager,
+                            a,
+                            NetLoginHandler.this.b(),
+                            message
+                    );
+                }
+
+                @Override
+                public void markLoginComplete() {
+                    NetLoginHandler.this.c = true;
+                }
+            };
+    private final LoginFlowStartExecutionSystem.LoginFlowActions loginFlowStartActions =
+            new LoginFlowStartExecutionSystem.LoginFlowActions() {
+                @Override
+                public void startLoginFlow() {
+                    Packet1Login packet1login = requirePendingLoginPacket(
+                            NetLoginHandler.this.pendingLoginFlowPacket,
+                            "login flow start"
+                    );
+                    Server bukkitServer = NetLoginHandler.this.minecraftServer.server;
+                    loginTransitionSystem.startLoginFlow(
+                            NetLoginHandler.this,
+                            packet1login,
+                            NetLoginHandler.this.minecraftServer,
+                            bukkitServer,
+                            NetLoginHandler.this.msgKickShutdown
+                    );
+                }
+            };
+    private final LoginAuthenticatedSessionExecutionSystem.CompletionActions loginAuthenticatedSessionActions =
+            new LoginAuthenticatedSessionExecutionSystem.CompletionActions() {
+                @Override
+                public LoginTransitionSystem.CompletionResult completeAuthenticatedSession() {
+                    Packet1Login packet1login = requirePendingLoginPacket(
+                            NetLoginHandler.this.pendingAuthenticatedSessionPacket,
+                            "authenticated session completion"
+                    );
+                    return loginTransitionSystem.completeAuthenticatedSession(
+                            NetLoginHandler.this,
+                            packet1login,
+                            NetLoginHandler.this.minecraftServer,
+                            NetLoginHandler.this.usingReleaseToBeta,
+                            NetLoginHandler.this.connectionType,
+                            NetLoginHandler.this.rawConnectionType,
+                            NetLoginHandler.this.receivedKeepAlive
+                    );
+                }
+
+                @Override
+                public void applyCompletionState(LoginTransitionSystem.CompletionResult completionResult) {
+                    loginCompletionStateApplySystem.applyCompletionState(
+                            completionResult,
+                            NetLoginHandler.this.loginCompletionStateSink
+                    );
+                }
+            };
+    private final LoginPacketExecutionSystem.ProxyAssignmentResolver loginProxyAssignmentResolver =
+            new LoginPacketExecutionSystem.ProxyAssignmentResolver() {
+                @Override
+                public LoginProxyAssignmentSystem.ProxyAssignment resolveProxy(Packet1Login loginPacket) {
+                    return loginProxyAssignmentSystem.resolveProxy(NetLoginHandler.this, loginPacket);
+                }
+            };
+    private final LoginPacketExecutionSystem.LoginStartActions loginStartActions =
+            new LoginPacketExecutionSystem.LoginStartActions() {
+                @Override
+                public void finishLogin(Packet1Login loginPacket) {
+                    NetLoginHandler.this.finishLogin(loginPacket);
+                }
+            };
+    private final LoginPendingPacketExecutionSystem.PendingPacketState loginFlowPendingPacketState =
+            new LoginPendingPacketExecutionSystem.PendingPacketState() {
+                @Override
+                public void set(Packet1Login loginPacket) {
+                    NetLoginHandler.this.pendingLoginFlowPacket = loginPacket;
+                }
+
+                @Override
+                public void clear() {
+                    NetLoginHandler.this.pendingLoginFlowPacket = null;
+                }
+            };
+    private final Runnable executeLoginFlowStart = new Runnable() {
+        @Override
+        public void run() {
+            loginFlowStartExecutionSystem.execute(NetLoginHandler.this.loginFlowStartActions);
+        }
+    };
+    private final LoginPendingPacketExecutionSystem.PendingPacketState authenticatedSessionPendingPacketState =
+            new LoginPendingPacketExecutionSystem.PendingPacketState() {
+                @Override
+                public void set(Packet1Login loginPacket) {
+                    NetLoginHandler.this.pendingAuthenticatedSessionPacket = loginPacket;
+                }
+
+                @Override
+                public void clear() {
+                    NetLoginHandler.this.pendingAuthenticatedSessionPacket = null;
+                }
+            };
+    private final Runnable executeAuthenticatedSessionCompletion = new Runnable() {
+        @Override
+        public void run() {
+            loginAuthenticatedSessionExecutionSystem.execute(NetLoginHandler.this.loginAuthenticatedSessionActions);
+        }
+    };
 
     private final String msgKickShutdown;
 
     public NetLoginHandler(MinecraftServer minecraftserver, Socket socket, String s) {
-        this.server = minecraftserver;
+        this.minecraftServer = minecraftserver;
         this.networkManager = new NetworkManager(socket, s, this);
         this.networkManager.f = 0;
 
@@ -48,186 +277,86 @@ public class NetLoginHandler extends NetHandler {
     // CraftBukkit end
 
     public void a() {
-        if (this.h != null) {
-            this.b(this.h);
-            this.h = null;
-        }
-
-        if (this.f++ == 600) {
-            this.disconnect("Took too long to log in");
-        } else {
-            this.networkManager.b();
-        }
+        this.f = loginTickOrchestrationSystem.execute(
+                this.h,
+                this.f,
+                LOGIN_TIMEOUT_TICKS,
+                loginTickPolicy,
+                loginTickExecutionSystem,
+                this.loginTickActions
+        );
     }
 
     public void disconnect(String s) {
-        try {
-            a.info("Disconnecting " + this.b() + ": " + s);
-            this.networkManager.queue(new Packet255KickDisconnect(s));
-            this.networkManager.d();
-            this.c = true;
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
+        loginDisconnectExecutionSystem.execute(s, this.loginDisconnectActions);
     }
 
     public void a(Packet2Handshake packet2handshake) {
-        if (this.server.onlineMode) {
-            this.serverId = Long.toHexString(d.nextLong());
-            this.networkManager.queue(new Packet2Handshake(this.serverId));
-        } else {
-            this.networkManager.queue(new Packet2Handshake("-"));
-        }
+        this.serverId = loginHandshakeExecutionSystem.executeHandshake(
+                this.minecraftServer.onlineMode,
+                this.serverId,
+                d,
+                loginHandshakePacketHandler,
+                this.loginHandshakeActions
+        );
     }
 
     public void a(Packet0KeepAlive packet0KeepAlive) {
-        receivedKeepAlive = true;
+        receivedKeepAlive = loginSessionStateSystem.markReceivedKeepAlive(receivedKeepAlive);
     }
 
     public boolean isCracked() {
-        return this.g != null && this.g.startsWith(".");
+        return loginIdentityPolicy.isCrackedUsername(this.g);
     }
 
     public void a(Packet1Login packet1login) {
-
-        if (receivedLoginPacket) {
-            this.disconnect("Multiple login packets received.");
-            return;
-        }
-        receivedLoginPacket = true;
-        this.g = packet1login.name;
-
-        // Kick players if they are using the wrong version
-        if (packet1login.a != 14) {
-            if (packet1login.a > 14) {
-                this.disconnect("Outdated server! I'm still on Beta 1.7.3");
-            } else {
-                this.disconnect("Outdated client! Please use Beta 1.7.3");
-            }
-        }
-
-
-        // Handle proxies (e.g., BungeeCord, Release2Beta)
-        if (!proxyHandler(packet1login)) {
-            return;
-        }
-
-        this.finishLogin(packet1login);
+        loginPacketExecutionSystem.execute(
+                packet1login,
+                receivedLoginPacket,
+                loginPacketGatekeepingPolicy,
+                loginGatekeepingExecutionSystem,
+                this.loginGatekeepingActions,
+                this.loginProxyAssignmentResolver,
+                loginProxySessionApplySystem,
+                loginSessionStateSystem,
+                this.loginProxySessionStateSink,
+                this.loginStartActions
+        );
     }
 
     public void updateUsername(String newUsername) {
         this.g = newUsername;
     }
 
-    private boolean proxyHandler(Packet1Login packet1login) {
-        //Project Poseidon - Start (Release2Beta)
-        if (packet1login.d == (byte) -999 || packet1login.d == (byte) 25) {
-            connectionType = ConnectionType.RELEASE2BETA_OFFLINE_MODE_IP_FORWARDING;
-        } else if (packet1login.d == (byte) 26) {
-            connectionType = ConnectionType.RELEASE2BETA_ONLINE_MODE_IP_FORWARDING;
-        } else if (packet1login.d == (byte) 1) {
-            connectionType = ConnectionType.RELEASE2BETA;
-        } else if (packet1login.d == (byte) 2) {
-            connectionType = ConnectionType.BUNGEECORD_OFFLINE_MODE_IP_FORWARDING;
-        } else {
-            connectionType = ConnectionType.NORMAL;
-        }
-        rawConnectionType = packet1login.d;
-        //TODO: We need to find a better and cleaner way to support these different Beta proxies, Maybe a handler class???
-        if ((Boolean) PoseidonConfig.getInstance().getConfigOption("settings.bungeecord.bungee-mode.enable") && !connectionType.equals(ConnectionType.BUNGEECORD_OFFLINE_MODE_IP_FORWARDING) && !connectionType.equals(ConnectionType.BUNGEECORD_ONLINE_MODE_IP_FORWARDING)) {
-            a.info(packet1login.name + " is not using BungeeCord, kicking the player.");
-            this.disconnect((String) PoseidonConfig.getInstance().getConfigOption("settings.bungeecord.bungee-mode.kick-message"));
-            return false;
-        }
-
-        if (connectionType.equals(ConnectionType.RELEASE2BETA_OFFLINE_MODE_IP_FORWARDING) || connectionType.equals(ConnectionType.RELEASE2BETA_ONLINE_MODE_IP_FORWARDING) || connectionType.equals(ConnectionType.BUNGEECORD_OFFLINE_MODE_IP_FORWARDING) || connectionType.equals(ConnectionType.BUNGEECORD_ONLINE_MODE_IP_FORWARDING)) {
-            //Proxy has IP Forwarding enabled
-            if ((Boolean) PoseidonConfig.getInstance().getConfigOption("settings.release2beta.enable-ip-pass-through")) {
-                //IP Forwarding is enabled server side
-                if (this.getSocket().getInetAddress().getHostAddress().equalsIgnoreCase(String.valueOf(PoseidonConfig.getInstance().getConfigOption("settings.release2beta.proxy-ip", "127.0.0.1")))) {
-                    //Release2Beta server is authorized - Override IP address
-                    InetSocketAddress address = deserializeAddress(packet1login.c);
-                    a.info(packet1login.name + " has been detected using Release2Beta, using the IP passed through: " + address.getAddress().getHostAddress());
-                    this.networkManager.setSocketAddress(address);
-                    this.usingReleaseToBeta = true;
-                } else {
-                    //Release2Beta server isn't authorized
-                    a.info(packet1login.name + " is attempting to use a unauthorized Release2Beta server, kicking the player.");
-                    this.disconnect(ChatColor.RED + "The Release2Beta server you are connecting through is unauthorized.");
-                    return false;
-                }
-            } else {
-                //Poseidon doesn't support IP Forwarding
-                a.info(packet1login.name + " is trying to connect through R2B with IP Forwarding enabled, however, it is disabled in Poseidon. Kicking player!");
-                this.disconnect(ChatColor.RED + "IP Forwarding is disabled in Poseidon. Please disable in Release2Beta.");
-                return false;
-            }
-        }
-        //Project Poseidon - End (Release2Beta
-
-        return true;
-    }
-
     public void finishLogin(Packet1Login packet1login) {
-
-        if (((CraftServer) Bukkit.getServer()).isShuttingdown()) {
-            this.disconnect(this.msgKickShutdown);
-            return;
-        }
-
-
-        new LoginProcessHandler(this, packet1login, this.server.server, this.server.onlineMode);
-        // (new ThreadLoginVerifier(this, packet1login, this.server.server)).start(); // CraftBukkit
-//            }
+        loginPendingPacketExecutionSystem.execute(
+                packet1login,
+                this.loginFlowPendingPacketState,
+                this.executeLoginFlowStart
+        );
     }
 
     public void b(Packet1Login packet1login) {
-        EntityPlayer entityplayer = this.server.serverConfigurationManager.a(this, packet1login.name);
-
-        if (entityplayer != null) {
-            this.server.serverConfigurationManager.b(entityplayer);
-            // entityplayer.a((World) this.server.a(entityplayer.dimension)); // CraftBukkit - set by Entity
-            // CraftBukkit - add world and location to 'logged in' message.
-            a.info(this.b() + " logged in with entity id " + entityplayer.id + " at ([" + entityplayer.world.worldData.name + "] " + entityplayer.locX + ", " + entityplayer.locY + ", " + entityplayer.locZ + ")");
-            WorldServer worldserver = (WorldServer) entityplayer.world; // CraftBukkit
-            ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
-            NetServerHandler netserverhandler = new NetServerHandler(this.server, this.networkManager, entityplayer);
-            //Poseidon Start
-            netserverhandler.setUsingReleaseToBeta(usingReleaseToBeta);
-            netserverhandler.setConnectionType(connectionType);
-            netserverhandler.setRawConnectionType(rawConnectionType);
-            netserverhandler.setReceivedKeepAlive(receivedKeepAlive);
-            //Poseidon End
-            netserverhandler.sendPacket(new Packet1Login("", entityplayer.id, worldserver.getSeed(), (byte) worldserver.worldProvider.dimension));
-            netserverhandler.sendPacket(new Packet6SpawnPosition(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z));
-            this.server.serverConfigurationManager.a(entityplayer, worldserver);
-            // this.server.serverConfigurationManager.sendAll(new Packet3Chat("\u00A7e" + entityplayer.name + " joined the game."));  // CraftBukkit - message moved to join event
-            this.server.serverConfigurationManager.c(entityplayer);
-            netserverhandler.a(entityplayer.locX, entityplayer.locY, entityplayer.locZ, entityplayer.yaw, entityplayer.pitch);
-            this.server.networkListenThread.a(netserverhandler);
-            netserverhandler.sendPacket(new Packet4UpdateTime(entityplayer.getPlayerTime())); // CraftBukkit - add support for player specific time
-            entityplayer.syncInventory();
-            // poseidon start
-            if (PoseidonConfig.getInstance().getBoolean("settings.support.modloader.enable", false)) {
-                net.minecraft.server.ModLoaderMp.HandleAllLogins(entityplayer);
-            }
-            // poseidon end
-        }
-
-        this.c = true;
+        loginPendingPacketExecutionSystem.execute(
+                packet1login,
+                this.authenticatedSessionPendingPacketState,
+                this.executeAuthenticatedSessionCompletion
+        );
     }
 
     public void a(String s, Object[] aobject) {
-        a.info(this.b() + " lost connection");
-        this.c = true;
+        loginConnectionLossExecutionSystem.execute(this.loginConnectionLossActions);
     }
 
     public void a(Packet packet) {
-        this.disconnect("Protocol error");
+        loginProtocolErrorExecutionSystem.execute(
+                loginConnectionLifecycleSystem.getProtocolErrorMessage(),
+                this.loginProtocolErrorActions
+        );
     }
 
     public String b() {
-        return this.g != null ? this.g + " [" + this.networkManager.getSocketAddress().toString() + "]" : this.networkManager.getSocketAddress().toString();
+        return loginIdentityPolicy.describeConnection(this.g, this.networkManager.getSocketAddress().toString());
     }
 
     //This can and will return null for multiple packets.
@@ -235,8 +364,19 @@ public class NetLoginHandler extends NetHandler {
         return this.g;
     }
 
+    public void setDeferredLoginPacket(Packet1Login loginPacket) {
+        this.h = loginPacket;
+    }
+
     public boolean c() {
         return true;
+    }
+
+    private Packet1Login requirePendingLoginPacket(Packet1Login packet1login, String stage) {
+        if (packet1login == null) {
+            throw new IllegalStateException("Missing pending login packet for " + stage);
+        }
+        return packet1login;
     }
 
     /**
@@ -252,6 +392,7 @@ public class NetLoginHandler extends NetHandler {
     }
 
     public static Packet1Login a(NetLoginHandler netloginhandler, Packet1Login packet1login) {
-        return netloginhandler.h = packet1login;
+        netloginhandler.setDeferredLoginPacket(packet1login);
+        return packet1login;
     }
 }

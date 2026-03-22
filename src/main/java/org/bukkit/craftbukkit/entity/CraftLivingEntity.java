@@ -1,5 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.poseidon.compat.bukkit.LivingEntityDamageStateBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.LivingEntityHealthAndViewBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.LivingEntityTargetingBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.LivingEntityProjectileLaunchBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.LivingEntityVehicleBridgeBehaviour;
 import net.minecraft.server.Entity;
 import net.minecraft.server.*;
 import org.bukkit.Location;
@@ -7,32 +12,32 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.*;
-import org.bukkit.util.BlockIterator;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+    private static final LivingEntityDamageStateBehaviour LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR =
+            LivingEntityDamageStateBehaviour.getInstance();
+    private static final LivingEntityHealthAndViewBehaviour LIVING_ENTITY_HEALTH_AND_VIEW_BEHAVIOUR =
+            LivingEntityHealthAndViewBehaviour.getInstance();
+    private static final LivingEntityProjectileLaunchBehaviour LIVING_ENTITY_PROJECTILE_LAUNCH_BEHAVIOUR =
+            LivingEntityProjectileLaunchBehaviour.getInstance();
+    private static final LivingEntityTargetingBehaviour LIVING_ENTITY_TARGETING_BEHAVIOUR =
+            LivingEntityTargetingBehaviour.getInstance();
+    private static final LivingEntityVehicleBridgeBehaviour LIVING_ENTITY_VEHICLE_BRIDGE_BEHAVIOUR =
+            LivingEntityVehicleBridgeBehaviour.getInstance();
+
     public CraftLivingEntity(final CraftServer server, final EntityLiving entity) {
         super(server, entity);
     }
 
     public int getHealth() {
-        return getHandle().health;
+        return LIVING_ENTITY_HEALTH_AND_VIEW_BEHAVIOUR.getHealth(getHandle());
     }
 
     public void setHealth(int health) {
-        if ((health < 0) || (health > 200)) {
-            throw new IllegalArgumentException("Health must be between 0 and 200");
-        }
-
-        if (entity instanceof EntityPlayer && health == 0) {
-            ((EntityPlayer) entity).die((Entity) null);
-        }
-
-        getHandle().health = health;
+        LIVING_ENTITY_HEALTH_AND_VIEW_BEHAVIOUR.setHealth(getHandle(), health);
     }
 
     @Override
@@ -52,22 +57,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     public Egg throwEgg() {
         net.minecraft.server.World world = ((CraftWorld) getWorld()).getHandle();
-        EntityEgg egg = new EntityEgg(world, getHandle());
-
-        world.addEntity(egg);
-        return (Egg) egg.getBukkitEntity();
+        return LIVING_ENTITY_PROJECTILE_LAUNCH_BEHAVIOUR.throwEgg(world, getHandle());
     }
 
     public Snowball throwSnowball() {
         net.minecraft.server.World world = ((CraftWorld) getWorld()).getHandle();
-        EntitySnowball snowball = new EntitySnowball(world, getHandle());
-
-        world.addEntity(snowball);
-        return (Snowball) snowball.getBukkitEntity();
+        return LIVING_ENTITY_PROJECTILE_LAUNCH_BEHAVIOUR.throwSnowball(world, getHandle());
     }
 
     public double getEyeHeight() {
-        return 1.0D;
+        return LIVING_ENTITY_HEALTH_AND_VIEW_BEHAVIOUR.getDefaultEyeHeight();
     }
 
     public double getEyeHeight(boolean ignoreSneaking) {
@@ -75,29 +74,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     private List<Block> getLineOfSight(HashSet<Byte> transparent, int maxDistance, int maxLength) {
-        if (maxDistance > 120) {
-            maxDistance = 120;
-        }
-        ArrayList<Block> blocks = new ArrayList<Block>();
-        Iterator<Block> itr = new BlockIterator(this, maxDistance);
-        while (itr.hasNext()) {
-            Block block = itr.next();
-            blocks.add(block);
-            if (maxLength != 0 && blocks.size() > maxLength) {
-                blocks.remove(0);
-            }
-            int id = block.getTypeId();
-            if (transparent == null) {
-                if (id != 0) {
-                    break;
-                }
-            } else {
-                if (!transparent.contains((byte) id)) {
-                    break;
-                }
-            }
-        }
-        return blocks;
+        return LIVING_ENTITY_TARGETING_BEHAVIOUR.collectLineOfSight(this, transparent, maxDistance, maxLength);
     }
 
     public List<Block> getLineOfSight(HashSet<Byte> transparent, int maxDistance) {
@@ -115,89 +92,70 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     public Arrow shootArrow() {
         net.minecraft.server.World world = ((CraftWorld) getWorld()).getHandle();
-        EntityArrow arrow = new EntityArrow(world, getHandle());
-
-        world.addEntity(arrow);
-        return (Arrow) arrow.getBukkitEntity();
+        return LIVING_ENTITY_PROJECTILE_LAUNCH_BEHAVIOUR.shootArrow(world, getHandle());
     }
 
     public boolean isInsideVehicle() {
-        return getHandle().vehicle != null;
+        return LIVING_ENTITY_VEHICLE_BRIDGE_BEHAVIOUR.isInsideVehicle(getHandle());
     }
 
     public boolean leaveVehicle() {
-        if (getHandle().vehicle == null) {
-            return false;
-        }
-
-        getHandle().setPassengerOf(null);
-        return true;
+        return LIVING_ENTITY_VEHICLE_BRIDGE_BEHAVIOUR.leaveVehicle(getHandle());
     }
 
     public Vehicle getVehicle() {
-        if (getHandle().vehicle == null) {
-            return null;
-        }
-
-        org.bukkit.entity.Entity vehicle = (getHandle().vehicle.getBukkitEntity());
-        if (vehicle instanceof Vehicle) {
-            return (Vehicle) vehicle;
-        }
-
-        return null;
+        return LIVING_ENTITY_VEHICLE_BRIDGE_BEHAVIOUR.resolveVehicle(getHandle());
     }
 
     public int getRemainingAir() {
-        return getHandle().airTicks;
+        return LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.getRemainingAir(getHandle());
     }
 
     public void setRemainingAir(int ticks) {
-        getHandle().airTicks = ticks;
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.setRemainingAir(getHandle(), ticks);
     }
 
     public int getMaximumAir() {
-        return getHandle().maxAirTicks;
+        return LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.getMaximumAir(getHandle());
     }
 
     public void setMaximumAir(int ticks) {
-        getHandle().maxAirTicks = ticks;
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.setMaximumAir(getHandle(), ticks);
     }
 
     public void damage(int amount) {
-        entity.damageEntity((Entity) null, amount);
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.applyDamage(getHandle(), amount);
     }
 
     public void damage(int amount, org.bukkit.entity.Entity source) {
-        entity.damageEntity(((CraftEntity) source).getHandle(), amount);
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.applyDamage(getHandle(), ((CraftEntity) source).getHandle(), amount);
     }
 
     public Location getEyeLocation() {
-        Location loc = getLocation();
-        loc.setY(loc.getY() + getEyeHeight());
-        return loc;
+        return LIVING_ENTITY_HEALTH_AND_VIEW_BEHAVIOUR.computeEyeLocation(getLocation(), getEyeHeight());
     }
 
     public int getMaximumNoDamageTicks() {
-        return getHandle().maxNoDamageTicks;
+        return LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.getMaximumNoDamageTicks(getHandle());
     }
 
     public void setMaximumNoDamageTicks(int ticks) {
-        getHandle().maxNoDamageTicks = ticks;
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.setMaximumNoDamageTicks(getHandle(), ticks);
     }
 
     public int getLastDamage() {
-        return getHandle().lastDamage;
+        return LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.getLastDamage(getHandle());
     }
 
     public void setLastDamage(int damage) {
-        getHandle().lastDamage = damage;
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.setLastDamage(getHandle(), damage);
     }
 
     public int getNoDamageTicks() {
-        return getHandle().noDamageTicks;
+        return LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.getNoDamageTicks(getHandle());
     }
 
     public void setNoDamageTicks(int ticks) {
-        getHandle().noDamageTicks = ticks;
+        LIVING_ENTITY_DAMAGE_STATE_BEHAVIOUR.setNoDamageTicks(getHandle(), ticks);
     }
 }

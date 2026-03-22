@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,24 +23,23 @@ public class Packet33RelEntityMoveLook extends Packet30Entity {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        super.a(datainputstream);
-        this.b = datainputstream.readByte();
-        this.c = datainputstream.readByte();
-        this.d = datainputstream.readByte();
-        this.e = datainputstream.readByte();
-        this.f = datainputstream.readByte();
+        PacketDataCodec.Packet33Data packetData = PacketDataCodec.getInstance().readPacket33(datainputstream);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getDeltaX();
+        this.c = packetData.getDeltaY();
+        this.d = packetData.getDeltaZ();
+        this.e = packetData.getYaw();
+        this.f = packetData.getPitch();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        super.a(dataoutputstream);
-        dataoutputstream.writeByte(this.b);
-        dataoutputstream.writeByte(this.c);
-        dataoutputstream.writeByte(this.d);
-        dataoutputstream.writeByte(this.e);
-        dataoutputstream.writeByte(this.f);
+        PacketDataCodec.getInstance().writePacket33(
+                new PacketDataCodec.Packet33Data(this.a, this.b, this.c, this.d, this.e, this.f),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 9;
+        return packetDataCodec.packet33Length();
     }
 }

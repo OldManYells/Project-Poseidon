@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.MovingObjectPositionBehaviour;
+
 public class MovingObjectPosition {
+    private static final MovingObjectPositionBehaviour MOVING_OBJECT_POSITION_BEHAVIOUR = MovingObjectPositionBehaviour.getInstance();
 
     public EnumMovingObjectType type;
     public int b;
@@ -11,17 +14,10 @@ public class MovingObjectPosition {
     public Entity entity;
 
     public MovingObjectPosition(int i, int j, int k, int l, Vec3D vec3d) {
-        this.type = EnumMovingObjectType.TILE;
-        this.b = i;
-        this.c = j;
-        this.d = k;
-        this.face = l;
-        this.f = Vec3D.create(vec3d.a, vec3d.b, vec3d.c);
+        MOVING_OBJECT_POSITION_BEHAVIOUR.initializeTileHit(this, i, j, k, l, vec3d);
     }
 
     public MovingObjectPosition(Entity entity) {
-        this.type = EnumMovingObjectType.ENTITY;
-        this.entity = entity;
-        this.f = Vec3D.create(entity.locX, entity.locY, entity.locZ);
+        MOVING_OBJECT_POSITION_BEHAVIOUR.initializeEntityHit(this, entity);
     }
 }

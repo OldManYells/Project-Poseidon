@@ -1,11 +1,9 @@
 package net.minecraft.server;
 
-// CraftBukkit start
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.event.entity.PigZapEvent;
-// CraftBukkit end
+import com.legacyminecraft.poseidon.entity.PigLifecycleBehaviour;
 
 public class EntityPig extends EntityAnimal {
+    private static final PigLifecycleBehaviour PIG_LIFECYCLE_BEHAVIOUR = PigLifecycleBehaviour.getInstance();
 
     public EntityPig(World world) {
         super(world);
@@ -14,7 +12,7 @@ public class EntityPig extends EntityAnimal {
     }
 
     protected void b() {
-        this.datawatcher.a(16, Byte.valueOf((byte) 0));
+        this.datawatcher.a(PIG_LIFECYCLE_BEHAVIOUR.getSaddleWatcherIndex(), Byte.valueOf(PIG_LIFECYCLE_BEHAVIOUR.withSaddleFlag(false)));
     }
 
     public void b(NBTTagCompound nbttagcompound) {
@@ -28,19 +26,19 @@ public class EntityPig extends EntityAnimal {
     }
 
     protected String g() {
-        return "mob.pig";
+        return PIG_LIFECYCLE_BEHAVIOUR.getAmbientSound();
     }
 
     protected String h() {
-        return "mob.pig";
+        return PIG_LIFECYCLE_BEHAVIOUR.getHurtSound();
     }
 
     protected String i() {
-        return "mob.pigdeath";
+        return PIG_LIFECYCLE_BEHAVIOUR.getDeathSound();
     }
 
     public boolean a(EntityHuman entityhuman) {
-        if (this.hasSaddle() && !this.world.isStatic && (this.passenger == null || this.passenger == entityhuman)) {
+        if (PIG_LIFECYCLE_BEHAVIOUR.canMount(this.hasSaddle(), this.world.isStatic, this.passenger, entityhuman)) {
             entityhuman.mount(this);
             return true;
         } else {
@@ -49,45 +47,25 @@ public class EntityPig extends EntityAnimal {
     }
 
     protected int j() {
-        return this.fireTicks > 0 ? Item.GRILLED_PORK.id : Item.PORK.id;
+        return PIG_LIFECYCLE_BEHAVIOUR.getDropItemId(this.fireTicks);
     }
 
     public boolean hasSaddle() {
-        return (this.datawatcher.a(16) & 1) != 0;
+        return PIG_LIFECYCLE_BEHAVIOUR.isSaddled(this.datawatcher.a(PIG_LIFECYCLE_BEHAVIOUR.getSaddleWatcherIndex()));
     }
 
     public void setSaddle(boolean flag) {
-        if (flag) {
-            this.datawatcher.watch(16, Byte.valueOf((byte) 1));
-        } else {
-            this.datawatcher.watch(16, Byte.valueOf((byte) 0));
-        }
+        this.datawatcher.watch(PIG_LIFECYCLE_BEHAVIOUR.getSaddleWatcherIndex(), Byte.valueOf(PIG_LIFECYCLE_BEHAVIOUR.withSaddleFlag(flag)));
     }
 
     public void a(EntityWeatherStorm entityweatherstorm) {
-        if (!this.world.isStatic) {
-            EntityPigZombie entitypigzombie = new EntityPigZombie(this.world);
-
-            // CraftBukkit start
-            PigZapEvent event = new PigZapEvent(this.getBukkitEntity(), entityweatherstorm.getBukkitEntity(), entitypigzombie.getBukkitEntity());
-            this.world.getServer().getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) {
-                return;
-            }
-            // CraftBukkit end
-
-            entitypigzombie.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
-             // CraftBukkit - added a reason for spawning this creature
-            this.world.addEntity(entitypigzombie, SpawnReason.LIGHTNING);
-            this.die();
-        }
+        PIG_LIFECYCLE_BEHAVIOUR.onLightningStrike(this, entityweatherstorm);
     }
 
     protected void a(float f) {
         super.a(f);
-        if (f > 5.0F && this.passenger instanceof EntityHuman) {
-            ((EntityHuman) this.passenger).a((Statistic) AchievementList.u);
+        if (PIG_LIFECYCLE_BEHAVIOUR.shouldAwardPigRideAchievement(f, this.passenger)) {
+            PIG_LIFECYCLE_BEHAVIOUR.awardPigRideAchievement(this.passenger);
         }
     }
 }

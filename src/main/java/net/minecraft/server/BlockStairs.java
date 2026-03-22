@@ -1,11 +1,14 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.StairGeometryBehaviour;
+
 import java.util.ArrayList;
 import java.util.Random;
 
 public class BlockStairs extends Block {
 
     private Block a;
+    private final StairGeometryBehaviour stairGeometryService = StairGeometryBehaviour.getInstance();
 
     protected BlockStairs(int i, Block block) {
         super(i, block.textureId, block.material);
@@ -34,26 +37,11 @@ public class BlockStairs extends Block {
 
     public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, ArrayList arraylist) {
         int l = world.getData(i, j, k);
-
-        if (l == 0) {
-            this.a(0.0F, 0.0F, 0.0F, 0.5F, 0.5F, 1.0F);
+        StairGeometryBehaviour.CollisionShapePair shapes = stairGeometryService.resolveCollisionShapes(l);
+        if (shapes != null) {
+            applyBounds(shapes.getPrimary());
             super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.5F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-        } else if (l == 1) {
-            this.a(0.0F, 0.0F, 0.0F, 0.5F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.5F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-        } else if (l == 2) {
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 0.5F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.0F, 0.0F, 0.5F, 1.0F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-        } else if (l == 3) {
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.5F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.0F, 0.0F, 0.5F, 1.0F, 0.5F, 1.0F);
+            applyBounds(shapes.getSecondary());
             super.a(world, i, j, k, axisalignedbb, arraylist);
         }
 
@@ -138,22 +126,17 @@ public class BlockStairs extends Block {
     }
 
     public void postPlace(World world, int i, int j, int k, EntityLiving entityliving) {
-        int l = MathHelper.floor((double) (entityliving.yaw * 4.0F / 360.0F) + 0.5D) & 3;
+        world.setData(i, j, k, stairGeometryService.resolvePlacementMetadata(entityliving.yaw));
+    }
 
-        if (l == 0) {
-            world.setData(i, j, k, 2);
-        }
-
-        if (l == 1) {
-            world.setData(i, j, k, 1);
-        }
-
-        if (l == 2) {
-            world.setData(i, j, k, 3);
-        }
-
-        if (l == 3) {
-            world.setData(i, j, k, 0);
-        }
+    private void applyBounds(StairGeometryBehaviour.Bounds bounds) {
+        this.a(
+                bounds.getMinX(),
+                bounds.getMinY(),
+                bounds.getMinZ(),
+                bounds.getMaxX(),
+                bounds.getMaxY(),
+                bounds.getMaxZ()
+        );
     }
 }

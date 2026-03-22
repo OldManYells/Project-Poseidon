@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.CraftResultInventoryBehaviour;
+
 public class InventoryCraftResult implements IInventory {
 
-    private ItemStack[] items = new ItemStack[1];
+    private ItemStack[] items = CraftResultInventoryBehaviour.getInstance().createStorage();
+    private final CraftResultInventoryBehaviour craftResultInventoryService = CraftResultInventoryBehaviour.getInstance();
 
     // CraftBukkit start
     public ItemStack[] getContents() {
@@ -17,7 +20,7 @@ public class InventoryCraftResult implements IInventory {
     }
 
     public ItemStack getItem(int i) {
-        return this.items[i];
+        return craftResultInventoryService.get(this.items, i);
     }
 
     public String getName() {
@@ -25,18 +28,11 @@ public class InventoryCraftResult implements IInventory {
     }
 
     public ItemStack splitStack(int i, int j) {
-        if (this.items[i] != null) {
-            ItemStack itemstack = this.items[i];
-
-            this.items[i] = null;
-            return itemstack;
-        } else {
-            return null;
-        }
+        return craftResultInventoryService.split(this.items, i);
     }
 
     public void setItem(int i, ItemStack itemstack) {
-        this.items[i] = itemstack;
+        craftResultInventoryService.set(this.items, i, itemstack);
     }
 
     public int getMaxStackSize() {

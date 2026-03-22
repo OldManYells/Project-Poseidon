@@ -1,39 +1,27 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.nbt.NbtCollectionCodecService;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class NBTTagCompound extends NBTBase {
 
     private Map a = new HashMap();
+    private final NbtCollectionCodecService nbtCollectionCodec = NbtCollectionCodecService.getInstance();
 
     public NBTTagCompound() {}
 
     void a(DataOutput dataoutput) throws IOException {
-        Iterator iterator = this.a.values().iterator();
-
-        while (iterator.hasNext()) {
-            NBTBase nbtbase = (NBTBase) iterator.next();
-
-            NBTBase.a(nbtbase, dataoutput);
-        }
-
-        dataoutput.writeByte(0);
+        nbtCollectionCodec.writeCompound(this.a, dataoutput);
     }
 
     void a(DataInput datainput) throws IOException {
-        this.a.clear();
-
-        NBTBase nbtbase;
-
-        while ((nbtbase = NBTBase.b(datainput)).a() != 0) {
-            this.a.put(nbtbase.b(), nbtbase);
-        }
+        nbtCollectionCodec.readCompound(this.a, datainput);
     }
 
     public Collection c() {

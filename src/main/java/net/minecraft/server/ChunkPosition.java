@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.ChunkPositionBehaviour;
+
 public class ChunkPosition {
+    private static final ChunkPositionBehaviour CHUNK_POSITION_BEHAVIOUR = ChunkPositionBehaviour.getInstance();
 
     public final int x;
     public final int y;
@@ -13,16 +16,10 @@ public class ChunkPosition {
     }
 
     public boolean equals(Object object) {
-        if (!(object instanceof ChunkPosition)) {
-            return false;
-        } else {
-            ChunkPosition chunkposition = (ChunkPosition) object;
-
-            return chunkposition.x == this.x && chunkposition.y == this.y && chunkposition.z == this.z;
-        }
+        return CHUNK_POSITION_BEHAVIOUR.equals(this, object);
     }
 
     public int hashCode() {
-        return this.x * 8976890 + this.y * 981131 + this.z;
+        return CHUNK_POSITION_BEHAVIOUR.hashCode(this);
     }
 }

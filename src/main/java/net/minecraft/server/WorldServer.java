@@ -1,17 +1,40 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.compat.bukkit.WorldLightningEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerChunkProviderBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerEntityEntryBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerEntityIndexBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerLocalEffectBroadcastBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerNearbyPacketDispatchBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerPacketBroadcastBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerSaveLevelBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerTileEntityRangeBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerTrackerDispatchBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerWeatherBroadcastBehaviour;
+import com.legacyminecraft.poseidon.world.WorldServerWeatherTransitionBehaviour;
 import org.bukkit.BlockChangeDelegate;
-import org.bukkit.craftbukkit.generator.*;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.generator.ChunkGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 // CraftBukkit start
 
 public class WorldServer extends World implements BlockChangeDelegate {
+    private static final WorldLightningEventBridgeBehaviour WORLD_LIGHTNING_EVENT_BRIDGE_BEHAVIOUR = WorldLightningEventBridgeBehaviour.getInstance();
+    private static final WorldServerBehaviour WORLD_SERVER_BEHAVIOUR = WorldServerBehaviour.getInstance();
+    private static final WorldServerChunkProviderBehaviour WORLD_SERVER_CHUNK_PROVIDER_BEHAVIOUR = WorldServerChunkProviderBehaviour.getInstance();
+    private static final WorldServerEntityEntryBehaviour WORLD_SERVER_ENTITY_ENTRY_BEHAVIOUR = WorldServerEntityEntryBehaviour.getInstance();
+    private static final WorldServerEntityIndexBehaviour WORLD_SERVER_ENTITY_INDEX_BEHAVIOUR = WorldServerEntityIndexBehaviour.getInstance();
+    private static final WorldServerLocalEffectBroadcastBehaviour WORLD_SERVER_LOCAL_EFFECT_BROADCAST_BEHAVIOUR = WorldServerLocalEffectBroadcastBehaviour.getInstance();
+    private static final WorldServerNearbyPacketDispatchBehaviour WORLD_SERVER_NEARBY_PACKET_DISPATCH_BEHAVIOUR = WorldServerNearbyPacketDispatchBehaviour.getInstance();
+    private static final WorldServerPacketBroadcastBehaviour WORLD_SERVER_PACKET_BROADCAST_BEHAVIOUR = WorldServerPacketBroadcastBehaviour.getInstance();
+    private static final WorldServerSaveLevelBehaviour WORLD_SERVER_SAVE_LEVEL_BEHAVIOUR = WorldServerSaveLevelBehaviour.getInstance();
+    private static final WorldServerTileEntityRangeBehaviour WORLD_SERVER_TILE_ENTITY_RANGE_BEHAVIOUR = WorldServerTileEntityRangeBehaviour.getInstance();
+    private static final WorldServerTrackerDispatchBehaviour WORLD_SERVER_TRACKER_DISPATCH_BEHAVIOUR = WorldServerTrackerDispatchBehaviour.getInstance();
+    private static final WorldServerWeatherBroadcastBehaviour WORLD_SERVER_WEATHER_BROADCAST_BEHAVIOUR = WorldServerWeatherBroadcastBehaviour.getInstance();
+    private static final WorldServerWeatherTransitionBehaviour WORLD_SERVER_WEATHER_TRANSITION_BEHAVIOUR = WorldServerWeatherTransitionBehaviour.getInstance();
     // CraftBukkit end
 
     public ChunkProviderServer chunkProviderServer;
@@ -42,7 +65,7 @@ public class WorldServer extends World implements BlockChangeDelegate {
         }
         // CraftBukkit end */
 
-        if (entity.passenger == null || !(entity.passenger instanceof EntityHuman)) {
+        if (WORLD_SERVER_ENTITY_ENTRY_BEHAVIOUR.shouldEnterWorld(entity)) {
             super.entityJoinedWorld(entity, flag);
         }
     }
@@ -55,75 +78,56 @@ public class WorldServer extends World implements BlockChangeDelegate {
         IChunkLoader ichunkloader = this.w.a(this.worldProvider);
 
         // CraftBukkit start
-        InternalChunkGenerator gen;
-
-        if (this.generator != null) {
-            gen = new CustomChunkGenerator(this, this.getSeed(), this.generator);
-        } else if (this.worldProvider instanceof WorldProviderHell) {
-            gen = new NetherChunkGenerator(this, this.getSeed());
-        } else if (this.worldProvider instanceof WorldProviderSky) {
-            gen = new SkyLandsChunkGenerator(this, this.getSeed());
-        } else {
-            gen = new NormalChunkGenerator(this, this.getSeed());
-        }
-
-        this.chunkProviderServer = new ChunkProviderServer(this, ichunkloader, gen);
+        this.chunkProviderServer = WORLD_SERVER_CHUNK_PROVIDER_BEHAVIOUR.createChunkProvider(this, ichunkloader, this.worldProvider, this.generator, this.getSeed());
         // CraftBukkit end
 
         return this.chunkProviderServer;
     }
 
     public List getTileEntities(int i, int j, int k, int l, int i1, int j1) {
-        ArrayList arraylist = new ArrayList();
-
-        for (int k1 = 0; k1 < this.c.size(); ++k1) {
-            TileEntity tileentity = (TileEntity) this.c.get(k1);
-
-            if (tileentity.x >= i && tileentity.y >= j && tileentity.z >= k && tileentity.x < l && tileentity.y < i1 && tileentity.z < j1) {
-                arraylist.add(tileentity);
-            }
-        }
-
-        return arraylist;
+        return WORLD_SERVER_TILE_ENTITY_RANGE_BEHAVIOUR.collectInRange(this.c, i, j, k, l, i1, j1);
     }
 
     public boolean a(EntityHuman entityhuman, int i, int j, int k) {
-        int l = (int) MathHelper.abs((float) (i - this.worldData.c()));
-        int i1 = (int) MathHelper.abs((float) (k - this.worldData.e()));
-
-        if (l > i1) {
-            i1 = l;
-        }
-
         // CraftBukkit - Configurable spawn protection
-        return i1 > this.getServer().getSpawnRadius() || this.server.serverConfigurationManager.isOp(entityhuman.name);
+        return WORLD_SERVER_BEHAVIOUR.canBypassSpawnProtection(
+                this.worldData.c(),
+                this.worldData.e(),
+                i,
+                k,
+                this.getServer().getSpawnRadius(),
+                this.server.serverConfigurationManager.isOp(entityhuman.name)
+        );
     }
 
     protected void c(Entity entity) {
         super.c(entity);
-        this.G.a(entity.id, entity);
+        WORLD_SERVER_ENTITY_INDEX_BEHAVIOUR.indexEntity(this.G, entity);
     }
 
     protected void d(Entity entity) {
         super.d(entity);
-        this.G.d(entity.id);
+        WORLD_SERVER_ENTITY_INDEX_BEHAVIOUR.unindexEntity(this.G, entity);
     }
 
     public Entity getEntity(int i) {
-        return (Entity) this.G.a(i);
+        return WORLD_SERVER_ENTITY_INDEX_BEHAVIOUR.getById(this.G, i);
     }
 
     public boolean strikeLightning(Entity entity) {
         // CraftBukkit start
-        LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) entity.getBukkitEntity());
-        this.getServer().getPluginManager().callEvent(lightning);
-
-        if (lightning.isCancelled()) {
+        if (WORLD_LIGHTNING_EVENT_BRIDGE_BEHAVIOUR.shouldCancelLightning(this, entity)) {
             return false;
         }
 
         if (super.strikeLightning(entity)) {
-            this.server.serverConfigurationManager.sendPacketNearby(entity.locX, entity.locY, entity.locZ, 512.0D, this.dimension, new Packet71Weather(entity));
+            WORLD_SERVER_LOCAL_EFFECT_BROADCAST_BEHAVIOUR.broadcastLightningEffect(
+                    this.server.serverConfigurationManager,
+                    WORLD_SERVER_NEARBY_PACKET_DISPATCH_BEHAVIOUR,
+                    WORLD_SERVER_PACKET_BROADCAST_BEHAVIOUR,
+                    this.dimension,
+                    entity
+            );
             // CraftBukkit end
             return true;
         } else {
@@ -132,20 +136,27 @@ public class WorldServer extends World implements BlockChangeDelegate {
     }
 
     public void a(Entity entity, byte b0) {
-        Packet38EntityStatus packet38entitystatus = new Packet38EntityStatus(entity.id, b0);
+        Packet38EntityStatus packet38entitystatus = WORLD_SERVER_PACKET_BROADCAST_BEHAVIOUR.createEntityStatusPacket(entity, b0);
 
         // CraftBukkit
-        this.server.getTracker(this.dimension).sendPacketToEntity(entity, packet38entitystatus);
+        WORLD_SERVER_TRACKER_DISPATCH_BEHAVIOUR.sendPacketToTrackedEntity(this.server, this.dimension, entity, packet38entitystatus);
     }
 
     //Project Poseidon Start
     public Explosion createExplosion(Entity entity, double d0, double d1, double d2, float f, boolean flag, EntityDamageEvent.DamageCause customDamageCause) {
         Explosion explosion = super.createExplosion(entity, d0, d1, d2, f, flag, customDamageCause);
 
-        if (explosion.wasCanceled) {
-            return explosion;
-        }
-        this.server.serverConfigurationManager.sendPacketNearby(d0, d1, d2, 64.0D, this.dimension, new Packet60Explosion(d0, d1, d2, f, explosion.blocks));
+        WORLD_SERVER_LOCAL_EFFECT_BROADCAST_BEHAVIOUR.broadcastExplosionEffectIfNeeded(
+                this.server.serverConfigurationManager,
+                WORLD_SERVER_NEARBY_PACKET_DISPATCH_BEHAVIOUR,
+                WORLD_SERVER_PACKET_BROADCAST_BEHAVIOUR,
+                this.dimension,
+                d0,
+                d1,
+                d2,
+                f,
+                explosion
+        );
 
         return explosion;
     }
@@ -155,16 +166,22 @@ public class WorldServer extends World implements BlockChangeDelegate {
         // CraftBukkit start
         Explosion explosion = super.createExplosion(entity, d0, d1, d2, f, flag);
 
-        if (explosion.wasCanceled) {
-            return explosion;
-        }
-
         /* Remove
         explosion.a = flag;
         explosion.a();
         explosion.a(false);
         */
-        this.server.serverConfigurationManager.sendPacketNearby(d0, d1, d2, 64.0D, this.dimension, new Packet60Explosion(d0, d1, d2, f, explosion.blocks));
+        WORLD_SERVER_LOCAL_EFFECT_BROADCAST_BEHAVIOUR.broadcastExplosionEffectIfNeeded(
+                this.server.serverConfigurationManager,
+                WORLD_SERVER_NEARBY_PACKET_DISPATCH_BEHAVIOUR,
+                WORLD_SERVER_PACKET_BROADCAST_BEHAVIOUR,
+                this.dimension,
+                d0,
+                d1,
+                d2,
+                f,
+                explosion
+        );
         // CraftBukkit end
         return explosion;
     }
@@ -172,26 +189,37 @@ public class WorldServer extends World implements BlockChangeDelegate {
     public void playNote(int i, int j, int k, int l, int i1) {
         super.playNote(i, j, k, l, i1);
         // CraftBukkit
-        this.server.serverConfigurationManager.sendPacketNearby((double) i, (double) j, (double) k, 64.0D, this.dimension, new Packet54PlayNoteBlock(i, j, k, l, i1));
+        WORLD_SERVER_LOCAL_EFFECT_BROADCAST_BEHAVIOUR.broadcastNoteEffect(
+                this.server.serverConfigurationManager,
+                WORLD_SERVER_NEARBY_PACKET_DISPATCH_BEHAVIOUR,
+                WORLD_SERVER_PACKET_BROADCAST_BEHAVIOUR,
+                this.dimension,
+                i,
+                j,
+                k,
+                l,
+                i1
+        );
     }
 
     public void saveLevel() {
-        this.w.e();
+        WORLD_SERVER_SAVE_LEVEL_BEHAVIOUR.flushDataManager(this.w);
     }
 
     protected void i() {
         boolean flag = this.v();
 
         super.i();
-        if (flag != this.v()) {
-            // CraftBukkit start - only sending weather packets to those affected
-            for (int i = 0; i < this.players.size(); ++i) {
-                if (((EntityPlayer) this.players.get(i)).world == this) {
-                    ((EntityPlayer) this.players.get(i)).netServerHandler.sendPacket(new Packet70Bed(flag ? 2 : 1));
-                }
-            }
-            // CraftBukkit end
-        }
+        // CraftBukkit start - only sending weather packets to those affected
+        WORLD_SERVER_WEATHER_TRANSITION_BEHAVIOUR.broadcastWeatherTransitionIfNeeded(
+                WORLD_SERVER_BEHAVIOUR,
+                WORLD_SERVER_WEATHER_BROADCAST_BEHAVIOUR,
+                this.players,
+                this,
+                flag,
+                this.v()
+        );
+        // CraftBukkit end
     }
     
     // Poseidon

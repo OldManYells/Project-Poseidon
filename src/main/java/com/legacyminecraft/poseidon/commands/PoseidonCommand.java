@@ -1,8 +1,8 @@
 package com.legacyminecraft.poseidon.commands;
 
 import com.legacyminecraft.poseidon.Poseidon;
-import com.projectposeidon.api.PoseidonUUID;
-import com.projectposeidon.api.UUIDType;
+import com.legacyminecraft.poseidon.api.uuid.PoseidonUUID;
+import com.legacyminecraft.poseidon.api.uuid.UUIDType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

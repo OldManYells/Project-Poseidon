@@ -1,31 +1,28 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.LadderPlacementAndBoundsBehaviour;
+
 import java.util.Random;
 
 public class BlockLadder extends Block {
+    private final LadderPlacementAndBoundsBehaviour ladderPlacementAndBoundsService = LadderPlacementAndBoundsBehaviour.getInstance();
 
     protected BlockLadder(int i, int j) {
         super(i, j, Material.ORIENTABLE);
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
-        int l = world.getData(i, j, k);
-        float f = 0.125F;
-
-        if (l == 2) {
-            this.a(0.0F, 0.0F, 1.0F - f, 1.0F, 1.0F, 1.0F);
-        }
-
-        if (l == 3) {
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, f);
-        }
-
-        if (l == 4) {
-            this.a(1.0F - f, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-        }
-
-        if (l == 5) {
-            this.a(0.0F, 0.0F, 0.0F, f, 1.0F, 1.0F);
+        LadderPlacementAndBoundsBehaviour.Bounds bounds =
+                ladderPlacementAndBoundsService.resolveBounds(world.getData(i, j, k), 0.125F);
+        if (bounds != null) {
+            this.a(
+                    bounds.getMinX(),
+                    bounds.getMinY(),
+                    bounds.getMinZ(),
+                    bounds.getMaxX(),
+                    bounds.getMaxY(),
+                    bounds.getMaxZ()
+            );
         }
 
         return super.e(world, i, j, k);
@@ -40,52 +37,23 @@ public class BlockLadder extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return world.e(i - 1, j, k) ? true : (world.e(i + 1, j, k) ? true : (world.e(i, j, k - 1) ? true : world.e(i, j, k + 1)));
+        return ladderPlacementAndBoundsService.canPlace(this.supportQuery(world), i, j, k);
     }
 
     public void postPlace(World world, int i, int j, int k, int l) {
-        int i1 = world.getData(i, j, k);
-
-        if ((i1 == 0 || l == 2) && world.e(i, j, k + 1)) {
-            i1 = 2;
-        }
-
-        if ((i1 == 0 || l == 3) && world.e(i, j, k - 1)) {
-            i1 = 3;
-        }
-
-        if ((i1 == 0 || l == 4) && world.e(i + 1, j, k)) {
-            i1 = 4;
-        }
-
-        if ((i1 == 0 || l == 5) && world.e(i - 1, j, k)) {
-            i1 = 5;
-        }
-
-        world.setData(i, j, k, i1);
+        world.setData(i, j, k, ladderPlacementAndBoundsService.resolvePostPlaceData(
+                this.supportQuery(world),
+                world.getData(i, j, k),
+                l,
+                i,
+                j,
+                k
+        ));
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
         int i1 = world.getData(i, j, k);
-        boolean flag = false;
-
-        if (i1 == 2 && world.e(i, j, k + 1)) {
-            flag = true;
-        }
-
-        if (i1 == 3 && world.e(i, j, k - 1)) {
-            flag = true;
-        }
-
-        if (i1 == 4 && world.e(i + 1, j, k)) {
-            flag = true;
-        }
-
-        if (i1 == 5 && world.e(i - 1, j, k)) {
-            flag = true;
-        }
-
-        if (!flag) {
+        if (!ladderPlacementAndBoundsService.hasValidAttachment(this.supportQuery(world), i, j, k, i1)) {
             this.g(world, i, j, k, i1);
             world.setTypeId(i, j, k, 0);
         }
@@ -95,5 +63,13 @@ public class BlockLadder extends Block {
 
     public int a(Random random) {
         return 1;
+    }
+
+    private LadderPlacementAndBoundsBehaviour.SupportQuery supportQuery(final World world) {
+        return new LadderPlacementAndBoundsBehaviour.SupportQuery() {
+            public boolean isBlockSolid(int x, int y, int z) {
+                return world.e(x, y, z);
+            }
+        };
     }
 }

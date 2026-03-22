@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.LeavesDecayBehaviour;
 import org.bukkit.event.block.LeavesDecayEvent;
 
 import java.util.Random;
@@ -8,6 +9,7 @@ public class BlockLeaves extends BlockLeavesBase {
 
     private int c;
     int[] a;
+    private static final LeavesDecayBehaviour LEAVES_DECAY_SERVICE = LeavesDecayBehaviour.getInstance();
 
     protected BlockLeaves(int i, int j) {
         super(i, j, Material.LEAVES, false);
@@ -16,104 +18,44 @@ public class BlockLeaves extends BlockLeavesBase {
     }
 
     public void remove(World world, int i, int j, int k) {
-        byte b0 = 1;
-        int l = b0 + 1;
-
-        if (world.a(i - l, j - l, k - l, i + l, j + l, k + l)) {
-            for (int i1 = -b0; i1 <= b0; ++i1) {
-                for (int j1 = -b0; j1 <= b0; ++j1) {
-                    for (int k1 = -b0; k1 <= b0; ++k1) {
-                        int l1 = world.getTypeId(i + i1, j + j1, k + k1);
-
-                        if (l1 == Block.LEAVES.id) {
-                            int i2 = world.getData(i + i1, j + j1, k + k1);
-
-                            world.setRawData(i + i1, j + j1, k + k1, i2 | 8);
-                        }
-                    }
-                }
+        LEAVES_DECAY_SERVICE.markNearbyLeavesForDecay(new LeavesDecayBehaviour.RemoveQuery() {
+            public boolean isAreaLoaded(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+                return world.a(minX, minY, minZ, maxX, maxY, maxZ);
             }
-        }
+
+            public int getTypeId(int x, int y, int z) {
+                return world.getTypeId(x, y, z);
+            }
+
+            public int getData(int x, int y, int z) {
+                return world.getData(x, y, z);
+            }
+
+            public void setRawData(int x, int y, int z, int data) {
+                world.setRawData(x, y, z, data);
+            }
+        }, i, j, k, Block.LEAVES.id);
     }
 
     public void a(World world, int i, int j, int k, Random random) {
         if (!world.isStatic) {
             int l = world.getData(i, j, k);
 
-            if ((l & 8) != 0) {
-                byte b0 = 4;
-                int i1 = b0 + 1;
-                byte b1 = 32;
-                int j1 = b1 * b1;
-                int k1 = b1 / 2;
-
-                if (this.a == null) {
-                    this.a = new int[b1 * b1 * b1];
+            LeavesDecayBehaviour.DecayResult result = LEAVES_DECAY_SERVICE.evaluateDecayTick(new LeavesDecayBehaviour.DecayQuery() {
+                public boolean isAreaLoaded(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+                    return world.a(minX, minY, minZ, maxX, maxY, maxZ);
                 }
 
-                int l1;
-
-                if (world.a(i - i1, j - i1, k - i1, i + i1, j + i1, k + i1)) {
-                    int i2;
-                    int j2;
-                    int k2;
-
-                    for (l1 = -b0; l1 <= b0; ++l1) {
-                        for (i2 = -b0; i2 <= b0; ++i2) {
-                            for (j2 = -b0; j2 <= b0; ++j2) {
-                                k2 = world.getTypeId(i + l1, j + i2, k + j2);
-                                if (k2 == Block.LOG.id) {
-                                    this.a[(l1 + k1) * j1 + (i2 + k1) * b1 + j2 + k1] = 0;
-                                } else if (k2 == Block.LEAVES.id) {
-                                    this.a[(l1 + k1) * j1 + (i2 + k1) * b1 + j2 + k1] = -2;
-                                } else {
-                                    this.a[(l1 + k1) * j1 + (i2 + k1) * b1 + j2 + k1] = -1;
-                                }
-                            }
-                        }
-                    }
-
-                    for (l1 = 1; l1 <= 4; ++l1) {
-                        for (i2 = -b0; i2 <= b0; ++i2) {
-                            for (j2 = -b0; j2 <= b0; ++j2) {
-                                for (k2 = -b0; k2 <= b0; ++k2) {
-                                    if (this.a[(i2 + k1) * j1 + (j2 + k1) * b1 + k2 + k1] == l1 - 1) {
-                                        if (this.a[(i2 + k1 - 1) * j1 + (j2 + k1) * b1 + k2 + k1] == -2) {
-                                            this.a[(i2 + k1 - 1) * j1 + (j2 + k1) * b1 + k2 + k1] = l1;
-                                        }
-
-                                        if (this.a[(i2 + k1 + 1) * j1 + (j2 + k1) * b1 + k2 + k1] == -2) {
-                                            this.a[(i2 + k1 + 1) * j1 + (j2 + k1) * b1 + k2 + k1] = l1;
-                                        }
-
-                                        if (this.a[(i2 + k1) * j1 + (j2 + k1 - 1) * b1 + k2 + k1] == -2) {
-                                            this.a[(i2 + k1) * j1 + (j2 + k1 - 1) * b1 + k2 + k1] = l1;
-                                        }
-
-                                        if (this.a[(i2 + k1) * j1 + (j2 + k1 + 1) * b1 + k2 + k1] == -2) {
-                                            this.a[(i2 + k1) * j1 + (j2 + k1 + 1) * b1 + k2 + k1] = l1;
-                                        }
-
-                                        if (this.a[(i2 + k1) * j1 + (j2 + k1) * b1 + (k2 + k1 - 1)] == -2) {
-                                            this.a[(i2 + k1) * j1 + (j2 + k1) * b1 + (k2 + k1 - 1)] = l1;
-                                        }
-
-                                        if (this.a[(i2 + k1) * j1 + (j2 + k1) * b1 + k2 + k1 + 1] == -2) {
-                                            this.a[(i2 + k1) * j1 + (j2 + k1) * b1 + k2 + k1 + 1] = l1;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                public int getTypeId(int x, int y, int z) {
+                    return world.getTypeId(x, y, z);
                 }
+            }, i, j, k, l, this.a, Block.LEAVES.id, Block.LOG.id);
+            this.a = result.scratch;
 
-                l1 = this.a[k1 * j1 + k1 * b1 + k1];
-                if (l1 >= 0) {
-                    world.setRawData(i, j, k, l & -9);
-                } else {
-                    this.g(world, i, j, k);
-                }
+            if (result.clearDecayBit) {
+                world.setRawData(i, j, k, LEAVES_DECAY_SERVICE.clearDecayBit(l));
+            } else if (result.decayNow) {
+                this.g(world, i, j, k);
             }
         }
     }
@@ -131,15 +73,16 @@ public class BlockLeaves extends BlockLeavesBase {
     }
 
     public int a(Random random) {
-        return random.nextInt(20) == 0 ? 1 : 0;
+        return LEAVES_DECAY_SERVICE.resolveSaplingDropCount(random);
     }
 
     public int a(int i, Random random) {
-        return Block.SAPLING.id;
+        return LEAVES_DECAY_SERVICE.resolveSaplingDropItemId(Block.SAPLING.id);
     }
 
     public void a(World world, EntityHuman entityhuman, int i, int j, int k, int l) {
-        if (!world.isStatic && entityhuman.G() != null && entityhuman.G().id == Item.SHEARS.id) {
+        int heldItemId = entityhuman.G() == null ? 0 : entityhuman.G().id;
+        if (LEAVES_DECAY_SERVICE.shouldUseShearHarvest(world.isStatic, heldItemId, Item.SHEARS.id)) {
             entityhuman.a(StatisticList.C[this.id], 1);
             this.a(world, i, j, k, new ItemStack(Block.LEAVES.id, 1, l & 3));
         } else {
@@ -148,15 +91,15 @@ public class BlockLeaves extends BlockLeavesBase {
     }
 
     protected int a_(int i) {
-        return i & 3;
+        return LEAVES_DECAY_SERVICE.stripVariantData(i);
     }
 
     public boolean a() {
-        return !this.b;
+        return LEAVES_DECAY_SERVICE.isOpaqueCube(this.b);
     }
 
     public int a(int i, int j) {
-        return (j & 3) == 1 ? this.textureId + 80 : this.textureId;
+        return LEAVES_DECAY_SERVICE.resolveTextureByVariantData(j, this.textureId);
     }
 
     public void b(World world, int i, int j, int k, Entity entity) {

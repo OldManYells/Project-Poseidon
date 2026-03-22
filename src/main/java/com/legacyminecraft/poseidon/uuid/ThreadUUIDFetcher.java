@@ -1,25 +1,25 @@
 package com.legacyminecraft.poseidon.uuid;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.auth.login.LoginProcessCallbacks;
 import com.legacyminecraft.poseidon.util.GetUUIDFetcher;
 import com.legacyminecraft.poseidon.util.UUIDResult;
-import com.projectposeidon.johnymuffin.LoginProcessHandler;
 import net.minecraft.server.Packet1Login;
 import org.bukkit.ChatColor;
 
 import java.util.UUID;
 
 import static com.legacyminecraft.poseidon.util.UUIDFetcher.getUUIDOf;
-import static com.projectposeidon.johnymuffin.UUIDManager.generateOfflineUUID;
+import static com.legacyminecraft.poseidon.auth.uuid.UUIDManager.generateOfflineUUID;
 
 public class ThreadUUIDFetcher extends Thread {
 
     final Packet1Login loginPacket;
     //    final NetLoginHandler netLoginHandler;
-    final LoginProcessHandler loginProcessHandler;
+    final LoginProcessCallbacks loginProcessHandler;
     final boolean useGetMethod;
 
-    public ThreadUUIDFetcher(Packet1Login packet1Login, LoginProcessHandler loginProcessHandler, boolean useGetMethod) {
+    public ThreadUUIDFetcher(Packet1Login packet1Login, LoginProcessCallbacks loginProcessHandler, boolean useGetMethod) {
 //        this.netLoginHandler = netloginhandler; // The login handler
         this.loginProcessHandler = loginProcessHandler;
         this.loginPacket = packet1Login; // The login packet
@@ -75,7 +75,12 @@ public class ThreadUUIDFetcher extends Thread {
         System.out.println("[Poseidon] Failed to fetch UUID for " + loginPacket.name + " using GET method from Mojang.");
         System.out.println("[Poseidon] Mojang's API may be offline, your internet connection may be down, or something else may be wrong.");
 
-        uuidResult.getException().printStackTrace();
+        if (uuidResult.getException() != null) {
+            uuidResult.getException().printStackTrace();
+        }
+        if (fallbackToOfflineUuid("GET request failed")) {
+            return;
+        }
         loginProcessHandler.cancelLoginProcess(ChatColor.RED + "Sorry, we can't connect to Mojang currently, please try again later");
 
     }
@@ -106,12 +111,24 @@ public class ThreadUUIDFetcher extends Thread {
             System.out.println("[Poseidon] You can do this by changing settings.uuid-fetcher.method.value to GET in the config");
 
             e.printStackTrace();
+            if (fallbackToOfflineUuid("POST request failed")) {
+                return;
+            }
             loginProcessHandler.cancelLoginProcess(ChatColor.RED + "Sorry, we can't connect to Mojang currently, please try again later");
         }
 
     }
 
+    private boolean fallbackToOfflineUuid(String reason) {
+        if (!PoseidonConfig.getInstance().getConfigBoolean("settings.uuid-fetcher.allow-graceful-uuids.value", true)) {
+            return false;
+        }
+
+        UUID offlineUUID = generateOfflineUUID(loginPacket.name);
+        System.out.println("[Poseidon] " + reason + ". Falling back to graceful offline UUID for " + loginPacket.name + " - " + offlineUUID);
+        loginProcessHandler.userUUIDReceived(offlineUUID, false);
+        return true;
+    }
+
 
 }
-
-

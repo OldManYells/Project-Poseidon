@@ -1,35 +1,48 @@
 package net.minecraft.server;
 
-import java.io.IOException;
+import com.legacyminecraft.poseidon.runtime.ConsoleInputLoopSystem;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ThreadCommandReader extends Thread {
 
+    private static final Logger LOGGER = Logger.getLogger(ThreadCommandReader.class.getName());
     final MinecraftServer server;
+    private final ConsoleInputLoopSystem consoleInputLoopSystem = ConsoleInputLoopSystem.getInstance();
+    private final ConsoleInputLoopSystem.LineReader consoleLineReader = new ConsoleInputLoopSystem.LineReader() {
+        @Override
+        public String readLine() throws java.io.IOException {
+            try {
+                if (org.bukkit.craftbukkit.Main.useJline) {
+                    return ThreadCommandReader.this.server.reader.readLine(">", null);
+                }
+                return ThreadCommandReader.this.server.reader.readLine();
+            } catch (Throwable throwable) {
+                LOGGER.log(Level.SEVERE, "Console reader failed; stopping command input loop", throwable);
+                return null;
+            }
+        }
+    };
+    private final ConsoleInputLoopSystem.RunningState runningState = new ConsoleInputLoopSystem.RunningState() {
+        @Override
+        public boolean shouldContinue() {
+            return !ThreadCommandReader.this.server.isStopped && MinecraftServer.isRunning(ThreadCommandReader.this.server);
+        }
+    };
+    private final ConsoleInputLoopSystem.CommandSink commandSink = new ConsoleInputLoopSystem.CommandSink() {
+        @Override
+        public void dispatch(String commandLine) {
+            ThreadCommandReader.this.server.issueCommand(commandLine, ThreadCommandReader.this.server);
+        }
+    };
 
     public ThreadCommandReader(MinecraftServer minecraftserver) {
         this.server = minecraftserver;
+        this.setName("Server Command Reader");
     }
 
     public void run() {
-        jline.ConsoleReader bufferedreader = this.server.reader; // CraftBukkit
-        String s = null;
-
-        try {
-            // CraftBukkit start - JLine disabling compatibility
-            while (!this.server.isStopped && MinecraftServer.isRunning(this.server)) {
-                if (org.bukkit.craftbukkit.Main.useJline) {
-                    s = bufferedreader.readLine(">", null);
-                } else {
-                    s = bufferedreader.readLine();
-                }
-                if (s != null) {
-                    this.server.issueCommand(s, this.server);
-                }
-                // CraftBukkit end
-            }
-        } catch (IOException ioexception) {
-            // CraftBukkit
-            java.util.logging.Logger.getLogger(ThreadCommandReader.class.getName()).log(java.util.logging.Level.SEVERE, null, ioexception);
-        }
+        consoleInputLoopSystem.runLoop(this.consoleLineReader, this.runningState, this.commandSink, LOGGER);
     }
 }

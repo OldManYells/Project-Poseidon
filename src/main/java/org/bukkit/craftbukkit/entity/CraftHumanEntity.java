@@ -1,6 +1,8 @@
 
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.poseidon.compat.bukkit.HumanInventoryBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.HumanPermissionBridgeBehaviour;
 import net.minecraft.server.EntityHuman;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
@@ -18,13 +20,17 @@ import java.util.Set;
 //import org.bukkit.GameMode;
 
 public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
+    private static final HumanInventoryBridgeBehaviour HUMAN_INVENTORY_BRIDGE_BEHAVIOUR =
+            HumanInventoryBridgeBehaviour.getInstance();
+    private static final HumanPermissionBridgeBehaviour HUMAN_PERMISSION_BRIDGE_BEHAVIOUR =
+            HumanPermissionBridgeBehaviour.getInstance();
     private CraftInventoryPlayer inventory;
     protected final PermissibleBase perm = new PermissibleBase(this);
     private boolean op;
 
     public CraftHumanEntity(final CraftServer server, final EntityHuman entity) {
         super(server, entity);
-        this.inventory = new CraftInventoryPlayer(entity.inventory);
+        this.inventory = HUMAN_INVENTORY_BRIDGE_BEHAVIOUR.createInventory(entity);
     }
 
     public String getName() {
@@ -39,7 +45,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     public void setHandle(final EntityHuman entity) {
         super.setHandle((EntityHuman) entity);
         this.entity = entity;
-        this.inventory = new CraftInventoryPlayer(entity.inventory);
+        this.inventory = HUMAN_INVENTORY_BRIDGE_BEHAVIOUR.createInventory(entity);
     }
 
     public PlayerInventory getInventory() {
@@ -72,52 +78,51 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     public boolean isPermissionSet(String name) {
-        return perm.isPermissionSet(name);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.isPermissionSet(perm, name);
     }
 
     public boolean isPermissionSet(Permission perm) {
-        return this.perm.isPermissionSet(perm);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.isPermissionSet(this.perm, perm);
     }
 
     public boolean hasPermission(String name) {
-        return perm.hasPermission(name);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.hasPermission(perm, name);
     }
 
     public boolean hasPermission(Permission perm) {
-        return this.perm.hasPermission(perm);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.hasPermission(this.perm, perm);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
-        return perm.addAttachment(plugin, name, value);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.addAttachment(perm, plugin, name, value);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin) {
-        return perm.addAttachment(plugin);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.addAttachment(perm, plugin);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
-        return perm.addAttachment(plugin, name, value, ticks);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.addAttachment(perm, plugin, name, value, ticks);
     }
 
     public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
-        return perm.addAttachment(plugin, ticks);
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.addAttachment(perm, plugin, ticks);
     }
 
     public void removeAttachment(PermissionAttachment attachment) {
-        perm.removeAttachment(attachment);
+        HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.removeAttachment(perm, attachment);
     }
 
     public void recalculatePermissions() {
-        perm.recalculatePermissions();
+        HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.recalculatePermissions(perm);
     }
 
     public void setOp(boolean value) {
-        this.op = value;
-        perm.recalculatePermissions();
+        this.op = HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.applyOperatorState(perm, value);
     }
 
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return perm.getEffectivePermissions();
+        return HUMAN_PERMISSION_BRIDGE_BEHAVIOUR.getEffectivePermissions(perm);
     }
 
 //    public GameMode getGameMode() {

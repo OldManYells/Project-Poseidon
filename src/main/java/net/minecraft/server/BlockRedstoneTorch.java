@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.RedstoneTorchStateBehaviour;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.ArrayList;
@@ -10,30 +11,14 @@ public class BlockRedstoneTorch extends BlockTorch {
 
     private boolean isOn = false;
     private static List b = new ArrayList();
+    private final RedstoneTorchStateBehaviour redstoneTorchStateService = RedstoneTorchStateBehaviour.getInstance();
 
     public int a(int i, int j) {
         return i == 1 ? Block.REDSTONE_WIRE.a(i, j) : super.a(i, j);
     }
 
     private boolean a(World world, int i, int j, int k, boolean flag) {
-        if (flag) {
-            b.add(new RedstoneUpdateInfo(i, j, k, world.getTime()));
-        }
-
-        int l = 0;
-
-        for (int i1 = 0; i1 < b.size(); ++i1) {
-            RedstoneUpdateInfo redstoneupdateinfo = (RedstoneUpdateInfo) b.get(i1);
-
-            if (redstoneupdateinfo.a == i && redstoneupdateinfo.b == j && redstoneupdateinfo.c == k) {
-                ++l;
-                if (l >= 8) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return redstoneTorchStateService.recordAndCheckBurnout(b, i, j, k, world.getTime(), flag, 8);
     }
 
     protected BlockRedstoneTorch(int i, int j, boolean flag) {
@@ -52,48 +37,63 @@ public class BlockRedstoneTorch extends BlockTorch {
         }
 
         if (this.isOn) {
-            world.applyPhysics(i, j - 1, k, this.id);
-            world.applyPhysics(i, j + 1, k, this.id);
-            world.applyPhysics(i - 1, j, k, this.id);
-            world.applyPhysics(i + 1, j, k, this.id);
-            world.applyPhysics(i, j, k - 1, this.id);
-            world.applyPhysics(i, j, k + 1, this.id);
+            redstoneTorchStateService.notifyAdjacentBlocks(
+                    new RedstoneTorchStateBehaviour.NeighborNotifier() {
+                        @Override
+                        public void applyPhysics(int x, int y, int z, int blockId) {
+                            world.applyPhysics(x, y, z, blockId);
+                        }
+                    },
+                    i,
+                    j,
+                    k,
+                    this.id
+            );
         }
     }
 
     public void remove(World world, int i, int j, int k) {
         if (this.isOn) {
-            world.applyPhysics(i, j - 1, k, this.id);
-            world.applyPhysics(i, j + 1, k, this.id);
-            world.applyPhysics(i - 1, j, k, this.id);
-            world.applyPhysics(i + 1, j, k, this.id);
-            world.applyPhysics(i, j, k - 1, this.id);
-            world.applyPhysics(i, j, k + 1, this.id);
+            redstoneTorchStateService.notifyAdjacentBlocks(
+                    new RedstoneTorchStateBehaviour.NeighborNotifier() {
+                        @Override
+                        public void applyPhysics(int x, int y, int z, int blockId) {
+                            world.applyPhysics(x, y, z, blockId);
+                        }
+                    },
+                    i,
+                    j,
+                    k,
+                    this.id
+            );
         }
     }
 
     public boolean a(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        if (!this.isOn) {
-            return false;
-        } else {
-            int i1 = iblockaccess.getData(i, j, k);
-
-            return i1 == 5 && l == 1 ? false : (i1 == 3 && l == 3 ? false : (i1 == 4 && l == 2 ? false : (i1 == 1 && l == 5 ? false : i1 != 2 || l != 4)));
-        }
+        int i1 = iblockaccess.getData(i, j, k);
+        return redstoneTorchStateService.canProvidePower(this.isOn, i1, l);
     }
 
     private boolean g(World world, int i, int j, int k) {
         int l = world.getData(i, j, k);
-
-        return l == 5 && world.isBlockFaceIndirectlyPowered(i, j - 1, k, 0) ? true : (l == 3 && world.isBlockFaceIndirectlyPowered(i, j, k - 1, 2) ? true : (l == 4 && world.isBlockFaceIndirectlyPowered(i, j, k + 1, 3) ? true : (l == 1 && world.isBlockFaceIndirectlyPowered(i - 1, j, k, 4) ? true : l == 2 && world.isBlockFaceIndirectlyPowered(i + 1, j, k, 5))));
+        return redstoneTorchStateService.isReceivingIndirectPower(
+                l,
+                i,
+                j,
+                k,
+                new RedstoneTorchStateBehaviour.IndirectPowerQuery() {
+                    @Override
+                    public boolean isBlockFaceIndirectlyPowered(int x, int y, int z, int face) {
+                        return world.isBlockFaceIndirectlyPowered(x, y, z, face);
+                    }
+                }
+        );
     }
 
     public void a(World world, int i, int j, int k, Random random) {
         boolean flag = this.g(world, i, j, k);
 
-        while (b.size() > 0 && world.getTime() - ((RedstoneUpdateInfo) b.get(0)).d > 100L) {
-            b.remove(0);
-        }
+        redstoneTorchStateService.purgeExpiredUpdates(b, world.getTime(), 100L);
 
         // CraftBukkit start
         org.bukkit.plugin.PluginManager manager = world.getServer().getPluginManager();

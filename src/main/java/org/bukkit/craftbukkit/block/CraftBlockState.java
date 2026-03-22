@@ -1,6 +1,8 @@
 
 package org.bukkit.craftbukkit.block;
 
+import com.legacyminecraft.poseidon.compat.bukkit.BlockStateDataBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.BlockStateUpdateBehaviour;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,6 +14,10 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.material.MaterialData;
 
 public class CraftBlockState implements BlockState {
+    private static final BlockStateDataBehaviour BLOCK_STATE_DATA_BEHAVIOUR =
+            BlockStateDataBehaviour.getInstance();
+    private static final BlockStateUpdateBehaviour BLOCK_STATE_UPDATE_BEHAVIOUR =
+            BlockStateUpdateBehaviour.getInstance();
     private final CraftWorld world;
     private final CraftChunk chunk;
     private final int x;
@@ -88,18 +94,7 @@ public class CraftBlockState implements BlockState {
      * @param data New block specific metadata
      */
     public void setData(final MaterialData data) {
-        Material mat = getType();
-
-        if ((mat == null) || (mat.getData() == null)) {
-            this.data = data;
-        } else {
-            if ((data.getClass() == mat.getData()) || (data.getClass() == MaterialData.class)) {
-                this.data = data;
-            } else {
-                throw new IllegalArgumentException("Provided data is not of type "
-                        + mat.getData().getName() + ", found " + data.getClass().getName());
-            }
-        }
+        this.data = BLOCK_STATE_DATA_BEHAVIOUR.validateData(getType(), data);
     }
 
     /**
@@ -168,30 +163,11 @@ public class CraftBlockState implements BlockState {
     }
 
     public boolean update(boolean force) {
-        Block block = getBlock();
-
-        synchronized (block) {
-            if (block.getType() != this.getType()) {
-                if (force) {
-                    block.setTypeId(this.getTypeId());
-                } else {
-                    return false;
-                }
-            }
-
-            block.setData(getRawData());
-        }
-
-        return true;
+        return BLOCK_STATE_UPDATE_BEHAVIOUR.applyUpdate(getBlock(), this.getType(), this.getTypeId(), getRawData(), force);
     }
 
     private void createData(final byte data) {
-        Material mat = Material.getMaterial(type);
-        if (mat == null || mat.getData() == null) {
-            this.data = new MaterialData(type, data);
-        } else {
-            this.data = mat.getNewData(data);
-        }
+        this.data = BLOCK_STATE_DATA_BEHAVIOUR.createData(type, data);
     }
 
     public byte getRawData() {

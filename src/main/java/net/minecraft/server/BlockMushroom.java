@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.MushroomStateBehaviour;
 import org.bukkit.event.block.BlockSpreadEvent;
 
 import java.util.Random;
 
 public class BlockMushroom extends BlockFlower {
+    private final MushroomStateBehaviour mushroomStateService = MushroomStateBehaviour.getInstance();
 
     protected BlockMushroom(int i, int j) {
         super(i, j);
@@ -15,15 +17,15 @@ public class BlockMushroom extends BlockFlower {
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (random.nextInt(100) == 0) {
-            int l = i + random.nextInt(3) - 1;
-            int i1 = j + random.nextInt(2) - random.nextInt(2);
-            int j1 = k + random.nextInt(3) - 1;
+        if (mushroomStateService.shouldAttemptSpread(random)) {
+            int l = i + mushroomStateService.resolveHorizontalOffset(random);
+            int i1 = j + mushroomStateService.resolveVerticalOffset(random);
+            int j1 = k + mushroomStateService.resolveHorizontalOffset(random);
 
             if (world.isEmpty(l, i1, j1) && this.f(world, l, i1, j1)) {
-                int k1 = i + (random.nextInt(3) - 1);
+                int k1 = i + mushroomStateService.resolveHorizontalOffset(random);
 
-                k1 = k + (random.nextInt(3) - 1);
+                k1 = k + mushroomStateService.resolveHorizontalOffset(random);
                 if (world.isEmpty(l, i1, j1) && this.f(world, l, i1, j1)) {
                     // CraftBukkit start
                     org.bukkit.World bworld = world.getWorld();
@@ -43,10 +45,16 @@ public class BlockMushroom extends BlockFlower {
     }
 
     protected boolean c(int i) {
-        return Block.o[i];
+        return mushroomStateService.canPlantOn(Block.o[i]);
     }
 
     public boolean f(World world, int i, int j, int k) {
-        return j >= 0 && j < 128 ? world.k(i, j, k) < 13 && this.c(world.getTypeId(i, j - 1, k)) : false;
+        return mushroomStateService.canStay(
+                j,
+                128,
+                world.k(i, j, k),
+                13,
+                this.c(world.getTypeId(i, j - 1, k))
+        );
     }
 }

@@ -1,10 +1,13 @@
 package net.minecraft.server;
 
-import javax.swing.*;
+import com.legacyminecraft.poseidon.runtime.gui.ServerGuiEventBehaviour;
+
+import javax.swing.JTextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 class ServerGuiCommandListener implements ActionListener {
+    private static final ServerGuiEventBehaviour SERVER_GUI_EVENT_BEHAVIOUR = ServerGuiEventBehaviour.getInstance();
 
     final JTextField a;
 
@@ -16,12 +19,6 @@ class ServerGuiCommandListener implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent actionevent) {
-        String s = this.a.getText().trim();
-
-        if (s.length() > 0) {
-            ServerGUI.a(this.b).issueCommand(s, this.b);
-        }
-
-        this.a.setText("");
+        SERVER_GUI_EVENT_BEHAVIOUR.onCommandSubmitted(this.a, ServerGUI.a(this.b), this.b);
     }
 }

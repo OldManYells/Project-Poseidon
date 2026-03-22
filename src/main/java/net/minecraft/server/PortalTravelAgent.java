@@ -1,7 +1,7 @@
 package net.minecraft.server;
 
-import org.bukkit.Bukkit;
-import org.bukkit.event.world.PortalCreateEvent;
+import com.legacyminecraft.poseidon.compat.bukkit.PortalCreateEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.world.PortalTravelSearchBehaviour;
 
 import java.util.Random;
 
@@ -9,6 +9,8 @@ import java.util.Random;
 // CraftBukkit end
 
 public class PortalTravelAgent {
+    private static final PortalCreateEventBridgeBehaviour PORTAL_CREATE_EVENT_BRIDGE_BEHAVIOUR = PortalCreateEventBridgeBehaviour.getInstance();
+    private static final PortalTravelSearchBehaviour PORTAL_TRAVEL_SEARCH_BEHAVIOUR = PortalTravelSearchBehaviour.getInstance();
 
     private Random a = new Random();
 
@@ -22,7 +24,7 @@ public class PortalTravelAgent {
     }
 
     public boolean b(World world, Entity entity) {
-        short short1 = 128;
+        int short1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.defaultSearchRadius();
         double d0 = -1.0D;
         int i = 0;
         int j = 0;
@@ -33,21 +35,19 @@ public class PortalTravelAgent {
         double d1;
 
         for (int j1 = l - short1; j1 <= l + short1; ++j1) {
-            double d2 = (double) j1 + 0.5D - entity.locX;
+            double d2 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(j1), entity.locX);
 
             for (int k1 = i1 - short1; k1 <= i1 + short1; ++k1) {
-                double d3 = (double) k1 + 0.5D - entity.locZ;
+                double d3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(k1), entity.locZ);
 
                 for (int l1 = 127; l1 >= 0; --l1) {
                     if (world.getTypeId(j1, l1, k1) == Block.PORTAL.id) {
-                        while (world.getTypeId(j1, l1 - 1, k1) == Block.PORTAL.id) {
-                            --l1;
-                        }
+                        l1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.descendToPortalBase(world, j1, l1, k1);
 
-                        d1 = (double) l1 + 0.5D - entity.locY;
-                        double d4 = d2 * d2 + d1 * d1 + d3 * d3;
+                        d1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(l1), entity.locY);
+                        double d4 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.squaredDistance(d2, d1, d3);
 
-                        if (d0 < 0.0D || d4 < d0) {
+                        if (PORTAL_TRAVEL_SEARCH_BEHAVIOUR.isBetterDistance(d0, d4)) {
                             d0 = d4;
                             i = j1;
                             j = l1;
@@ -59,25 +59,11 @@ public class PortalTravelAgent {
         }
 
         if (d0 >= 0.0D) {
-            double d5 = (double) i + 0.5D;
-            double d6 = (double) j + 0.5D;
-
-            d1 = (double) k + 0.5D;
-            if (world.getTypeId(i - 1, j, k) == Block.PORTAL.id) {
-                d5 -= 0.5D;
-            }
-
-            if (world.getTypeId(i + 1, j, k) == Block.PORTAL.id) {
-                d5 += 0.5D;
-            }
-
-            if (world.getTypeId(i, j, k - 1) == Block.PORTAL.id) {
-                d1 -= 0.5D;
-            }
-
-            if (world.getTypeId(i, j, k + 1) == Block.PORTAL.id) {
-                d1 += 0.5D;
-            }
+            double d5 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(i);
+            double d6 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(j);
+            d1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(k);
+            d5 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.adjustPortalCenterX(world, i, j, k, d5);
+            d1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.adjustPortalCenterZ(world, i, j, k, d1);
 
             entity.setPositionRotation(d5, d6, d1, entity.yaw, 0.0F);
             entity.motX = entity.motY = entity.motZ = 0.0D;
@@ -88,7 +74,7 @@ public class PortalTravelAgent {
     }
 
     public boolean c(World world, Entity entity) {
-        byte b0 = 16;
+        int b0 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.defaultCreateSearchRadius();
         double d0 = -1.0D;
         int i = MathHelper.floor(entity.locX);
         int j = MathHelper.floor(entity.locY);
@@ -116,10 +102,10 @@ public class PortalTravelAgent {
         double d4;
 
         for (i2 = i - b0; i2 <= i + b0; ++i2) {
-            d1 = (double) i2 + 0.5D - entity.locX;
+            d1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(i2), entity.locX);
 
             for (j2 = k - b0; j2 <= k + b0; ++j2) {
-                d2 = (double) j2 + 0.5D - entity.locZ;
+                d2 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(j2), entity.locZ);
 
                 label271:
                 for (l2 = 127; l2 >= 0; --l2) {
@@ -129,12 +115,8 @@ public class PortalTravelAgent {
                         }
 
                         for (k2 = l1; k2 < l1 + 4; ++k2) {
-                            j3 = k2 % 2;
-                            i3 = 1 - j3;
-                            if (k2 % 4 >= 2) {
-                                j3 = -j3;
-                                i3 = -i3;
-                            }
+                            j3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.orientationAxisX(k2);
+                            i3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.orientationAxisZ(k2);
 
                             for (l3 = 0; l3 < 3; ++l3) {
                                 for (k3 = 0; k3 < 4; ++k3) {
@@ -150,9 +132,9 @@ public class PortalTravelAgent {
                                 }
                             }
 
-                            d3 = (double) l2 + 0.5D - entity.locY;
-                            d4 = d1 * d1 + d3 * d3 + d2 * d2;
-                            if (d0 < 0.0D || d4 < d0) {
+                            d3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(l2), entity.locY);
+                            d4 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.squaredDistance(d1, d3, d2);
+                            if (PORTAL_TRAVEL_SEARCH_BEHAVIOUR.isBetterDistance(d0, d4)) {
                                 d0 = d4;
                                 l = i2;
                                 i1 = l2;
@@ -167,10 +149,10 @@ public class PortalTravelAgent {
 
         if (d0 < 0.0D) {
             for (i2 = i - b0; i2 <= i + b0; ++i2) {
-                d1 = (double) i2 + 0.5D - entity.locX;
+                d1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(i2), entity.locX);
 
                 for (j2 = k - b0; j2 <= k + b0; ++j2) {
-                    d2 = (double) j2 + 0.5D - entity.locZ;
+                    d2 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(j2), entity.locZ);
 
                     label219:
                     for (l2 = 127; l2 >= 0; --l2) {
@@ -180,8 +162,8 @@ public class PortalTravelAgent {
                             }
 
                             for (k2 = l1; k2 < l1 + 2; ++k2) {
-                                j3 = k2 % 2;
-                                i3 = 1 - j3;
+                                j3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.primaryAxisX(k2);
+                                i3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.primaryAxisZ(k2);
 
                                 for (l3 = 0; l3 < 4; ++l3) {
                                     for (k3 = -1; k3 < 4; ++k3) {
@@ -194,9 +176,9 @@ public class PortalTravelAgent {
                                     }
                                 }
 
-                                d3 = (double) l2 + 0.5D - entity.locY;
-                                d4 = d1 * d1 + d3 * d3 + d2 * d2;
-                                if (d0 < 0.0D || d4 < d0) {
+                                d3 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.axisDistance(PORTAL_TRAVEL_SEARCH_BEHAVIOUR.centeredCoordinate(l2), entity.locY);
+                                d4 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.squaredDistance(d1, d3, d2);
+                                if (PORTAL_TRAVEL_SEARCH_BEHAVIOUR.isBetterDistance(d0, d4)) {
                                     d0 = d4;
                                     l = i2;
                                     i1 = l2;
@@ -214,13 +196,8 @@ public class PortalTravelAgent {
         int j5 = i1;
 
         j2 = j1;
-        int k5 = k1 % 2;
-        int l5 = 1 - k5;
-
-        if (k1 % 4 >= 2) {
-            k5 = -k5;
-            l5 = -l5;
-        }
+        int k5 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.orientationAxisX(k1);
+        int l5 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.orientationAxisZ(k1);
 
         boolean flag;
 
@@ -230,13 +207,7 @@ public class PortalTravelAgent {
         org.bukkit.World bworld = world.getWorld();
 
         if (d0 < 0.0D) {
-            if (i1 < 70) {
-                i1 = 70;
-            }
-
-            if (i1 > 118) {
-                i1 = 118;
-            }
+            i1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.clampPortalBaseY(i1);
 
             j5 = i1;
 
@@ -263,22 +234,13 @@ public class PortalTravelAgent {
             }
         }
 
-        PortalCreateEvent event = new PortalCreateEvent(blocks, bworld);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
+        if (PORTAL_CREATE_EVENT_BRIDGE_BEHAVIOUR.shouldCancelPortalCreation(blocks, bworld)) {
             return true;
         }
         // CraftBukkit end
 
         if (d0 < 0.0D) {
-            if (i1 < 70) {
-                i1 = 70;
-            }
-
-            if (i1 > 118) {
-                i1 = 118;
-            }
+            i1 = PORTAL_TRAVEL_SEARCH_BEHAVIOUR.clampPortalBaseY(i1);
 
             j5 = i1;
 

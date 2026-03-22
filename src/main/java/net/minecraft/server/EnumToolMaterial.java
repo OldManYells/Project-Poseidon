@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.ToolMaterialBehaviour;
+
 public enum EnumToolMaterial {
 
     WOOD("WOOD", 0, 0, 59, 2.0F, 0), STONE("STONE", 1, 1, 131, 4.0F, 1), IRON("IRON", 2, 2, 250, 6.0F, 2), DIAMOND("EMERALD", 3, 3, 1561, 8.0F, 3), GOLD("GOLD", 4, 0, 32, 12.0F, 0);
+    private static final ToolMaterialBehaviour TOOL_MATERIAL_BEHAVIOUR = ToolMaterialBehaviour.getInstance();
     private final int f;
     private final int g;
     private final float h;
@@ -18,18 +21,18 @@ public enum EnumToolMaterial {
     }
 
     public int a() {
-        return this.g;
+        return TOOL_MATERIAL_BEHAVIOUR.getDurability(this.g);
     }
 
     public float b() {
-        return this.h;
+        return TOOL_MATERIAL_BEHAVIOUR.getMiningSpeed(this.h);
     }
 
     public int c() {
-        return this.i;
+        return TOOL_MATERIAL_BEHAVIOUR.getAttackDamage(this.i);
     }
 
     public int d() {
-        return this.f;
+        return TOOL_MATERIAL_BEHAVIOUR.getHarvestLevel(this.f);
     }
 }

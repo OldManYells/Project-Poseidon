@@ -1,68 +1,40 @@
 package org.bukkit.craftbukkit.scheduler;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SchedulerWorkerRegistryBehaviour;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashSet;
-import java.util.Iterator;
 
 public class CraftThreadManager {
 
+    private final SchedulerWorkerRegistryBehaviour schedulerWorkerRegistryBehaviour =
+            SchedulerWorkerRegistryBehaviour.getInstance();
     final HashSet<CraftWorker> workers = new HashSet<CraftWorker>();
 
     void executeTask(Runnable task, Plugin owner, int taskId) {
 
         CraftWorker craftWorker = new CraftWorker(this, task, owner, taskId);
-        synchronized (workers) {
-            workers.add(craftWorker);
-        }
+        schedulerWorkerRegistryBehaviour.registerWorker(workers, craftWorker);
 
     }
 
     void interruptTask(int taskId) {
-        synchronized (workers) {
-            Iterator<CraftWorker> itr = workers.iterator();
-            while (itr.hasNext()) {
-                CraftWorker craftWorker = itr.next();
-                if (craftWorker.getTaskId() == taskId) {
-                    craftWorker.interrupt();
-                }
-            }
-        }
+        schedulerWorkerRegistryBehaviour.interruptTask(workers, taskId);
     }
 
     void interruptTasks(Plugin owner) {
-        synchronized (workers) {
-            Iterator<CraftWorker> itr = workers.iterator();
-            while (itr.hasNext()) {
-                CraftWorker craftWorker = itr.next();
-                if (craftWorker.getOwner().equals(owner)) {
-                    craftWorker.interrupt();
-                }
-            }
-        }
+        schedulerWorkerRegistryBehaviour.interruptTasks(workers, owner);
     }
 
     void interruptAllTasks() {
-        synchronized (workers) {
-            Iterator<CraftWorker> itr = workers.iterator();
-            while (itr.hasNext()) {
-                CraftWorker craftWorker = itr.next();
-                craftWorker.interrupt();
-            }
-        }
+        schedulerWorkerRegistryBehaviour.interruptAllTasks(workers);
     }
 
     boolean isAlive(int taskId) {
-        synchronized (workers) {
-            Iterator<CraftWorker> itr = workers.iterator();
-            while (itr.hasNext()) {
-                CraftWorker craftWorker = itr.next();
-                if (craftWorker.getTaskId() == taskId) {
-                    return craftWorker.isAlive();
-                }
-            }
-            // didn't find it, so it must have been removed
-            return false;
-        }
+        return schedulerWorkerRegistryBehaviour.isAlive(workers, taskId);
+    }
+
+    void removeWorker(CraftWorker worker) {
+        schedulerWorkerRegistryBehaviour.removeWorker(workers, worker);
     }
 }

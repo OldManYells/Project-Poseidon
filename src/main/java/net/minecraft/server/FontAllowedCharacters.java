@@ -1,9 +1,9 @@
 package net.minecraft.server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import com.legacyminecraft.poseidon.runtime.text.AllowedCharacterSetBehaviour;
 
 public class FontAllowedCharacters {
+    private static final AllowedCharacterSetBehaviour ALLOWED_CHARACTER_SET_BEHAVIOUR = AllowedCharacterSetBehaviour.getInstance();
 
     public static final String allowedCharacters = a();
     public static final char[] b = new char[] { '/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
@@ -11,23 +11,6 @@ public class FontAllowedCharacters {
     public FontAllowedCharacters() {}
 
     private static String a() {
-        String s = "";
-
-        try {
-            BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(FontAllowedCharacters.class.getResourceAsStream("/font.txt"), "UTF-8"));
-            String s1 = "";
-
-            while ((s1 = bufferedreader.readLine()) != null) {
-                if (!s1.startsWith("#")) {
-                    s = s + s1;
-                }
-            }
-
-            bufferedreader.close();
-        } catch (Exception exception) {
-            ;
-        }
-
-        return s;
+        return ALLOWED_CHARACTER_SET_BEHAVIOUR.loadAllowedCharacters(FontAllowedCharacters.class, "/font.txt");
     }
 }

@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.path.PathReconstructionBehaviour;
+
 public class Pathfinder {
+    private static final PathReconstructionBehaviour PATH_RECONSTRUCTION_BEHAVIOUR = PathReconstructionBehaviour.getInstance();
 
     private IBlockAccess a;
     private Path b = new Path();
@@ -194,24 +197,6 @@ public class Pathfinder {
     }
 
     private PathEntity a(PathPoint pathpoint, PathPoint pathpoint1) {
-        int i = 1;
-
-        PathPoint pathpoint2;
-
-        for (pathpoint2 = pathpoint1; pathpoint2.h != null; pathpoint2 = pathpoint2.h) {
-            ++i;
-        }
-
-        PathPoint[] apathpoint = new PathPoint[i];
-
-        pathpoint2 = pathpoint1;
-        --i;
-
-        for (apathpoint[i] = pathpoint1; pathpoint2.h != null; apathpoint[i] = pathpoint2) {
-            pathpoint2 = pathpoint2.h;
-            --i;
-        }
-
-        return new PathEntity(apathpoint);
+        return PATH_RECONSTRUCTION_BEHAVIOUR.build(pathpoint, pathpoint1);
     }
 }

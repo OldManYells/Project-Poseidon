@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.FishingHookLaunchBehaviour;
+import com.legacyminecraft.poseidon.entity.FishingHookPersistenceBehaviour;
+import com.legacyminecraft.poseidon.entity.FishingHookReelBehaviour;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -11,6 +14,9 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntityFish extends Entity {
+    private static final FishingHookLaunchBehaviour FISHING_HOOK_LAUNCH_BEHAVIOUR = FishingHookLaunchBehaviour.getInstance();
+    private static final FishingHookPersistenceBehaviour FISHING_HOOK_PERSISTENCE_BEHAVIOUR = FishingHookPersistenceBehaviour.getInstance();
+    private static final FishingHookReelBehaviour FISHING_HOOK_REEL_BEHAVIOUR = FishingHookReelBehaviour.getInstance();
 
     private int d = -1;
     private int e = -1;
@@ -59,25 +65,14 @@ public class EntityFish extends Entity {
     protected void b() {}
 
     public void a(double d0, double d1, double d2, float f, float f1) {
-        float f2 = MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
+        FishingHookLaunchBehaviour.LaunchState launchState = FISHING_HOOK_LAUNCH_BEHAVIOUR.createLaunchState(d0, d1, d2, f, f1, this.random);
 
-        d0 /= (double) f2;
-        d1 /= (double) f2;
-        d2 /= (double) f2;
-        d0 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d1 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d2 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d0 *= (double) f;
-        d1 *= (double) f;
-        d2 *= (double) f;
-        this.motX = d0;
-        this.motY = d1;
-        this.motZ = d2;
-        float f3 = MathHelper.a(d0 * d0 + d2 * d2);
-
-        this.lastYaw = this.yaw = (float) (Math.atan2(d0, d2) * 180.0D / 3.1415927410125732D);
-        this.lastPitch = this.pitch = (float) (Math.atan2(d1, (double) f3) * 180.0D / 3.1415927410125732D);
-        this.i = 0;
+        this.motX = launchState.getMotX();
+        this.motY = launchState.getMotY();
+        this.motZ = launchState.getMotZ();
+        this.lastYaw = this.yaw = launchState.getYaw();
+        this.lastPitch = this.pitch = launchState.getPitch();
+        this.i = FISHING_HOOK_LAUNCH_BEHAVIOUR.resetTicksInGroundCounter();
     }
 
     public void m_() {
@@ -317,21 +312,18 @@ public class EntityFish extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.d);
-        nbttagcompound.a("yTile", (short) this.e);
-        nbttagcompound.a("zTile", (short) this.f);
-        nbttagcompound.a("inTile", (byte) this.g);
-        nbttagcompound.a("shake", (byte) this.a);
-        nbttagcompound.a("inGround", (byte) (this.h ? 1 : 0));
+        FISHING_HOOK_PERSISTENCE_BEHAVIOUR.writeToNbt(nbttagcompound, this.d, this.e, this.f, this.g, this.a, this.h);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.d = nbttagcompound.d("xTile");
-        this.e = nbttagcompound.d("yTile");
-        this.f = nbttagcompound.d("zTile");
-        this.g = nbttagcompound.c("inTile") & 255;
-        this.a = nbttagcompound.c("shake") & 255;
-        this.h = nbttagcompound.c("inGround") == 1;
+        FishingHookPersistenceBehaviour.HookPersistenceState state = FISHING_HOOK_PERSISTENCE_BEHAVIOUR.readFromNbt(nbttagcompound);
+
+        this.d = state.getBlockX();
+        this.e = state.getBlockY();
+        this.f = state.getBlockZ();
+        this.g = state.getInTileId();
+        this.a = state.getShakeTicks();
+        this.h = state.isInGround();
     }
 
     public int h() {
@@ -348,15 +340,11 @@ public class EntityFish extends Entity {
                 return 0;
             }
             // CraftBukkit end
-            double d0 = this.owner.locX - this.locX;
-            double d1 = this.owner.locY - this.locY;
-            double d2 = this.owner.locZ - this.locZ;
-            double d3 = (double) MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
-            double d4 = 0.1D;
+            FishingHookReelBehaviour.PullMotion pullMotion = FISHING_HOOK_REEL_BEHAVIOUR.computePullMotion(this.owner.locX, this.owner.locY, this.owner.locZ, this.locX, this.locY, this.locZ);
 
-            this.c.motX += d0 * d4;
-            this.c.motY += d1 * d4 + (double) MathHelper.a(d3) * 0.08D;
-            this.c.motZ += d2 * d4;
+            this.c.motX += pullMotion.getMotX();
+            this.c.motY += pullMotion.getMotY();
+            this.c.motZ += pullMotion.getMotZ();
             b0 = 3;
         } else if (this.k > 0) {
             EntityItem entityitem = new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.RAW_FISH));
@@ -370,15 +358,11 @@ public class EntityFish extends Entity {
                 return 0;
             }
             // CraftBukkit end
-            double d5 = this.owner.locX - this.locX;
-            double d6 = this.owner.locY - this.locY;
-            double d7 = this.owner.locZ - this.locZ;
-            double d8 = (double) MathHelper.a(d5 * d5 + d6 * d6 + d7 * d7);
-            double d9 = 0.1D;
+            FishingHookReelBehaviour.PullMotion pullMotion = FISHING_HOOK_REEL_BEHAVIOUR.computePullMotion(this.owner.locX, this.owner.locY, this.owner.locZ, this.locX, this.locY, this.locZ);
 
-            entityitem.motX = d5 * d9;
-            entityitem.motY = d6 * d9 + (double) MathHelper.a(d8) * 0.08D;
-            entityitem.motZ = d7 * d9;
+            entityitem.motX = pullMotion.getMotX();
+            entityitem.motY = pullMotion.getMotY();
+            entityitem.motZ = pullMotion.getMotZ();
             this.world.addEntity(entityitem);
             this.owner.a(StatisticList.B, 1);
             b0 = 1;

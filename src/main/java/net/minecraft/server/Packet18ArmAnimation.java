@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +10,7 @@ public class Packet18ArmAnimation extends Packet {
 
     public int a;
     public int b;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet18ArmAnimation() {}
 
@@ -17,13 +20,16 @@ public class Packet18ArmAnimation extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readByte();
+        PacketDataCodec.Packet18Data packetData = packetDataCodec.readPacket18(datainputstream);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getAnimation();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeByte(this.b);
+        packetDataCodec.writePacket18(
+                new PacketDataCodec.Packet18Data(this.a, this.b),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -31,6 +37,6 @@ public class Packet18ArmAnimation extends Packet {
     }
 
     public int a() {
-        return 5;
+        return packetDataCodec.packet18Length();
     }
 }

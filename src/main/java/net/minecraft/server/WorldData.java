@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.WorldDataStateBehaviour;
+
 import java.util.List;
 
 public class WorldData {
+    private static final WorldDataStateBehaviour WORLD_DATA_STATE_BEHAVIOUR = WorldDataStateBehaviour.getInstance();
 
     private long a;
     private int b;
@@ -23,25 +26,7 @@ public class WorldData {
     private int o;
 
     public WorldData(NBTTagCompound nbttagcompound) {
-        this.a = nbttagcompound.getLong("RandomSeed");
-        this.b = nbttagcompound.e("SpawnX");
-        this.c = nbttagcompound.e("SpawnY");
-        this.d = nbttagcompound.e("SpawnZ");
-        this.yaw = nbttagcompound.g("SpawnYaw"); // Poseidon
-        this.pitch = nbttagcompound.g("SpawnPitch"); // Poseidon
-        this.e = nbttagcompound.getLong("Time");
-        this.f = nbttagcompound.getLong("LastPlayed");
-        this.g = nbttagcompound.getLong("SizeOnDisk");
-        this.name = nbttagcompound.getString("LevelName");
-        this.k = nbttagcompound.e("version");
-        this.m = nbttagcompound.e("rainTime");
-        this.l = nbttagcompound.m("raining");
-        this.o = nbttagcompound.e("thunderTime");
-        this.n = nbttagcompound.m("thundering");
-        if (nbttagcompound.hasKey("Player")) {
-            this.h = nbttagcompound.k("Player");
-            this.i = this.h.e("Dimension");
-        }
+        WORLD_DATA_STATE_BEHAVIOUR.readFromTag(this, nbttagcompound);
     }
 
     public WorldData(long i, String s) {
@@ -70,49 +55,11 @@ public class WorldData {
     }
 
     public NBTTagCompound a() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-        this.a(nbttagcompound, this.h);
-        return nbttagcompound;
+        return WORLD_DATA_STATE_BEHAVIOUR.createSaveTag(this);
     }
 
     public NBTTagCompound a(List list) {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        EntityHuman entityhuman = null;
-        NBTTagCompound nbttagcompound1 = null;
-
-        if (list.size() > 0) {
-            entityhuman = (EntityHuman) list.get(0);
-        }
-
-        if (entityhuman != null) {
-            nbttagcompound1 = new NBTTagCompound();
-            entityhuman.d(nbttagcompound1);
-        }
-
-        this.a(nbttagcompound, nbttagcompound1);
-        return nbttagcompound;
-    }
-
-    private void a(NBTTagCompound nbttagcompound, NBTTagCompound nbttagcompound1) {
-        nbttagcompound.setLong("RandomSeed", this.a);
-        nbttagcompound.a("SpawnX", this.b);
-        nbttagcompound.a("SpawnY", this.c);
-        nbttagcompound.a("SpawnZ", this.d);
-        nbttagcompound.a("SpawnYaw", this.yaw); // Poseidon
-        nbttagcompound.a("SpawnPitch", this.pitch); // Poseidon
-        nbttagcompound.setLong("Time", this.e);
-        nbttagcompound.setLong("SizeOnDisk", this.g);
-        nbttagcompound.setLong("LastPlayed", System.currentTimeMillis());
-        nbttagcompound.setString("LevelName", this.name);
-        nbttagcompound.a("version", this.k);
-        nbttagcompound.a("rainTime", this.m);
-        nbttagcompound.a("raining", this.l);
-        nbttagcompound.a("thunderTime", this.o);
-        nbttagcompound.a("thundering", this.n);
-        if (nbttagcompound1 != null) {
-            nbttagcompound.a("Player", nbttagcompound1);
-        }
+        return WORLD_DATA_STATE_BEHAVIOUR.createSaveTagWithFirstPlayer(this, list);
     }
 
     public long getSeed() {
@@ -221,5 +168,24 @@ public class WorldData {
 
     public void setWeatherDuration(int i) {
         this.m = i;
+    }
+
+    public void poseidonSetSeed(long seed) {
+        this.a = seed;
+    }
+
+    public void poseidonSetLastPlayed(long lastPlayed) {
+        this.f = lastPlayed;
+    }
+
+    public void poseidonSetCachedPlayerData(NBTTagCompound playerTag) {
+        this.h = playerTag;
+        if (playerTag != null) {
+            this.i = playerTag.e("Dimension");
+        }
+    }
+
+    public NBTTagCompound poseidonGetCachedPlayerData() {
+        return this.h;
     }
 }

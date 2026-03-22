@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.DecorationPlantStateBehaviour;
+
 import java.util.Random;
 
 public class BlockLongGrass extends BlockFlower {
+    private final DecorationPlantStateBehaviour decorationPlantStateService = DecorationPlantStateBehaviour.getInstance();
 
     protected BlockLongGrass(int i, int j) {
         super(i, j);
@@ -12,10 +15,10 @@ public class BlockLongGrass extends BlockFlower {
     }
 
     public int a(int i, int j) {
-        return j == 1 ? this.textureId : (j == 2 ? this.textureId + 16 + 1 : (j == 0 ? this.textureId + 16 : this.textureId));
+        return decorationPlantStateService.longGrassTextureByData(j, this.textureId);
     }
 
     public int a(int i, Random random) {
-        return random.nextInt(8) == 0 ? Item.SEEDS.id : -1;
+        return decorationPlantStateService.longGrassDropItemId(random, Item.SEEDS.id);
     }
 }

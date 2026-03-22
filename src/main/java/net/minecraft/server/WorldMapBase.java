@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.map.WorldMapDirtyFlagBehaviour;
+
 public abstract class WorldMapBase {
+    private static final WorldMapDirtyFlagBehaviour WORLD_MAP_DIRTY_FLAG_BEHAVIOUR = WorldMapDirtyFlagBehaviour.getInstance();
 
     public final String a;
     private boolean b;
@@ -14,14 +17,14 @@ public abstract class WorldMapBase {
     public abstract void b(NBTTagCompound nbttagcompound);
 
     public void a() {
-        this.a(true);
+        this.a(WORLD_MAP_DIRTY_FLAG_BEHAVIOUR.markDirty());
     }
 
     public void a(boolean flag) {
-        this.b = flag;
+        this.b = WORLD_MAP_DIRTY_FLAG_BEHAVIOUR.setDirty(flag);
     }
 
     public boolean b() {
-        return this.b;
+        return WORLD_MAP_DIRTY_FLAG_BEHAVIOUR.isDirty(this.b);
     }
 }

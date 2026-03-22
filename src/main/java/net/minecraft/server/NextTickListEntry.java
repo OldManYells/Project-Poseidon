@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.NextTickEntryOrderingBehaviour;
+
 public class NextTickListEntry implements Comparable {
+    private static final NextTickEntryOrderingBehaviour NEXT_TICK_ENTRY_ORDERING_BEHAVIOUR = NextTickEntryOrderingBehaviour.getInstance();
 
     private static long f = 0L;
     public int a;
@@ -11,7 +14,8 @@ public class NextTickListEntry implements Comparable {
     private long g;
 
     public NextTickListEntry(int i, int j, int k, int l) {
-        this.g = (long) (f++);
+        this.g = NEXT_TICK_ENTRY_ORDERING_BEHAVIOUR.nextSequence(f);
+        f = NEXT_TICK_ENTRY_ORDERING_BEHAVIOUR.incrementCounter(f);
         this.a = i;
         this.b = j;
         this.c = k;
@@ -24,12 +28,12 @@ public class NextTickListEntry implements Comparable {
         } else {
             NextTickListEntry nextticklistentry = (NextTickListEntry) object;
 
-            return this.a == nextticklistentry.a && this.b == nextticklistentry.b && this.c == nextticklistentry.c && this.d == nextticklistentry.d;
+            return NEXT_TICK_ENTRY_ORDERING_BEHAVIOUR.matches(this.a, this.b, this.c, this.d, nextticklistentry.a, nextticklistentry.b, nextticklistentry.c, nextticklistentry.d);
         }
     }
 
     public int hashCode() {
-        return (this.a * 128 * 1024 + this.c * 128 + this.b) * 256 + this.d;
+        return NEXT_TICK_ENTRY_ORDERING_BEHAVIOUR.hash(this.a, this.b, this.c, this.d);
     }
 
     public NextTickListEntry a(long i) {
@@ -39,6 +43,6 @@ public class NextTickListEntry implements Comparable {
 
     public int compareTo(Object o) {
         NextTickListEntry nextticklistentry = (NextTickListEntry) o;
-        return this.e < nextticklistentry.e ? -1 : (this.e > nextticklistentry.e ? 1 : (this.g < nextticklistentry.g ? -1 : (this.g > nextticklistentry.g ? 1 : 0)));
+        return NEXT_TICK_ENTRY_ORDERING_BEHAVIOUR.compare(this.e, this.g, nextticklistentry.e, nextticklistentry.g);
     }
 }

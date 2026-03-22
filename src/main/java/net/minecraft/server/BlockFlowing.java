@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.block.FlowingFluidPropagationBehaviour;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.BlockFromToEvent;
 
@@ -14,6 +15,7 @@ public class BlockFlowing extends BlockFluids {
     int a = 0;
     boolean[] b = new boolean[4];
     int[] c = new int[4];
+    private static final FlowingFluidPropagationBehaviour FLOWING_FLUID_PROPAGATION_SERVICE = FlowingFluidPropagationBehaviour.getInstance();
 
     protected BlockFlowing(int i, Material material) {
         super(i, material);
@@ -21,10 +23,19 @@ public class BlockFlowing extends BlockFluids {
 
     private void i(World world, int i, int j, int k) {
         int l = world.getData(i, j, k);
+        FLOWING_FLUID_PROPAGATION_SERVICE.convertToStillBlock(new FlowingFluidPropagationBehaviour.ConvertToStillSink() {
+            public void setRawTypeIdAndData(int x, int y, int z, int typeId, int data) {
+                world.setRawTypeIdAndData(x, y, z, typeId, data);
+            }
 
-        world.setRawTypeIdAndData(i, j, k, this.id + 1, l);
-        world.b(i, j, k, i, j, k);
-        world.notify(i, j, k);
+            public void markNeighborsDirty(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+                world.b(minX, minY, minZ, maxX, maxY, maxZ);
+            }
+
+            public void notifyBlock(int x, int y, int z) {
+                world.notify(x, y, z);
+            }
+        }, i, j, k, this.id, l);
     }
 
     public void a(World world, int i, int j, int k, Random random) {
@@ -35,55 +46,39 @@ public class BlockFlowing extends BlockFluids {
         // CraftBukkit end
 
         int l = this.g(world, i, j, k);
-        byte b0 = 1;
-
-        if (this.material == Material.LAVA && !world.worldProvider.d) {
-            b0 = 2;
-        }
+        int b0 = FLOWING_FLUID_PROPAGATION_SERVICE.resolveFlowIncreaseStep(this.material == Material.LAVA, world.worldProvider.d);
 
         boolean flag = true;
         int i1;
 
         if (l > 0) {
-            byte b1 = -100;
-
-            this.a = 0;
-            int j1 = this.f(world, i - 1, j, k, b1);
-
-            j1 = this.f(world, i + 1, j, k, j1);
-            j1 = this.f(world, i, j, k - 1, j1);
-            j1 = this.f(world, i, j, k + 1, j1);
-            i1 = j1 + b0;
-            if (i1 >= 8 || j1 < 0) {
-                i1 = -1;
-            }
-
-            if (this.g(world, i, j + 1, k) >= 0) {
-                int k1 = this.g(world, i, j + 1, k);
-
-                if (k1 >= 8) {
-                    i1 = k1;
-                } else {
-                    i1 = k1 + 8;
+            FlowingFluidPropagationBehaviour.LevelComputation levelComputation = FLOWING_FLUID_PROPAGATION_SERVICE.computeNextLevel(new FlowingFluidPropagationBehaviour.LevelUpdateQuery() {
+                public int fluidLevel(int x, int y, int z) {
+                    return BlockFlowing.this.g(world, x, y, z);
                 }
-            }
 
-            if (this.a >= 2 && this.material == Material.WATER) {
-                if (world.getMaterial(i, j - 1, k).isBuildable()) {
-                    i1 = 0;
-                } else if (world.getMaterial(i, j - 1, k) == this.material && world.getData(i, j, k) == 0) {
-                    i1 = 0;
+                public boolean belowIsBuildable(int x, int y, int z) {
+                    return world.getMaterial(x, y, z).isBuildable();
                 }
-            }
+
+                public boolean belowIsSameMaterial(int x, int y, int z) {
+                    return world.getMaterial(x, y, z) == BlockFlowing.this.material;
+                }
+
+                public int currentData(int x, int y, int z) {
+                    return world.getData(x, y, z);
+                }
+            }, i, j, k, l, b0, this.material == Material.WATER);
+            this.a = levelComputation.sourceCount;
+            i1 = levelComputation.nextLevel;
 
             if (this.material == Material.LAVA && l < 8 && i1 < 8 && i1 > l && random.nextInt(4) != 0) {
                 // Poseidon start - Fix flowing lava not disappearing
                 boolean fixFlowingLava = PoseidonConfig.getInstance().getConfigBoolean("world.settings.flowing-lava-fix.enabled", true);
-                if (!fixFlowingLava) {
-                    i1 = l;
-                }
+                FlowingFluidPropagationBehaviour.LavaSlowdownResult lavaSlowdownResult = FLOWING_FLUID_PROPAGATION_SERVICE.applyLavaSlowdown(true, l, i1, 1, fixFlowingLava);
+                i1 = lavaSlowdownResult.adjustedNextLevel;
                 // Poseidon end
-                flag = false;
+                flag = lavaSlowdownResult.shouldConvertToStill;
             }
 
             if (i1 != l) {
@@ -110,22 +105,14 @@ public class BlockFlowing extends BlockFluids {
             }
 
             if (!event.isCancelled()) {
-                if (l >= 8) {
-                    world.setTypeIdAndData(i, j - 1, k, this.id, l);
-                } else {
-                    world.setTypeIdAndData(i, j - 1, k, this.id, l + 8);
-                }
+                world.setTypeIdAndData(i, j - 1, k, this.id, FLOWING_FLUID_PROPAGATION_SERVICE.resolveDownwardFlowLevel(l));
             }
             // CraftBukkit end
         } else if (l >= 0 && (l == 0 || this.k(world, i, j - 1, k))) {
             boolean[] aboolean = this.j(world, i, j, k);
 
-            i1 = l + b0;
-            if (l >= 8) {
-                i1 = 1;
-            }
-
-            if (i1 >= 8) {
+            i1 = FLOWING_FLUID_PROPAGATION_SERVICE.resolveSideFlowLevel(l, b0);
+            if (i1 < 0) {
                 return;
             }
 
@@ -168,135 +155,44 @@ public class BlockFlowing extends BlockFluids {
     }
 
     private int b(World world, int i, int j, int k, int l, int i1) {
-        int j1 = 1000;
-
-        for (int k1 = 0; k1 < 4; ++k1) {
-            if ((k1 != 0 || i1 != 1) && (k1 != 1 || i1 != 0) && (k1 != 2 || i1 != 3) && (k1 != 3 || i1 != 2)) {
-                int l1 = i;
-                int i2 = k;
-
-                if (k1 == 0) {
-                    l1 = i - 1;
-                }
-
-                if (k1 == 1) {
-                    ++l1;
-                }
-
-                if (k1 == 2) {
-                    i2 = k - 1;
-                }
-
-                if (k1 == 3) {
-                    ++i2;
-                }
-
-                if (!this.k(world, l1, j, i2) && (world.getMaterial(l1, j, i2) != this.material || world.getData(l1, j, i2) != 0)) {
-                    if (!this.k(world, l1, j - 1, i2)) {
-                        return l;
-                    }
-
-                    if (l < 4) {
-                        int j2 = this.b(world, l1, j, i2, l + 1, k1);
-
-                        if (j2 < j1) {
-                            j1 = j2;
-                        }
-                    }
-                }
+        return FLOWING_FLUID_PROPAGATION_SERVICE.computeSlopeDistance(new FlowingFluidPropagationBehaviour.SlopeQuery() {
+            public boolean isBlocked(int x, int y, int z) {
+                return BlockFlowing.this.k(world, x, y, z);
             }
-        }
 
-        return j1;
+            public boolean isSameMaterialLevelZero(int x, int y, int z) {
+                return world.getMaterial(x, y, z) == BlockFlowing.this.material && world.getData(x, y, z) == 0;
+            }
+        }, i, j, k, l, i1);
     }
 
     private boolean[] j(World world, int i, int j, int k) {
-        int l;
-        int i1;
-
-        for (l = 0; l < 4; ++l) {
-            this.c[l] = 1000;
-            i1 = i;
-            int j1 = k;
-
-            if (l == 0) {
-                i1 = i - 1;
+        return FLOWING_FLUID_PROPAGATION_SERVICE.resolveOptimalFlowDirections(new FlowingFluidPropagationBehaviour.DirectionQuery() {
+            public boolean isBlocked(int x, int y, int z) {
+                return BlockFlowing.this.k(world, x, y, z);
             }
 
-            if (l == 1) {
-                ++i1;
+            public boolean isSameMaterialLevelZero(int x, int y, int z) {
+                return world.getMaterial(x, y, z) == BlockFlowing.this.material && world.getData(x, y, z) == 0;
             }
-
-            if (l == 2) {
-                j1 = k - 1;
-            }
-
-            if (l == 3) {
-                ++j1;
-            }
-
-            if (!this.k(world, i1, j, j1) && (world.getMaterial(i1, j, j1) != this.material || world.getData(i1, j, j1) != 0)) {
-                if (!this.k(world, i1, j - 1, j1)) {
-                    this.c[l] = 0;
-                } else {
-                    this.c[l] = this.b(world, i1, j, j1, 1, l);
-                }
-            }
-        }
-
-        l = this.c[0];
-
-        for (i1 = 1; i1 < 4; ++i1) {
-            if (this.c[i1] < l) {
-                l = this.c[i1];
-            }
-        }
-
-        for (i1 = 0; i1 < 4; ++i1) {
-            this.b[i1] = this.c[i1] == l;
-        }
-
-        return this.b;
+        }, i, j, k, this.c, this.b);
     }
 
     private boolean k(World world, int i, int j, int k) {
         int l = world.getTypeId(i, j, k);
-
-        if (l != Block.WOODEN_DOOR.id && l != Block.IRON_DOOR_BLOCK.id && l != Block.SIGN_POST.id && l != Block.LADDER.id && l != Block.SUGAR_CANE_BLOCK.id) {
-            if (l == 0) {
-                return false;
-            } else {
-                Material material = Block.byId[l].material;
-
-                return material.isSolid();
-            }
-        } else {
-            return true;
-        }
+        Material material = l == 0 ? Material.AIR : Block.byId[l].material;
+        return FLOWING_FLUID_PROPAGATION_SERVICE.isBlockedType(l, material.isSolid(), Block.WOODEN_DOOR.id, Block.IRON_DOOR_BLOCK.id, Block.SIGN_POST.id, Block.LADDER.id, Block.SUGAR_CANE_BLOCK.id);
     }
 
     protected int f(World world, int i, int j, int k, int l) {
-        int i1 = this.g(world, i, j, k);
-
-        if (i1 < 0) {
-            return l;
-        } else {
-            if (i1 == 0) {
-                ++this.a;
-            }
-
-            if (i1 >= 8) {
-                i1 = 0;
-            }
-
-            return l >= 0 && i1 >= l ? l : i1;
-        }
+        FlowingFluidPropagationBehaviour.NeighborLevelUpdate update = FLOWING_FLUID_PROPAGATION_SERVICE.accumulateNeighbor(this.g(world, i, j, k), l);
+        this.a += update.sourceCountIncrement;
+        return update.minLevel;
     }
 
     private boolean l(World world, int i, int j, int k) {
         Material material = world.getMaterial(i, j, k);
-
-        return material == this.material ? false : (material == Material.LAVA ? false : !this.k(world, i, j, k));
+        return FLOWING_FLUID_PROPAGATION_SERVICE.canFlowInto(material == this.material, material == Material.LAVA, this.k(world, i, j, k));
     }
 
     public void c(World world, int i, int j, int k) {

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,18 +13,20 @@ public class Packet12PlayerLook extends Packet10Flying {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.yaw = datainputstream.readFloat();
-        this.pitch = datainputstream.readFloat();
-        super.a(datainputstream);
+        PacketDataCodec.Packet12Data packetData = PacketDataCodec.getInstance().readPacket12(datainputstream);
+        this.yaw = packetData.getYaw();
+        this.pitch = packetData.getPitch();
+        this.g = packetData.isOnGround();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeFloat(this.yaw);
-        dataoutputstream.writeFloat(this.pitch);
-        super.a(dataoutputstream);
+        PacketDataCodec.getInstance().writePacket12(
+                new PacketDataCodec.Packet12Data(this.yaw, this.pitch, this.g),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 9;
+        return packetDataCodec.packet12Length();
     }
 }

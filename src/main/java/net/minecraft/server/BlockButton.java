@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.ButtonPlacementAndPowerBehaviour;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.Random;
 
 public class BlockButton extends Block {
+    private final ButtonPlacementAndPowerBehaviour buttonPlacementAndPowerService = ButtonPlacementAndPowerBehaviour.getInstance();
 
     protected BlockButton(int i, int j) {
         super(i, j, Material.ORIENTABLE);
@@ -28,59 +30,37 @@ public class BlockButton extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k, int l) {
-        return l == 2 && world.e(i, j, k + 1) ? true : (l == 3 && world.e(i, j, k - 1) ? true : (l == 4 && world.e(i + 1, j, k) ? true : l == 5 && world.e(i - 1, j, k)));
+        return buttonPlacementAndPowerService.canPlaceOnSide(this.supportQuery(world), i, j, k, l);
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return world.e(i - 1, j, k) ? true : (world.e(i + 1, j, k) ? true : (world.e(i, j, k - 1) ? true : world.e(i, j, k + 1)));
+        return buttonPlacementAndPowerService.canPlace(this.supportQuery(world), i, j, k);
     }
 
     public void postPlace(World world, int i, int j, int k, int l) {
-        int i1 = world.getData(i, j, k);
-        int j1 = i1 & 8;
-
-        i1 &= 7;
-        if (l == 2 && world.e(i, j, k + 1)) {
-            i1 = 4;
-        } else if (l == 3 && world.e(i, j, k - 1)) {
-            i1 = 3;
-        } else if (l == 4 && world.e(i + 1, j, k)) {
-            i1 = 2;
-        } else if (l == 5 && world.e(i - 1, j, k)) {
-            i1 = 1;
-        } else {
-            i1 = this.g(world, i, j, k);
-        }
-
-        world.setData(i, j, k, i1 + j1);
+        world.setData(i, j, k, buttonPlacementAndPowerService.resolvePostPlaceData(
+                this.supportQuery(world),
+                i,
+                j,
+                k,
+                l,
+                world.getData(i, j, k)
+        ));
     }
 
     private int g(World world, int i, int j, int k) {
-        return world.e(i - 1, j, k) ? 1 : (world.e(i + 1, j, k) ? 2 : (world.e(i, j, k - 1) ? 3 : (world.e(i, j, k + 1) ? 4 : 1)));
+        return buttonPlacementAndPowerService.resolveFallbackFacing(this.supportQuery(world), i, j, k);
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
         if (this.h(world, i, j, k)) {
-            int i1 = world.getData(i, j, k) & 7;
-            boolean flag = false;
-
-            if (!world.e(i - 1, j, k) && i1 == 1) {
-                flag = true;
-            }
-
-            if (!world.e(i + 1, j, k) && i1 == 2) {
-                flag = true;
-            }
-
-            if (!world.e(i, j, k - 1) && i1 == 3) {
-                flag = true;
-            }
-
-            if (!world.e(i, j, k + 1) && i1 == 4) {
-                flag = true;
-            }
-
-            if (flag) {
+            if (buttonPlacementAndPowerService.isAttachedSupportMissing(
+                    this.supportQuery(world),
+                    i,
+                    j,
+                    k,
+                    world.getData(i, j, k)
+            )) {
                 this.g(world, i, j, k, world.getData(i, j, k));
                 world.setTypeId(i, j, k, 0);
             }
@@ -98,26 +78,17 @@ public class BlockButton extends Block {
     }
 
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
-        int l = iblockaccess.getData(i, j, k);
-        int i1 = l & 7;
-        boolean flag = (l & 8) > 0;
-        float f = 0.375F;
-        float f1 = 0.625F;
-        float f2 = 0.1875F;
-        float f3 = 0.125F;
-
-        if (flag) {
-            f3 = 0.0625F;
-        }
-
-        if (i1 == 1) {
-            this.a(0.0F, f, 0.5F - f2, f3, f1, 0.5F + f2);
-        } else if (i1 == 2) {
-            this.a(1.0F - f3, f, 0.5F - f2, 1.0F, f1, 0.5F + f2);
-        } else if (i1 == 3) {
-            this.a(0.5F - f2, f, 0.0F, 0.5F + f2, f1, f3);
-        } else if (i1 == 4) {
-            this.a(0.5F - f2, f, 1.0F - f3, 0.5F + f2, f1, 1.0F);
+        ButtonPlacementAndPowerBehaviour.Bounds bounds =
+                buttonPlacementAndPowerService.resolveBounds(iblockaccess.getData(i, j, k));
+        if (bounds != null) {
+            this.a(
+                    bounds.getMinX(),
+                    bounds.getMinY(),
+                    bounds.getMinZ(),
+                    bounds.getMaxX(),
+                    bounds.getMaxY(),
+                    bounds.getMaxZ()
+            );
         }
     }
 
@@ -127,8 +98,8 @@ public class BlockButton extends Block {
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {
         int l = world.getData(i, j, k);
-        int i1 = l & 7;
-        int j1 = 8 - (l & 8);
+        int i1 = buttonPlacementAndPowerService.extractFacing(l);
+        int j1 = buttonPlacementAndPowerService.calculateTogglePowerBit(l);
 
         if (j1 == 0) {
             return true;
@@ -146,21 +117,11 @@ public class BlockButton extends Block {
             }
             // CraftBukkit end
 
-            world.setData(i, j, k, i1 + j1);
+            world.setData(i, j, k, buttonPlacementAndPowerService.composeData(i1, j1));
             world.b(i, j, k, i, j, k);
             world.makeSound((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D, "random.click", 0.3F, 0.6F);
             world.applyPhysics(i, j, k, this.id);
-            if (i1 == 1) {
-                world.applyPhysics(i - 1, j, k, this.id);
-            } else if (i1 == 2) {
-                world.applyPhysics(i + 1, j, k, this.id);
-            } else if (i1 == 3) {
-                world.applyPhysics(i, j, k - 1, this.id);
-            } else if (i1 == 4) {
-                world.applyPhysics(i, j, k + 1, this.id);
-            } else {
-                world.applyPhysics(i, j - 1, k, this.id);
-            }
+            this.applyPhysicsToAttachedBlock(world, i, j, k, i1);
 
             world.c(i, j, k, this.id, this.c());
             return true;
@@ -172,38 +133,18 @@ public class BlockButton extends Block {
 
         if ((l & 8) > 0) {
             world.applyPhysics(i, j, k, this.id);
-            int i1 = l & 7;
-
-            if (i1 == 1) {
-                world.applyPhysics(i - 1, j, k, this.id);
-            } else if (i1 == 2) {
-                world.applyPhysics(i + 1, j, k, this.id);
-            } else if (i1 == 3) {
-                world.applyPhysics(i, j, k - 1, this.id);
-            } else if (i1 == 4) {
-                world.applyPhysics(i, j, k + 1, this.id);
-            } else {
-                world.applyPhysics(i, j - 1, k, this.id);
-            }
+            this.applyPhysicsToAttachedBlock(world, i, j, k, buttonPlacementAndPowerService.extractFacing(l));
         }
 
         super.remove(world, i, j, k);
     }
 
     public boolean a(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        return (iblockaccess.getData(i, j, k) & 8) > 0;
+        return buttonPlacementAndPowerService.isPressed(iblockaccess.getData(i, j, k));
     }
 
     public boolean d(World world, int i, int j, int k, int l) {
-        int i1 = world.getData(i, j, k);
-
-        if ((i1 & 8) == 0) {
-            return false;
-        } else {
-            int j1 = i1 & 7;
-
-            return j1 == 5 && l == 1 ? true : (j1 == 4 && l == 2 ? true : (j1 == 3 && l == 3 ? true : (j1 == 2 && l == 4 ? true : j1 == 1 && l == 5)));
-        }
+        return buttonPlacementAndPowerService.isPoweringSide(world.getData(i, j, k), l);
     }
 
     public boolean isPowerSource() {
@@ -224,25 +165,33 @@ public class BlockButton extends Block {
                 if (eventRedstone.getNewCurrent() > 0) return;
                 // CraftBukkit end
 
-                world.setData(i, j, k, l & 7);
+                int i1 = buttonPlacementAndPowerService.extractFacing(l);
+                world.setData(i, j, k, buttonPlacementAndPowerService.composeData(i1, 0));
                 world.applyPhysics(i, j, k, this.id);
-                int i1 = l & 7;
-
-                if (i1 == 1) {
-                    world.applyPhysics(i - 1, j, k, this.id);
-                } else if (i1 == 2) {
-                    world.applyPhysics(i + 1, j, k, this.id);
-                } else if (i1 == 3) {
-                    world.applyPhysics(i, j, k - 1, this.id);
-                } else if (i1 == 4) {
-                    world.applyPhysics(i, j, k + 1, this.id);
-                } else {
-                    world.applyPhysics(i, j - 1, k, this.id);
-                }
+                this.applyPhysicsToAttachedBlock(world, i, j, k, i1);
 
                 world.makeSound((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D, "random.click", 0.3F, 0.5F);
                 world.b(i, j, k, i, j, k);
             }
         }
+    }
+
+    private void applyPhysicsToAttachedBlock(World world, int x, int y, int z, int facing) {
+        ButtonPlacementAndPowerBehaviour.NeighborOffset neighborOffset =
+                buttonPlacementAndPowerService.resolveAttachmentOffset(facing);
+        world.applyPhysics(
+                x + neighborOffset.getX(),
+                y + neighborOffset.getY(),
+                z + neighborOffset.getZ(),
+                this.id
+        );
+    }
+
+    private ButtonPlacementAndPowerBehaviour.SupportQuery supportQuery(final World world) {
+        return new ButtonPlacementAndPowerBehaviour.SupportQuery() {
+            public boolean isBlockSolid(int x, int y, int z) {
+                return world.e(x, y, z);
+            }
+        };
     }
 }

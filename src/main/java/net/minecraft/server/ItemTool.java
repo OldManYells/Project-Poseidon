@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.ToolItemCombatAndMiningBehaviour;
+
 public class ItemTool extends Item {
+    private static final ToolItemCombatAndMiningBehaviour TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR = ToolItemCombatAndMiningBehaviour.getInstance();
 
     private Block[] bk;
     private float bl = 4.0F;
@@ -14,30 +17,22 @@ public class ItemTool extends Item {
         this.maxStackSize = 1;
         this.d(enumtoolmaterial.a());
         this.bl = enumtoolmaterial.b();
-        this.bm = j + enumtoolmaterial.c();
+        this.bm = TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.resolveToolAttackDamage(j, enumtoolmaterial);
     }
 
     public float a(ItemStack itemstack, Block block) {
-        for (int i = 0; i < this.bk.length; ++i) {
-            if (this.bk[i] == block) {
-                return this.bl;
-            }
-        }
-
-        return 1.0F;
+        return TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.resolveDestroySpeed(this.bk, this.bl, block);
     }
 
     public boolean a(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
-        itemstack.damage(2, entityliving1);
-        return true;
+        return TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.damageOnEntityHit(itemstack, entityliving1, 2);
     }
 
     public boolean a(ItemStack itemstack, int i, int j, int k, int l, EntityLiving entityliving) {
-        itemstack.damage(1, entityliving);
-        return true;
+        return TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.damageOnBlockBreak(itemstack, entityliving, 1);
     }
 
     public int a(Entity entity) {
-        return this.bm;
+        return TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.resolveAttackDamageAgainstEntity(this.bm, entity);
     }
 }

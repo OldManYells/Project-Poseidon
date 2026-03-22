@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.FoodItemConsumptionBehaviour;
+
 public class ItemFood extends Item {
+    private static final FoodItemConsumptionBehaviour FOOD_ITEM_CONSUMPTION_BEHAVIOUR = FoodItemConsumptionBehaviour.getInstance();
 
     private int a;
     private boolean bk;
@@ -13,9 +16,7 @@ public class ItemFood extends Item {
     }
 
     public ItemStack a(ItemStack itemstack, World world, EntityHuman entityhuman) {
-        --itemstack.count;
-        entityhuman.b(this.a);
-        return itemstack;
+        return FOOD_ITEM_CONSUMPTION_BEHAVIOUR.consume(itemstack, world, entityhuman, this.a);
     }
 
     public int k() {

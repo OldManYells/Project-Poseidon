@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public interface IChunkProvider {
+import com.legacyminecraft.poseidon.world.chunk.ChunkProviderContract;
+
+public interface IChunkProvider extends ChunkProviderContract {
 
     boolean isChunkLoaded(int i, int j);
 
@@ -15,4 +17,8 @@ public interface IChunkProvider {
     boolean unloadChunks();
 
     boolean canSave();
+
+    default void populate(IChunkProvider provider, int chunkX, int chunkZ) {
+        this.getChunkAt(provider, chunkX, chunkZ);
+    }
 }

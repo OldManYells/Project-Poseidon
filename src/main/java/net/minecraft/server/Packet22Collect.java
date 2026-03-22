@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +10,7 @@ public class Packet22Collect extends Packet {
 
     public int a;
     public int b;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet22Collect() {}
 
@@ -17,13 +20,13 @@ public class Packet22Collect extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readInt();
+        PacketDataCodec.Packet22Data packetData = packetDataCodec.readPacket22(datainputstream);
+        this.a = packetData.getCollectedEntityId();
+        this.b = packetData.getCollectorEntityId();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeInt(this.b);
+        packetDataCodec.writePacket22(new PacketDataCodec.Packet22Data(this.a, this.b), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -31,6 +34,6 @@ public class Packet22Collect extends Packet {
     }
 
     public int a() {
-        return 8;
+        return packetDataCodec.packet22Length();
     }
 }

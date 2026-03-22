@@ -1,13 +1,9 @@
 package net.minecraft.server;
 
-// CraftBukkit start
-import org.bukkit.Location;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-// CraftBukkit end
+import com.legacyminecraft.poseidon.entity.CowInteractionBehaviour;
 
 public class EntityCow extends EntityAnimal {
+    private static final CowInteractionBehaviour COW_INTERACTION_BEHAVIOUR = CowInteractionBehaviour.getInstance();
 
     public EntityCow(World world) {
         super(world);
@@ -24,47 +20,26 @@ public class EntityCow extends EntityAnimal {
     }
 
     protected String g() {
-        return "mob.cow";
+        return COW_INTERACTION_BEHAVIOUR.getAmbientSound();
     }
 
     protected String h() {
-        return "mob.cowhurt";
+        return COW_INTERACTION_BEHAVIOUR.getHurtSound();
     }
 
     protected String i() {
-        return "mob.cowhurt";
+        return COW_INTERACTION_BEHAVIOUR.getDeathSound();
     }
 
     protected float k() {
-        return 0.4F;
+        return COW_INTERACTION_BEHAVIOUR.getSoundVolume();
     }
 
     protected int j() {
-        return Item.LEATHER.id;
+        return COW_INTERACTION_BEHAVIOUR.getDropItemId();
     }
 
     public boolean a(EntityHuman entityhuman) {
-        ItemStack itemstack = entityhuman.inventory.getItemInHand();
-
-        if (itemstack != null && itemstack.id == Item.BUCKET.id) {
-            // CraftBukkit start - got milk?
-            Location loc = this.getBukkitEntity().getLocation();
-            PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), -1, itemstack, Item.MILK_BUCKET);
-
-            if (event.isCancelled()) {
-                return false;
-            }
-
-            CraftItemStack itemInHand = (CraftItemStack) event.getItemStack();
-            byte data = itemInHand.getData() == null ? (byte) 0 : itemInHand.getData().getData();
-            itemstack = new ItemStack(itemInHand.getTypeId(), itemInHand.getAmount(), data);
-
-            entityhuman.inventory.setItem(entityhuman.inventory.itemInHandIndex, itemstack);
-            // CraftBukkit end
-
-            return true;
-        } else {
-            return false;
-        }
+        return COW_INTERACTION_BEHAVIOUR.tryFillBucket(this, entityhuman, entityhuman.inventory.getItemInHand());
     }
 }

@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.FarmlandStateBehaviour;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.entity.EntityInteractEvent;
 
@@ -9,6 +10,7 @@ import java.util.Random;
 // CraftBukkit end
 
 public class BlockSoil extends Block {
+    private final FarmlandStateBehaviour farmlandStateService = FarmlandStateBehaviour.getInstance();
 
     protected BlockSoil(int i) {
         super(i, Material.EARTH);
@@ -19,7 +21,7 @@ public class BlockSoil extends Block {
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
-        return AxisAlignedBB.b((double) (i + 0), (double) (j + 0), (double) (k + 0), (double) (i + 1), (double) (j + 1), (double) (k + 1));
+        return farmlandStateService.resolveCollisionBox(i, j, k);
     }
 
     public boolean a() {
@@ -31,27 +33,27 @@ public class BlockSoil extends Block {
     }
 
     public int a(int i, int j) {
-        return i == 1 && j > 0 ? this.textureId - 1 : (i == 1 ? this.textureId : 2);
+        return farmlandStateService.resolveTextureBySideAndMoisture(i, j, this.textureId, 2);
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (random.nextInt(5) == 0) {
-            if (!this.h(world, i, j, k) && !world.s(i, j + 1, k)) {
+        if (farmlandStateService.shouldProcessMoistureTick(random)) {
+            if (farmlandStateService.shouldDecayWithoutWaterAndRain(this.h(world, i, j, k), world.s(i, j + 1, k))) {
                 int l = world.getData(i, j, k);
 
                 if (l > 0) {
-                    world.setData(i, j, k, l - 1);
-                } else if (!this.g(world, i, j, k)) {
+                    world.setData(i, j, k, farmlandStateService.resolveNextMoisture(l));
+                } else if (farmlandStateService.shouldTurnToDirtWhenDry(l, this.g(world, i, j, k))) {
                     world.setTypeId(i, j, k, Block.DIRT.id);
                 }
             } else {
-                world.setData(i, j, k, 7);
+                world.setData(i, j, k, farmlandStateService.hydratedMoisture());
             }
         }
     }
 
     public void b(World world, int i, int j, int k, Entity entity) {
-        if (world.random.nextInt(4) == 0) {
+        if (farmlandStateService.shouldTrampleToDirt(world.random)) {
             // CraftBukkit start - Interact Soil
             org.bukkit.event.Cancellable cancellable;
             if (entity instanceof EntityHuman) {
@@ -71,38 +73,26 @@ public class BlockSoil extends Block {
     }
 
     private boolean g(World world, int i, int j, int k) {
-        byte b0 = 0;
-
-        for (int l = i - b0; l <= i + b0; ++l) {
-            for (int i1 = k - b0; i1 <= k + b0; ++i1) {
-                if (world.getTypeId(l, j + 1, i1) == Block.CROPS.id) {
-                    return true;
-                }
+        return farmlandStateService.hasCropsAbove(new FarmlandStateBehaviour.TypeQuery() {
+            public int getTypeId(int x, int y, int z) {
+                return world.getTypeId(x, y, z);
             }
-        }
-
-        return false;
+        }, i, j, k, Block.CROPS.id);
     }
 
     private boolean h(World world, int i, int j, int k) {
-        for (int l = i - 4; l <= i + 4; ++l) {
-            for (int i1 = j; i1 <= j + 1; ++i1) {
-                for (int j1 = k - 4; j1 <= k + 4; ++j1) {
-                    if (world.getMaterial(l, i1, j1) == Material.WATER) {
-                        return true;
-                    }
-                }
+        return farmlandStateService.hasNearbyWater(new FarmlandStateBehaviour.MaterialQuery() {
+            public Material getMaterial(int x, int y, int z) {
+                return world.getMaterial(x, y, z);
             }
-        }
-
-        return false;
+        }, i, j, k);
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
         super.doPhysics(world, i, j, k, l);
         Material material = world.getMaterial(i, j + 1, k);
 
-        if (material.isBuildable()) {
+        if (farmlandStateService.shouldTurnToDirtForBlockAbove(material.isBuildable())) {
             world.setTypeId(i, j, k, Block.DIRT.id);
         }
     }

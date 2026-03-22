@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.RedstoneWireStateBehaviour;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ public class BlockRedstoneWire extends Block {
 
     private boolean a = true;
     private Set b = new HashSet();
+    private static final RedstoneWireStateBehaviour REDSTONE_WIRE_STATE_SERVICE = RedstoneWireStateBehaviour.getInstance();
 
     public BlockRedstoneWire(int i, int j) {
         super(i, j, Material.ORIENTABLE);
@@ -34,7 +36,7 @@ public class BlockRedstoneWire extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return world.e(i, j - 1, k);
+        return REDSTONE_WIRE_STATE_SERVICE.canPlace(world.e(i, j - 1, k));
     }
 
     private void g(World world, int i, int j, int k) {
@@ -52,57 +54,18 @@ public class BlockRedstoneWire extends Block {
 
     private void a(World world, int i, int j, int k, int l, int i1, int j1) {
         int k1 = world.getData(i, j, k);
-        int l1 = 0;
-
         this.a = false;
         boolean flag = world.isBlockIndirectlyPowered(i, j, k);
-
         this.a = true;
-        int i2;
-        int j2;
-        int k2;
-
-        if (flag) {
-            l1 = 15;
-        } else {
-            for (i2 = 0; i2 < 4; ++i2) {
-                j2 = i;
-                k2 = k;
-                if (i2 == 0) {
-                    j2 = i - 1;
-                }
-
-                if (i2 == 1) {
-                    ++j2;
-                }
-
-                if (i2 == 2) {
-                    k2 = k - 1;
-                }
-
-                if (i2 == 3) {
-                    ++k2;
-                }
-
-                if (j2 != l || j != i1 || k2 != j1) {
-                    l1 = this.getPower(world, j2, j, k2, l1);
-                }
-
-                if (world.e(j2, j, k2) && !world.e(i, j + 1, k)) {
-                    if (j2 != l || j + 1 != i1 || k2 != j1) {
-                        l1 = this.getPower(world, j2, j + 1, k2, l1);
-                    }
-                } else if (!world.e(j2, j, k2) && (j2 != l || j - 1 != i1 || k2 != j1)) {
-                    l1 = this.getPower(world, j2, j - 1, k2, l1);
-                }
+        int l1 = REDSTONE_WIRE_STATE_SERVICE.computeTargetPower(new RedstoneWireStateBehaviour.PowerComputationQuery() {
+            public int getPowerAt(int x, int y, int z, int currentMax) {
+                return BlockRedstoneWire.this.getPower(world, x, y, z, currentMax);
             }
 
-            if (l1 > 0) {
-                --l1;
-            } else {
-                l1 = 0;
+            public boolean isSolidTop(int x, int y, int z) {
+                return world.e(x, y, z);
             }
-        }
+        }, i, j, k, l, i1, j1, flag);
 
         // CraftBukkit start
         if (k1 != l1) {
@@ -119,75 +82,41 @@ public class BlockRedstoneWire extends Block {
             world.b(i, j, k, i, j, k);
             world.suppressPhysics = false;
 
-            for (i2 = 0; i2 < 4; ++i2) {
-                j2 = i;
-                k2 = k;
-                int l2 = j - 1;
-
-                if (i2 == 0) {
-                    j2 = i - 1;
+            REDSTONE_WIRE_STATE_SERVICE.forEachPropagationTarget(new RedstoneWireStateBehaviour.PropagationQuery() {
+                public int getPowerAt(int x, int y, int z, int currentMax) {
+                    return BlockRedstoneWire.this.getPower(world, x, y, z, currentMax);
                 }
 
-                if (i2 == 1) {
-                    ++j2;
+                public int currentPower(int x, int y, int z) {
+                    return world.getData(x, y, z);
                 }
 
-                if (i2 == 2) {
-                    k2 = k - 1;
+                public boolean isSolidTop(int x, int y, int z) {
+                    return world.e(x, y, z);
                 }
-
-                if (i2 == 3) {
-                    ++k2;
+            }, i, j, k, new RedstoneWireStateBehaviour.PositionConsumer() {
+                public void accept(int x, int y, int z) {
+                    BlockRedstoneWire.this.a(world, x, y, z, i, j, k);
                 }
-
-                if (world.e(j2, j, k2)) {
-                    l2 += 2;
-                }
-
-                boolean flag1 = false;
-                int i3 = this.getPower(world, j2, j, k2, -1);
-
-                l1 = world.getData(i, j, k);
-                if (l1 > 0) {
-                    --l1;
-                }
-
-                if (i3 >= 0 && i3 != l1) {
-                    this.a(world, j2, j, k2, i, j, k);
-                }
-
-                i3 = this.getPower(world, j2, l2, k2, -1);
-                l1 = world.getData(i, j, k);
-                if (l1 > 0) {
-                    --l1;
-                }
-
-                if (i3 >= 0 && i3 != l1) {
-                    this.a(world, j2, l2, k2, i, j, k);
-                }
-            }
+            });
 
             if (k1 == 0 || l1 == 0) {
-                this.b.add(new ChunkPosition(i, j, k));
-                this.b.add(new ChunkPosition(i - 1, j, k));
-                this.b.add(new ChunkPosition(i + 1, j, k));
-                this.b.add(new ChunkPosition(i, j - 1, k));
-                this.b.add(new ChunkPosition(i, j + 1, k));
-                this.b.add(new ChunkPosition(i, j, k - 1));
-                this.b.add(new ChunkPosition(i, j, k + 1));
+                REDSTONE_WIRE_STATE_SERVICE.forEachTransitionPhysicsPosition(i, j, k, new RedstoneWireStateBehaviour.PositionConsumer() {
+                    public void accept(int x, int y, int z) {
+                        BlockRedstoneWire.this.b.add(new ChunkPosition(x, y, z));
+                    }
+                });
             }
         }
     }
 
     private void h(World world, int i, int j, int k) {
         if (world.getTypeId(i, j, k) == this.id) {
-            world.applyPhysics(i, j, k, this.id);
-            world.applyPhysics(i - 1, j, k, this.id);
-            world.applyPhysics(i + 1, j, k, this.id);
-            world.applyPhysics(i, j, k - 1, this.id);
-            world.applyPhysics(i, j, k + 1, this.id);
-            world.applyPhysics(i, j - 1, k, this.id);
-            world.applyPhysics(i, j + 1, k, this.id);
+            REDSTONE_WIRE_STATE_SERVICE.forEachTransitionPhysicsPosition(i, j, k, new RedstoneWireStateBehaviour.PositionConsumer() {
+                public void accept(int x, int y, int z) {
+                    world.applyPhysics(x, y, z, BlockRedstoneWire.this.id);
+                }
+            });
         }
     }
 
@@ -197,33 +126,15 @@ public class BlockRedstoneWire extends Block {
             this.g(world, i, j, k);
             world.applyPhysics(i, j + 1, k, this.id);
             world.applyPhysics(i, j - 1, k, this.id);
-            this.h(world, i - 1, j, k);
-            this.h(world, i + 1, j, k);
-            this.h(world, i, j, k - 1);
-            this.h(world, i, j, k + 1);
-            if (world.e(i - 1, j, k)) {
-                this.h(world, i - 1, j + 1, k);
-            } else {
-                this.h(world, i - 1, j - 1, k);
-            }
-
-            if (world.e(i + 1, j, k)) {
-                this.h(world, i + 1, j + 1, k);
-            } else {
-                this.h(world, i + 1, j - 1, k);
-            }
-
-            if (world.e(i, j, k - 1)) {
-                this.h(world, i, j + 1, k - 1);
-            } else {
-                this.h(world, i, j - 1, k - 1);
-            }
-
-            if (world.e(i, j, k + 1)) {
-                this.h(world, i, j + 1, k + 1);
-            } else {
-                this.h(world, i, j - 1, k + 1);
-            }
+            REDSTONE_WIRE_STATE_SERVICE.forEachExtendedNeighborPosition(new RedstoneWireStateBehaviour.SolidQuery() {
+                public boolean isSolidTop(int x, int y, int z) {
+                    return world.e(x, y, z);
+                }
+            }, i, j, k, new RedstoneWireStateBehaviour.PositionConsumer() {
+                public void accept(int x, int y, int z) {
+                    BlockRedstoneWire.this.h(world, x, y, z);
+                }
+            });
         }
     }
 
@@ -233,33 +144,15 @@ public class BlockRedstoneWire extends Block {
             world.applyPhysics(i, j + 1, k, this.id);
             world.applyPhysics(i, j - 1, k, this.id);
             this.g(world, i, j, k);
-            this.h(world, i - 1, j, k);
-            this.h(world, i + 1, j, k);
-            this.h(world, i, j, k - 1);
-            this.h(world, i, j, k + 1);
-            if (world.e(i - 1, j, k)) {
-                this.h(world, i - 1, j + 1, k);
-            } else {
-                this.h(world, i - 1, j - 1, k);
-            }
-
-            if (world.e(i + 1, j, k)) {
-                this.h(world, i + 1, j + 1, k);
-            } else {
-                this.h(world, i + 1, j - 1, k);
-            }
-
-            if (world.e(i, j, k - 1)) {
-                this.h(world, i, j + 1, k - 1);
-            } else {
-                this.h(world, i, j - 1, k - 1);
-            }
-
-            if (world.e(i, j, k + 1)) {
-                this.h(world, i, j + 1, k + 1);
-            } else {
-                this.h(world, i, j - 1, k + 1);
-            }
+            REDSTONE_WIRE_STATE_SERVICE.forEachExtendedNeighborPosition(new RedstoneWireStateBehaviour.SolidQuery() {
+                public boolean isSolidTop(int x, int y, int z) {
+                    return world.e(x, y, z);
+                }
+            }, i, j, k, new RedstoneWireStateBehaviour.PositionConsumer() {
+                public void accept(int x, int y, int z) {
+                    BlockRedstoneWire.this.h(world, x, y, z);
+                }
+            });
         }
     }
 
@@ -277,7 +170,7 @@ public class BlockRedstoneWire extends Block {
     public void doPhysics(World world, int i, int j, int k, int l) {
         if (!world.isStatic) {
             int i1 = world.getData(i, j, k);
-            boolean flag = this.canPlace(world, i, j, k);
+            boolean flag = REDSTONE_WIRE_STATE_SERVICE.canPlace(world.e(i, j - 1, k));
 
             if (!flag) {
                 this.g(world, i, j, k, i1);
@@ -338,20 +231,18 @@ public class BlockRedstoneWire extends Block {
     }
 
     public static boolean c(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        int i1 = iblockaccess.getTypeId(i, j, k);
+        return REDSTONE_WIRE_STATE_SERVICE.isWireOrPowerSourceConnection(new RedstoneWireStateBehaviour.StaticConnectionQuery() {
+            public int typeIdAt(int x, int y, int z) {
+                return iblockaccess.getTypeId(x, y, z);
+            }
 
-        if (i1 == Block.REDSTONE_WIRE.id) {
-            return true;
-        } else if (i1 == 0) {
-            return false;
-        } else if (Block.byId[i1].isPowerSource()) {
-            return true;
-        } else if (i1 != Block.DIODE_OFF.id && i1 != Block.DIODE_ON.id) {
-            return false;
-        } else {
-            int j1 = iblockaccess.getData(i, j, k);
+            public int dataAt(int x, int y, int z) {
+                return iblockaccess.getData(x, y, z);
+            }
 
-            return l == BedBlockTextures.b[j1 & 3];
-        }
+            public boolean isPowerSource(int typeId) {
+                return Block.byId[typeId].isPowerSource();
+            }
+        }, i, j, k, l, Block.REDSTONE_WIRE.id, Block.DIODE_OFF.id, Block.DIODE_ON.id, BedBlockTextures.b);
     }
 }

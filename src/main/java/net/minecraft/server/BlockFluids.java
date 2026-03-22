@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.FluidBlockStateBehaviour;
+
 import java.util.Random;
 
 public abstract class BlockFluids extends Block {
+    private static final FluidBlockStateBehaviour FLUID_BLOCK_STATE_SERVICE = FluidBlockStateBehaviour.getInstance();
 
     protected BlockFluids(int i, Material material) {
         super(i, (material == Material.LAVA ? 14 : 12) * 16 + 13, material);
@@ -14,53 +17,36 @@ public abstract class BlockFluids extends Block {
     }
 
     public static float c(int i) {
-        if (i >= 8) {
-            i = 0;
-        }
-
-        float f = (float) (i + 1) / 9.0F;
-
-        return f;
+        return FLUID_BLOCK_STATE_SERVICE.normalizedFluidHeight(i);
     }
 
     public int a(int i) {
-        return i != 0 && i != 1 ? this.textureId + 1 : this.textureId;
+        return FLUID_BLOCK_STATE_SERVICE.resolveTextureBySide(i, this.textureId);
     }
 
     protected int g(World world, int i, int j, int k) {
-        return world.getMaterial(i, j, k) != this.material ? -1 : world.getData(i, j, k);
+        return FLUID_BLOCK_STATE_SERVICE.resolveRawFlowData(world.getMaterial(i, j, k) == this.material, world.getData(i, j, k));
     }
 
     protected int b(IBlockAccess iblockaccess, int i, int j, int k) {
-        if (iblockaccess.getMaterial(i, j, k) != this.material) {
-            return -1;
-        } else {
-            int l = iblockaccess.getData(i, j, k);
-
-            if (l >= 8) {
-                l = 0;
-            }
-
-            return l;
-        }
+        return FLUID_BLOCK_STATE_SERVICE.resolveFlowData(iblockaccess.getMaterial(i, j, k) == this.material, iblockaccess.getData(i, j, k));
     }
 
     public boolean b() {
-        return false;
+        return FLUID_BLOCK_STATE_SERVICE.isNormalCube();
     }
 
     public boolean a() {
-        return false;
+        return FLUID_BLOCK_STATE_SERVICE.isOpaqueCube();
     }
 
     public boolean a(int i, boolean flag) {
-        return flag && i == 0;
+        return FLUID_BLOCK_STATE_SERVICE.canCollideCheck(i, flag);
     }
 
     public boolean b(IBlockAccess iblockaccess, int i, int j, int k, int l) {
         Material material = iblockaccess.getMaterial(i, j, k);
-
-        return material == this.material ? false : (material == Material.ICE ? false : (l == 1 ? true : super.b(iblockaccess, i, j, k, l)));
+        return FLUID_BLOCK_STATE_SERVICE.shouldRenderSide(material == this.material, material == Material.ICE, l, super.b(iblockaccess, i, j, k, l));
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
@@ -68,96 +54,32 @@ public abstract class BlockFluids extends Block {
     }
 
     public int a(int i, Random random) {
-        return 0;
+        return FLUID_BLOCK_STATE_SERVICE.resolveDroppedItemId();
     }
 
     public int a(Random random) {
-        return 0;
+        return FLUID_BLOCK_STATE_SERVICE.resolveDroppedCount();
     }
 
     private Vec3D c(IBlockAccess iblockaccess, int i, int j, int k) {
-        Vec3D vec3d = Vec3D.create(0.0D, 0.0D, 0.0D);
-        int l = this.b(iblockaccess, i, j, k);
-
-        for (int i1 = 0; i1 < 4; ++i1) {
-            int j1 = i;
-            int k1 = k;
-
-            if (i1 == 0) {
-                j1 = i - 1;
+        FluidBlockStateBehaviour.FlowVector flow = FLUID_BLOCK_STATE_SERVICE.computeFlowVector(new FluidBlockStateBehaviour.FlowQuery() {
+            public int flowDataAt(int x, int y, int z) {
+                return BlockFluids.this.b(iblockaccess, x, y, z);
             }
 
-            if (i1 == 1) {
-                k1 = k - 1;
+            public boolean isSolidMaterial(int x, int y, int z) {
+                return iblockaccess.getMaterial(x, y, z).isSolid();
             }
 
-            if (i1 == 2) {
-                ++j1;
+            public int blockDataAt(int x, int y, int z) {
+                return iblockaccess.getData(x, y, z);
             }
 
-            if (i1 == 3) {
-                ++k1;
+            public boolean canFlowOutside(int x, int y, int z, int side) {
+                return BlockFluids.this.b(iblockaccess, x, y, z, side);
             }
-
-            int l1 = this.b(iblockaccess, j1, j, k1);
-            int i2;
-
-            if (l1 < 0) {
-                if (!iblockaccess.getMaterial(j1, j, k1).isSolid()) {
-                    l1 = this.b(iblockaccess, j1, j - 1, k1);
-                    if (l1 >= 0) {
-                        i2 = l1 - (l - 8);
-                        vec3d = vec3d.add((double) ((j1 - i) * i2), (double) ((j - j) * i2), (double) ((k1 - k) * i2));
-                    }
-                }
-            } else if (l1 >= 0) {
-                i2 = l1 - l;
-                vec3d = vec3d.add((double) ((j1 - i) * i2), (double) ((j - j) * i2), (double) ((k1 - k) * i2));
-            }
-        }
-
-        if (iblockaccess.getData(i, j, k) >= 8) {
-            boolean flag = false;
-
-            if (flag || this.b(iblockaccess, i, j, k - 1, 2)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i, j, k + 1, 3)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i - 1, j, k, 4)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i + 1, j, k, 5)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i, j + 1, k - 1, 2)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i, j + 1, k + 1, 3)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i - 1, j + 1, k, 4)) {
-                flag = true;
-            }
-
-            if (flag || this.b(iblockaccess, i + 1, j + 1, k, 5)) {
-                flag = true;
-            }
-
-            if (flag) {
-                vec3d = vec3d.b().add(0.0D, -6.0D, 0.0D);
-            }
-        }
-
-        vec3d = vec3d.b();
-        return vec3d;
+        }, i, j, k);
+        return Vec3D.create(flow.x, flow.y, flow.z);
     }
 
     public void a(World world, int i, int j, int k, Entity entity, Vec3D vec3d) {
@@ -169,7 +91,7 @@ public abstract class BlockFluids extends Block {
     }
 
     public int c() {
-        return this.material == Material.WATER ? 5 : (this.material == Material.LAVA ? 30 : 0);
+        return FLUID_BLOCK_STATE_SERVICE.resolveTickDelay(this.material == Material.WATER, this.material == Material.LAVA);
     }
 
     public void a(World world, int i, int j, int k, Random random) {
@@ -185,49 +107,28 @@ public abstract class BlockFluids extends Block {
     }
 
     private void i(World world, int i, int j, int k) {
-        if (world.getTypeId(i, j, k) == this.id) {
-            if (this.material == Material.LAVA) {
-                boolean flag = false;
-
-                if (flag || world.getMaterial(i, j, k - 1) == Material.WATER) {
-                    flag = true;
+        if (FLUID_BLOCK_STATE_SERVICE.shouldProcessLavaMix(world.getTypeId(i, j, k), this.id, this.material == Material.LAVA)) {
+            boolean hasWaterNeighbor = FLUID_BLOCK_STATE_SERVICE.hasWaterNeighbor(new FluidBlockStateBehaviour.MaterialQuery() {
+                public boolean isWater(int x, int y, int z) {
+                    return world.getMaterial(x, y, z) == Material.WATER;
                 }
+            }, i, j, k);
 
-                if (flag || world.getMaterial(i, j, k + 1) == Material.WATER) {
-                    flag = true;
+            if (hasWaterNeighbor) {
+                int resultBlockId = FLUID_BLOCK_STATE_SERVICE.resolveLavaMixResult(world.getData(i, j, k), Block.OBSIDIAN.id, Block.COBBLESTONE.id);
+                if (resultBlockId > 0) {
+                    world.setTypeId(i, j, k, resultBlockId);
                 }
-
-                if (flag || world.getMaterial(i - 1, j, k) == Material.WATER) {
-                    flag = true;
-                }
-
-                if (flag || world.getMaterial(i + 1, j, k) == Material.WATER) {
-                    flag = true;
-                }
-
-                if (flag || world.getMaterial(i, j + 1, k) == Material.WATER) {
-                    flag = true;
-                }
-
-                if (flag) {
-                    int l = world.getData(i, j, k);
-
-                    if (l == 0) {
-                        world.setTypeId(i, j, k, Block.OBSIDIAN.id);
-                    } else if (l <= 4) {
-                        world.setTypeId(i, j, k, Block.COBBLESTONE.id);
-                    }
-
-                    this.h(world, i, j, k);
-                }
+                this.h(world, i, j, k);
             }
         }
     }
 
     protected void h(World world, int i, int j, int k) {
-        world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), "random.fizz", 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
+        float randomDelta = world.random.nextFloat() - world.random.nextFloat();
+        world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), "random.fizz", 0.5F, FLUID_BLOCK_STATE_SERVICE.resolveFizzPitch(randomDelta));
 
-        for (int l = 0; l < 8; ++l) {
+        for (int l = 0; l < FLUID_BLOCK_STATE_SERVICE.resolveFizzSmokeCount(); ++l) {
             world.a("largesmoke", (double) i + Math.random(), (double) j + 1.2D, (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
         }
     }

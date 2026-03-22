@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.gen.FlowerPatchGenerationBehaviour;
+
 import java.util.Random;
 
 public class WorldGenFlowers extends WorldGenerator {
+    private static final FlowerPatchGenerationBehaviour FLOWER_PATCH_GENERATION_BEHAVIOUR = FlowerPatchGenerationBehaviour.getInstance();
 
     private int a;
 
@@ -11,16 +14,6 @@ public class WorldGenFlowers extends WorldGenerator {
     }
 
     public boolean a(World world, Random random, int i, int j, int k) {
-        for (int l = 0; l < 64; ++l) {
-            int i1 = i + random.nextInt(8) - random.nextInt(8);
-            int j1 = j + random.nextInt(4) - random.nextInt(4);
-            int k1 = k + random.nextInt(8) - random.nextInt(8);
-
-            if (world.isEmpty(i1, j1, k1) && ((BlockFlower) Block.byId[this.a]).f(world, i1, j1, k1)) {
-                world.setRawTypeId(i1, j1, k1, this.a);
-            }
-        }
-
-        return true;
+        return FLOWER_PATCH_GENERATION_BEHAVIOUR.generate(world, random, i, j, k, this.a);
     }
 }

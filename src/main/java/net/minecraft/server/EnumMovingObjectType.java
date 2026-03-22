@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public enum EnumMovingObjectType {
+import com.legacyminecraft.poseidon.world.types.MovingObjectTypeContract;
+
+public enum EnumMovingObjectType implements MovingObjectTypeContract {
 
     TILE("TILE", 0), ENTITY("ENTITY", 1);
 

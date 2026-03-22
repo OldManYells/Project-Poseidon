@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.PistonMovingBlockBehaviour;
+
 import java.util.Random;
 
 public class BlockPistonMoving extends BlockContainer {
+    private final PistonMovingBlockBehaviour pistonMovingBlockService = PistonMovingBlockBehaviour.getInstance();
 
     public BlockPistonMoving(int i) {
         super(i, Material.PISTON);
@@ -16,11 +19,7 @@ public class BlockPistonMoving extends BlockContainer {
     public void c(World world, int i, int j, int k) {}
 
     public void remove(World world, int i, int j, int k) {
-        TileEntity tileentity = world.getTileEntity(i, j, k);
-
-        if (tileentity != null && tileentity instanceof TileEntityPiston) {
-            ((TileEntityPiston) tileentity).k();
-        } else {
+        if (!pistonMovingBlockService.handleRemove(world, i, j, k)) {
             super.remove(world, i, j, k);
         }
     }
@@ -42,7 +41,7 @@ public class BlockPistonMoving extends BlockContainer {
     }
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {
-        if (!world.isStatic && world.getTileEntity(i, j, k) == null) {
+        if (pistonMovingBlockService.shouldClearOrphanMovingBlock(world, i, j, k)) {
             world.setTypeId(i, j, k, 0);
             return true;
         } else {
@@ -55,13 +54,7 @@ public class BlockPistonMoving extends BlockContainer {
     }
 
     public void dropNaturally(World world, int i, int j, int k, int l, float f) {
-        if (!world.isStatic) {
-            TileEntityPiston tileentitypiston = this.b(world, i, j, k);
-
-            if (tileentitypiston != null) {
-                Block.byId[tileentitypiston.a()].g(world, i, j, k, tileentitypiston.e());
-            }
-        }
+        pistonMovingBlockService.dropMovedBlockNaturally(world, i, j, k, this.b(world, i, j, k));
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
@@ -71,7 +64,7 @@ public class BlockPistonMoving extends BlockContainer {
     }
 
     public static TileEntity a(int i, int j, int k, boolean flag, boolean flag1) {
-        return new TileEntityPiston(i, j, k, flag, flag1);
+        return PistonMovingBlockBehaviour.getInstance().createMovingTileEntity(i, j, k, flag, flag1);
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
@@ -80,13 +73,15 @@ public class BlockPistonMoving extends BlockContainer {
         if (tileentitypiston == null) {
             return null;
         } else {
-            float f = tileentitypiston.a(0.0F);
-
-            if (tileentitypiston.c()) {
-                f = 1.0F - f;
-            }
-
-            return this.a(world, i, j, k, tileentitypiston.a(), f, tileentitypiston.d());
+            return this.a(
+                    world,
+                    i,
+                    j,
+                    k,
+                    tileentitypiston.a(),
+                    pistonMovingBlockService.resolveRenderProgress(tileentitypiston),
+                    tileentitypiston.d()
+            );
         }
     }
 
@@ -101,46 +96,25 @@ public class BlockPistonMoving extends BlockContainer {
             }
 
             block.a(iblockaccess, i, j, k);
-            float f = tileentitypiston.a(0.0F);
-
-            if (tileentitypiston.c()) {
-                f = 1.0F - f;
-            }
-
-            int l = tileentitypiston.d();
-
-            this.minX = block.minX - (double) ((float) PistonBlockTextures.b[l] * f);
-            this.minY = block.minY - (double) ((float) PistonBlockTextures.c[l] * f);
-            this.minZ = block.minZ - (double) ((float) PistonBlockTextures.d[l] * f);
-            this.maxX = block.maxX - (double) ((float) PistonBlockTextures.b[l] * f);
-            this.maxY = block.maxY - (double) ((float) PistonBlockTextures.c[l] * f);
-            this.maxZ = block.maxZ - (double) ((float) PistonBlockTextures.d[l] * f);
+            PistonMovingBlockBehaviour.Bounds bounds = pistonMovingBlockService.resolveShiftedOutlineBounds(
+                    block,
+                    pistonMovingBlockService.resolveRenderProgress(tileentitypiston),
+                    tileentitypiston.d()
+            );
+            this.minX = bounds.getMinX();
+            this.minY = bounds.getMinY();
+            this.minZ = bounds.getMinZ();
+            this.maxX = bounds.getMaxX();
+            this.maxY = bounds.getMaxY();
+            this.maxZ = bounds.getMaxZ();
         }
     }
 
     public AxisAlignedBB a(World world, int i, int j, int k, int l, float f, int i1) {
-        if (l != 0 && l != this.id) {
-            AxisAlignedBB axisalignedbb = Block.byId[l].e(world, i, j, k);
-
-            if (axisalignedbb == null) {
-                return null;
-            } else {
-                axisalignedbb.a -= (double) ((float) PistonBlockTextures.b[i1] * f);
-                axisalignedbb.d -= (double) ((float) PistonBlockTextures.b[i1] * f);
-                axisalignedbb.b -= (double) ((float) PistonBlockTextures.c[i1] * f);
-                axisalignedbb.e -= (double) ((float) PistonBlockTextures.c[i1] * f);
-                axisalignedbb.c -= (double) ((float) PistonBlockTextures.d[i1] * f);
-                axisalignedbb.f -= (double) ((float) PistonBlockTextures.d[i1] * f);
-                return axisalignedbb;
-            }
-        } else {
-            return null;
-        }
+        return pistonMovingBlockService.resolveShiftedCollisionBox(world, i, j, k, l, f, i1, this.id);
     }
 
     private TileEntityPiston b(IBlockAccess iblockaccess, int i, int j, int k) {
-        TileEntity tileentity = iblockaccess.getTileEntity(i, j, k);
-
-        return tileentity != null && tileentity instanceof TileEntityPiston ? (TileEntityPiston) tileentity : null;
+        return pistonMovingBlockService.extractPistonTileEntity(iblockaccess.getTileEntity(i, j, k));
     }
 }

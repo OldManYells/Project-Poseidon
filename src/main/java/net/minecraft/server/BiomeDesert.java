@@ -1,6 +1,11 @@
 package net.minecraft.server;
 
-public class BiomeDesert extends BiomeBase {
+import com.legacyminecraft.poseidon.world.biome.BiomeVariantInitializationBehaviour;
 
-    public BiomeDesert() {}
+public class BiomeDesert extends BiomeBase {
+    private static final BiomeVariantInitializationBehaviour BIOME_VARIANT_INITIALIZATION_BEHAVIOUR = BiomeVariantInitializationBehaviour.getInstance();
+
+    public BiomeDesert() {
+        BIOME_VARIANT_INITIALIZATION_BEHAVIOUR.initializeDesertBiome(this);
+    }
 }

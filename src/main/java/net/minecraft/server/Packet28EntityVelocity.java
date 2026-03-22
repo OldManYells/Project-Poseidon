@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,58 +12,39 @@ public class Packet28EntityVelocity extends Packet {
     public int b;
     public int c;
     public int d;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet28EntityVelocity() {}
 
     public Packet28EntityVelocity(Entity entity) {
-        this(entity.id, entity.motX, entity.motY, entity.motZ);
+        PacketDataCodec.Packet28Data packetData = packetDataCodec.packet28FromEntity(entity);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getVelocityX();
+        this.c = packetData.getVelocityY();
+        this.d = packetData.getVelocityZ();
     }
 
     public Packet28EntityVelocity(int i, double d0, double d1, double d2) {
-        this.a = i;
-        double d3 = 3.9D;
-
-        if (d0 < -d3) {
-            d0 = -d3;
-        }
-
-        if (d1 < -d3) {
-            d1 = -d3;
-        }
-
-        if (d2 < -d3) {
-            d2 = -d3;
-        }
-
-        if (d0 > d3) {
-            d0 = d3;
-        }
-
-        if (d1 > d3) {
-            d1 = d3;
-        }
-
-        if (d2 > d3) {
-            d2 = d3;
-        }
-
-        this.b = (int) (d0 * 8000.0D);
-        this.c = (int) (d1 * 8000.0D);
-        this.d = (int) (d2 * 8000.0D);
+        PacketDataCodec.Packet28Data packetData = packetDataCodec.packet28FromMotion(i, d0, d1, d2);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getVelocityX();
+        this.c = packetData.getVelocityY();
+        this.d = packetData.getVelocityZ();
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readShort();
-        this.c = datainputstream.readShort();
-        this.d = datainputstream.readShort();
+        PacketDataCodec.Packet28Data packetData = packetDataCodec.readPacket28(datainputstream);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getVelocityX();
+        this.c = packetData.getVelocityY();
+        this.d = packetData.getVelocityZ();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeShort(this.b);
-        dataoutputstream.writeShort(this.c);
-        dataoutputstream.writeShort(this.d);
+        packetDataCodec.writePacket28(
+                new PacketDataCodec.Packet28Data(this.a, this.b, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -69,6 +52,6 @@ public class Packet28EntityVelocity extends Packet {
     }
 
     public int a() {
-        return 10;
+        return packetDataCodec.packet28Length();
     }
 }

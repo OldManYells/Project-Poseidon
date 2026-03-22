@@ -1,11 +1,14 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.poseidon.compat.bukkit.MobPropertyBehaviour;
 import net.minecraft.server.EntitySheep;
 import org.bukkit.DyeColor;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Sheep;
 
 public class CraftSheep extends CraftAnimals implements Sheep {
+    private static final MobPropertyBehaviour MOB_PROPERTY_BEHAVIOUR = MobPropertyBehaviour.getInstance();
+
     public CraftSheep(CraftServer server, EntitySheep entity) {
         super(server, entity);
     }
@@ -21,19 +24,19 @@ public class CraftSheep extends CraftAnimals implements Sheep {
     }
 
     public DyeColor getColor() {
-        return DyeColor.getByData((byte) getHandle().getColor());
+        return MOB_PROPERTY_BEHAVIOUR.getSheepColor(getHandle());
     }
 
     public void setColor(DyeColor color) {
-        getHandle().setColor(color.getData());
+        MOB_PROPERTY_BEHAVIOUR.setSheepColor(getHandle(), color);
     }
 
     public boolean isSheared() {
-        return getHandle().isSheared();
+        return MOB_PROPERTY_BEHAVIOUR.isSheepSheared(getHandle());
     }
 
     public void setSheared(boolean flag) {
-        getHandle().setSheared(flag);
+        MOB_PROPERTY_BEHAVIOUR.setSheepSheared(getHandle(), flag);
     }
 
 }

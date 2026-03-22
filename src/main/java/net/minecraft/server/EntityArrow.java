@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.ArrowStateBehaviour;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -13,6 +14,7 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntityArrow extends Entity {
+    private static final ArrowStateBehaviour ARROW_STATE_BEHAVIOUR = ArrowStateBehaviour.getInstance();
 
     private int d = -1;
     private int e = -1;
@@ -43,39 +45,44 @@ public class EntityArrow extends Entity {
         this.shooter = entityliving;
         this.fromPlayer = entityliving instanceof EntityHuman;
         this.b(0.5F, 0.5F);
-        this.setPositionRotation(entityliving.locX, entityliving.locY + (double) entityliving.t(), entityliving.locZ, entityliving.yaw, entityliving.pitch);
-        this.locX -= (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * 0.16F);
-        this.locY -= 0.10000000149011612D;
-        this.locZ -= (double) (MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * 0.16F);
+        ArrowStateBehaviour.ShooterLaunchState launchState = ARROW_STATE_BEHAVIOUR.createShooterLaunchState(
+                entityliving.locX,
+                entityliving.locY,
+                entityliving.locZ,
+                entityliving.yaw,
+                entityliving.pitch,
+                entityliving.t()
+        );
+        this.setPositionRotation(launchState.spawnX, launchState.spawnY, launchState.spawnZ, entityliving.yaw, entityliving.pitch);
+        this.locX = launchState.spawnX;
+        this.locY = launchState.spawnY;
+        this.locZ = launchState.spawnZ;
         this.setPosition(this.locX, this.locY, this.locZ);
         this.height = 0.0F;
-        this.motX = (double) (-MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
-        this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
-        this.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F));
+        this.motX = launchState.baseMotionX;
+        this.motY = launchState.baseMotionY;
+        this.motZ = launchState.baseMotionZ;
         this.a(this.motX, this.motY, this.motZ, 1.5F, 1.0F);
     }
 
     protected void b() {}
 
     public void a(double d0, double d1, double d2, float f, float f1) {
-        float f2 = MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
-
-        d0 /= (double) f2;
-        d1 /= (double) f2;
-        d2 /= (double) f2;
-        d0 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d1 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d2 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d0 *= (double) f;
-        d1 *= (double) f;
-        d2 *= (double) f;
-        this.motX = d0;
-        this.motY = d1;
-        this.motZ = d2;
-        float f3 = MathHelper.a(d0 * d0 + d2 * d2);
-
-        this.lastYaw = this.yaw = (float) (Math.atan2(d0, d2) * 180.0D / 3.1415927410125732D);
-        this.lastPitch = this.pitch = (float) (Math.atan2(d1, (double) f3) * 180.0D / 3.1415927410125732D);
+        ArrowStateBehaviour.HeadingState heading = ARROW_STATE_BEHAVIOUR.computeHeading(
+                d0,
+                d1,
+                d2,
+                f,
+                f1,
+                this.random.nextGaussian(),
+                this.random.nextGaussian(),
+                this.random.nextGaussian()
+        );
+        this.motX = heading.motionX;
+        this.motY = heading.motionY;
+        this.motZ = heading.motionZ;
+        this.lastYaw = this.yaw = heading.yaw;
+        this.lastPitch = this.pitch = heading.pitch;
         this.j = 0;
     }
 
@@ -270,25 +277,19 @@ public class EntityArrow extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.d);
-        nbttagcompound.a("yTile", (short) this.e);
-        nbttagcompound.a("zTile", (short) this.f);
-        nbttagcompound.a("inTile", (byte) this.g);
-        nbttagcompound.a("inData", (byte) this.h);
-        nbttagcompound.a("shake", (byte) this.shake);
-        nbttagcompound.a("inGround", (byte) (this.inGround ? 1 : 0));
-        nbttagcompound.a("player", this.fromPlayer);
+        ARROW_STATE_BEHAVIOUR.writePersistedState(nbttagcompound, this.d, this.e, this.f, this.g, this.h, this.shake, this.inGround, this.fromPlayer);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.d = nbttagcompound.d("xTile");
-        this.e = nbttagcompound.d("yTile");
-        this.f = nbttagcompound.d("zTile");
-        this.g = nbttagcompound.c("inTile") & 255;
-        this.h = nbttagcompound.c("inData") & 255;
-        this.shake = nbttagcompound.c("shake") & 255;
-        this.inGround = nbttagcompound.c("inGround") == 1;
-        this.fromPlayer = nbttagcompound.m("player");
+        ArrowStateBehaviour.LoadedState loadedState = ARROW_STATE_BEHAVIOUR.readPersistedState(nbttagcompound);
+        this.d = loadedState.tileX;
+        this.e = loadedState.tileY;
+        this.f = loadedState.tileZ;
+        this.g = loadedState.inTile;
+        this.h = loadedState.inData;
+        this.shake = loadedState.shake;
+        this.inGround = loadedState.inGround;
+        this.fromPlayer = loadedState.fromPlayer;
     }
 
     public void b(EntityHuman entityhuman) {

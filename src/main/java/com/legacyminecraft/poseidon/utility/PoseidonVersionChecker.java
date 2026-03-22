@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.utility;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.Server;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -18,9 +18,9 @@ public class PoseidonVersionChecker {
     private static final String releaseUrl = "https://github.com/retromcorg/Project-Poseidon/releases";
     private final String currentVersion;
     private volatile String latestVersion;
-    private CraftServer server;
+    private Server server;
 
-    public PoseidonVersionChecker(CraftServer server, String currentVersion) {
+    public PoseidonVersionChecker(Server server, String currentVersion) {
         this.currentVersion = currentVersion;
         this.latestVersion = currentVersion; // Assume the latest version is the current version until checked
         this.server = server;

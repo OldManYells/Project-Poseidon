@@ -1,8 +1,10 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.TrapdoorStateBehaviour;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockTrapdoor extends Block {
+    private final TrapdoorStateBehaviour trapdoorStateService = TrapdoorStateBehaviour.getInstance();
 
     protected BlockTrapdoor(int i, Material material) {
         super(i, material);
@@ -35,26 +37,15 @@ public class BlockTrapdoor extends Block {
     }
 
     public void c(int i) {
-        float f = 0.1875F;
-
-        this.a(0.0F, 0.0F, 0.0F, 1.0F, f, 1.0F);
-        if (d(i)) {
-            if ((i & 3) == 0) {
-                this.a(0.0F, 0.0F, 1.0F - f, 1.0F, 1.0F, 1.0F);
-            }
-
-            if ((i & 3) == 1) {
-                this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, f);
-            }
-
-            if ((i & 3) == 2) {
-                this.a(1.0F - f, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-            }
-
-            if ((i & 3) == 3) {
-                this.a(0.0F, 0.0F, 0.0F, f, 1.0F, 1.0F);
-            }
-        }
+        TrapdoorStateBehaviour.Bounds bounds = trapdoorStateService.resolveBounds(i);
+        this.a(
+                bounds.getMinX(),
+                bounds.getMinY(),
+                bounds.getMinZ(),
+                bounds.getMaxX(),
+                bounds.getMaxY(),
+                bounds.getMaxZ()
+        );
     }
 
     public void b(World world, int i, int j, int k, EntityHuman entityhuman) {
@@ -67,7 +58,7 @@ public class BlockTrapdoor extends Block {
         } else {
             int l = world.getData(i, j, k);
 
-            world.setData(i, j, k, l ^ 4);
+            world.setData(i, j, k, trapdoorStateService.toggleOpenBit(l));
             world.a(entityhuman, 1003, i, j, k, 0);
             return true;
         }
@@ -75,10 +66,8 @@ public class BlockTrapdoor extends Block {
 
     public void a(World world, int i, int j, int k, boolean flag) {
         int l = world.getData(i, j, k);
-        boolean flag1 = (l & 4) > 0;
-
-        if (flag1 != flag) {
-            world.setData(i, j, k, l ^ 4);
+        if (trapdoorStateService.shouldToggleOpenState(l, flag)) {
+            world.setData(i, j, k, trapdoorStateService.toggleOpenBit(l));
             world.a((EntityHuman) null, 1003, i, j, k, 0);
         }
     }
@@ -86,26 +75,8 @@ public class BlockTrapdoor extends Block {
     public void doPhysics(World world, int i, int j, int k, int l) {
         if (!world.isStatic) {
             int i1 = world.getData(i, j, k);
-            int j1 = i;
-            int k1 = k;
-
-            if ((i1 & 3) == 0) {
-                k1 = k + 1;
-            }
-
-            if ((i1 & 3) == 1) {
-                --k1;
-            }
-
-            if ((i1 & 3) == 2) {
-                j1 = i + 1;
-            }
-
-            if ((i1 & 3) == 3) {
-                --j1;
-            }
-
-            if (!world.e(j1, j, k1)) {
+            TrapdoorStateBehaviour.AttachmentOffset attachmentOffset = trapdoorStateService.resolveAttachmentOffset(i1);
+            if (!this.supportQuery(world).isBlockSolid(i + attachmentOffset.getX(), j + attachmentOffset.getY(), k + attachmentOffset.getZ())) {
                 world.setTypeId(i, j, k, 0);
                 this.g(world, i, j, k, i1);
             }
@@ -135,55 +106,23 @@ public class BlockTrapdoor extends Block {
     }
 
     public void postPlace(World world, int i, int j, int k, int l) {
-        byte b0 = 0;
-
-        if (l == 2) {
-            b0 = 0;
-        }
-
-        if (l == 3) {
-            b0 = 1;
-        }
-
-        if (l == 4) {
-            b0 = 2;
-        }
-
-        if (l == 5) {
-            b0 = 3;
-        }
-
-        world.setData(i, j, k, b0);
+        world.setData(i, j, k, trapdoorStateService.resolvePostPlaceData(l));
         doPhysics(world, i, j, k, Block.REDSTONE_WIRE.id); // CraftBukkit
     }
 
     public boolean canPlace(World world, int i, int j, int k, int l) {
-        if (l == 0) {
-            return false;
-        } else if (l == 1) {
-            return false;
-        } else {
-            if (l == 2) {
-                ++k;
-            }
-
-            if (l == 3) {
-                --k;
-            }
-
-            if (l == 4) {
-                ++i;
-            }
-
-            if (l == 5) {
-                --i;
-            }
-
-            return world.e(i, j, k);
-        }
+        return trapdoorStateService.canPlaceOnSide(this.supportQuery(world), i, j, k, l);
     }
 
     public static boolean d(int i) {
-        return (i & 4) != 0;
+        return TrapdoorStateBehaviour.getInstance().isOpen(i);
+    }
+
+    private TrapdoorStateBehaviour.SupportQuery supportQuery(final World world) {
+        return new TrapdoorStateBehaviour.SupportQuery() {
+            public boolean isBlockSolid(int x, int y, int z) {
+                return world.e(x, y, z);
+            }
+        };
     }
 }

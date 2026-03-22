@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.ArrowStateBehaviour;
+import com.legacyminecraft.poseidon.entity.ThrowableProjectileStateBehaviour;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -12,6 +14,7 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntitySnowball extends Entity {
+    private static final ThrowableProjectileStateBehaviour THROWABLE_PROJECTILE_STATE_BEHAVIOUR = ThrowableProjectileStateBehaviour.getInstance();
 
     private int b = -1;
     private int c = -1;
@@ -34,17 +37,24 @@ public class EntitySnowball extends Entity {
         super(world);
         this.shooter = entityliving;
         this.b(0.25F, 0.25F);
-        this.setPositionRotation(entityliving.locX, entityliving.locY + (double) entityliving.t(), entityliving.locZ, entityliving.yaw, entityliving.pitch);
-        this.locX -= (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * 0.16F);
-        this.locY -= 0.10000000149011612D;
-        this.locZ -= (double) (MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * 0.16F);
+        ArrowStateBehaviour.ShooterLaunchState launchState = THROWABLE_PROJECTILE_STATE_BEHAVIOUR.createShooterLaunchState(
+                entityliving.locX,
+                entityliving.locY,
+                entityliving.locZ,
+                entityliving.yaw,
+                entityliving.pitch,
+                entityliving.t(),
+                0.4F
+        );
+        this.setPositionRotation(launchState.spawnX, launchState.spawnY, launchState.spawnZ, entityliving.yaw, entityliving.pitch);
+        this.locX = launchState.spawnX;
+        this.locY = launchState.spawnY;
+        this.locZ = launchState.spawnZ;
         this.setPosition(this.locX, this.locY, this.locZ);
         this.height = 0.0F;
-        float f = 0.4F;
-
-        this.motX = (double) (-MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F) * f);
-        this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F) * f);
-        this.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F) * f);
+        this.motX = launchState.baseMotionX;
+        this.motY = launchState.baseMotionY;
+        this.motZ = launchState.baseMotionZ;
         this.a(this.motX, this.motY, this.motZ, 1.5F, 1.0F);
     }
 
@@ -57,24 +67,21 @@ public class EntitySnowball extends Entity {
     }
 
     public void a(double d0, double d1, double d2, float f, float f1) {
-        float f2 = MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
-
-        d0 /= (double) f2;
-        d1 /= (double) f2;
-        d2 /= (double) f2;
-        d0 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d1 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d2 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d0 *= (double) f;
-        d1 *= (double) f;
-        d2 *= (double) f;
-        this.motX = d0;
-        this.motY = d1;
-        this.motZ = d2;
-        float f3 = MathHelper.a(d0 * d0 + d2 * d2);
-
-        this.lastYaw = this.yaw = (float) (Math.atan2(d0, d2) * 180.0D / 3.1415927410125732D);
-        this.lastPitch = this.pitch = (float) (Math.atan2(d1, (double) f3) * 180.0D / 3.1415927410125732D);
+        ArrowStateBehaviour.HeadingState heading = THROWABLE_PROJECTILE_STATE_BEHAVIOUR.computeHeading(
+                d0,
+                d1,
+                d2,
+                f,
+                f1,
+                this.random.nextGaussian(),
+                this.random.nextGaussian(),
+                this.random.nextGaussian()
+        );
+        this.motX = heading.motionX;
+        this.motY = heading.motionY;
+        this.motZ = heading.motionZ;
+        this.lastYaw = this.yaw = heading.yaw;
+        this.lastPitch = this.pitch = heading.pitch;
         this.h = 0;
     }
 
@@ -232,21 +239,17 @@ public class EntitySnowball extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.b);
-        nbttagcompound.a("yTile", (short) this.c);
-        nbttagcompound.a("zTile", (short) this.d);
-        nbttagcompound.a("inTile", (byte) this.e);
-        nbttagcompound.a("shake", (byte) this.a);
-        nbttagcompound.a("inGround", (byte) (this.f ? 1 : 0));
+        THROWABLE_PROJECTILE_STATE_BEHAVIOUR.writePersistedState(nbttagcompound, this.b, this.c, this.d, this.e, this.a, this.f);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.b = nbttagcompound.d("xTile");
-        this.c = nbttagcompound.d("yTile");
-        this.d = nbttagcompound.d("zTile");
-        this.e = nbttagcompound.c("inTile") & 255;
-        this.a = nbttagcompound.c("shake") & 255;
-        this.f = nbttagcompound.c("inGround") == 1;
+        ThrowableProjectileStateBehaviour.LoadedState loadedState = THROWABLE_PROJECTILE_STATE_BEHAVIOUR.readPersistedState(nbttagcompound);
+        this.b = loadedState.tileX;
+        this.c = loadedState.tileY;
+        this.d = loadedState.tileZ;
+        this.e = loadedState.inTile;
+        this.a = loadedState.shake;
+        this.f = loadedState.inGround;
     }
 
     public void b(EntityHuman entityhuman) {

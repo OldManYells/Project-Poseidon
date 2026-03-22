@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SoftMapStrongReferenceQueueBehaviour;
 import com.google.common.collect.MapMaker;
 
 import java.lang.ref.ReferenceQueue;
@@ -32,6 +33,8 @@ public class ConcurrentSoftMap<K, V> {
     private final ReferenceQueue<SoftMapReference> queue = new ReferenceQueue<SoftMapReference>();
     private final LinkedList<V> strongReferenceQueue = new LinkedList<V>();
     private final int strongReferenceSize;
+    private final SoftMapStrongReferenceQueueBehaviour softMapStrongReferenceQueueBehaviour =
+            SoftMapStrongReferenceQueueBehaviour.getInstance();
 
     public ConcurrentSoftMap() {
         this(20);
@@ -109,10 +112,7 @@ public class ConcurrentSoftMap<K, V> {
 
         if (value != null) {
             synchronized (strongReferenceQueue) {
-                strongReferenceQueue.addFirst(value);
-                if (strongReferenceQueue.size() > strongReferenceSize) {
-                    strongReferenceQueue.removeLast();
-                }
+                softMapStrongReferenceQueueBehaviour.promote(strongReferenceQueue, value, strongReferenceSize);
             }
         }
         return value;
@@ -151,10 +151,7 @@ public class ConcurrentSoftMap<K, V> {
     private void fastPut(K key, V value) {
         map.put(key, new SoftMapReference<K, V>(key, value, queue));
         synchronized (strongReferenceQueue) {
-            strongReferenceQueue.addFirst(value);
-            if (strongReferenceQueue.size() > strongReferenceSize) {
-                strongReferenceQueue.removeLast();
-            }
+            softMapStrongReferenceQueueBehaviour.promote(strongReferenceQueue, value, strongReferenceSize);
         }
     }
 
@@ -197,10 +194,7 @@ public class ConcurrentSoftMap<K, V> {
 
         if (ret == null) {
             synchronized (strongReferenceQueue) {
-                strongReferenceQueue.addFirst(value);
-                if (strongReferenceQueue.size() > strongReferenceSize) {
-                    strongReferenceQueue.removeLast();
-                }
+                softMapStrongReferenceQueueBehaviour.promote(strongReferenceQueue, value, strongReferenceSize);
             }
         }
 

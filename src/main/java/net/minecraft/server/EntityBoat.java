@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.BoatLifecycleBehaviour;
+import com.legacyminecraft.poseidon.entity.BoatCollisionBehaviour;
 import org.bukkit.Location;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
@@ -10,6 +12,8 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntityBoat extends Entity {
+    private static final BoatLifecycleBehaviour BOAT_LIFECYCLE_BEHAVIOUR = BoatLifecycleBehaviour.getInstance();
+    private static final BoatCollisionBehaviour BOAT_COLLISION_BEHAVIOUR = BoatCollisionBehaviour.getInstance();
 
     public int damage;
     public int b;
@@ -26,16 +30,7 @@ public class EntityBoat extends Entity {
 
     @Override
     public void collide(Entity entity) {
-        org.bukkit.entity.Entity hitEntity = (entity == null) ? null : entity.getBukkitEntity();
-
-        VehicleEntityCollisionEvent event = new VehicleEntityCollisionEvent((Vehicle) this.getBukkitEntity(), hitEntity);
-        this.world.getServer().getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
-            return;
-        }
-
-        super.collide(entity);
+        BOAT_COLLISION_BEHAVIOUR.collide(this, entity);
     }
     // CraftBukkit end
 
@@ -85,57 +80,7 @@ public class EntityBoat extends Entity {
     }
 
     public boolean damageEntity(Entity entity, int i) {
-        if (!this.world.isStatic && !this.dead) {
-            // CraftBukkit start
-            Vehicle vehicle = (Vehicle) this.getBukkitEntity();
-            org.bukkit.entity.Entity attacker = (entity == null) ? null : entity.getBukkitEntity();
-
-            VehicleDamageEvent event = new VehicleDamageEvent(vehicle, attacker, i);
-            this.world.getServer().getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) {
-                return true;
-            }
-            // i = event.getDamage(); // TODO Why don't we do this?
-            // CraftBukkit end
-
-            this.c = -this.c;
-            this.b = 10;
-            this.damage += i * 10;
-            this.af();
-            if (this.damage > 40) {
-
-                // CraftBukkit start
-                VehicleDestroyEvent destroyEvent = new VehicleDestroyEvent(vehicle, attacker);
-                this.world.getServer().getPluginManager().callEvent(destroyEvent);
-
-                if (destroyEvent.isCancelled()) {
-                    this.damage = 40; // Maximize damage so this doesn't get triggered again right away
-                    return true;
-                }
-                // CraftBukkit end
-
-                if (this.passenger != null) {
-                    this.passenger.mount(this);
-                }
-
-                int j;
-
-                for (j = 0; j < 3; ++j) {
-                    this.a(Block.WOOD.id, 1, 0.0F);
-                }
-
-                for (j = 0; j < 2; ++j) {
-                    this.a(Item.STICK.id, 1, 0.0F);
-                }
-
-                this.die();
-            }
-
-            return true;
-        } else {
-            return true;
-        }
+        return BOAT_LIFECYCLE_BEHAVIOUR.handleDamage(this, entity, i);
     }
 
     public boolean l_() {
@@ -377,12 +322,7 @@ public class EntityBoat extends Entity {
     }
 
     public void f() {
-        if (this.passenger != null) {
-            double d0 = Math.cos((double) this.yaw * 3.141592653589793D / 180.0D) * 0.4D;
-            double d1 = Math.sin((double) this.yaw * 3.141592653589793D / 180.0D) * 0.4D;
-
-            this.passenger.setPosition(this.locX + d0, this.locY + this.m() + this.passenger.I(), this.locZ + d1);
-        }
+        BOAT_LIFECYCLE_BEHAVIOUR.updatePassengerPosition(this);
     }
 
     protected void b(NBTTagCompound nbttagcompound) {}
@@ -390,23 +330,18 @@ public class EntityBoat extends Entity {
     protected void a(NBTTagCompound nbttagcompound) {}
 
     public boolean a(EntityHuman entityhuman) {
-        if (this.passenger != null && this.passenger instanceof EntityHuman && this.passenger != entityhuman) {
-            return true;
-        } else {
-            if (!this.world.isStatic) {
-                // CraftBukkit start
-                VehicleEnterEvent event = new VehicleEnterEvent((Vehicle) this.getBukkitEntity(), entityhuman.getBukkitEntity());
-                this.world.getServer().getPluginManager().callEvent(event);
+        return BOAT_LIFECYCLE_BEHAVIOUR.interact(this, entityhuman);
+    }
 
-                if (event.isCancelled()) {
-                    return true;
-                }
-                // CraftBukkit end
+    public double poseidonPassengerYOffset() {
+        return this.m();
+    }
 
-                entityhuman.mount(this);
-            }
+    public void poseidonMarkDamaged() {
+        this.af();
+    }
 
-            return true;
-        }
+    public void poseidonSuperCollide(Entity entity) {
+        super.collide(entity);
     }
 }

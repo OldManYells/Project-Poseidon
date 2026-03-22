@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,25 +14,25 @@ public class Packet27 extends Packet {
     private boolean d;
     private float e;
     private float f;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet27() {}
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readFloat();
-        this.b = datainputstream.readFloat();
-        this.e = datainputstream.readFloat();
-        this.f = datainputstream.readFloat();
-        this.c = datainputstream.readBoolean();
-        this.d = datainputstream.readBoolean();
+        PacketDataCodec.Packet27Data data = packetDataCodec.readPacket27(datainputstream);
+        this.a = data.getPrimaryX();
+        this.b = data.getPrimaryY();
+        this.e = data.getSecondaryX();
+        this.f = data.getSecondaryY();
+        this.c = data.isPrimaryFlag();
+        this.d = data.isSecondaryFlag();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeFloat(this.a);
-        dataoutputstream.writeFloat(this.b);
-        dataoutputstream.writeFloat(this.e);
-        dataoutputstream.writeFloat(this.f);
-        dataoutputstream.writeBoolean(this.c);
-        dataoutputstream.writeBoolean(this.d);
+        packetDataCodec.writePacket27(
+                new PacketDataCodec.Packet27Data(this.a, this.b, this.e, this.f, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -38,7 +40,7 @@ public class Packet27 extends Packet {
     }
 
     public int a() {
-        return 18;
+        return packetDataCodec.packet27Length();
     }
 
     public float c() {

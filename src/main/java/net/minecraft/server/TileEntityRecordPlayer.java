@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.tile.JukeboxTileBehaviour;
+
 public class TileEntityRecordPlayer extends TileEntity {
+    private static final JukeboxTileBehaviour JUKEBOX_TILE_BEHAVIOUR = JukeboxTileBehaviour.getInstance();
 
     public int a;
 
@@ -8,13 +11,11 @@ public class TileEntityRecordPlayer extends TileEntity {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.a = nbttagcompound.e("Record");
+        this.a = JUKEBOX_TILE_BEHAVIOUR.readRecordId(nbttagcompound);
     }
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        if (this.a > 0) {
-            nbttagcompound.a("Record", this.a);
-        }
+        JUKEBOX_TILE_BEHAVIOUR.writeRecordIdIfPresent(nbttagcompound, this.a);
     }
 }

@@ -1,8 +1,10 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.ItemCoreBehaviour;
 import java.util.Random;
 
 public class Item {
+    private static final ItemCoreBehaviour ITEM_CORE_BEHAVIOUR = ItemCoreBehaviour.getInstance();
 
     protected static Random b = new Random();
     public static Item[] byId = new Item[32000];
@@ -123,15 +125,12 @@ public class Item {
 
     protected Item(int i) {
         this.id = 256 + i;
-        if (byId[256 + i] != null) {
-            System.out.println("CONFLICT @ " + i);
-        }
-
+        ITEM_CORE_BEHAVIOUR.registerOrWarn(byId, 256 + i);
         byId[256 + i] = this;
     }
 
     public Item b(int i) {
-        this.textureId = i;
+        this.textureId = ITEM_CORE_BEHAVIOUR.resolveTextureId(i);
         return this;
     }
 
@@ -141,7 +140,7 @@ public class Item {
     }
 
     public Item a(int i, int j) {
-        this.textureId = i + j * 16;
+        this.textureId = ITEM_CORE_BEHAVIOUR.resolveTextureIdFromGrid(i, j);
         return this;
     }
 
@@ -162,7 +161,7 @@ public class Item {
     }
 
     public int filterData(int i) {
-        return 0;
+        return ITEM_CORE_BEHAVIOUR.filterData(i);
     }
 
     public boolean d() {
@@ -184,7 +183,7 @@ public class Item {
     }
 
     public boolean f() {
-        return this.durability > 0 && !this.bj;
+        return ITEM_CORE_BEHAVIOUR.isDamageableUsable(this.durability, this.bj);
     }
 
     public boolean a(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
@@ -211,7 +210,7 @@ public class Item {
     }
 
     public Item a(String s) {
-        this.name = "item." + s;
+        this.name = ITEM_CORE_BEHAVIOUR.prefixedName(s);
         return this;
     }
 
@@ -220,12 +219,9 @@ public class Item {
     }
 
     public Item a(Item item) {
-        if (this.maxStackSize > 1) {
-            throw new IllegalArgumentException("Max stack size must be 1 for items with crafting results");
-        } else {
-            this.craftingResult = item;
-            return this;
-        }
+        ITEM_CORE_BEHAVIOUR.validateCraftingResultAssignment(this.maxStackSize);
+        this.craftingResult = item;
+        return this;
     }
 
     public Item h() {
@@ -233,11 +229,11 @@ public class Item {
     }
 
     public boolean i() {
-        return this.craftingResult != null;
+        return ITEM_CORE_BEHAVIOUR.hasCraftingResult(this.craftingResult);
     }
 
     public String j() {
-        return StatisticCollector.a(this.a() + ".name");
+        return ITEM_CORE_BEHAVIOUR.localizeItemName(this.a());
     }
 
     public void a(ItemStack itemstack, World world, Entity entity, int i, boolean flag) {}

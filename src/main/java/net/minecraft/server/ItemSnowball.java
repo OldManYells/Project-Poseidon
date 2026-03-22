@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.ThrowableItemBehaviour;
+
 public class ItemSnowball extends Item {
+    private static final ThrowableItemBehaviour THROWABLE_ITEM_BEHAVIOUR = ThrowableItemBehaviour.getInstance();
 
     public ItemSnowball(int i) {
         super(i);
@@ -8,12 +11,6 @@ public class ItemSnowball extends Item {
     }
 
     public ItemStack a(ItemStack itemstack, World world, EntityHuman entityhuman) {
-        --itemstack.count;
-        world.makeSound(entityhuman, "random.bow", 0.5F, 0.4F / (b.nextFloat() * 0.4F + 0.8F));
-        if (!world.isStatic) {
-            world.addEntity(new EntitySnowball(world, entityhuman));
-        }
-
-        return itemstack;
+        return THROWABLE_ITEM_BEHAVIOUR.throwSnowball(itemstack, world, entityhuman, b);
     }
 }

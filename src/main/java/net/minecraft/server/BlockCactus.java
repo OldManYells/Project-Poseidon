@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.CactusStateBehaviour;
+import com.legacyminecraft.poseidon.block.ColumnPlantGrowthBehaviour;
+
 // CraftBukkit start
 
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
@@ -10,6 +13,8 @@ import java.util.Random;
 // CraftBukkit end
 
 public class BlockCactus extends Block {
+    private final ColumnPlantGrowthBehaviour columnPlantGrowthService = ColumnPlantGrowthBehaviour.getInstance();
+    private final CactusStateBehaviour cactusStateService = CactusStateBehaviour.getInstance();
 
     protected BlockCactus(int i, int j) {
         super(i, j, Material.CACTUS);
@@ -18,33 +23,26 @@ public class BlockCactus extends Block {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (world.isEmpty(i, j + 1, k)) {
-            int l;
-
-            for (l = 1; world.getTypeId(i, j - l, k) == this.id; ++l) {
-                ;
-            }
-
-            if (l < 3) {
+            int l = columnPlantGrowthService.countContiguousBelow(this.blockIdQuery(world), i, j, k, this.id);
+            if (columnPlantGrowthService.shouldAttemptGrowth(true, l, 3)) {
                 int i1 = world.getData(i, j, k);
 
-                if (i1 == 15) {
+                if (columnPlantGrowthService.shouldSpawnNewSegment(i1, 15)) {
                     world.setTypeId(i, j + 1, k, this.id);
-                    world.setData(i, j, k, 0);
+                    world.setData(i, j, k, columnPlantGrowthService.nextGrowthData(i1, 15));
                 } else {
-                    world.setData(i, j, k, i1 + 1);
+                    world.setData(i, j, k, columnPlantGrowthService.nextGrowthData(i1, 15));
                 }
             }
         }
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
-        float f = 0.0625F;
-
-        return AxisAlignedBB.b((double) ((float) i + f), (double) j, (double) ((float) k + f), (double) ((float) (i + 1) - f), (double) ((float) (j + 1) - f), (double) ((float) (k + 1) - f));
+        return cactusStateService.resolveCollisionBox(i, j, k);
     }
 
     public int a(int i) {
-        return i == 1 ? this.textureId - 1 : (i == 0 ? this.textureId + 1 : this.textureId);
+        return cactusStateService.resolveTextureBySide(i, this.textureId);
     }
 
     public boolean b() {
@@ -56,7 +54,7 @@ public class BlockCactus extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return !super.canPlace(world, i, j, k) ? false : this.f(world, i, j, k);
+        return cactusStateService.canPlace(super.canPlace(world, i, j, k), this.f(world, i, j, k));
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
@@ -67,19 +65,7 @@ public class BlockCactus extends Block {
     }
 
     public boolean f(World world, int i, int j, int k) {
-        if (world.getMaterial(i - 1, j, k).isBuildable()) {
-            return false;
-        } else if (world.getMaterial(i + 1, j, k).isBuildable()) {
-            return false;
-        } else if (world.getMaterial(i, j, k - 1).isBuildable()) {
-            return false;
-        } else if (world.getMaterial(i, j, k + 1).isBuildable()) {
-            return false;
-        } else {
-            int l = world.getTypeId(i, j - 1, k);
-
-            return l == Block.CACTUS.id || l == Block.SAND.id;
-        }
+        return cactusStateService.canRemainPlaced(this.supportQuery(world), i, j, k, Block.CACTUS.id, Block.SAND.id);
     }
 
     public void a(World world, int i, int j, int k, Entity entity) {
@@ -98,6 +84,26 @@ public class BlockCactus extends Block {
         }
         // CraftBukkit end
 
-        entity.damageEntity((Entity) null, 1);
+        entity.damageEntity((Entity) null, cactusStateService.contactDamage());
+    }
+
+    private ColumnPlantGrowthBehaviour.BlockIdQuery blockIdQuery(final World world) {
+        return new ColumnPlantGrowthBehaviour.BlockIdQuery() {
+            public int getTypeId(int x, int y, int z) {
+                return world.getTypeId(x, y, z);
+            }
+        };
+    }
+
+    private CactusStateBehaviour.SupportQuery supportQuery(final World world) {
+        return new CactusStateBehaviour.SupportQuery() {
+            public boolean isBuildableMaterial(int x, int y, int z) {
+                return world.getMaterial(x, y, z).isBuildable();
+            }
+
+            public int getTypeId(int x, int y, int z) {
+                return world.getTypeId(x, y, z);
+            }
+        };
     }
 }

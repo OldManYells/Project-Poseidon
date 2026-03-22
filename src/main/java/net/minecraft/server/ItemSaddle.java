@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.SaddleUseBehaviour;
+
 public class ItemSaddle extends Item {
+    private static final SaddleUseBehaviour SADDLE_USE_BEHAVIOUR = SaddleUseBehaviour.getInstance();
 
     public ItemSaddle(int i) {
         super(i);
@@ -8,18 +11,10 @@ public class ItemSaddle extends Item {
     }
 
     public void a(ItemStack itemstack, EntityLiving entityliving) {
-        if (entityliving instanceof EntityPig) {
-            EntityPig entitypig = (EntityPig) entityliving;
-
-            if (!entitypig.hasSaddle()) {
-                entitypig.setSaddle(true);
-                --itemstack.count;
-            }
-        }
+        SADDLE_USE_BEHAVIOUR.applyToEntity(itemstack, entityliving);
     }
 
     public boolean a(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
-        this.a(itemstack, entityliving);
-        return true;
+        return SADDLE_USE_BEHAVIOUR.interactEntity(itemstack, entityliving, entityliving1);
     }
 }

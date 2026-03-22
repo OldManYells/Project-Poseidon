@@ -1,18 +1,19 @@
 package org.bukkit.craftbukkit.command;
 
+import com.legacyminecraft.poseidon.compat.bukkit.CommandSenderBackedListener;
+import com.legacyminecraft.poseidon.compat.bukkit.ServerCommandListenerBehaviour;
 import net.minecraft.server.ICommandListener;
 import org.bukkit.command.CommandSender;
 
-import java.lang.reflect.Method;
-
-public class ServerCommandListener implements ICommandListener {
+public class ServerCommandListener implements ICommandListener, CommandSenderBackedListener {
     private final CommandSender commandSender;
     private final String prefix;
+    private final ServerCommandListenerBehaviour serverCommandListenerBehaviour =
+            ServerCommandListenerBehaviour.getInstance();
 
     public ServerCommandListener(CommandSender commandSender) {
         this.commandSender = commandSender;
-        String[] parts = commandSender.getClass().getName().split("\\.");
-        this.prefix = parts[parts.length-1];
+        this.prefix = serverCommandListenerBehaviour.resolvePrefix(commandSender);
     }
 
     public void sendMessage(String msg) {
@@ -24,12 +25,6 @@ public class ServerCommandListener implements ICommandListener {
     }
 
     public String getName() {
-        try {
-            Method getName = commandSender.getClass().getMethod("getName");
-
-            return (String) getName.invoke(commandSender);
-        } catch (Exception e) {}
-
-        return this.prefix;
+        return serverCommandListenerBehaviour.resolveNameOrPrefix(this.commandSender, this.prefix);
     }
 }

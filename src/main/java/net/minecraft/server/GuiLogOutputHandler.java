@@ -1,11 +1,14 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.runtime.log.GuiLogOutputBehaviour;
+
 import javax.swing.*;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 public class GuiLogOutputHandler extends Handler {
+    private static final GuiLogOutputBehaviour GUI_LOG_OUTPUT_BEHAVIOUR = GuiLogOutputBehaviour.getInstance();
 
     private int[] b = new int[1024];
     private int c = 0;
@@ -22,17 +25,6 @@ public class GuiLogOutputHandler extends Handler {
     public void flush() {}
 
     public void publish(LogRecord logrecord) {
-        int i = this.d.getDocument().getLength();
-
-        this.d.append(this.a.format(logrecord));
-        this.d.setCaretPosition(this.d.getDocument().getLength());
-        int j = this.d.getDocument().getLength() - i;
-
-        if (this.b[this.c] != 0) {
-            this.d.replaceRange("", 0, this.b[this.c]);
-        }
-
-        this.b[this.c] = j;
-        this.c = (this.c + 1) % 1024;
+        this.c = GUI_LOG_OUTPUT_BEHAVIOUR.publish(this.d, this.a, logrecord, this.b, this.c);
     }
 }

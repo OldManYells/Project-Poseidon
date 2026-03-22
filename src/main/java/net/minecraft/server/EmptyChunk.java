@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
-import java.util.Arrays;
+import com.legacyminecraft.poseidon.world.EmptyChunkBehaviour;
+
 import java.util.List;
 import java.util.Random;
 
 public class EmptyChunk extends Chunk {
+    private static final EmptyChunkBehaviour EMPTY_CHUNK_BEHAVIOUR = EmptyChunkBehaviour.getInstance();
 
     public EmptyChunk(World world, int i, int j) {
         super(world, i, j);
@@ -93,18 +95,11 @@ public class EmptyChunk extends Chunk {
     }
 
     public int getData(byte[] abyte, int i, int j, int k, int l, int i1, int j1, int k1) {
-        int l1 = l - i;
-        int i2 = i1 - j;
-        int j2 = j1 - k;
-        int k2 = l1 * i2 * j2;
-        int l2 = k2 + k2 / 2 * 3;
-
-        Arrays.fill(abyte, k1, k1 + l2, (byte) 0);
-        return l2;
+        return EMPTY_CHUNK_BEHAVIOUR.zeroFillChunkData(abyte, k1, i, j, k, l, i1, j1);
     }
 
     public Random a(long i) {
-        return new Random(this.world.getSeed() + (long) (this.x * this.x * 4987142) + (long) (this.x * 5947611) + (long) (this.z * this.z) * 4392871L + (long) (this.z * 389711) ^ i);
+        return EMPTY_CHUNK_BEHAVIOUR.createChunkRandom(this.world.getSeed(), this.x, this.z, i);
     }
 
     public boolean isEmpty() {

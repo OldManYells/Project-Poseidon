@@ -1,14 +1,19 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.biome.BiomeSpawnListBehaviour;
+import com.legacyminecraft.poseidon.world.biome.BiomeTreeGeneratorSelectionBehaviour;
+
 import java.util.Random;
 
 public class BiomeTaiga extends BiomeBase {
+    private final BiomeSpawnListBehaviour biomeSpawnListService = BiomeSpawnListBehaviour.getInstance();
+    private final BiomeTreeGeneratorSelectionBehaviour biomeTreeGeneratorSelectionService = BiomeTreeGeneratorSelectionBehaviour.getInstance();
 
     public BiomeTaiga() {
-        this.t.add(new BiomeMeta(EntityWolf.class, 2));
+        biomeSpawnListService.configureTaigaBiomeSpawns(this.t);
     }
 
     public WorldGenerator a(Random random) {
-        return (WorldGenerator) (random.nextInt(3) == 0 ? new WorldGenTaiga1() : new WorldGenTaiga2());
+        return biomeTreeGeneratorSelectionService.selectTaigaTreeGenerator(random);
     }
 }

@@ -1,6 +1,10 @@
 package net.minecraft.server;
 
-public class MaterialMapColor {
+import com.legacyminecraft.poseidon.block.MaterialMapColorStateBehaviour;
+import com.legacyminecraft.poseidon.world.types.MapColorTypeContract;
+
+public class MaterialMapColor implements MapColorTypeContract {
+    private static final MaterialMapColorStateBehaviour MATERIAL_MAP_COLOR_STATE_BEHAVIOUR = MaterialMapColorStateBehaviour.getInstance();
 
     public static final MaterialMapColor[] a = new MaterialMapColor[16];
     public static final MaterialMapColor b = new MaterialMapColor(0, 0);
@@ -21,8 +25,16 @@ public class MaterialMapColor {
     public final int q;
 
     private MaterialMapColor(int i, int j) {
-        this.q = i;
-        this.p = j;
-        a[i] = this;
+        MaterialMapColorStateBehaviour.MaterialMapColorState state = MATERIAL_MAP_COLOR_STATE_BEHAVIOUR.initialize(a, i, j, this);
+        this.q = state.getColorIndex();
+        this.p = state.getColorRgb();
+    }
+
+    public int getColorRgb() {
+        return this.p;
+    }
+
+    public int getColorIndex() {
+        return this.q;
     }
 }

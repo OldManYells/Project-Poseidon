@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.RegionChunkBufferBehaviour;
+
 import java.io.ByteArrayOutputStream;
 
 class ChunkBuffer extends ByteArrayOutputStream {
+    private static final RegionChunkBufferBehaviour REGION_CHUNK_BUFFER_BEHAVIOUR = RegionChunkBufferBehaviour.getInstance();
 
     private int b;
     private int c;
@@ -17,6 +20,6 @@ class ChunkBuffer extends ByteArrayOutputStream {
     }
 
     public void close() {
-        this.a.a(this.b, this.c, this.buf, this.count);
+        REGION_CHUNK_BUFFER_BEHAVIOUR.flushToRegion(this.a, this.b, this.c, this.buf, this.count);
     }
 }

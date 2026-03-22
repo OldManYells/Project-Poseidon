@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.FurnaceResultSlotBehaviour;
+
 public class SlotResult2 extends Slot {
+    private static final FurnaceResultSlotBehaviour FURNACE_RESULT_SLOT_BEHAVIOUR = FurnaceResultSlotBehaviour.getInstance();
 
     private EntityHuman d;
 
@@ -10,19 +13,11 @@ public class SlotResult2 extends Slot {
     }
 
     public boolean isAllowed(ItemStack itemstack) {
-        return false;
+        return FURNACE_RESULT_SLOT_BEHAVIOUR.isAllowed(itemstack);
     }
 
     public void a(ItemStack itemstack) {
-        itemstack.b(this.d.world, this.d);
-        if (itemstack.id == Item.IRON_INGOT.id) {
-            this.d.a(AchievementList.k, 1);
-        }
-
-        if (itemstack.id == Item.COOKED_FISH.id) {
-            this.d.a(AchievementList.p, 1);
-        }
-
+        FURNACE_RESULT_SLOT_BEHAVIOUR.onSmelted(itemstack, this.d);
         super.a(itemstack);
     }
 }

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +10,7 @@ public class Packet70Bed extends Packet {
 
     public static final String[] a = new String[] { "tile.bed.notValid", null, null};
     public int b;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet70Bed() {}
 
@@ -16,11 +19,11 @@ public class Packet70Bed extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.b = datainputstream.readByte();
+        this.b = packetDataCodec.readPacket70Bed(datainputstream).getEventId();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeByte(this.b);
+        packetDataCodec.writePacket70Bed(new PacketDataCodec.Packet70BedData(this.b), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -28,6 +31,6 @@ public class Packet70Bed extends Packet {
     }
 
     public int a() {
-        return 1;
+        return packetDataCodec.packet70Length();
     }
 }

@@ -1,15 +1,31 @@
 package org.bukkit.craftbukkit.inventory;
 
+import com.legacyminecraft.poseidon.compat.bukkit.InventoryItemBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.InventoryRemovalBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.InventorySearchBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.InventoryTransactionBatchBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.InventoryTransactionEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.InventoryTransactionMutationBehaviour;
 import net.minecraft.server.IInventory;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.event.inventory.InventoryTransactionEvent;
 import org.bukkit.event.inventory.InventoryTransactionType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 
 public class CraftInventory implements org.bukkit.inventory.Inventory {
+    private static final InventoryItemBridgeBehaviour INVENTORY_ITEM_BRIDGE_BEHAVIOUR =
+            InventoryItemBridgeBehaviour.getInstance();
+    private static final InventorySearchBehaviour INVENTORY_SEARCH_BEHAVIOUR =
+            InventorySearchBehaviour.getInstance();
+    private static final InventoryRemovalBehaviour INVENTORY_REMOVAL_BEHAVIOUR =
+            InventoryRemovalBehaviour.getInstance();
+    private static final InventoryTransactionBatchBehaviour INVENTORY_TRANSACTION_BATCH_BEHAVIOUR =
+            InventoryTransactionBatchBehaviour.getInstance();
+    private static final InventoryTransactionEventBridgeBehaviour INVENTORY_TRANSACTION_EVENT_BRIDGE_BEHAVIOUR =
+            InventoryTransactionEventBridgeBehaviour.getInstance();
+    private static final InventoryTransactionMutationBehaviour INVENTORY_TRANSACTION_MUTATION_BEHAVIOUR =
+            InventoryTransactionMutationBehaviour.getInstance();
     protected IInventory inventory;
 
     public CraftInventory(IInventory inventory) {
@@ -29,18 +45,12 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public ItemStack getItem(int index) {
-        return new CraftItemStack(getInventory().getItem(index));
+        return INVENTORY_ITEM_BRIDGE_BEHAVIOUR.wrapSingle(getInventory().getItem(index));
     }
 
     public ItemStack[] getContents() {
-        ItemStack[] items = new ItemStack[getSize()];
         net.minecraft.server.ItemStack[] mcItems = getInventory().getContents();
-
-        for (int i = 0; i < mcItems.length; i++) {
-            items[i] = mcItems[i] == null ? null : new CraftItemStack(mcItems[i]);
-        }
-
-        return items;
+        return INVENTORY_ITEM_BRIDGE_BEHAVIOUR.toBukkitContents(mcItems, getSize());
     }
 
     public void setContents(ItemStack[] items) {
@@ -49,28 +59,15 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
         }
 
         net.minecraft.server.ItemStack[] mcItems = getInventory().getContents();
-
-        for (int i = 0; i < items.length; i++) {
-            ItemStack item = items[i];
-            if (item == null || item.getTypeId() <= 0) {
-                mcItems[i] = null;
-            } else {
-                mcItems[i] = new net.minecraft.server.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability());
-            }
-        }
+        INVENTORY_ITEM_BRIDGE_BEHAVIOUR.copyContentsToNms(items, mcItems);
     }
 
     public void setItem(int index, ItemStack item) {
-        getInventory().setItem(index, (item == null ? null : new net.minecraft.server.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability())));
+        getInventory().setItem(index, INVENTORY_ITEM_BRIDGE_BEHAVIOUR.toNmsForSetItem(item));
     }
 
     public boolean contains(int materialId) {
-        for (ItemStack item: getContents()) {
-            if (item != null && item.getTypeId() == materialId) {
-                return true;
-            }
-        }
-        return false;
+        return INVENTORY_SEARCH_BEHAVIOUR.containsMaterialId(getContents(), materialId);
     }
 
     public boolean contains(Material material) {
@@ -78,25 +75,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public boolean contains(ItemStack item) {
-        if (item == null) {
-            return false;
-        }
-        for (ItemStack i: getContents()) {
-            if (item.equals(i)) {
-                return true;
-            }
-        }
-        return false;
+        return INVENTORY_SEARCH_BEHAVIOUR.containsItem(getContents(), item);
     }
 
     public boolean contains(int materialId, int amount) {
-        int amt = 0;
-        for (ItemStack item: getContents()) {
-            if (item != null && item.getTypeId() == materialId) {
-                amt += item.getAmount();
-            }
-        }
-        return amt >= amount;
+        return INVENTORY_SEARCH_BEHAVIOUR.containsMaterialId(getContents(), materialId, amount);
     }
 
     public boolean contains(Material material, int amount) {
@@ -104,29 +87,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public boolean contains(ItemStack item, int amount) {
-        if (item == null) {
-            return false;
-        }
-        int amt = 0;
-        for (ItemStack i: getContents()) {
-            if (item.equals(i)) {
-                amt += item.getAmount();
-            }
-        }
-        return amt >= amount;
+        return INVENTORY_SEARCH_BEHAVIOUR.containsItem(getContents(), item, amount);
     }
 
     public HashMap<Integer, ItemStack> all(int materialId) {
-        HashMap<Integer, ItemStack> slots = new HashMap<Integer, ItemStack>();
-
-        ItemStack[] inventory = getContents();
-        for (int i = 0; i < inventory.length; i++) {
-            ItemStack item = inventory[i];
-            if (item != null && item.getTypeId() == materialId) {
-                slots.put(i, item);
-            }
-        }
-        return slots;
+        return INVENTORY_SEARCH_BEHAVIOUR.allByMaterialId(getContents(), materialId);
     }
 
     public HashMap<Integer, ItemStack> all(Material material) {
@@ -134,27 +99,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public HashMap<Integer, ItemStack> all(ItemStack item) {
-        HashMap<Integer, ItemStack> slots = new HashMap<Integer, ItemStack>();
-        if (item != null) {
-            ItemStack[] inventory = getContents();
-            for (int i = 0; i < inventory.length; i++) {
-                if (item.equals(inventory[i])) {
-                    slots.put(i, inventory[i]);
-                }
-            }
-        }
-        return slots;
+        return INVENTORY_SEARCH_BEHAVIOUR.allByItem(getContents(), item);
     }
 
     public int first(int materialId) {
-        ItemStack[] inventory = getContents();
-        for (int i = 0; i < inventory.length; i++) {
-            ItemStack item = inventory[i];
-            if (item != null && item.getTypeId() == materialId) {
-                return i;
-            }
-        }
-        return -1;
+        return INVENTORY_SEARCH_BEHAVIOUR.firstByMaterialId(getContents(), materialId);
     }
 
     public int first(Material material) {
@@ -162,37 +111,15 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public int first(ItemStack item) {
-        if (item == null) {
-            return -1;
-        }
-        ItemStack[] inventory = getContents();
-        for (int i = 0; i < inventory.length; i++) {
-            if (item.equals(inventory[i])) {
-                return i;
-            }
-        }
-        return -1;
+        return INVENTORY_SEARCH_BEHAVIOUR.firstByItem(getContents(), item);
     }
 
     public int firstEmpty() {
-        ItemStack[] inventory = getContents();
-        for (int i = 0; i < inventory.length; i++) {
-            if (inventory[i] == null) {
-                return i;
-            }
-        }
-        return -1;
+        return INVENTORY_SEARCH_BEHAVIOUR.firstEmpty(getContents());
     }
 
     public int firstPartial(int materialId) {
-        ItemStack[] inventory = getContents();
-        for (int i = 0; i < inventory.length; i++) {
-            ItemStack item = inventory[i];
-            if (item != null && item.getTypeId() == materialId && item.getAmount() < item.getMaxStackSize()) {
-                return i;
-            }
-        }
-        return -1;
+        return INVENTORY_SEARCH_BEHAVIOUR.firstPartialByMaterialId(getContents(), materialId);
     }
 
     public int firstPartial(Material material) {
@@ -200,144 +127,99 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public int firstPartial(ItemStack item) {
-        ItemStack[] inventory = getContents();
-        if (item == null) {
-            return -1;
-        }
-        for (int i = 0; i < inventory.length; i++) {
-            ItemStack cItem = inventory[i];
-            if (cItem != null && cItem.getTypeId() == item.getTypeId() && cItem.getAmount() < cItem.getMaxStackSize() && cItem.getDurability() == item.getDurability()) {
-                return i;
-            }
-        }
-        return -1;
+        return INVENTORY_SEARCH_BEHAVIOUR.firstPartialByItem(getContents(), item);
     }
 
     public HashMap<Integer, ItemStack> addItem(ItemStack... items) {
-        HashMap<Integer, ItemStack> leftover = new HashMap<Integer, ItemStack>();
-
-        /* TODO: some optimization
-         *  - Create a 'firstPartial' with a 'fromIndex'
-         *  - Record the lastPartial per Material
-         *  - Cache firstEmpty result
-         */
-
-        for (int i = 0; i < items.length; i++) {
-            ItemStack item = items[i];
-            
-            // Poseidon
-            InventoryTransactionEvent event = new InventoryTransactionEvent(InventoryTransactionType.ITEM_ADDED, this, item);
-            Bukkit.getServer().getPluginManager().callEvent(event);
-            if (event.isCancelled())
-                continue;
-            
-            while (true) {
-                // Do we already have a stack of it?
-                int firstPartial = firstPartial(item);
-
-                // Drat! no partial stack
-                if (firstPartial == -1) {
-                    // Find a free spot!
-                    int firstFree = firstEmpty();
-
-                    if (firstFree == -1) {
-                        // No space at all!
-                        leftover.put(i, item);
-                        break;
-                    } else {
-                        // More than a single stack!
-                        if (item.getAmount() > getMaxItemStack()) {
-                            setItem(firstFree, new CraftItemStack(item.getTypeId(), getMaxItemStack(), item.getDurability()));
-                            item.setAmount(item.getAmount() - getMaxItemStack());
-                        } else {
-                            // Just store it
-                            setItem(firstFree, item);
-                            break;
-                        }
+        return INVENTORY_TRANSACTION_BATCH_BEHAVIOUR.processAdds(
+                items,
+                new InventoryTransactionBatchBehaviour.TransactionGate() {
+                    public boolean isCancelled(ItemStack item) {
+                        return INVENTORY_TRANSACTION_EVENT_BRIDGE_BEHAVIOUR.isCancelled(
+                                InventoryTransactionType.ITEM_ADDED,
+                                CraftInventory.this,
+                                item
+                        );
                     }
-                } else {
-                    // So, apparently it might only partially fit, well lets do just that
-                    ItemStack partialItem = getItem(firstPartial);
-
-                    int amount = item.getAmount();
-                    int partialAmount = partialItem.getAmount();
-                    int maxAmount = partialItem.getMaxStackSize();
-
-                    // Check if it fully fits
-                    if (amount + partialAmount <= maxAmount) {
-                        partialItem.setAmount(amount + partialAmount);
-                        break;
+                },
+                new InventoryTransactionBatchBehaviour.AddMutation() {
+                    public boolean tryAdd(ItemStack item) {
+                        return INVENTORY_TRANSACTION_MUTATION_BEHAVIOUR.addItem(createMutationAccess(), item);
                     }
-
-                    // It fits partially
-                    partialItem.setAmount(maxAmount);
-                    item.setAmount(amount + partialAmount - maxAmount);
                 }
-            }
-        }
-        return leftover;
+        );
     }
 
     public HashMap<Integer, ItemStack> removeItem(ItemStack... items) {
-        HashMap<Integer, ItemStack> leftover = new HashMap<Integer, ItemStack>();
-
-        // TODO: optimization
-
-        for (int i = 0; i < items.length; i++) {
-            ItemStack item = items[i];
-            
-            // Poseidon
-            InventoryTransactionEvent event = new InventoryTransactionEvent(InventoryTransactionType.ITEM_REMOVED, this, item);
-            Bukkit.getServer().getPluginManager().callEvent(event);
-            if (event.isCancelled())
-                continue;
-            
-            int toDelete = item.getAmount();
-
-            while (true) {
-                int first = first(item.getType());
-
-                // Drat! we don't have this type in the inventory
-                if (first == -1) {
-                    item.setAmount(toDelete);
-                    leftover.put(i, item);
-                    break;
-                } else {
-                    ItemStack itemStack = getItem(first);
-                    int amount = itemStack.getAmount();
-
-                    if (amount <= toDelete) {
-                        toDelete -= amount;
-                        // clear the slot, all used up
-                        clear(first);
-                    } else {
-                        // split the stack and store
-                        itemStack.setAmount(amount - toDelete);
-                        setItem(first, itemStack);
-                        toDelete = 0;
+        return INVENTORY_TRANSACTION_BATCH_BEHAVIOUR.processRemovals(
+                items,
+                new InventoryTransactionBatchBehaviour.TransactionGate() {
+                    public boolean isCancelled(ItemStack item) {
+                        return INVENTORY_TRANSACTION_EVENT_BRIDGE_BEHAVIOUR.isCancelled(
+                                InventoryTransactionType.ITEM_REMOVED,
+                                CraftInventory.this,
+                                item
+                        );
+                    }
+                },
+                new InventoryTransactionBatchBehaviour.RemoveMutation() {
+                    public int remove(ItemStack item) {
+                        return INVENTORY_TRANSACTION_MUTATION_BEHAVIOUR.removeItem(createMutationAccess(), item);
                     }
                 }
-
-                // Bail when done
-                if (toDelete <= 0) {
-                    break;
-                }
-            }
-        }
-        return leftover;
+        );
     }
 
     private int getMaxItemStack() {
         return getInventory().getMaxStackSize();
     }
 
-    public void remove(int materialId) {
-        ItemStack[] items = getContents();
-        for (int i = 0; i < items.length; i++) {
-            if (items[i] != null && items[i].getTypeId() == materialId) {
-                clear(i);
+    private InventoryTransactionMutationBehaviour.InventoryAccess createMutationAccess() {
+        return new InventoryTransactionMutationBehaviour.InventoryAccess() {
+            public int firstPartial(ItemStack item) {
+                return CraftInventory.this.firstPartial(item);
             }
-        }
+
+            public int firstEmpty() {
+                return CraftInventory.this.firstEmpty();
+            }
+
+            public int getMaxItemStack() {
+                return CraftInventory.this.getMaxItemStack();
+            }
+
+            public void setItem(int index, ItemStack item) {
+                CraftInventory.this.setItem(index, item);
+            }
+
+            public ItemStack getItem(int index) {
+                return CraftInventory.this.getItem(index);
+            }
+
+            public int first(Material material) {
+                return CraftInventory.this.first(material);
+            }
+
+            public void clear(int index) {
+                CraftInventory.this.clear(index);
+            }
+
+            public ItemStack createItem(int typeId, int amount, short durability) {
+                return new CraftItemStack(typeId, amount, durability);
+            }
+        };
+    }
+
+    public void remove(int materialId) {
+        INVENTORY_REMOVAL_BEHAVIOUR.removeMaterialId(
+                getContents(),
+                materialId,
+                new InventoryRemovalBehaviour.SlotClearer() {
+                    public void clear(int index) {
+                        CraftInventory.this.clear(index);
+                    }
+                }
+        );
     }
 
     public void remove(Material material) {
@@ -345,12 +227,15 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public void remove(ItemStack item) {
-        ItemStack[] items = getContents();
-        for (int i = 0; i < items.length; i++) {
-            if (items[i] != null && items[i].equals(item)) {
-                clear(i);
-            }
-        }
+        INVENTORY_REMOVAL_BEHAVIOUR.removeMatchingItem(
+                getContents(),
+                item,
+                new InventoryRemovalBehaviour.SlotClearer() {
+                    public void clear(int index) {
+                        CraftInventory.this.clear(index);
+                    }
+                }
+        );
     }
 
     public void clear(int index) {
@@ -358,8 +243,13 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public void clear() {
-        for (int i = 0; i < getSize(); i++) {
-            clear(i);
-        }
+        INVENTORY_REMOVAL_BEHAVIOUR.clearAll(
+                getSize(),
+                new InventoryRemovalBehaviour.SlotClearer() {
+                    public void clear(int index) {
+                        CraftInventory.this.clear(index);
+                    }
+                }
+        );
     }
 }

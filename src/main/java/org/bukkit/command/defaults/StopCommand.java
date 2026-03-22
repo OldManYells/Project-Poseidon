@@ -2,8 +2,8 @@ package org.bukkit.command.defaults;
 
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.runtime.StopCommandExecutionSystem;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 public class StopCommand extends VanillaCommand {
     private final String msgKickShutdown;
+    private final StopCommandExecutionSystem stopCommandExecutionSystem = StopCommandExecutionSystem.getInstance();
     
     public StopCommand() {
         super("stop");
@@ -25,20 +26,42 @@ public class StopCommand extends VanillaCommand {
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if (!testPermission(sender)) return true;
 
-        Command.broadcastCommandMessage(sender, "Starting Server Shutdown, Saving Data.");
+        stopCommandExecutionSystem.executeStopCommand(new StopCommandExecutionSystem.ShutdownActions() {
+            @Override
+            public void broadcast(String message) {
+                Command.broadcastCommandMessage(sender, message);
+            }
 
-        ((CraftServer) Bukkit.getServer()).setShuttingdown(true);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.saveData();
-            player.kickPlayer(this.msgKickShutdown);
-        }
-        for (World world : Bukkit.getWorlds()) {
-            world.save();
-        }
-        Bukkit.getScheduler().scheduleSyncDelayedTask(new PoseidonPlugin(), () -> {
-            Command.broadcastCommandMessage(sender, "Stopping the server..");
-            Bukkit.shutdown();
-        }, 100);
+            @Override
+            public void setShuttingDown(boolean shuttingDown) {
+                ((CraftServer) Bukkit.getServer()).setShuttingdown(shuttingDown);
+            }
+
+            @Override
+            public void saveAndKickPlayers(String kickMessage) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.saveData();
+                    player.kickPlayer(kickMessage);
+                }
+            }
+
+            @Override
+            public void saveWorlds() {
+                for (World world : Bukkit.getWorlds()) {
+                    world.save();
+                }
+            }
+
+            @Override
+            public void scheduleFinalStop(Runnable task, long delayTicks) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(PoseidonPlugin.getInstance(), task, delayTicks);
+            }
+
+            @Override
+            public void shutdownNow() {
+                Bukkit.shutdown();
+            }
+        }, this.msgKickShutdown);
 
         return true;
     }

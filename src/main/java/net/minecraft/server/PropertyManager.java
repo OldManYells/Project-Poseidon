@@ -1,13 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.runtime.PropertyFileBehaviour;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PropertyManager {
+    private static final PropertyFileBehaviour PROPERTY_FILE_BEHAVIOUR = PropertyFileBehaviour.getInstance();
 
     public static Logger a = Logger.getLogger("Minecraft");
     public Properties properties = new Properties(); // CraftBukkit - priv to pub
@@ -15,17 +15,11 @@ public class PropertyManager {
 
     public PropertyManager(File file1) {
         this.c = file1;
-        if (file1.exists()) {
-            try {
-                this.properties.load(new FileInputStream(file1));
-            } catch (Exception exception) {
-                a.log(Level.WARNING, "Failed to load " + file1, exception);
-                this.a();
+        PROPERTY_FILE_BEHAVIOUR.initialize(file1, this.properties, a, new Runnable() {
+            public void run() {
+                PropertyManager.this.a();
             }
-        } else {
-            a.log(Level.WARNING, file1 + " does not exist");
-            this.a();
-        }
+        });
     }
 
     // CraftBukkit start
@@ -38,61 +32,55 @@ public class PropertyManager {
     }
 
     private <T> T getOverride(String name, T value) {
-        if ((this.options != null) && (this.options.has(name))) {
-            return (T) this.options.valueOf(name);
-        }
-
-        return value;
+        return PROPERTY_FILE_BEHAVIOUR.getOverride(this.options, name, value);
     }
     // CraftBukkit end
 
     public void a() {
-        a.log(Level.INFO, "Generating new properties file");
-        this.savePropertiesFile();
+        PROPERTY_FILE_BEHAVIOUR.generate(a, new Runnable() {
+            public void run() {
+                PropertyManager.this.savePropertiesFile();
+            }
+        });
     }
 
     public void savePropertiesFile() {
-        try {
-            this.properties.store(new FileOutputStream(this.c), "Minecraft server properties");
-        } catch (Exception exception) {
-            a.log(Level.WARNING, "Failed to save " + this.c, exception);
-            this.a();
-        }
+        PROPERTY_FILE_BEHAVIOUR.save(this.c, this.properties, a, new Runnable() {
+            public void run() {
+                PropertyManager.this.a();
+            }
+        });
     }
 
     public String getString(String s, String s1) {
-        if (!this.properties.containsKey(s)) {
-            s1 = this.getOverride(s, s1); // CraftBukkit
-            this.properties.setProperty(s, s1);
-            this.savePropertiesFile();
-        }
-
-        return this.getOverride(s, this.properties.getProperty(s, s1)); // CraftBukkit
+        return PROPERTY_FILE_BEHAVIOUR.getString(this.properties, this.options, s, s1, new Runnable() {
+            public void run() {
+                PropertyManager.this.savePropertiesFile();
+            }
+        });
     }
 
     public int getInt(String s, int i) {
-        try {
-            return this.getOverride(s, Integer.parseInt(this.getString(s, "" + i))); // CraftBukkit
-        } catch (Exception exception) {
-            i = this.getOverride(s, i); // CraftBukkit
-            this.properties.setProperty(s, "" + i);
-            return i;
-        }
+        return PROPERTY_FILE_BEHAVIOUR.getInt(this.properties, this.options, s, i, new Runnable() {
+            public void run() {
+                PropertyManager.this.savePropertiesFile();
+            }
+        });
     }
 
     public boolean getBoolean(String s, boolean flag) {
-        try {
-            return this.getOverride(s, Boolean.parseBoolean(this.getString(s, "" + flag))); // CraftBukkit
-        } catch (Exception exception) {
-            flag = this.getOverride(s, flag); // CraftBukkit
-            this.properties.setProperty(s, "" + flag);
-            return flag;
-        }
+        return PROPERTY_FILE_BEHAVIOUR.getBoolean(this.properties, this.options, s, flag, new Runnable() {
+            public void run() {
+                PropertyManager.this.savePropertiesFile();
+            }
+        });
     }
 
     public void b(String s, boolean flag) {
-        flag = this.getOverride(s, flag); // CraftBukkit
-        this.properties.setProperty(s, "" + flag);
-        this.savePropertiesFile();
+        PROPERTY_FILE_BEHAVIOUR.setBoolean(this.properties, this.options, s, flag, new Runnable() {
+            public void run() {
+                PropertyManager.this.savePropertiesFile();
+            }
+        });
     }
 }

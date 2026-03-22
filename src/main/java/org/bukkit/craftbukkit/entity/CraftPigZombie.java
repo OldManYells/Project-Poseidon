@@ -1,10 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.poseidon.compat.bukkit.MobPropertyBehaviour;
 import net.minecraft.server.EntityPigZombie;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.PigZombie;
 
 public class CraftPigZombie extends CraftZombie implements PigZombie {
+    private static final MobPropertyBehaviour MOB_PROPERTY_BEHAVIOUR = MobPropertyBehaviour.getInstance();
 
     public CraftPigZombie(CraftServer server, EntityPigZombie entity) {
         super(server, entity);
@@ -21,19 +23,19 @@ public class CraftPigZombie extends CraftZombie implements PigZombie {
     }
 
     public int getAnger() {
-        return getHandle().angerLevel;
+        return MOB_PROPERTY_BEHAVIOUR.getPigZombieAnger(getHandle());
     }
 
     public void setAnger(int level) {
-        getHandle().angerLevel = level;
+        MOB_PROPERTY_BEHAVIOUR.setPigZombieAnger(getHandle(), level);
     }
 
     public void setAngry(boolean angry) {
-        setAnger(angry ? 400 : 0);
+        MOB_PROPERTY_BEHAVIOUR.setPigZombieAngry(getHandle(), angry);
     }
 
     public boolean isAngry() {
-        return getAnger() > 0;
+        return MOB_PROPERTY_BEHAVIOUR.isPigZombieAngry(getHandle());
     }
 
 }

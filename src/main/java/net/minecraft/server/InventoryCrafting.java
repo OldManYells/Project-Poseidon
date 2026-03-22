@@ -1,10 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.CraftingInventoryBehaviour;
+
 public class InventoryCrafting implements IInventory {
 
     private ItemStack[] items;
     private int b;
     private Container c;
+    private final CraftingInventoryBehaviour craftingInventoryService = CraftingInventoryBehaviour.getInstance();
 
     // CraftBukkit start
     public ItemStack[] getContents() {
@@ -13,9 +16,7 @@ public class InventoryCrafting implements IInventory {
     // CraftBukkit end
 
     public InventoryCrafting(Container container, int i, int j) {
-        int k = i * j;
-
-        this.items = new ItemStack[k];
+        this.items = craftingInventoryService.createGridStorage(i, j);
         this.c = container;
         this.b = i;
     }
@@ -25,17 +26,11 @@ public class InventoryCrafting implements IInventory {
     }
 
     public ItemStack getItem(int i) {
-        return i >= this.getSize() ? null : this.items[i];
+        return craftingInventoryService.getByIndex(this.items, this.getSize(), i);
     }
 
     public ItemStack b(int i, int j) {
-        if (i >= 0 && i < this.b) {
-            int k = i + j * this.b;
-
-            return this.getItem(k);
-        } else {
-            return null;
-        }
+        return craftingInventoryService.getByGridPosition(this.items, this.b, i, j);
     }
 
     public String getName() {
@@ -43,30 +38,15 @@ public class InventoryCrafting implements IInventory {
     }
 
     public ItemStack splitStack(int i, int j) {
-        if (this.items[i] != null) {
-            ItemStack itemstack;
-
-            if (this.items[i].count <= j) {
-                itemstack = this.items[i];
-                this.items[i] = null;
-                this.c.a((IInventory) this);
-                return itemstack;
-            } else {
-                itemstack = this.items[i].a(j);
-                if (this.items[i].count == 0) {
-                    this.items[i] = null;
-                }
-
-                this.c.a((IInventory) this);
-                return itemstack;
-            }
-        } else {
-            return null;
+        CraftingInventoryBehaviour.SplitResult splitResult = craftingInventoryService.split(this.items, i, j);
+        if (splitResult.isChanged()) {
+            this.c.a((IInventory) this);
         }
+        return splitResult.getItemStack();
     }
 
     public void setItem(int i, ItemStack itemstack) {
-        this.items[i] = itemstack;
+        craftingInventoryService.set(this.items, i, itemstack);
         this.c.a((IInventory) this);
     }
 

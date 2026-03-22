@@ -1,6 +1,11 @@
 package net.minecraft.server;
 
-final class DistancesCounter implements Counter {
+import com.legacyminecraft.poseidon.world.stats.CounterVariantBehaviour;
 
-    DistancesCounter() {}
+final class DistancesCounter implements Counter {
+    private static final CounterVariantBehaviour COUNTER_VARIANT_BEHAVIOUR = CounterVariantBehaviour.getInstance();
+
+    DistancesCounter() {
+        COUNTER_VARIANT_BEHAVIOUR.initializeDistancesCounter();
+    }
 }

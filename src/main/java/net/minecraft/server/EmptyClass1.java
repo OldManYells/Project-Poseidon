@@ -1,3 +1,6 @@
 package net.minecraft.server;
 
-class EmptyClass1 {}
+import com.legacyminecraft.poseidon.compat.nms.LegacyEmptyShimContract;
+
+class EmptyClass1 implements LegacyEmptyShimContract {
+}

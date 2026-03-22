@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 public class Packet29DestroyEntity extends Packet {
 
     public int a;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet29DestroyEntity() {}
 
@@ -15,11 +18,11 @@ public class Packet29DestroyEntity extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
+        this.a = packetDataCodec.readPacket29(datainputstream).getEntityId();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
+        packetDataCodec.writePacket29(new PacketDataCodec.Packet29Data(this.a), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -27,6 +30,6 @@ public class Packet29DestroyEntity extends Packet {
     }
 
     public int a() {
-        return 4;
+        return packetDataCodec.packet29Length();
     }
 }

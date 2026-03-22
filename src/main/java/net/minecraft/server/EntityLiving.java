@@ -1,7 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.craftbukkit.TrigMath;
+import com.legacyminecraft.poseidon.runtime.math.TrigAtanBehaviour;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -15,6 +15,7 @@ import java.util.List;
 // CraftBukkit end
 
 public abstract class EntityLiving extends Entity {
+    private static final TrigAtanBehaviour TRIG_ATAN_BEHAVIOUR = TrigAtanBehaviour.getInstance();
 
     public int maxNoDamageTicks = 20;
     public float I;
@@ -233,7 +234,7 @@ public abstract class EntityLiving extends Entity {
             f3 = 1.0F;
             f2 = f * 3.0F;
             // CraftBukkit - Math -> TrigMath
-            f1 = (float) TrigMath.atan2(d1, d0) * 180.0F / 3.1415927F - 90.0F;
+            f1 = (float) TRIG_ATAN_BEHAVIOUR.atan2(d1, d0) * 180.0F / 3.1415927F - 90.0F;
         }
 
         if (this.aa > 0.0F) {

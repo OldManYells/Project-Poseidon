@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public interface ICommandListener {
+import com.legacyminecraft.poseidon.commands.CommandListenerContract;
+
+public interface ICommandListener extends CommandListenerContract {
 
     void sendMessage(String s);
 

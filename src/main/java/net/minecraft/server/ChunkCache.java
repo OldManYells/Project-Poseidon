@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.ChunkWindowAccessBehaviour;
+
 public class ChunkCache implements IBlockAccess {
+    private static final ChunkWindowAccessBehaviour CHUNK_WINDOW_ACCESS_BEHAVIOUR = ChunkWindowAccessBehaviour.getInstance();
 
     private int a;
     private int b;
@@ -9,68 +12,29 @@ public class ChunkCache implements IBlockAccess {
 
     public ChunkCache(World world, int i, int j, int k, int l, int i1, int j1) {
         this.d = world;
-        this.a = i >> 4;
-        this.b = k >> 4;
-        int k1 = l >> 4;
-        int l1 = j1 >> 4;
-
-        this.c = new Chunk[k1 - this.a + 1][l1 - this.b + 1];
-
-        for (int i2 = this.a; i2 <= k1; ++i2) {
-            for (int j2 = this.b; j2 <= l1; ++j2) {
-                this.c[i2 - this.a][j2 - this.b] = world.getChunkAt(i2, j2);
-            }
-        }
+        ChunkWindowAccessBehaviour.WindowState state = CHUNK_WINDOW_ACCESS_BEHAVIOUR.initialize(world, i, k, l, j1);
+        this.a = state.minChunkX;
+        this.b = state.minChunkZ;
+        this.c = state.chunks;
     }
 
     public int getTypeId(int i, int j, int k) {
-        if (j < 0) {
-            return 0;
-        } else if (j >= 128) {
-            return 0;
-        } else {
-            int l = (i >> 4) - this.a;
-            int i1 = (k >> 4) - this.b;
-
-            if (l >= 0 && l < this.c.length && i1 >= 0 && i1 < this.c[l].length) {
-                Chunk chunk = this.c[l][i1];
-
-                return chunk == null ? 0 : chunk.getTypeId(i & 15, j, k & 15);
-            } else {
-                return 0;
-            }
-        }
+        return CHUNK_WINDOW_ACCESS_BEHAVIOUR.getTypeId(this.a, this.b, this.c, i, j, k);
     }
 
     public TileEntity getTileEntity(int i, int j, int k) {
-        int l = (i >> 4) - this.a;
-        int i1 = (k >> 4) - this.b;
-
-        return this.c[l][i1].d(i & 15, j, k & 15);
+        return CHUNK_WINDOW_ACCESS_BEHAVIOUR.getTileEntity(this.a, this.b, this.c, i, j, k);
     }
 
     public int getData(int i, int j, int k) {
-        if (j < 0) {
-            return 0;
-        } else if (j >= 128) {
-            return 0;
-        } else {
-            int l = (i >> 4) - this.a;
-            int i1 = (k >> 4) - this.b;
-
-            return this.c[l][i1].getData(i & 15, j, k & 15);
-        }
+        return CHUNK_WINDOW_ACCESS_BEHAVIOUR.getData(this.a, this.b, this.c, i, j, k);
     }
 
     public Material getMaterial(int i, int j, int k) {
-        int l = this.getTypeId(i, j, k);
-
-        return l == 0 ? Material.AIR : Block.byId[l].material;
+        return CHUNK_WINDOW_ACCESS_BEHAVIOUR.getMaterial(this.getTypeId(i, j, k));
     }
 
     public boolean e(int i, int j, int k) {
-        Block block = Block.byId[this.getTypeId(i, j, k)];
-
-        return block == null ? false : block.material.isSolid() && block.b();
+        return CHUNK_WINDOW_ACCESS_BEHAVIOUR.isSolidRenderable(Block.byId[this.getTypeId(i, j, k)]);
     }
 }

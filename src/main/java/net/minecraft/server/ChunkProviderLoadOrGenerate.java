@@ -1,8 +1,15 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.chunk.ChunkProviderCacheBehaviour;
+import com.legacyminecraft.poseidon.world.chunk.ChunkPopulationTriggerBehaviour;
+import com.legacyminecraft.poseidon.world.chunk.ChunkProviderPersistencePolicyBehaviour;
+
 import java.util.*;
 
 public class ChunkProviderLoadOrGenerate implements IChunkProvider {
+    private static final ChunkProviderCacheBehaviour CHUNK_PROVIDER_CACHE_BEHAVIOUR = ChunkProviderCacheBehaviour.getInstance();
+    private static final ChunkPopulationTriggerBehaviour CHUNK_POPULATION_TRIGGER_BEHAVIOUR = ChunkPopulationTriggerBehaviour.getInstance();
+    private static final ChunkProviderPersistencePolicyBehaviour CHUNK_PROVIDER_PERSISTENCE_POLICY_BEHAVIOUR = ChunkProviderPersistencePolicyBehaviour.getInstance();
 
     private Set a = new HashSet();
     private Chunk b;
@@ -20,14 +27,12 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
     }
 
     public boolean isChunkLoaded(int i, int j) {
-        return this.e.containsKey(Integer.valueOf(ChunkCoordIntPair.a(i, j)));
+        return CHUNK_PROVIDER_CACHE_BEHAVIOUR.isLoaded(this.e, i, j);
     }
 
     public Chunk getChunkAt(int i, int j) {
-        int k = ChunkCoordIntPair.a(i, j);
-
-        this.a.remove(Integer.valueOf(k));
-        Chunk chunk = (Chunk) this.e.get(Integer.valueOf(k));
+        CHUNK_PROVIDER_CACHE_BEHAVIOUR.removeUnloadRequest(this.a, i, j);
+        Chunk chunk = CHUNK_PROVIDER_CACHE_BEHAVIOUR.getLoadedChunk(this.e, i, j);
 
         if (chunk == null) {
             chunk = this.d(i, j);
@@ -39,26 +44,36 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
                 }
             }
 
-            this.e.put(Integer.valueOf(k), chunk);
-            this.f.add(chunk);
+            CHUNK_PROVIDER_CACHE_BEHAVIOUR.cacheChunk(this.e, this.f, i, j, chunk);
             if (chunk != null) {
                 chunk.loadNOP();
                 chunk.addEntities();
             }
 
-            if (!chunk.done && this.isChunkLoaded(i + 1, j + 1) && this.isChunkLoaded(i, j + 1) && this.isChunkLoaded(i + 1, j)) {
+            boolean hasSouthEast = this.isChunkLoaded(i + 1, j + 1);
+            boolean hasSouth = this.isChunkLoaded(i, j + 1);
+            boolean hasEast = this.isChunkLoaded(i + 1, j);
+            if (CHUNK_POPULATION_TRIGGER_BEHAVIOUR.shouldPopulateCurrentChunk(chunk, hasSouthEast && hasSouth && hasEast)) {
                 this.getChunkAt(this, i, j);
             }
 
-            if (this.isChunkLoaded(i - 1, j) && !this.getOrCreateChunk(i - 1, j).done && this.isChunkLoaded(i - 1, j + 1) && this.isChunkLoaded(i, j + 1) && this.isChunkLoaded(i - 1, j)) {
+            boolean hasWest = this.isChunkLoaded(i - 1, j);
+            boolean westDone = hasWest && this.getOrCreateChunk(i - 1, j).done;
+            boolean hasSouthWest = this.isChunkLoaded(i - 1, j + 1);
+            if (CHUNK_POPULATION_TRIGGER_BEHAVIOUR.shouldPopulateWestNeighbor(hasWest, westDone, hasSouthWest, hasSouth)) {
                 this.getChunkAt(this, i - 1, j);
             }
 
-            if (this.isChunkLoaded(i, j - 1) && !this.getOrCreateChunk(i, j - 1).done && this.isChunkLoaded(i + 1, j - 1) && this.isChunkLoaded(i, j - 1) && this.isChunkLoaded(i + 1, j)) {
+            boolean hasNorth = this.isChunkLoaded(i, j - 1);
+            boolean northDone = hasNorth && this.getOrCreateChunk(i, j - 1).done;
+            boolean hasNorthEast = this.isChunkLoaded(i + 1, j - 1);
+            if (CHUNK_POPULATION_TRIGGER_BEHAVIOUR.shouldPopulateNorthNeighbor(hasNorth, northDone, hasNorthEast, hasEast)) {
                 this.getChunkAt(this, i, j - 1);
             }
 
-            if (this.isChunkLoaded(i - 1, j - 1) && !this.getOrCreateChunk(i - 1, j - 1).done && this.isChunkLoaded(i - 1, j - 1) && this.isChunkLoaded(i, j - 1) && this.isChunkLoaded(i - 1, j)) {
+            boolean hasNorthWest = this.isChunkLoaded(i - 1, j - 1);
+            boolean northWestDone = hasNorthWest && this.getOrCreateChunk(i - 1, j - 1).done;
+            if (CHUNK_POPULATION_TRIGGER_BEHAVIOUR.shouldPopulateNorthWestNeighbor(hasNorthWest, northWestDone, hasNorth, hasWest)) {
                 this.getChunkAt(this, i - 1, j - 1);
             }
         }
@@ -67,7 +82,7 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
     }
 
     public Chunk getOrCreateChunk(int i, int j) {
-        Chunk chunk = (Chunk) this.e.get(Integer.valueOf(ChunkCoordIntPair.a(i, j)));
+        Chunk chunk = CHUNK_PROVIDER_CACHE_BEHAVIOUR.getLoadedChunk(this.e, i, j);
 
         return chunk == null ? this.getChunkAt(i, j) : chunk;
     }
@@ -130,7 +145,7 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
         for (int j = 0; j < this.f.size(); ++j) {
             Chunk chunk = (Chunk) this.f.get(j);
 
-            if (flag && !chunk.p) {
+            if (CHUNK_PROVIDER_PERSISTENCE_POLICY_BEHAVIOUR.shouldWriteChunkMetadata(flag, chunk.p)) {
                 this.a(chunk);
             }
 
@@ -138,17 +153,13 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
                 this.b(chunk);
                 chunk.o = false;
                 ++i;
-                if (i == 24 && !flag) {
+                if (CHUNK_PROVIDER_PERSISTENCE_POLICY_BEHAVIOUR.shouldStopIncrementalSave(i, flag)) {
                     return false;
                 }
             }
         }
 
-        if (flag) {
-            if (this.d == null) {
-                return true;
-            }
-
+        if (CHUNK_PROVIDER_PERSISTENCE_POLICY_BEHAVIOUR.shouldFlushChunkLoader(flag, this.d)) {
             this.d.b();
         }
 
@@ -156,8 +167,8 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
     }
 
     public boolean unloadChunks() {
-        for (int i = 0; i < 100; ++i) {
-            if (!this.a.isEmpty()) {
+        for (int i = 0; i < CHUNK_PROVIDER_PERSISTENCE_POLICY_BEHAVIOUR.maxChunksPerUnloadPass(); ++i) {
+            if (CHUNK_PROVIDER_PERSISTENCE_POLICY_BEHAVIOUR.hasQueuedUnloads(this.a.isEmpty())) {
                 Integer integer = (Integer) this.a.iterator().next();
                 Chunk chunk = (Chunk) this.e.get(integer);
 

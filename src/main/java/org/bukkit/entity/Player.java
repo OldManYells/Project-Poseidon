@@ -310,6 +310,15 @@ public interface Player extends HumanEntity, CommandSender, OfflinePlayer {
      */
     public ConnectionType getConnectionType();
 
+    /**
+     * Canonical Poseidon connection type for migrated internals.
+     *
+     * @return canonical connection type
+     */
+    default com.legacyminecraft.poseidon.api.network.ConnectionType getCanonicalConnectionType() {
+        return getConnectionType().toCanonical();
+    }
+
     public boolean hasReceivedPacket0();
 
     /**

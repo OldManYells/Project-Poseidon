@@ -1,10 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.RedstoneOreStateBehaviour;
+
 import java.util.Random;
 
 public class BlockRedstoneOre extends Block {
 
     private boolean a;
+    private final RedstoneOreStateBehaviour redstoneOreStateService = RedstoneOreStateBehaviour.getInstance();
 
     public BlockRedstoneOre(int i, int j, boolean flag) {
         super(i, j, Material.STONE);
@@ -16,7 +19,7 @@ public class BlockRedstoneOre extends Block {
     }
 
     public int c() {
-        return 30;
+        return redstoneOreStateService.updateDelayTicks();
     }
 
     public void b(World world, int i, int j, int k, EntityHuman entityhuman) {
@@ -36,61 +39,41 @@ public class BlockRedstoneOre extends Block {
 
     private void g(World world, int i, int j, int k) {
         this.h(world, i, j, k);
-        if (this.id == Block.REDSTONE_ORE.id) {
+        if (redstoneOreStateService.shouldSwitchToGlowing(this.id, Block.REDSTONE_ORE.id)) {
             world.setTypeId(i, j, k, Block.GLOWING_REDSTONE_ORE.id);
         }
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (this.id == Block.GLOWING_REDSTONE_ORE.id) {
+        if (redstoneOreStateService.shouldRevertToNormal(this.id, Block.GLOWING_REDSTONE_ORE.id)) {
             world.setTypeId(i, j, k, Block.REDSTONE_ORE.id);
         }
     }
 
     public int a(int i, Random random) {
-        return Item.REDSTONE.id;
+        return redstoneOreStateService.resolveDropItemId(Item.REDSTONE.id);
     }
 
     public int a(Random random) {
-        return 4 + random.nextInt(2);
+        return redstoneOreStateService.resolveDropCount(random);
     }
 
     private void h(World world, int i, int j, int k) {
-        Random random = world.random;
-        double d0 = 0.0625D;
-
-        for (int l = 0; l < 6; ++l) {
-            double d1 = (double) ((float) i + random.nextFloat());
-            double d2 = (double) ((float) j + random.nextFloat());
-            double d3 = (double) ((float) k + random.nextFloat());
-
-            if (l == 0 && !world.p(i, j + 1, k)) {
-                d2 = (double) (j + 1) + d0;
-            }
-
-            if (l == 1 && !world.p(i, j - 1, k)) {
-                d2 = (double) (j + 0) - d0;
-            }
-
-            if (l == 2 && !world.p(i, j, k + 1)) {
-                d3 = (double) (k + 1) + d0;
-            }
-
-            if (l == 3 && !world.p(i, j, k - 1)) {
-                d3 = (double) (k + 0) - d0;
-            }
-
-            if (l == 4 && !world.p(i + 1, j, k)) {
-                d1 = (double) (i + 1) + d0;
-            }
-
-            if (l == 5 && !world.p(i - 1, j, k)) {
-                d1 = (double) (i + 0) - d0;
-            }
-
-            if (d1 < (double) i || d1 > (double) (i + 1) || d2 < 0.0D || d2 > (double) (j + 1) || d3 < (double) k || d3 > (double) (k + 1)) {
-                world.a("reddust", d1, d2, d3, 0.0D, 0.0D, 0.0D);
-            }
-        }
+        redstoneOreStateService.emitActivationParticles(
+                new RedstoneOreStateBehaviour.ParticleEmitter() {
+                    public void emit(String particle, double x, double y, double z) {
+                        world.a(particle, x, y, z, 0.0D, 0.0D, 0.0D);
+                    }
+                },
+                new RedstoneOreStateBehaviour.OcclusionQuery() {
+                    public boolean isOccluding(int x, int y, int z) {
+                        return world.p(x, y, z);
+                    }
+                },
+                world.random,
+                i,
+                j,
+                k
+        );
     }
 }

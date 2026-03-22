@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,38 +13,32 @@ public class Packet15Place extends Packet {
     public int c;
     public int face;
     public ItemStack itemstack;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet15Place() {}
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.read();
-        this.c = datainputstream.readInt();
-        this.face = datainputstream.read();
-        short short1 = datainputstream.readShort();
-
-        if (short1 >= 0) {
-            byte b0 = datainputstream.readByte();
-            short short2 = datainputstream.readShort();
-
-            this.itemstack = new ItemStack(short1, b0, short2);
-        } else {
+        PacketDataCodec.Packet15Data packetData = packetDataCodec.readPacket15(datainputstream);
+        this.a = packetData.getX();
+        this.b = packetData.getY();
+        this.c = packetData.getZ();
+        this.face = packetData.getFace();
+        PacketDataCodec.ItemSlotData itemSlot = packetData.getItemSlot();
+        if (itemSlot == null) {
             this.itemstack = null;
+        } else {
+            this.itemstack = new ItemStack(itemSlot.getItemId(), itemSlot.getCount(), itemSlot.getData());
         }
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.write(this.b);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.write(this.face);
-        if (this.itemstack == null) {
-            dataoutputstream.writeShort(-1);
-        } else {
-            dataoutputstream.writeShort(this.itemstack.id);
-            dataoutputstream.writeByte(this.itemstack.count);
-            dataoutputstream.writeShort(this.itemstack.getData());
-        }
+        PacketDataCodec.ItemSlotData itemSlot = this.itemstack == null
+                ? null
+                : new PacketDataCodec.ItemSlotData((short) this.itemstack.id, this.itemstack.count, (short) this.itemstack.getData());
+        packetDataCodec.writePacket15(
+                new PacketDataCodec.Packet15Data(this.a, this.b, this.c, this.face, itemSlot),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -50,6 +46,6 @@ public class Packet15Place extends Packet {
     }
 
     public int a() {
-        return 15;
+        return packetDataCodec.packet15Length();
     }
 }

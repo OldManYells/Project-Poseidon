@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.CoordinateMathBehaviour;
+
 public class ChunkCoordIntPair {
+    private static final CoordinateMathBehaviour COORDINATE_MATH_BEHAVIOUR = CoordinateMathBehaviour.getInstance();
 
     public final int x;
     public final int z;
@@ -11,16 +14,14 @@ public class ChunkCoordIntPair {
     }
 
     public static int a(int i, int j) {
-        return (i < 0 ? Integer.MIN_VALUE : 0) | (i & 32767) << 16 | (j < 0 ? '\u8000' : 0) | j & 32767;
+        return COORDINATE_MATH_BEHAVIOUR.chunkPairKey(i, j);
     }
 
     public int hashCode() {
-        return a(this.x, this.z);
+        return COORDINATE_MATH_BEHAVIOUR.chunkPairKey(this.x, this.z);
     }
 
     public boolean equals(Object object) {
-        ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) object;
-
-        return chunkcoordintpair.x == this.x && chunkcoordintpair.z == this.z;
+        return COORDINATE_MATH_BEHAVIOUR.equals(this, object);
     }
 }

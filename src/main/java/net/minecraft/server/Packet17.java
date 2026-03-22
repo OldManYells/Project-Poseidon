@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,6 +13,7 @@ public class Packet17 extends Packet {
     public int c;
     public int d;
     public int e;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet17() {}
 
@@ -23,19 +26,19 @@ public class Packet17 extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.e = datainputstream.readByte();
-        this.b = datainputstream.readInt();
-        this.c = datainputstream.readByte();
-        this.d = datainputstream.readInt();
+        PacketDataCodec.Packet17Data data = packetDataCodec.readPacket17(datainputstream);
+        this.a = data.getEntityId();
+        this.e = data.getType();
+        this.b = data.getPrimaryValue();
+        this.c = data.getAuxiliaryByteValue();
+        this.d = data.getSecondaryValue();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeByte(this.e);
-        dataoutputstream.writeInt(this.b);
-        dataoutputstream.writeByte(this.c);
-        dataoutputstream.writeInt(this.d);
+        packetDataCodec.writePacket17(
+                new PacketDataCodec.Packet17Data(this.a, this.e, this.b, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -43,6 +46,6 @@ public class Packet17 extends Packet {
     }
 
     public int a() {
-        return 14;
+        return packetDataCodec.packet17Length();
     }
 }

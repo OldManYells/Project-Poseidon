@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.stats.StatisticRegistry;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -34,14 +36,7 @@ public class Statistic {
     }
 
     public Statistic d() {
-        if (StatisticList.a.containsKey(Integer.valueOf(this.e))) {
-            throw new RuntimeException("Duplicate stat id: \"" + ((Statistic) StatisticList.a.get(Integer.valueOf(this.e))).f + "\" and \"" + this.f + "\" at id " + this.e);
-        } else {
-            StatisticList.b.add(this);
-            StatisticList.a.put(Integer.valueOf(this.e), this);
-            this.h = AchievementMap.a(this.e);
-            return this;
-        }
+        return StatisticRegistry.getInstance().register(this, StatisticList.a, StatisticList.b);
     }
 
     public String toString() {

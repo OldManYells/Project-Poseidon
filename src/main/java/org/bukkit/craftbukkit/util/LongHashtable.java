@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
+import com.legacyminecraft.poseidon.compat.bukkit.LongHashBucketIndexBehaviour;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.MinecraftServer;
 
@@ -8,6 +9,8 @@ import java.util.ArrayList;
 import static org.bukkit.craftbukkit.util.Java15Compat.Arrays_copyOf;
 
 public class LongHashtable<V> extends LongHash {
+    private static final LongHashBucketIndexBehaviour LONG_HASH_BUCKET_INDEX_BEHAVIOUR =
+            LongHashBucketIndexBehaviour.getInstance();
     Object[][][] values = new Object[256][][];
     Entry cache = null;
 
@@ -39,11 +42,11 @@ public class LongHashtable<V> extends LongHash {
     }
 
     public synchronized void put(long key, V value) {
-        int mainIdx = (int) (key & 255);
+        int mainIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key);
         Object[][] outer = this.values[mainIdx];
         if (outer == null) this.values[mainIdx] = outer = new Object[256][];
 
-        int outerIdx = (int) ((key >> 32) & 255);
+        int outerIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
         Object[] inner = outer[outerIdx];
 
         if (inner == null) {
@@ -70,8 +73,8 @@ public class LongHashtable<V> extends LongHash {
     public synchronized boolean containsKey(long key) {
         if (this.cache != null && cache.key == key) return true;
 
-        int outerIdx = (int) ((key >> 32) & 255);
-        Object[][] outer = this.values[(int) (key & 255)];
+        int outerIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
+        Object[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
         if (outer == null) return false;
 
         Object[] inner = outer[outerIdx];
@@ -90,10 +93,11 @@ public class LongHashtable<V> extends LongHash {
     }
 
     public synchronized void remove(long key) {
-        Object[][] outer = this.values[(int) (key & 255)];
+        int outerIndex = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
+        Object[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
         if (outer == null) return;
 
-        Object[] inner = outer[(int) ((key >> 32) & 255)];
+        Object[] inner = outer[outerIndex];
         if (inner == null) return;
 
         for (int i = 0; i < inner.length; i++) {

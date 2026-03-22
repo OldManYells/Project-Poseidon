@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.LockedChestStateBehaviour;
+
 import java.util.Random;
 
 public class BlockLockedChest extends Block {
+    private final LockedChestStateBehaviour lockedChestStateService = LockedChestStateBehaviour.getInstance();
 
     protected BlockLockedChest(int i) {
         super(i, Material.WOOD);
@@ -10,14 +13,14 @@ public class BlockLockedChest extends Block {
     }
 
     public int a(int i) {
-        return i == 1 ? this.textureId - 1 : (i == 0 ? this.textureId - 1 : (i == 3 ? this.textureId + 1 : this.textureId));
+        return lockedChestStateService.resolveTextureBySide(i, this.textureId);
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return true;
+        return lockedChestStateService.canPlaceAtAnyLocation();
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        world.setTypeId(i, j, k, 0);
+        world.setTypeId(i, j, k, lockedChestStateService.expiredBlockTypeId());
     }
 }

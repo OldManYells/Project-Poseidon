@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -18,18 +20,20 @@ public class Packet32EntityLook extends Packet30Entity {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        super.a(datainputstream);
-        this.e = datainputstream.readByte();
-        this.f = datainputstream.readByte();
+        PacketDataCodec.Packet32Data packetData = PacketDataCodec.getInstance().readPacket32(datainputstream);
+        this.a = packetData.getEntityId();
+        this.e = packetData.getYaw();
+        this.f = packetData.getPitch();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        super.a(dataoutputstream);
-        dataoutputstream.writeByte(this.e);
-        dataoutputstream.writeByte(this.f);
+        PacketDataCodec.getInstance().writePacket32(
+                new PacketDataCodec.Packet32Data(this.a, this.e, this.f),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 6;
+        return packetDataCodec.packet32Length();
     }
 }

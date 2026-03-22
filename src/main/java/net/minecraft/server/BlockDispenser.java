@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.DispenserStateBehaviour;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.util.Vector;
@@ -12,6 +13,7 @@ import java.util.Random;
 public class BlockDispenser extends BlockContainer {
 
     private Random a = new Random();
+    private static final DispenserStateBehaviour DISPENSER_STATE_SERVICE = DispenserStateBehaviour.getInstance();
 
     protected BlockDispenser(int i) {
         super(i, Material.STONE);
@@ -19,11 +21,11 @@ public class BlockDispenser extends BlockContainer {
     }
 
     public int c() {
-        return 4;
+        return DISPENSER_STATE_SERVICE.resolveTickRate();
     }
 
     public int a(int i, Random random) {
-        return Block.DISPENSER.id;
+        return DISPENSER_STATE_SERVICE.resolveDroppedBlockId(Block.DISPENSER.id);
     }
 
     public void c(World world, int i, int j, int k) {
@@ -37,30 +39,12 @@ public class BlockDispenser extends BlockContainer {
             int i1 = world.getTypeId(i, j, k + 1);
             int j1 = world.getTypeId(i - 1, j, k);
             int k1 = world.getTypeId(i + 1, j, k);
-            byte b0 = 3;
-
-            if (Block.o[l] && !Block.o[i1]) {
-                b0 = 3;
-            }
-
-            if (Block.o[i1] && !Block.o[l]) {
-                b0 = 2;
-            }
-
-            if (Block.o[j1] && !Block.o[k1]) {
-                b0 = 5;
-            }
-
-            if (Block.o[k1] && !Block.o[j1]) {
-                b0 = 4;
-            }
-
-            world.setData(i, j, k, b0);
+            world.setData(i, j, k, DISPENSER_STATE_SERVICE.resolveDefaultFacing(Block.o[l], Block.o[i1], Block.o[j1], Block.o[k1]));
         }
     }
 
     public int a(int i) {
-        return i == 1 ? this.textureId + 17 : (i == 0 ? this.textureId + 17 : (i == 3 ? this.textureId + 1 : this.textureId));
+        return DISPENSER_STATE_SERVICE.resolveTextureBySide(i, this.textureId);
     }
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {
@@ -77,18 +61,9 @@ public class BlockDispenser extends BlockContainer {
     // CraftBukkit - private -> public
     public void dispense(World world, int i, int j, int k, Random random) {
         int l = world.getData(i, j, k);
-        byte b0 = 0;
-        byte b1 = 0;
-
-        if (l == 3) {
-            b1 = 1;
-        } else if (l == 2) {
-            b1 = -1;
-        } else if (l == 5) {
-            b0 = 1;
-        } else {
-            b0 = -1;
-        }
+        DispenserStateBehaviour.Facing facing = DISPENSER_STATE_SERVICE.resolveDispenseFacing(l);
+        int b0 = facing.offsetX;
+        int b1 = facing.offsetZ;
 
         TileEntityDispenser tileentitydispenser = (TileEntityDispenser) world.getTileEntity(i, j, k);
         // CraftBukkit start
@@ -102,21 +77,18 @@ public class BlockDispenser extends BlockContainer {
         }
         // CraftBukkit end
 
-        double d0 = (double) i + (double) b0 * 0.6D + 0.5D;
-        double d1 = (double) j + 0.5D;
-        double d2 = (double) k + (double) b1 * 0.6D + 0.5D;
+        double d0 = DISPENSER_STATE_SERVICE.resolveDispenseOriginX(i, b0);
+        double d1 = DISPENSER_STATE_SERVICE.resolveDispenseOriginY(j);
+        double d2 = DISPENSER_STATE_SERVICE.resolveDispenseOriginZ(k, b1);
 
         if (itemstack == null) {
             world.e(1001, i, j, k, 0);
         } else {
             // CraftBukkit start
-            double d3 = random.nextDouble() * 0.1D + 0.2D;
-            double motX = (double) b0 * d3;
-            double motY = 0.20000000298023224D;
-            double motZ = (double) b1 * d3;
-            motX += random.nextGaussian() * 0.007499999832361937D * 6.0D;
-            motY += random.nextGaussian() * 0.007499999832361937D * 6.0D;
-            motZ += random.nextGaussian() * 0.007499999832361937D * 6.0D;
+            double d3 = DISPENSER_STATE_SERVICE.resolveDispenseBaseSpeed(random);
+            double motX = DISPENSER_STATE_SERVICE.resolveDispenseVelocityComponent(b0, d3, random.nextGaussian());
+            double motY = DISPENSER_STATE_SERVICE.resolveDispenseVerticalVelocity(0.20000000298023224D, random.nextGaussian());
+            double motZ = DISPENSER_STATE_SERVICE.resolveDispenseVelocityComponent(b1, d3, random.nextGaussian());
 
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
             org.bukkit.inventory.ItemStack bukkitItem = new CraftItemStack(itemstack).clone();
@@ -160,7 +132,7 @@ public class BlockDispenser extends BlockContainer {
             } else {
                 EntityItem entityitem = new EntityItem(world, d0, d1 - 0.3D, d2, itemstack);
                 // CraftBukkit start
-                // double d3 = random.nextDouble() * 0.1D + 0.2D; // Moved up
+                // Base dispense speed and spread were moved earlier for event mutation support.
                 entityitem.motX = motX;
                 entityitem.motY = motY;
                 entityitem.motZ = motZ;
@@ -169,22 +141,22 @@ public class BlockDispenser extends BlockContainer {
                 world.e(1000, i, j, k, 0);
             }
 
-            world.e(2000, i, j, k, b0 + 1 + (b1 + 1) * 3);
+            world.e(2000, i, j, k, DISPENSER_STATE_SERVICE.resolveDispenseEventData(b0, b1));
         }
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        if (l > 0 && Block.byId[l].isPowerSource()) {
-            boolean flag = world.isBlockIndirectlyPowered(i, j, k) || world.isBlockIndirectlyPowered(i, j + 1, k);
+        boolean sourceIsPowerSource = l > 0 && Block.byId[l].isPowerSource();
+        boolean poweredSelf = world.isBlockIndirectlyPowered(i, j, k);
+        boolean poweredAbove = world.isBlockIndirectlyPowered(i, j + 1, k);
 
-            if (flag) {
-                world.c(i, j, k, this.id, this.c());
-            }
+        if (DISPENSER_STATE_SERVICE.shouldScheduleDispense(sourceIsPowerSource, poweredSelf, poweredAbove)) {
+            world.c(i, j, k, this.id, this.c());
         }
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (world.isBlockIndirectlyPowered(i, j, k) || world.isBlockIndirectlyPowered(i, j + 1, k)) {
+        if (DISPENSER_STATE_SERVICE.shouldDispenseNow(world.isBlockIndirectlyPowered(i, j, k), world.isBlockIndirectlyPowered(i, j + 1, k))) {
             this.dispense(world, i, j, k, random);
         }
     }
@@ -194,23 +166,7 @@ public class BlockDispenser extends BlockContainer {
     }
 
     public void postPlace(World world, int i, int j, int k, EntityLiving entityliving) {
-        int l = MathHelper.floor((double) (entityliving.yaw * 4.0F / 360.0F) + 0.5D) & 3;
-
-        if (l == 0) {
-            world.setData(i, j, k, 2);
-        }
-
-        if (l == 1) {
-            world.setData(i, j, k, 5);
-        }
-
-        if (l == 2) {
-            world.setData(i, j, k, 3);
-        }
-
-        if (l == 3) {
-            world.setData(i, j, k, 4);
-        }
+        world.setData(i, j, k, DISPENSER_STATE_SERVICE.resolvePostPlaceData(entityliving.yaw));
     }
 
     public void remove(World world, int i, int j, int k) {
@@ -220,24 +176,18 @@ public class BlockDispenser extends BlockContainer {
             ItemStack itemstack = tileentitydispenser.getItem(l);
 
             if (itemstack != null) {
-                float f = this.a.nextFloat() * 0.8F + 0.1F;
-                float f1 = this.a.nextFloat() * 0.8F + 0.1F;
-                float f2 = this.a.nextFloat() * 0.8F + 0.1F;
+                float f = DISPENSER_STATE_SERVICE.resolveDropOffset(this.a);
+                float f1 = DISPENSER_STATE_SERVICE.resolveDropOffset(this.a);
+                float f2 = DISPENSER_STATE_SERVICE.resolveDropOffset(this.a);
 
                 while (itemstack.count > 0) {
-                    int i1 = this.a.nextInt(21) + 10;
-
-                    if (i1 > itemstack.count) {
-                        i1 = itemstack.count;
-                    }
+                    int i1 = DISPENSER_STATE_SERVICE.resolveDropStackChunk(this.a, itemstack.count);
 
                     itemstack.count -= i1;
                     EntityItem entityitem = new EntityItem(world, (double) ((float) i + f), (double) ((float) j + f1), (double) ((float) k + f2), new ItemStack(itemstack.id, i1, itemstack.getData()));
-                    float f3 = 0.05F;
-
-                    entityitem.motX = (double) ((float) this.a.nextGaussian() * f3);
-                    entityitem.motY = (double) ((float) this.a.nextGaussian() * f3 + 0.2F);
-                    entityitem.motZ = (double) ((float) this.a.nextGaussian() * f3);
+                    entityitem.motX = DISPENSER_STATE_SERVICE.resolveDropMotion(this.a, false);
+                    entityitem.motY = DISPENSER_STATE_SERVICE.resolveDropMotion(this.a, true);
+                    entityitem.motZ = DISPENSER_STATE_SERVICE.resolveDropMotion(this.a, false);
                     world.addEntity(entityitem);
                 }
                 tileentitydispenser.setItem(l, null);

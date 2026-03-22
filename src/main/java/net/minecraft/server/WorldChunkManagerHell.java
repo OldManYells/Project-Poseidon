@@ -1,8 +1,9 @@
 package net.minecraft.server;
 
-import java.util.Arrays;
+import com.legacyminecraft.poseidon.world.FixedBiomeClimateBehaviour;
 
 public class WorldChunkManagerHell extends WorldChunkManager {
+    private static final FixedBiomeClimateBehaviour FIXED_BIOME_CLIMATE_BEHAVIOUR = FixedBiomeClimateBehaviour.getInstance();
 
     private BiomeBase e;
     private double f;
@@ -15,11 +16,11 @@ public class WorldChunkManagerHell extends WorldChunkManager {
     }
 
     public BiomeBase a(ChunkCoordIntPair chunkcoordintpair) {
-        return this.e;
+        return FIXED_BIOME_CLIMATE_BEHAVIOUR.biomeAt(this.e);
     }
 
     public BiomeBase getBiome(int i, int j) {
-        return this.e;
+        return FIXED_BIOME_CLIMATE_BEHAVIOUR.biomeAt(this.e);
     }
 
     public BiomeBase[] getBiomeData(int i, int j, int k, int l) {
@@ -28,27 +29,13 @@ public class WorldChunkManagerHell extends WorldChunkManager {
     }
 
     public double[] a(double[] adouble, int i, int j, int k, int l) {
-        if (adouble == null || adouble.length < k * l) {
-            adouble = new double[k * l];
-        }
-
-        Arrays.fill(adouble, 0, k * l, this.f);
-        return adouble;
+        return FIXED_BIOME_CLIMATE_BEHAVIOUR.fillTemperatureArray(adouble, k, l, this.f);
     }
 
     public BiomeBase[] a(BiomeBase[] abiomebase, int i, int j, int k, int l) {
-        if (abiomebase == null || abiomebase.length < k * l) {
-            abiomebase = new BiomeBase[k * l];
-        }
-
-        if (this.temperature == null || this.temperature.length < k * l) {
-            this.temperature = new double[k * l];
-            this.rain = new double[k * l];
-        }
-
-        Arrays.fill(abiomebase, 0, k * l, this.e);
-        Arrays.fill(this.rain, 0, k * l, this.g);
-        Arrays.fill(this.temperature, 0, k * l, this.f);
-        return abiomebase;
+        FixedBiomeClimateBehaviour.ClimateArrays climate = FIXED_BIOME_CLIMATE_BEHAVIOUR.fillClimate(abiomebase, this.rain, this.temperature, k, l, this.e, this.g, this.f);
+        this.rain = climate.rain;
+        this.temperature = climate.temperature;
+        return climate.biomes;
     }
 }

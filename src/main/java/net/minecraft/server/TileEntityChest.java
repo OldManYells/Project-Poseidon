@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
-public class TileEntityChest extends TileEntity implements IInventory {
+import com.legacyminecraft.poseidon.inventory.ChestTileInventoryBehaviour;
 
-    private ItemStack[] items = new ItemStack[27]; // CraftBukkit
+public class TileEntityChest extends TileEntity implements IInventory {
+    private static final ChestTileInventoryBehaviour CHEST_TILE_INVENTORY_BEHAVIOUR = ChestTileInventoryBehaviour.getInstance();
+
+    private ItemStack[] items = CHEST_TILE_INVENTORY_BEHAVIOUR.createStorage(); // CraftBukkit
 
     // CraftBukkit start
     public ItemStack[] getContents() {
@@ -13,87 +16,45 @@ public class TileEntityChest extends TileEntity implements IInventory {
     public TileEntityChest() {}
 
     public int getSize() {
-        return 27;
+        return CHEST_TILE_INVENTORY_BEHAVIOUR.getSize();
     }
 
     public ItemStack getItem(int i) {
-        return this.items[i];
+        return CHEST_TILE_INVENTORY_BEHAVIOUR.getItem(this.items, i);
     }
 
     public ItemStack splitStack(int i, int j) {
-        if (this.items[i] != null) {
-            ItemStack itemstack;
-
-            if (this.items[i].count <= j) {
-                itemstack = this.items[i];
-                this.items[i] = null;
-                this.update();
-                return itemstack;
-            } else {
-                itemstack = this.items[i].a(j);
-                if (this.items[i].count == 0) {
-                    this.items[i] = null;
-                }
-
-                this.update();
-                return itemstack;
-            }
-        } else {
-            return null;
+        ItemStack split = CHEST_TILE_INVENTORY_BEHAVIOUR.splitStack(this.items, i, j);
+        if (split != null) {
+            this.update();
         }
+        return split;
     }
 
     public void setItem(int i, ItemStack itemstack) {
-        this.items[i] = itemstack;
-        if (itemstack != null && itemstack.count > this.getMaxStackSize()) {
-            itemstack.count = this.getMaxStackSize();
-        }
-
+        this.items[i] = CHEST_TILE_INVENTORY_BEHAVIOUR.clampStackSize(itemstack);
         this.update();
     }
 
     public String getName() {
-        return "Chest";
+        return CHEST_TILE_INVENTORY_BEHAVIOUR.getName();
     }
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        NBTTagList nbttaglist = nbttagcompound.l("Items");
-
-        this.items = new ItemStack[this.getSize()];
-
-        for (int i = 0; i < nbttaglist.c(); ++i) {
-            NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.a(i);
-            int j = nbttagcompound1.c("Slot") & 255;
-
-            if (j >= 0 && j < this.items.length) {
-                this.items[j] = new ItemStack(nbttagcompound1);
-            }
-        }
+        this.items = CHEST_TILE_INVENTORY_BEHAVIOUR.readItems(nbttagcompound, this.getSize());
     }
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        NBTTagList nbttaglist = new NBTTagList();
-
-        for (int i = 0; i < this.items.length; ++i) {
-            if (this.items[i] != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-
-                nbttagcompound1.a("Slot", (byte) i);
-                this.items[i].a(nbttagcompound1);
-                nbttaglist.a((NBTBase) nbttagcompound1);
-            }
-        }
-
-        nbttagcompound.a("Items", (NBTBase) nbttaglist);
+        CHEST_TILE_INVENTORY_BEHAVIOUR.writeItems(nbttagcompound, this.items);
     }
 
     public int getMaxStackSize() {
-        return 64;
+        return CHEST_TILE_INVENTORY_BEHAVIOUR.getMaxStackSize();
     }
 
     public boolean a_(EntityHuman entityhuman) {
-        return this.world.getTileEntity(this.x, this.y, this.z) != this ? false : entityhuman.e((double) this.x + 0.5D, (double) this.y + 0.5D, (double) this.z + 0.5D) <= 64.0D;
+        return CHEST_TILE_INVENTORY_BEHAVIOUR.canUse(this.world, this.x, this.y, this.z, this, entityhuman);
     }
 }

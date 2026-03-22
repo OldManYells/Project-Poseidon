@@ -1,15 +1,21 @@
 package org.bukkit.craftbukkit.scheduler;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SchedulerObjectContainerBehaviour;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 public class ObjectContainer<T> {
 
-    T object;
+    private final SchedulerObjectContainerBehaviour schedulerObjectContainerBehaviour =
+            SchedulerObjectContainerBehaviour.getInstance();
+    private final AtomicReference<T> objectReference = new AtomicReference<T>();
 
     public void setObject(T object) {
-        this.object = object;
+        schedulerObjectContainerBehaviour.setObject(objectReference, object);
     }
 
     public T getObject() {
-        return object;
+        return schedulerObjectContainerBehaviour.getObject(objectReference);
     }
 
 }

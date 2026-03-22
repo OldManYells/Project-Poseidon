@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,46 +18,43 @@ public class Packet21PickupSpawn extends Packet {
     public int h;
     public int i;
     public int l;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet21PickupSpawn() {}
 
     public Packet21PickupSpawn(EntityItem entityitem) {
-        this.a = entityitem.id;
-        this.h = entityitem.itemStack.id;
-        this.i = entityitem.itemStack.count;
-        this.l = entityitem.itemStack.getData();
-        this.b = MathHelper.floor(entityitem.locX * 32.0D);
-        this.c = MathHelper.floor(entityitem.locY * 32.0D);
-        this.d = MathHelper.floor(entityitem.locZ * 32.0D);
-        this.e = (byte) ((int) (entityitem.motX * 128.0D));
-        this.f = (byte) ((int) (entityitem.motY * 128.0D));
-        this.g = (byte) ((int) (entityitem.motZ * 128.0D));
+        PacketDataCodec.Packet21Data packetData = packetDataCodec.packet21FromPickupEntity(entityitem);
+        this.a = packetData.getEntityId();
+        this.h = packetData.getItemId();
+        this.i = packetData.getItemCount();
+        this.l = packetData.getItemData();
+        this.b = packetData.getX();
+        this.c = packetData.getY();
+        this.d = packetData.getZ();
+        this.e = packetData.getVelocityX();
+        this.f = packetData.getVelocityY();
+        this.g = packetData.getVelocityZ();
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.h = datainputstream.readShort();
-        this.i = datainputstream.readByte();
-        this.l = datainputstream.readShort();
-        this.b = datainputstream.readInt();
-        this.c = datainputstream.readInt();
-        this.d = datainputstream.readInt();
-        this.e = datainputstream.readByte();
-        this.f = datainputstream.readByte();
-        this.g = datainputstream.readByte();
+        PacketDataCodec.Packet21Data packetData = packetDataCodec.readPacket21(datainputstream);
+        this.a = packetData.getEntityId();
+        this.h = packetData.getItemId();
+        this.i = packetData.getItemCount();
+        this.l = packetData.getItemData();
+        this.b = packetData.getX();
+        this.c = packetData.getY();
+        this.d = packetData.getZ();
+        this.e = packetData.getVelocityX();
+        this.f = packetData.getVelocityY();
+        this.g = packetData.getVelocityZ();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeShort(this.h);
-        dataoutputstream.writeByte(this.i);
-        dataoutputstream.writeShort(this.l);
-        dataoutputstream.writeInt(this.b);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.writeInt(this.d);
-        dataoutputstream.writeByte(this.e);
-        dataoutputstream.writeByte(this.f);
-        dataoutputstream.writeByte(this.g);
+        packetDataCodec.writePacket21(
+                new PacketDataCodec.Packet21Data(this.a, this.h, this.i, this.l, this.b, this.c, this.d, this.e, this.f, this.g),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -63,6 +62,6 @@ public class Packet21PickupSpawn extends Packet {
     }
 
     public int a() {
-        return 24;
+        return packetDataCodec.packet21Length();
     }
 }

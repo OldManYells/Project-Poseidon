@@ -2,12 +2,15 @@ package net.minecraft.server;
 
 // CraftBukkit start
 
-import org.bukkit.craftbukkit.TrigMath;
+import com.legacyminecraft.poseidon.entity.EntityCreatureRoamingBehaviour;
+import com.legacyminecraft.poseidon.runtime.math.TrigAtanBehaviour;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
 // CraftBukkit end
 
 public class EntityCreature extends EntityLiving {
+    private static final EntityCreatureRoamingBehaviour ENTITY_CREATURE_ROAMING_BEHAVIOUR = EntityCreatureRoamingBehaviour.getInstance();
+    private static final TrigAtanBehaviour TRIG_ATAN_BEHAVIOUR = TrigAtanBehaviour.getInstance();
 
     public PathEntity pathEntity; // CraftBukkit - public
     public Entity target; // CraftBukkit - public
@@ -99,7 +102,7 @@ public class EntityCreature extends EntityLiving {
                 double d2 = vec3d.c - this.locZ;
                 double d3 = vec3d.b - (double) i;
                 // CraftBukkit - Math -> TrigMath
-                float f2 = (float) (TrigMath.atan2(d2, d1) * 180.0D / 3.1415927410125732D) - 90.0F;
+                float f2 = (float) (TRIG_ATAN_BEHAVIOUR.atan2(d2, d1) * 180.0D / 3.1415927410125732D) - 90.0F;
                 float f3 = f2 - this.yaw;
 
                 for (this.aA = this.aE; f3 < -180.0F; f3 += 360.0F) {
@@ -153,29 +156,14 @@ public class EntityCreature extends EntityLiving {
     }
 
     protected void B() {
-        boolean flag = false;
-        int i = -1;
-        int j = -1;
-        int k = -1;
-        float f = -99999.0F;
-
-        for (int l = 0; l < 10; ++l) {
-            int i1 = MathHelper.floor(this.locX + (double) this.random.nextInt(13) - 6.0D);
-            int j1 = MathHelper.floor(this.locY + (double) this.random.nextInt(7) - 3.0D);
-            int k1 = MathHelper.floor(this.locZ + (double) this.random.nextInt(13) - 6.0D);
-            float f1 = this.a(i1, j1, k1);
-
-            if (f1 > f) {
-                f = f1;
-                i = i1;
-                j = j1;
-                k = k1;
-                flag = true;
+        EntityCreatureRoamingBehaviour.TargetCandidate targetCandidate = ENTITY_CREATURE_ROAMING_BEHAVIOUR.selectBestRoamTarget(this.locX, this.locY, this.locZ, this.random, new EntityCreatureRoamingBehaviour.CandidateScorer() {
+            public float score(int x, int y, int z) {
+                return EntityCreature.this.a(x, y, z);
             }
-        }
+        });
 
-        if (flag) {
-            this.pathEntity = this.world.a(this, i, j, k, 10.0F);
+        if (targetCandidate != null) {
+            this.pathEntity = this.world.a(this, targetCandidate.getX(), targetCandidate.getY(), targetCandidate.getZ(), 10.0F);
         }
     }
 

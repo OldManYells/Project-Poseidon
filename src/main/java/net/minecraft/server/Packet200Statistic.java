@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +10,7 @@ public class Packet200Statistic extends Packet {
 
     public int a;
     public int b;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet200Statistic() {}
 
@@ -21,16 +24,16 @@ public class Packet200Statistic extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readByte();
+        PacketDataCodec.Packet200Data packetData = packetDataCodec.readPacket200(datainputstream);
+        this.a = packetData.getStatisticId();
+        this.b = packetData.getAmount();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeByte(this.b);
+        packetDataCodec.writePacket200(new PacketDataCodec.Packet200Data(this.a, this.b), dataoutputstream);
     }
 
     public int a() {
-        return 6;
+        return packetDataCodec.packet200Length();
     }
 }

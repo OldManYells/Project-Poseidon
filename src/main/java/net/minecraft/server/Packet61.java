@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,6 +13,7 @@ public class Packet61 extends Packet {
     public int c;
     public int d;
     public int e;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet61() {}
 
@@ -23,19 +26,19 @@ public class Packet61 extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.c = datainputstream.readInt();
-        this.d = datainputstream.readByte();
-        this.e = datainputstream.readInt();
-        this.b = datainputstream.readInt();
+        PacketDataCodec.Packet61Data data = packetDataCodec.readPacket61(datainputstream);
+        this.a = data.getPrimaryId();
+        this.c = data.getX();
+        this.d = data.getY();
+        this.e = data.getZ();
+        this.b = data.getValue();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.writeByte(this.d);
-        dataoutputstream.writeInt(this.e);
-        dataoutputstream.writeInt(this.b);
+        packetDataCodec.writePacket61(
+                new PacketDataCodec.Packet61Data(this.a, this.c, this.d, this.e, this.b),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -43,6 +46,6 @@ public class Packet61 extends Packet {
     }
 
     public int a() {
-        return 20;
+        return packetDataCodec.packet61Length();
     }
 }

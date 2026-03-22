@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.FireSpreadBehaviour;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
@@ -15,6 +16,7 @@ public class BlockFire extends Block {
 
     private int[] a = new int[256];
     private int[] b = new int[256];
+    private static final FireSpreadBehaviour FIRE_SPREAD_POLICY_SERVICE = FireSpreadBehaviour.getInstance();
 
     protected BlockFire(int i, int j) {
         super(i, j, Material.FIRE);
@@ -34,8 +36,7 @@ public class BlockFire extends Block {
     }
 
     private void a(int i, int j, int k) {
-        this.a[i] = j;
-        this.b[i] = k;
+        FIRE_SPREAD_POLICY_SERVICE.setFlammability(this.a, this.b, i, j, k);
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
@@ -51,35 +52,36 @@ public class BlockFire extends Block {
     }
 
     public int a(Random random) {
-        return 0;
+        return FIRE_SPREAD_POLICY_SERVICE.resolveDropCount();
     }
 
     public int c() {
-        return 40;
+        return FIRE_SPREAD_POLICY_SERVICE.resolveTickRate();
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        boolean flag = world.getTypeId(i, j - 1, k) == Block.NETHERRACK.id;
-
-        if (!this.canPlace(world, i, j, k)) {
+        boolean flag = FIRE_SPREAD_POLICY_SERVICE.isEternalBase(world.getTypeId(i, j - 1, k), Block.NETHERRACK.id);
+        if (FIRE_SPREAD_POLICY_SERVICE.shouldRemoveForInvalidPlacement(this.canPlace(world, i, j, k))) {
             world.setTypeId(i, j, k, 0);
         }
 
-        if (!flag && world.v() && (world.s(i, j, k) || world.s(i - 1, j, k) || world.s(i + 1, j, k) || world.s(i, j, k - 1) || world.s(i, j, k + 1))) {
+        boolean rainedOnSelfOrNeighbors = world.s(i, j, k) || world.s(i - 1, j, k) || world.s(i + 1, j, k) || world.s(i, j, k - 1) || world.s(i, j, k + 1);
+        if (FIRE_SPREAD_POLICY_SERVICE.shouldRemoveForRain(flag, world.v(), rainedOnSelfOrNeighbors)) {
             world.setTypeId(i, j, k, 0);
         } else {
             int l = world.getData(i, j, k);
 
-            if (l < 15) {
-                world.setRawData(i, j, k, l + random.nextInt(3) / 2);
+            int nextAge = FIRE_SPREAD_POLICY_SERVICE.nextFireAge(l, random.nextInt(3));
+            if (nextAge != l) {
+                world.setRawData(i, j, k, nextAge);
+                l = nextAge;
             }
 
             world.c(i, j, k, this.id, this.c());
-            if (!flag && !this.g(world, i, j, k)) {
-                if (!world.e(i, j - 1, k) || l > 3) {
-                    world.setTypeId(i, j, k, 0);
-                }
-            } else if (!flag && !this.b(world, i, j - 1, k) && l == 15 && random.nextInt(4) == 0) {
+            boolean hasBurnableNeighbor = this.g(world, i, j, k);
+            if (FIRE_SPREAD_POLICY_SERVICE.shouldRemoveWithoutSupport(flag, hasBurnableNeighbor, world.e(i, j - 1, k), l)) {
+                world.setTypeId(i, j, k, 0);
+            } else if (FIRE_SPREAD_POLICY_SERVICE.shouldRemoveAtMaxAge(flag, this.b(world, i, j - 1, k), l, random.nextInt(4))) {
                 world.setTypeId(i, j, k, 0);
             } else {
                 this.a(world, i + 1, j, k, 300, random, l);
@@ -101,23 +103,17 @@ public class BlockFire extends Block {
                     for (int j1 = k - 1; j1 <= k + 1; ++j1) {
                         for (int k1 = j - 1; k1 <= j + 4; ++k1) {
                             if (i1 != i || k1 != j || j1 != k) {
-                                int l1 = 100;
-
-                                if (k1 > j + 1) {
-                                    l1 += (k1 - (j + 1)) * 100;
-                                }
+                                int l1 = FIRE_SPREAD_POLICY_SERVICE.resolveVerticalSpreadBound(j, k1, 100);
 
                                 int i2 = this.h(world, i1, k1, j1);
 
                                 if (i2 > 0) {
-                                    int j2 = (i2 + 40) / (l + 30);
+                                    int j2 = FIRE_SPREAD_POLICY_SERVICE.resolveSpreadChanceFromNeighbor(i2, l);
+                                    boolean weatherBlockedTarget = world.v() && world.s(i1, k1, j1);
+                                    boolean weatherBlockedAdjacent = world.s(i1 - 1, k1, k) || world.s(i1 + 1, k1, j1) || world.s(i1, k1, j1 - 1) || world.s(i1, k1, j1 + 1);
 
-                                    if (j2 > 0 && random.nextInt(l1) <= j2 && (!world.v() || !world.s(i1, k1, j1)) && !world.s(i1 - 1, k1, k) && !world.s(i1 + 1, k1, j1) && !world.s(i1, k1, j1 - 1) && !world.s(i1, k1, j1 + 1)) {
-                                        int k2 = l + random.nextInt(5) / 4;
-
-                                        if (k2 > 15) {
-                                            k2 = 15;
-                                        }
+                                    if (FIRE_SPREAD_POLICY_SERVICE.shouldSpreadToAir(j2, random.nextInt(l1), weatherBlockedTarget, weatherBlockedAdjacent)) {
+                                        int k2 = FIRE_SPREAD_POLICY_SERVICE.nextSpreadAge(l, random.nextInt(5));
                                         // CraftBukkit start - Call to stop spread of fire.
                                         org.bukkit.block.Block block = bworld.getBlockAt(i1, k1, j1);
 
@@ -152,9 +148,9 @@ public class BlockFire extends Block {
     }
 
     private void a(World world, int i, int j, int k, int l, Random random, int i1) {
-        int j1 = this.b[world.getTypeId(i, j, k)];
+        int j1 = FIRE_SPREAD_POLICY_SERVICE.resolveNeighborBurnOdds(this.b, world.getTypeId(i, j, k));
 
-        if (random.nextInt(l) < j1) {
+        if (FIRE_SPREAD_POLICY_SERVICE.shouldAttemptNeighborBurn(random.nextInt(l), j1)) {
             boolean flag = world.getTypeId(i, j, k) == Block.TNT.id;
             // CraftBukkit start
             org.bukkit.block.Block theBlock = world.getWorld().getBlockAt(i, j, k);
@@ -167,13 +163,8 @@ public class BlockFire extends Block {
             }
             // CraftBukkit end
 
-            if (random.nextInt(i1 + 10) < 5 && !world.s(i, j, k)) {
-                int k1 = i1 + random.nextInt(5) / 4;
-
-                if (k1 > 15) {
-                    k1 = 15;
-                }
-
+            if (FIRE_SPREAD_POLICY_SERVICE.shouldIgniteBurnedBlock(random.nextInt(i1 + 10), world.s(i, j, k))) {
+                int k1 = FIRE_SPREAD_POLICY_SERVICE.nextSpreadAge(i1, random.nextInt(5));
                 world.setTypeIdAndData(i, j, k, this.id, k1);
             } else {
                 world.setTypeId(i, j, k, 0);
@@ -186,24 +177,23 @@ public class BlockFire extends Block {
     }
 
     private boolean g(World world, int i, int j, int k) {
-        return this.b(world, i + 1, j, k) ? true : (this.b(world, i - 1, j, k) ? true : (this.b(world, i, j - 1, k) ? true : (this.b(world, i, j + 1, k) ? true : (this.b(world, i, j, k - 1) ? true : this.b(world, i, j, k + 1)))));
+        return FIRE_SPREAD_POLICY_SERVICE.hasBurnableNeighbor(new FireSpreadBehaviour.BurnableQuery() {
+            public boolean isBurnable(int x, int y, int z) {
+                return BlockFire.this.b(world, x, y, z);
+            }
+        }, i, j, k);
     }
 
     private int h(World world, int i, int j, int k) {
-        byte b0 = 0;
+        return FIRE_SPREAD_POLICY_SERVICE.resolveNeighborEncouragement(new FireSpreadBehaviour.MaxEncouragementQuery() {
+            public boolean isEmpty(int x, int y, int z) {
+                return world.isEmpty(x, y, z);
+            }
 
-        if (!world.isEmpty(i, j, k)) {
-            return 0;
-        } else {
-            int l = this.f(world, i + 1, j, k, b0);
-
-            l = this.f(world, i - 1, j, k, l);
-            l = this.f(world, i, j - 1, k, l);
-            l = this.f(world, i, j + 1, k, l);
-            l = this.f(world, i, j, k - 1, l);
-            l = this.f(world, i, j, k + 1, l);
-            return l;
-        }
+            public int encouragementAt(int x, int y, int z) {
+                return FIRE_SPREAD_POLICY_SERVICE.resolveEncouragement(BlockFire.this.a, world.getTypeId(x, y, z));
+            }
+        }, i, j, k);
     }
 
     public boolean k_() {
@@ -211,28 +201,27 @@ public class BlockFire extends Block {
     }
 
     public boolean b(IBlockAccess iblockaccess, int i, int j, int k) {
-        return this.a[iblockaccess.getTypeId(i, j, k)] > 0;
+        return FIRE_SPREAD_POLICY_SERVICE.isBurnable(FIRE_SPREAD_POLICY_SERVICE.resolveEncouragement(this.a, iblockaccess.getTypeId(i, j, k)));
     }
 
     public int f(World world, int i, int j, int k, int l) {
-        int i1 = this.a[world.getTypeId(i, j, k)];
-
-        return i1 > l ? i1 : l;
+        int i1 = FIRE_SPREAD_POLICY_SERVICE.resolveEncouragement(this.a, world.getTypeId(i, j, k));
+        return FIRE_SPREAD_POLICY_SERVICE.maxEncouragement(l, i1);
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return world.e(i, j - 1, k) || this.g(world, i, j, k);
+        return FIRE_SPREAD_POLICY_SERVICE.canPlace(world.e(i, j - 1, k), this.g(world, i, j, k));
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        if (!world.e(i, j - 1, k) && !this.g(world, i, j, k)) {
+        if (FIRE_SPREAD_POLICY_SERVICE.shouldDropOnPhysics(world.e(i, j - 1, k), this.g(world, i, j, k))) {
             world.setTypeId(i, j, k, 0);
         }
     }
 
     public void c(World world, int i, int j, int k) {
-        if (world.getTypeId(i, j - 1, k) != Block.OBSIDIAN.id || !Block.PORTAL.a_(world, i, j, k)) {
-            if (!world.e(i, j - 1, k) && !this.g(world, i, j, k)) {
+        if (!FIRE_SPREAD_POLICY_SERVICE.shouldTryPortalCreation(world.getTypeId(i, j - 1, k), Block.OBSIDIAN.id) || !Block.PORTAL.a_(world, i, j, k)) {
+            if (FIRE_SPREAD_POLICY_SERVICE.shouldDropOnPhysics(world.e(i, j - 1, k), this.g(world, i, j, k))) {
                 world.setTypeId(i, j, k, 0);
             } else {
                 world.c(i, j, k, this.id, this.c());

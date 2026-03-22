@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +12,7 @@ public class Packet100OpenWindow extends Packet {
     public int b;
     public String c;
     public int d;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet100OpenWindow() {}
 
@@ -25,20 +28,21 @@ public class Packet100OpenWindow extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readByte();
-        this.b = datainputstream.readByte();
-        this.c = datainputstream.readUTF();
-        this.d = datainputstream.readByte();
+        PacketDataCodec.Packet100Data packetData = packetDataCodec.readPacket100(datainputstream);
+        this.a = packetData.getWindowId();
+        this.b = packetData.getWindowType();
+        this.c = packetData.getTitle();
+        this.d = packetData.getSlotCount();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeByte(this.a);
-        dataoutputstream.writeByte(this.b);
-        dataoutputstream.writeUTF(this.c);
-        dataoutputstream.writeByte(this.d);
+        packetDataCodec.writePacket100(
+                new PacketDataCodec.Packet100Data(this.a, this.b, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 3 + this.c.length();
+        return packetDataCodec.packet100Length(this.c);
     }
 }

@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.gen.ChunkGeneratorBootstrapBehaviour;
+
 import java.util.Random;
 
 public class ChunkProviderHell implements IChunkProvider {
+    private static final ChunkGeneratorBootstrapBehaviour CHUNK_GENERATOR_BOOTSTRAP_BEHAVIOUR = ChunkGeneratorBootstrapBehaviour.getInstance();
 
     private Random h;
     private NoiseGeneratorOctaves i;
@@ -182,8 +185,8 @@ public class ChunkProviderHell implements IChunkProvider {
     }
 
     public Chunk getOrCreateChunk(int i, int j) {
-        this.h.setSeed((long) i * 341873128712L + (long) j * 132897987541L);
-        byte[] abyte = new byte['\u8000'];
+        this.h.setSeed(CHUNK_GENERATOR_BOOTSTRAP_BEHAVIOUR.chunkSeed(i, j));
+        byte[] abyte = CHUNK_GENERATOR_BOOTSTRAP_BEHAVIOUR.createChunkBlockBuffer();
 
         this.a(i, j, abyte);
         this.b(i, j, abyte);

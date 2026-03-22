@@ -1,13 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.CraftingBlockRecipeRegistrationBehaviour;
+
 public class RecipesCrafting {
+    private static final CraftingBlockRecipeRegistrationBehaviour CRAFTING_BLOCK_RECIPE_REGISTRATION_BEHAVIOUR = CraftingBlockRecipeRegistrationBehaviour.getInstance();
 
     public RecipesCrafting() {}
 
     public void a(CraftingManager craftingmanager) {
-        craftingmanager.registerShapedRecipe(new ItemStack(Block.CHEST), new Object[] { "###", "# #", "###", Character.valueOf('#'), Block.WOOD});
-        craftingmanager.registerShapedRecipe(new ItemStack(Block.FURNACE), new Object[] { "###", "# #", "###", Character.valueOf('#'), Block.COBBLESTONE});
-        craftingmanager.registerShapedRecipe(new ItemStack(Block.WORKBENCH), new Object[] { "##", "##", Character.valueOf('#'), Block.WOOD});
-        craftingmanager.registerShapedRecipe(new ItemStack(Block.SANDSTONE), new Object[] { "##", "##", Character.valueOf('#'), Block.SAND});
+        CRAFTING_BLOCK_RECIPE_REGISTRATION_BEHAVIOUR.registerAll(craftingmanager);
     }
 }

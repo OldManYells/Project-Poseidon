@@ -1,31 +1,25 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.poseidon.compat.bukkit.CreatureTargetBridgeBehaviour;
 import net.minecraft.server.EntityCreature;
-import net.minecraft.server.EntityLiving;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
 
 public class CraftCreature extends CraftLivingEntity implements Creature {
+    private static final CreatureTargetBridgeBehaviour CREATURE_TARGET_BRIDGE_BEHAVIOUR =
+            CreatureTargetBridgeBehaviour.getInstance();
+
     public CraftCreature(CraftServer server, EntityCreature entity) {
         super(server, entity);
     }
 
     public void setTarget(LivingEntity target) {
-        EntityCreature entity = getHandle();
-        if (target == null) {
-            entity.target = null;
-        } else if (target instanceof CraftLivingEntity) {
-            EntityLiving victim = ((CraftLivingEntity) target).getHandle();
-            entity.target = victim;
-            entity.pathEntity = entity.world.findPath(entity, entity.target, 16.0F);
-        }
+        CREATURE_TARGET_BRIDGE_BEHAVIOUR.setTarget(getHandle(), target);
     }
 
     public CraftLivingEntity getTarget() {
-        if (getHandle().target == null) return null;
-
-        return (CraftLivingEntity) getHandle().target.getBukkitEntity();
+        return CREATURE_TARGET_BRIDGE_BEHAVIOUR.getTarget(getHandle());
     }
 
     @Override

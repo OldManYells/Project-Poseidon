@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,23 +13,24 @@ public class Packet14BlockDig extends Packet {
     public int c;
     public int face;
     public int e;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet14BlockDig() {}
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.e = datainputstream.read();
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.read();
-        this.c = datainputstream.readInt();
-        this.face = datainputstream.read();
+        PacketDataCodec.Packet14Data packetData = packetDataCodec.readPacket14(datainputstream);
+        this.e = packetData.getStatus();
+        this.a = packetData.getX();
+        this.b = packetData.getY();
+        this.c = packetData.getZ();
+        this.face = packetData.getFace();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.write(this.e);
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.write(this.b);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.write(this.face);
+        packetDataCodec.writePacket14(
+                new PacketDataCodec.Packet14Data(this.e, this.a, this.b, this.c, this.face),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -35,6 +38,6 @@ public class Packet14BlockDig extends Packet {
     }
 
     public int a() {
-        return 11;
+        return packetDataCodec.packet14Length();
     }
 }

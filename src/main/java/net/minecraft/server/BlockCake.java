@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.CakeStateBehaviour;
+
 import java.util.Random;
 
 public class BlockCake extends Block {
+    private final CakeStateBehaviour cakeStateService = CakeStateBehaviour.getInstance();
 
     protected BlockCake(int i, int j) {
         super(i, j, Material.CAKE);
@@ -10,29 +13,27 @@ public class BlockCake extends Block {
     }
 
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
-        int l = iblockaccess.getData(i, j, k);
-        float f = 0.0625F;
-        float f1 = (float) (1 + l * 2) / 16.0F;
-        float f2 = 0.5F;
-
-        this.a(f1, 0.0F, f, 1.0F - f, f2, 1.0F - f);
+        CakeStateBehaviour.Bounds bounds = cakeStateService.resolveSelectionBounds(iblockaccess.getData(i, j, k));
+        this.a(
+                bounds.getMinX(),
+                bounds.getMinY(),
+                bounds.getMinZ(),
+                bounds.getMaxX(),
+                bounds.getMaxY(),
+                bounds.getMaxZ()
+        );
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
-        int l = world.getData(i, j, k);
-        float f = 0.0625F;
-        float f1 = (float) (1 + l * 2) / 16.0F;
-        float f2 = 0.5F;
-
-        return AxisAlignedBB.b((double) ((float) i + f1), (double) j, (double) ((float) k + f), (double) ((float) (i + 1) - f), (double) ((float) j + f2 - f), (double) ((float) (k + 1) - f));
+        return cakeStateService.resolveCollisionBox(i, j, k, world.getData(i, j, k));
     }
 
     public int a(int i, int j) {
-        return i == 1 ? this.textureId : (i == 0 ? this.textureId + 3 : (j > 0 && i == 4 ? this.textureId + 2 : this.textureId + 1));
+        return cakeStateService.resolveTextureBySideAndBites(i, j, this.textureId);
     }
 
     public int a(int i) {
-        return i == 1 ? this.textureId : (i == 0 ? this.textureId + 3 : this.textureId + 1);
+        return cakeStateService.resolveTextureBySide(i, this.textureId);
     }
 
     public boolean b() {
@@ -53,11 +54,11 @@ public class BlockCake extends Block {
     }
 
     private void c(World world, int i, int j, int k, EntityHuman entityhuman) {
-        if (entityhuman.health < 20) {
-            entityhuman.b(3);
-            int l = world.getData(i, j, k) + 1;
+        if (cakeStateService.canEatAtHealth(entityhuman.health)) {
+            entityhuman.b(cakeStateService.healAmountPerBite());
+            int l = cakeStateService.incrementBites(world.getData(i, j, k));
 
-            if (l >= 6) {
+            if (cakeStateService.isConsumed(l)) {
                 world.setTypeId(i, j, k, 0);
             } else {
                 world.setData(i, j, k, l);
@@ -67,7 +68,7 @@ public class BlockCake extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return !super.canPlace(world, i, j, k) ? false : this.f(world, i, j, k);
+        return cakeStateService.canRemainPlaced(super.canPlace(world, i, j, k), this.f(world, i, j, k));
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
@@ -78,7 +79,7 @@ public class BlockCake extends Block {
     }
 
     public boolean f(World world, int i, int j, int k) {
-        return world.getMaterial(i, j - 1, k).isBuildable();
+        return cakeStateService.hasBuildableSupportBelow(world.getMaterial(i, j - 1, k).isBuildable());
     }
 
     public int a(Random random) {

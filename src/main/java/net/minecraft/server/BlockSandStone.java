@@ -1,12 +1,15 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.SandstoneTextureBehaviour;
+
 public class BlockSandStone extends Block {
+    private final SandstoneTextureBehaviour sandstoneTextureService = SandstoneTextureBehaviour.getInstance();
 
     public BlockSandStone(int i) {
         super(i, 192, Material.STONE);
     }
 
     public int a(int i) {
-        return i == 1 ? this.textureId - 16 : (i == 0 ? this.textureId + 16 : this.textureId);
+        return sandstoneTextureService.resolveTextureBySide(i, this.textureId);
     }
 }

@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.MinecartLifecycleBehaviour;
+import com.legacyminecraft.poseidon.entity.MinecartCollisionBehaviour;
+import com.legacyminecraft.poseidon.entity.MinecartNbtBehaviour;
 import org.bukkit.Location;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
@@ -10,6 +13,9 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntityMinecart extends Entity implements IInventory {
+    private static final MinecartLifecycleBehaviour MINECART_LIFECYCLE_BEHAVIOUR = MinecartLifecycleBehaviour.getInstance();
+    private static final MinecartCollisionBehaviour MINECART_COLLISION_BEHAVIOUR = MinecartCollisionBehaviour.getInstance();
+    private static final MinecartNbtBehaviour MINECART_NBT_BEHAVIOUR = MinecartNbtBehaviour.getInstance();
 
     private ItemStack[] items;
     public int damage;
@@ -92,83 +98,7 @@ public class EntityMinecart extends Entity implements IInventory {
     }
 
     public boolean damageEntity(Entity entity, int i) {
-        if (!this.world.isStatic && !this.dead) {
-            // CraftBukkit start
-            Vehicle vehicle = (Vehicle) this.getBukkitEntity();
-            org.bukkit.entity.Entity passenger = (entity == null) ? null : entity.getBukkitEntity();
-
-            VehicleDamageEvent event = new VehicleDamageEvent(vehicle, passenger, i);
-            this.world.getServer().getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) {
-                return true;
-            }
-
-            i = event.getDamage();
-            // CraftBukkit end
-
-            this.c = -this.c;
-            this.b = 10;
-            this.af();
-            this.damage += i * 10;
-            if (this.damage > 40) {
-                if (this.passenger != null) {
-                    this.passenger.mount(this);
-                }
-
-                // CraftBukkit start
-                VehicleDestroyEvent destroyEvent = new VehicleDestroyEvent(vehicle, passenger);
-                this.world.getServer().getPluginManager().callEvent(destroyEvent);
-
-                if (destroyEvent.isCancelled()) {
-                    this.damage = 40; // Maximize damage so this doesn't get triggered again right away
-                    return true;
-                }
-                // CraftBukkit end
-
-                this.die();
-                this.a(Item.MINECART.id, 1, 0.0F);
-                if (this.type == 1) {
-                    EntityMinecart entityminecart = this;
-
-                    for (int j = 0; j < entityminecart.getSize(); ++j) {
-                        ItemStack itemstack = entityminecart.getItem(j);
-
-                        if (itemstack != null) {
-                            float f = this.random.nextFloat() * 0.8F + 0.1F;
-                            float f1 = this.random.nextFloat() * 0.8F + 0.1F;
-                            float f2 = this.random.nextFloat() * 0.8F + 0.1F;
-
-                            while (itemstack.count > 0) {
-                                int k = this.random.nextInt(21) + 10;
-
-                                if (k > itemstack.count) {
-                                    k = itemstack.count;
-                                }
-
-                                itemstack.count -= k;
-                                EntityItem entityitem = new EntityItem(this.world, this.locX + (double) f, this.locY + (double) f1, this.locZ + (double) f2, new ItemStack(itemstack.id, k, itemstack.getData()));
-                                float f3 = 0.05F;
-
-                                entityitem.motX = (double) ((float) this.random.nextGaussian() * f3);
-                                entityitem.motY = (double) ((float) this.random.nextGaussian() * f3 + 0.2F);
-                                entityitem.motZ = (double) ((float) this.random.nextGaussian() * f3);
-                                this.world.addEntity(entityitem);
-                            }
-                            entityminecart.setItem(j, null);
-                        }
-                    }
-
-                    this.a(Block.CHEST.id, 1, 0.0F);
-                } else if (this.type == 2) {
-                    this.a(Block.FURNACE.id, 1, 0.0F);
-                }
-            }
-
-            return true;
-        } else {
-            return true;
-        }
+        return MINECART_LIFECYCLE_BEHAVIOUR.handleDamage(this, entity, i);
     }
 
     public boolean l_() {
@@ -176,33 +106,7 @@ public class EntityMinecart extends Entity implements IInventory {
     }
 
     public void die() {
-        for (int i = 0; i < this.getSize(); ++i) {
-            ItemStack itemstack = this.getItem(i);
-
-            if (itemstack != null) {
-                float f = this.random.nextFloat() * 0.8F + 0.1F;
-                float f1 = this.random.nextFloat() * 0.8F + 0.1F;
-                float f2 = this.random.nextFloat() * 0.8F + 0.1F;
-
-                while (itemstack.count > 0) {
-                    int j = this.random.nextInt(21) + 10;
-
-                    if (j > itemstack.count) {
-                        j = itemstack.count;
-                    }
-
-                    itemstack.count -= j;
-                    EntityItem entityitem = new EntityItem(this.world, this.locX + (double) f, this.locY + (double) f1, this.locZ + (double) f2, new ItemStack(itemstack.id, j, itemstack.getData()));
-                    float f3 = 0.05F;
-
-                    entityitem.motX = (double) ((float) this.random.nextGaussian() * f3);
-                    entityitem.motY = (double) ((float) this.random.nextGaussian() * f3 + 0.2F);
-                    entityitem.motZ = (double) ((float) this.random.nextGaussian() * f3);
-                    this.world.addEntity(entityitem);
-                }
-            }
-        }
-
+        MINECART_LIFECYCLE_BEHAVIOUR.dropInventoryContents(this);
         super.die();
     }
 
@@ -656,141 +560,15 @@ public class EntityMinecart extends Entity implements IInventory {
     }
 
     protected void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Type", this.type);
-        if (this.type == 2) {
-            nbttagcompound.a("PushX", this.f);
-            nbttagcompound.a("PushZ", this.g);
-            nbttagcompound.a("Fuel", (short) this.e);
-        } else if (this.type == 1) {
-            NBTTagList nbttaglist = new NBTTagList();
-
-            for (int i = 0; i < this.items.length; ++i) {
-                if (this.items[i] != null) {
-                    NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-
-                    nbttagcompound1.a("Slot", (byte) i);
-                    this.items[i].a(nbttagcompound1);
-                    nbttaglist.a((NBTBase) nbttagcompound1);
-                }
-            }
-
-            nbttagcompound.a("Items", (NBTBase) nbttaglist);
-        }
+        MINECART_NBT_BEHAVIOUR.writeNbt(this, nbttagcompound);
     }
 
     protected void a(NBTTagCompound nbttagcompound) {
-        this.type = nbttagcompound.e("Type");
-        if (this.type == 2) {
-            this.f = nbttagcompound.h("PushX");
-            this.g = nbttagcompound.h("PushZ");
-            this.e = nbttagcompound.d("Fuel");
-        } else if (this.type == 1) {
-            NBTTagList nbttaglist = nbttagcompound.l("Items");
-
-            this.items = new ItemStack[this.getSize()];
-
-            for (int i = 0; i < nbttaglist.c(); ++i) {
-                NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.a(i);
-                int j = nbttagcompound1.c("Slot") & 255;
-
-                if (j >= 0 && j < this.items.length) {
-                    this.items[j] = new ItemStack(nbttagcompound1);
-                }
-            }
-        }
+        MINECART_NBT_BEHAVIOUR.readNbt(this, nbttagcompound);
     }
 
     public void collide(Entity entity) {
-        if (!this.world.isStatic) {
-            if (entity != this.passenger) {
-                // CraftBukkit start
-                Vehicle vehicle = (Vehicle) this.getBukkitEntity();
-                org.bukkit.entity.Entity hitEntity = (entity == null) ? null : entity.getBukkitEntity();
-
-                VehicleEntityCollisionEvent collisionEvent = new VehicleEntityCollisionEvent(vehicle, hitEntity);
-                this.world.getServer().getPluginManager().callEvent(collisionEvent);
-
-                if (collisionEvent.isCancelled()) {
-                    return;
-                }
-
-                if (entity instanceof EntityLiving && !(entity instanceof EntityHuman) && this.type == 0 && this.motX * this.motX + this.motZ * this.motZ > 0.01D && this.passenger == null && entity.vehicle == null) {
-                    if (!collisionEvent.isPickupCancelled()) {
-                        VehicleEnterEvent enterEvent = new VehicleEnterEvent(vehicle, hitEntity);
-                        this.world.getServer().getPluginManager().callEvent(enterEvent);
-
-                        if (!enterEvent.isCancelled()) {
-                            entity.mount(this);
-                        }
-                    }
-                }
-                // CraftBukkit end
-
-                double d0 = entity.locX - this.locX;
-                double d1 = entity.locZ - this.locZ;
-                double d2 = d0 * d0 + d1 * d1;
-
-                // CraftBukkit - Collision
-                if (d2 >= 9.999999747378752E-5D && !collisionEvent.isCollisionCancelled()) {
-                    d2 = (double) MathHelper.a(d2);
-                    d0 /= d2;
-                    d1 /= d2;
-                    double d3 = 1.0D / d2;
-
-                    if (d3 > 1.0D) {
-                        d3 = 1.0D;
-                    }
-
-                    d0 *= d3;
-                    d1 *= d3;
-                    d0 *= 0.10000000149011612D;
-                    d1 *= 0.10000000149011612D;
-                    d0 *= (double) (1.0F - this.bu);
-                    d1 *= (double) (1.0F - this.bu);
-                    d0 *= 0.5D;
-                    d1 *= 0.5D;
-                    if (entity instanceof EntityMinecart) {
-                        double d4 = entity.locX - this.locX;
-                        double d5 = entity.locZ - this.locZ;
-                        double d6 = d4 * entity.motZ + d5 * entity.lastX;
-
-                        d6 *= d6;
-                        if (d6 > 5.0D) {
-                            return;
-                        }
-
-                        double d7 = entity.motX + this.motX;
-                        double d8 = entity.motZ + this.motZ;
-
-                        if (((EntityMinecart) entity).type == 2 && this.type != 2) {
-                            this.motX *= 0.20000000298023224D;
-                            this.motZ *= 0.20000000298023224D;
-                            this.b(entity.motX - d0, 0.0D, entity.motZ - d1);
-                            entity.motX *= 0.699999988079071D;
-                            entity.motZ *= 0.699999988079071D;
-                        } else if (((EntityMinecart) entity).type != 2 && this.type == 2) {
-                            entity.motX *= 0.20000000298023224D;
-                            entity.motZ *= 0.20000000298023224D;
-                            entity.b(this.motX + d0, 0.0D, this.motZ + d1);
-                            this.motX *= 0.699999988079071D;
-                            this.motZ *= 0.699999988079071D;
-                        } else {
-                            d7 /= 2.0D;
-                            d8 /= 2.0D;
-                            this.motX *= 0.20000000298023224D;
-                            this.motZ *= 0.20000000298023224D;
-                            this.b(d7 - d0, 0.0D, d8 - d1);
-                            entity.motX *= 0.20000000298023224D;
-                            entity.motZ *= 0.20000000298023224D;
-                            entity.b(d7 + d0, 0.0D, d8 + d1);
-                        }
-                    } else {
-                        this.b(-d0, 0.0D, -d1);
-                        entity.b(d0 / 4.0D, 0.0D, d1 / 4.0D);
-                    }
-                }
-            }
-        }
+        MINECART_COLLISION_BEHAVIOUR.handleCollision(this, entity);
     }
 
     public int getSize() {
@@ -840,48 +618,38 @@ public class EntityMinecart extends Entity implements IInventory {
     public void update() {}
 
     public boolean a(EntityHuman entityhuman) {
-        if (this.type == 0) {
-            if (this.passenger != null && this.passenger instanceof EntityHuman && this.passenger != entityhuman) {
-                return true;
-            }
-
-            if (!this.world.isStatic) {
-                // CraftBukkit start
-                org.bukkit.entity.Entity player = (entityhuman == null) ? null : entityhuman.getBukkitEntity();
-
-                VehicleEnterEvent event = new VehicleEnterEvent((Vehicle) this.getBukkitEntity(), player);
-                this.world.getServer().getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
-                    return true;
-                }
-                // CraftBukkit end
-
-                entityhuman.mount(this);
-            }
-        } else if (this.type == 1) {
-            if (!this.world.isStatic) {
-                entityhuman.a((IInventory) this);
-            }
-        } else if (this.type == 2) {
-            ItemStack itemstack = entityhuman.inventory.getItemInHand();
-
-            if (itemstack != null && itemstack.id == Item.COAL.id) {
-                if (--itemstack.count == 0) {
-                    entityhuman.inventory.setItem(entityhuman.inventory.itemInHandIndex, (ItemStack) null);
-                }
-
-                this.e += 1200;
-            }
-
-            this.f = this.locX - entityhuman.locX;
-            this.g = this.locZ - entityhuman.locZ;
-        }
-
-        return true;
+        return MINECART_LIFECYCLE_BEHAVIOUR.interact(this, entityhuman);
     }
 
     public boolean a_(EntityHuman entityhuman) {
         return this.dead ? false : entityhuman.g(this) <= 64.0D;
+    }
+
+    public double poseidonCollisionReductionFactor() {
+        return (double) (1.0F - this.bu);
+    }
+
+    public void poseidonApplyCollisionPush(double x, double y, double z) {
+        this.b(x, y, z);
+    }
+
+    public void poseidonMarkDamaged() {
+        this.af();
+    }
+
+    public void poseidonDropEntityItem(int itemId, int count, float spread) {
+        this.a(itemId, count, spread);
+    }
+
+    public float poseidonRandomFloat() {
+        return this.random.nextFloat();
+    }
+
+    public int poseidonRandomInt(int bound) {
+        return this.random.nextInt(bound);
+    }
+
+    public double poseidonRandomGaussian() {
+        return this.random.nextGaussian();
     }
 }

@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
+import com.legacyminecraft.poseidon.compat.bukkit.TerminalConsoleFlushBehaviour;
 import jline.ConsoleReader;
 import org.bukkit.craftbukkit.Main;
 
@@ -10,6 +11,7 @@ import java.util.logging.Logger;
 
 public class TerminalConsoleHandler extends ConsoleHandler {
     private final ConsoleReader reader;
+    private final TerminalConsoleFlushBehaviour terminalConsoleFlushBehaviour = TerminalConsoleFlushBehaviour.getInstance();
 
     public TerminalConsoleHandler(ConsoleReader reader) {
         super();
@@ -19,19 +21,12 @@ public class TerminalConsoleHandler extends ConsoleHandler {
     @Override
     public synchronized void flush() {
         try {
-            if (Main.useJline) {
-                reader.printString(ConsoleReader.RESET_LINE + "");
-                reader.flushConsole();
-                super.flush();
-                try {
-                    reader.drawLine();
-                } catch (Throwable ex) {
-                    reader.getCursorBuffer().clearBuffer();
+            terminalConsoleFlushBehaviour.flush(this.reader, Main.useJline, new TerminalConsoleFlushBehaviour.FlushCallbacks() {
+                @Override
+                public void flushParent() {
+                    TerminalConsoleHandler.super.flush();
                 }
-                reader.flushConsole();
-            } else {
-                super.flush();
-            }
+            });
         } catch (IOException ex) {
             Logger.getLogger(TerminalConsoleHandler.class.getName()).log(Level.SEVERE, null, ex);
         }

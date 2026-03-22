@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.SaplingGrowthBehaviour;
 import org.bukkit.BlockChangeDelegate;
 
 import java.util.Random;
 
 public class BlockSapling extends BlockFlower {
+    private final SaplingGrowthBehaviour saplingGrowthService = SaplingGrowthBehaviour.getInstance();
 
     protected BlockSapling(int i, int j) {
         super(i, j);
@@ -16,11 +18,11 @@ public class BlockSapling extends BlockFlower {
     public void a(World world, int i, int j, int k, Random random) {
         if (!world.isStatic) {
             super.a(world, i, j, k, random);
-            if (world.getLightLevel(i, j + 1, k) >= 9 && random.nextInt(30) == 0) {
+            if (saplingGrowthService.shouldAttemptGrowth(world.getLightLevel(i, j + 1, k), random)) {
                 int l = world.getData(i, j, k);
 
-                if ((l & 8) == 0) {
-                    world.setData(i, j, k, l | 8);
+                if (!saplingGrowthService.isMarkedForGrowth(l)) {
+                    world.setData(i, j, k, saplingGrowthService.markForGrowth(l));
                 } else {
                     this.b(world, i, j, k, random);
                 }
@@ -29,12 +31,12 @@ public class BlockSapling extends BlockFlower {
     }
 
     public int a(int i, int j) {
-        j &= 3;
-        return j == 1 ? 63 : (j == 2 ? 79 : super.a(i, j));
+        int variant = saplingGrowthService.extractVariant(j);
+        return saplingGrowthService.resolveTextureByVariant(variant, super.a(i, variant));
     }
 
     public void b(World world, int i, int j, int k, Random random) {
-        int l = world.getData(i, j, k) & 3;
+        int l = saplingGrowthService.extractVariant(world.getData(i, j, k));
 
         world.setRawTypeId(i, j, k, 0);
 
@@ -42,16 +44,15 @@ public class BlockSapling extends BlockFlower {
         boolean grownTree;
         BlockChangeWithNotify delegate = new BlockChangeWithNotify(world);
 
-        if (l == 1) {
+        SaplingGrowthBehaviour.TreeGeneratorType generatorType = saplingGrowthService.resolveGeneratorType(l, random);
+        if (generatorType == SaplingGrowthBehaviour.TreeGeneratorType.TAIGA) {
             grownTree = new WorldGenTaiga2().generate(delegate, random, i, j, k);
-        } else if (l == 2) {
+        } else if (generatorType == SaplingGrowthBehaviour.TreeGeneratorType.FOREST) {
             grownTree = new WorldGenForest().generate(delegate, random, i, j, k);
+        } else if (generatorType == SaplingGrowthBehaviour.TreeGeneratorType.BIG_TREE) {
+            grownTree = new WorldGenBigTree().generate(delegate, random, i, j, k);
         } else {
-            if (random.nextInt(10) == 0) {
-                grownTree = new WorldGenBigTree().generate(delegate, random, i, j, k);
-            } else {
-                grownTree = new WorldGenTrees().generate(delegate, random, i, j, k);
-            }
+            grownTree = new WorldGenTrees().generate(delegate, random, i, j, k);
         }
 
         if (!grownTree) {
@@ -61,7 +62,7 @@ public class BlockSapling extends BlockFlower {
     }
 
     protected int a_(int i) {
-        return i & 3;
+        return saplingGrowthService.extractVariant(i);
     }
 
     // CraftBukkit start

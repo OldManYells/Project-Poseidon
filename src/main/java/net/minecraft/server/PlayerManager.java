@@ -1,9 +1,20 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.player.PlayerViewRangeBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkMovementBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkCoordinateBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkIterationBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkSpiralLoadBehaviour;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerManager {
+    private static final PlayerChunkIterationBehaviour PLAYER_CHUNK_ITERATION_BEHAVIOUR = PlayerChunkIterationBehaviour.getInstance();
+    private static final PlayerChunkSpiralLoadBehaviour PLAYER_CHUNK_SPIRAL_LOAD_BEHAVIOUR = PlayerChunkSpiralLoadBehaviour.getInstance();
+    private static final PlayerChunkCoordinateBehaviour PLAYER_CHUNK_COORDINATE_BEHAVIOUR = PlayerChunkCoordinateBehaviour.getInstance();
+    private static final PlayerChunkMovementBehaviour PLAYER_CHUNK_MOVEMENT_BEHAVIOUR = PlayerChunkMovementBehaviour.getInstance();
+    private static final PlayerViewRangeBehaviour PLAYER_VIEW_RANGE_BEHAVIOUR = PlayerViewRangeBehaviour.getInstance();
 
     public List managedPlayers = new ArrayList();
     private PlayerList b = new PlayerList();
@@ -11,18 +22,12 @@ public class PlayerManager {
     private MinecraftServer server;
     private int e;
     private int f;
-    private final int[][] g = new int[][] { { 1, 0}, { 0, 1}, { -1, 0}, { 0, -1}};
 
     public PlayerManager(MinecraftServer minecraftserver, int i, int j) {
-        if (j > 15) {
-            throw new IllegalArgumentException("Too big view radius!");
-        } else if (j < 3) {
-            throw new IllegalArgumentException("Too small view radius!");
-        } else {
-            this.f = j;
-            this.server = minecraftserver;
-            this.e = i;
-        }
+        PLAYER_VIEW_RANGE_BEHAVIOUR.validateViewRadius(j);
+        this.f = j;
+        this.server = minecraftserver;
+        this.e = i;
     }
 
     public WorldServer a() {
@@ -50,106 +55,78 @@ public class PlayerManager {
     }
 
     public void flagDirty(int i, int j, int k) {
-        int l = i >> 4;
-        int i1 = k >> 4;
+        int l = PLAYER_CHUNK_COORDINATE_BEHAVIOUR.chunkFromBlock(i);
+        int i1 = PLAYER_CHUNK_COORDINATE_BEHAVIOUR.chunkFromBlock(k);
         PlayerInstance playerinstance = this.a(l, i1, false);
 
         if (playerinstance != null) {
-            playerinstance.a(i & 15, j, k & 15);
+            playerinstance.a(PLAYER_CHUNK_COORDINATE_BEHAVIOUR.localBlockInChunk(i), j, PLAYER_CHUNK_COORDINATE_BEHAVIOUR.localBlockInChunk(k));
         }
     }
 
     public void addPlayer(EntityPlayer entityplayer) {
-        int i = (int) entityplayer.locX >> 4;
-        int j = (int) entityplayer.locZ >> 4;
+        int i = PLAYER_CHUNK_COORDINATE_BEHAVIOUR.chunkFromWorldPosition(entityplayer.locX);
+        int j = PLAYER_CHUNK_COORDINATE_BEHAVIOUR.chunkFromWorldPosition(entityplayer.locZ);
 
         entityplayer.d = entityplayer.locX;
         entityplayer.e = entityplayer.locZ;
-        int k = 0;
-        int l = this.f;
-        int i1 = 0;
-        int j1 = 0;
-
-        this.a(i, j, true).a(entityplayer);
-
-        int k1;
-
-        for (k1 = 1; k1 <= l * 2; ++k1) {
-            for (int l1 = 0; l1 < 2; ++l1) {
-                int[] aint = this.g[k++ % 4];
-
-                for (int i2 = 0; i2 < k1; ++i2) {
-                    i1 += aint[0];
-                    j1 += aint[1];
-                    this.a(i + i1, j + j1, true).a(entityplayer);
-                }
+        PLAYER_CHUNK_SPIRAL_LOAD_BEHAVIOUR.forEachSpiralChunk(i, j, this.f, new PlayerChunkSpiralLoadBehaviour.ChunkConsumer() {
+            public void accept(int chunkX, int chunkZ) {
+                a(chunkX, chunkZ, true).a(entityplayer);
             }
-        }
-
-        k %= 4;
-
-        for (k1 = 0; k1 < l * 2; ++k1) {
-            i1 += this.g[k][0];
-            j1 += this.g[k][1];
-            this.a(i + i1, j + j1, true).a(entityplayer);
-        }
+        });
 
         this.managedPlayers.add(entityplayer);
     }
 
     public void removePlayer(EntityPlayer entityplayer) {
-        int i = (int) entityplayer.d >> 4;
-        int j = (int) entityplayer.e >> 4;
+        int i = PLAYER_CHUNK_COORDINATE_BEHAVIOUR.chunkFromWorldPosition(entityplayer.d);
+        int j = PLAYER_CHUNK_COORDINATE_BEHAVIOUR.chunkFromWorldPosition(entityplayer.e);
 
-        for (int k = i - this.f; k <= i + this.f; ++k) {
-            for (int l = j - this.f; l <= j + this.f; ++l) {
-                PlayerInstance playerinstance = this.a(k, l, false);
+        PLAYER_CHUNK_ITERATION_BEHAVIOUR.forEachChunkInViewRange(i, j, this.f, new PlayerChunkIterationBehaviour.ChunkConsumer() {
+            public void accept(int chunkX, int chunkZ) {
+                PlayerInstance playerinstance = a(chunkX, chunkZ, false);
 
                 if (playerinstance != null) {
                     playerinstance.b(entityplayer);
                 }
             }
-        }
+        });
 
         this.managedPlayers.remove(entityplayer);
     }
 
     private boolean a(int i, int j, int k, int l) {
-        int i1 = i - k;
-        int j1 = j - l;
-
-        return i1 >= -this.f && i1 <= this.f ? j1 >= -this.f && j1 <= this.f : false;
+        return PLAYER_VIEW_RANGE_BEHAVIOUR.isWithinViewRange(i, j, k, l, this.f);
     }
 
     public void movePlayer(EntityPlayer entityplayer) {
-        int i = (int) entityplayer.locX >> 4;
-        int j = (int) entityplayer.locZ >> 4;
-        double d0 = entityplayer.d - entityplayer.locX;
-        double d1 = entityplayer.e - entityplayer.locZ;
-        double d2 = d0 * d0 + d1 * d1;
+        int i = PLAYER_CHUNK_MOVEMENT_BEHAVIOUR.chunkCoordinate(entityplayer.locX);
+        int j = PLAYER_CHUNK_MOVEMENT_BEHAVIOUR.chunkCoordinate(entityplayer.locZ);
+        double d2 = PLAYER_CHUNK_MOVEMENT_BEHAVIOUR.squaredMovement(entityplayer.d, entityplayer.e, entityplayer.locX, entityplayer.locZ);
 
-        if (d2 >= 64.0D) {
-            int k = (int) entityplayer.d >> 4;
-            int l = (int) entityplayer.e >> 4;
+        if (PLAYER_CHUNK_MOVEMENT_BEHAVIOUR.shouldProcessChunkMovement(d2)) {
+            int k = PLAYER_CHUNK_MOVEMENT_BEHAVIOUR.chunkCoordinate(entityplayer.d);
+            int l = PLAYER_CHUNK_MOVEMENT_BEHAVIOUR.chunkCoordinate(entityplayer.e);
             int i1 = i - k;
             int j1 = j - l;
 
             if (i1 != 0 || j1 != 0) {
-                for (int k1 = i - this.f; k1 <= i + this.f; ++k1) {
-                    for (int l1 = j - this.f; l1 <= j + this.f; ++l1) {
-                        if (!this.a(k1, l1, k, l)) {
-                            this.a(k1, l1, true).a(entityplayer);
+                PLAYER_CHUNK_ITERATION_BEHAVIOUR.forEachChunkInViewRange(i, j, this.f, new PlayerChunkIterationBehaviour.ChunkConsumer() {
+                    public void accept(int chunkX, int chunkZ) {
+                        if (!a(chunkX, chunkZ, k, l)) {
+                            a(chunkX, chunkZ, true).a(entityplayer);
                         }
 
-                        if (!this.a(k1 - i1, l1 - j1, i, j)) {
-                            PlayerInstance playerinstance = this.a(k1 - i1, l1 - j1, false);
+                        if (!a(chunkX - i1, chunkZ - j1, i, j)) {
+                            PlayerInstance playerinstance = a(chunkX - i1, chunkZ - j1, false);
 
                             if (playerinstance != null) {
                                 playerinstance.b(entityplayer);
                             }
                         }
                     }
-                }
+                });
 
                 entityplayer.d = entityplayer.locX;
                 entityplayer.e = entityplayer.locZ;
@@ -179,7 +156,7 @@ public class PlayerManager {
     }
 
     public int getFurthestViewableBlock() {
-        return this.f * 16 - 16;
+        return PLAYER_VIEW_RANGE_BEHAVIOUR.furthestViewableBlock(this.f);
     }
 
     static PlayerList a(PlayerManager playermanager) {

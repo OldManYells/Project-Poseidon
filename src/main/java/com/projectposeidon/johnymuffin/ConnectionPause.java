@@ -1,72 +1,75 @@
 package com.projectposeidon.johnymuffin;
 
+import com.legacyminecraft.poseidon.auth.login.LoginPauseController;
+
+/**
+ * @deprecated Use canonical authentication classes under com.legacyminecraft.poseidon.auth.
+ */
+@Deprecated
 public class ConnectionPause {
-    private String pluginName;
-    private String connectionPauseName;
-    private LoginProcessHandler loginProcessHandler;
-    private long creationTime;
+    private final com.legacyminecraft.poseidon.auth.login.ConnectionPause delegate;
+    private final LoginPauseController pauseController;
+    private final LoginProcessHandler loginProcessHandler;
 
-    private long completionTime;
-    private boolean active;
+    public ConnectionPause(String pluginName, String connectionPauseName, LoginProcessHandler loginProcessHandler) {
+        this(new com.legacyminecraft.poseidon.auth.login.ConnectionPause(pluginName, connectionPauseName), loginProcessHandler, loginProcessHandler);
+    }
 
-    public ConnectionPause(String PluginName, String connectionPauseName, LoginProcessHandler loginProcessHandler) {
-        this.pluginName = PluginName;
-        this.connectionPauseName = connectionPauseName;
+    private ConnectionPause(com.legacyminecraft.poseidon.auth.login.ConnectionPause delegate, LoginPauseController pauseController, LoginProcessHandler loginProcessHandler) {
+        this.delegate = delegate;
+        this.pauseController = pauseController;
         this.loginProcessHandler = loginProcessHandler;
-        this.creationTime = System.currentTimeMillis();
-        this.active = true;
+    }
+
+    public static ConnectionPause fromCanonical(com.legacyminecraft.poseidon.auth.login.ConnectionPause delegate, LoginPauseController pauseController, LoginProcessHandler loginProcessHandler) {
+        return new ConnectionPause(delegate, pauseController, loginProcessHandler);
     }
 
     /**
      * This method is still undecided, please don't use it in production.
      */
     public void removeConnectionPause() {
-        loginProcessHandler.removeConnectionPause(this);
+        if (pauseController != null) {
+            pauseController.clearConnectionPause(delegate);
+        }
     }
 
     public String getPluginName() {
-        return this.pluginName;
+        return delegate.getPluginName();
     }
 
     public String getConnectionPauseName() {
-        return this.connectionPauseName;
+        return delegate.getConnectionPauseName();
     }
 
-
     public long getCreationTime() {
-        return creationTime;
+        return delegate.getCreationTime();
     }
 
     public boolean isActive() {
-        return active;
+        return delegate.isActive();
     }
 
     /**
      * This method is for Poseidon, not plugin use. DON'T TOUCH THIS IF YOU DON'T KNOW WHAT YOU ARE DOING.
      */
     public void setActive(boolean active) {
-        if(!active)
-            this.completionTime = System.currentTimeMillis();
-        this.active = active;
+        delegate.setActive(active);
     }
 
     public int getRunningTime() {
-        int running;
-        if (active) {
-            running = (int) (System.currentTimeMillis() - creationTime);
-        } else {
-            running = (int) (completionTime - creationTime);
-        }
-        running = running / 1000;
-        return running;
+        return delegate.getRunningTime();
     }
-
 
     public LoginProcessHandler getLoginProcessHandler() {
         return loginProcessHandler;
     }
 
     public long getCompletionTime() {
-        return completionTime;
+        return delegate.getCompletionTime();
+    }
+
+    public com.legacyminecraft.poseidon.auth.login.ConnectionPause getCanonicalConnectionPause() {
+        return delegate;
     }
 }

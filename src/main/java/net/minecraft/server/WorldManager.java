@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.WorldAccessDispatchBehaviour;
+
 public class WorldManager implements IWorldAccess {
+    private static final WorldAccessDispatchBehaviour WORLD_ACCESS_DISPATCH_BEHAVIOUR = WorldAccessDispatchBehaviour.getInstance();
 
     private MinecraftServer server;
     public WorldServer world; // CraftBukkit - private -> public
@@ -13,11 +16,11 @@ public class WorldManager implements IWorldAccess {
     public void a(String s, double d0, double d1, double d2, double d3, double d4, double d5) {}
 
     public void a(Entity entity) {
-        this.server.getTracker(this.world.dimension).track(entity); // CraftBukkit
+        WORLD_ACCESS_DISPATCH_BEHAVIOUR.onEntityAdded(this.server, this.world, entity);
     }
 
     public void b(Entity entity) {
-        this.server.getTracker(this.world.dimension).untrackEntity(entity); // CraftBukkit
+        WORLD_ACCESS_DISPATCH_BEHAVIOUR.onEntityRemoved(this.server, this.world, entity);
     }
 
     public void a(String s, double d0, double d1, double d2, float f, float f1) {}
@@ -27,16 +30,16 @@ public class WorldManager implements IWorldAccess {
     public void a() {}
 
     public void a(int i, int j, int k) {
-        this.server.serverConfigurationManager.flagDirty(i, j, k, this.world.dimension); // CraftBukkit
+        WORLD_ACCESS_DISPATCH_BEHAVIOUR.markBlockDirty(this.server, this.world, i, j, k);
     }
 
     public void a(String s, int i, int j, int k) {}
 
     public void a(int i, int j, int k, TileEntity tileentity) {
-        this.server.serverConfigurationManager.a(i, j, k, tileentity);
+        WORLD_ACCESS_DISPATCH_BEHAVIOUR.onTileEntityChanged(this.server, i, j, k, tileentity);
     }
 
     public void a(EntityHuman entityhuman, int i, int j, int k, int l, int i1) {
-        this.server.serverConfigurationManager.sendPacketNearby(entityhuman, (double) j, (double) k, (double) l, 64.0D, this.world.dimension, new Packet61(i, j, k, l, i1)); // CraftBukkit
+        WORLD_ACCESS_DISPATCH_BEHAVIOUR.sendAuxSfx(this.server, this.world, entityhuman, i, j, k, l, i1);
     }
 }

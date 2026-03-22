@@ -1,22 +1,33 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.MineralDropBehaviour;
+
 import java.util.Random;
 
 public class BlockOre extends Block {
+    private final MineralDropBehaviour mineralDropService = MineralDropBehaviour.getInstance();
 
     public BlockOre(int i, int j) {
         super(i, j, Material.STONE);
     }
 
     public int a(int i, Random random) {
-        return this.id == Block.COAL_ORE.id ? Item.COAL.id : (this.id == Block.DIAMOND_ORE.id ? Item.DIAMOND.id : (this.id == Block.LAPIS_ORE.id ? Item.INK_SACK.id : this.id));
+        return mineralDropService.resolveOreDropItemId(
+                this.id,
+                Block.COAL_ORE.id,
+                Block.DIAMOND_ORE.id,
+                Block.LAPIS_ORE.id,
+                Item.COAL.id,
+                Item.DIAMOND.id,
+                Item.INK_SACK.id
+        );
     }
 
     public int a(Random random) {
-        return this.id == Block.LAPIS_ORE.id ? 4 + random.nextInt(5) : 1;
+        return mineralDropService.resolveOreDropCount(this.id, Block.LAPIS_ORE.id, random);
     }
 
     protected int a_(int i) {
-        return this.id == Block.LAPIS_ORE.id ? 4 : 0;
+        return mineralDropService.resolveOreDropData(this.id, Block.LAPIS_ORE.id);
     }
 }

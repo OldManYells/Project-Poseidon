@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.CoordinateMathBehaviour;
+
 public class ChunkCoordinates implements Comparable {
+    private static final CoordinateMathBehaviour COORDINATE_MATH_BEHAVIOUR = CoordinateMathBehaviour.getInstance();
 
     public int x;
     public int y;
@@ -21,29 +24,19 @@ public class ChunkCoordinates implements Comparable {
     }
 
     public boolean equals(Object object) {
-        if (!(object instanceof ChunkCoordinates)) {
-            return false;
-        } else {
-            ChunkCoordinates chunkcoordinates = (ChunkCoordinates) object;
-
-            return this.x == chunkcoordinates.x && this.y == chunkcoordinates.y && this.z == chunkcoordinates.z;
-        }
+        return COORDINATE_MATH_BEHAVIOUR.equals(this, object);
     }
 
     public int hashCode() {
-        return this.x + this.z << 8 + this.y << 16;
+        return COORDINATE_MATH_BEHAVIOUR.hash(this);
     }
 
     public int compareTo(Object o) {
         ChunkCoordinates chunkcoordinates = (ChunkCoordinates) o;
-        return this.y == chunkcoordinates.y ? (this.z == chunkcoordinates.z ? this.x - chunkcoordinates.x : this.z - chunkcoordinates.z) : this.y - chunkcoordinates.y;
+        return COORDINATE_MATH_BEHAVIOUR.compare(this, chunkcoordinates);
     }
 
     public double a(int i, int j, int k) {
-        int l = this.x - i;
-        int i1 = this.y - j;
-        int j1 = this.z - k;
-
-        return Math.sqrt((double) (l * l + i1 * i1 + j1 * j1));
+        return COORDINATE_MATH_BEHAVIOUR.distance(this, i, j, k);
     }
 }

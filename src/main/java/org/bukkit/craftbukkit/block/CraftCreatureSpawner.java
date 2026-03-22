@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SpawnerStateBehaviour;
 import net.minecraft.server.TileEntityMobSpawner;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -7,43 +8,40 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.CreatureType;
 
 public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpawner {
-    private final CraftWorld world;
+    private static final SpawnerStateBehaviour SPAWNER_STATE_BEHAVIOUR =
+            SpawnerStateBehaviour.getInstance();
+
     private final TileEntityMobSpawner spawner;
 
     public CraftCreatureSpawner(final Block block) {
         super(block);
 
-        world = (CraftWorld) block.getWorld();
+        CraftWorld world = (CraftWorld) block.getWorld();
         spawner = (TileEntityMobSpawner) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     public CreatureType getCreatureType() {
-        return CreatureType.fromName(spawner.mobName);
+        return SPAWNER_STATE_BEHAVIOUR.getCreatureType(spawner);
     }
 
     public void setCreatureType(CreatureType creatureType) {
-        spawner.mobName = creatureType.getName();
+        SPAWNER_STATE_BEHAVIOUR.setCreatureType(spawner, creatureType);
     }
 
     public String getCreatureTypeId() {
-        return spawner.mobName;
+        return SPAWNER_STATE_BEHAVIOUR.getCreatureTypeId(spawner);
     }
 
     public void setCreatureTypeId(String creatureType) {
-        // Verify input
-        CreatureType type = CreatureType.fromName(creatureType);
-        if (type == null) {
-            return;
-        }
-        spawner.mobName = type.getName();
+        SPAWNER_STATE_BEHAVIOUR.setCreatureTypeId(spawner, creatureType);
     }
 
     public int getDelay() {
-        return spawner.spawnDelay;
+        return SPAWNER_STATE_BEHAVIOUR.getDelay(spawner);
     }
 
     public void setDelay(int delay) {
-        spawner.spawnDelay = delay;
+        SPAWNER_STATE_BEHAVIOUR.setDelay(spawner, delay);
     }
 
 }

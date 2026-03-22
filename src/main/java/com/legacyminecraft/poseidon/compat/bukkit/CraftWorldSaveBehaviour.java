@@ -1,0 +1,24 @@
+package com.legacyminecraft.poseidon.compat.bukkit;
+
+import net.minecraft.server.WorldServer;
+
+/**
+ * Canonical behavior for CraftWorld save orchestration.
+ */
+public final class CraftWorldSaveBehaviour {
+    private static final CraftWorldSaveBehaviour INSTANCE = new CraftWorldSaveBehaviour();
+
+    private CraftWorldSaveBehaviour() {
+    }
+
+    public static CraftWorldSaveBehaviour getInstance() {
+        return INSTANCE;
+    }
+
+    public void save(WorldServer worldServer) {
+        boolean previousCanSave = worldServer.canSave;
+        worldServer.canSave = false;
+        worldServer.save(true, null);
+        worldServer.canSave = previousCanSave;
+    }
+}

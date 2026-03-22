@@ -1,13 +1,16 @@
 package net.minecraft.server;
 
-class PlayerListEntry {
+import com.legacyminecraft.poseidon.entity.PlayerListEntryStateBehaviour;
+
+public class PlayerListEntry {
+    private static final PlayerListEntryStateBehaviour PLAYER_LIST_ENTRY_STATE_BEHAVIOUR = PlayerListEntryStateBehaviour.getInstance();
 
     final long a;
     Object b;
     PlayerListEntry c;
     final int d;
 
-    PlayerListEntry(int i, long j, Object object, PlayerListEntry playerlistentry) {
+    public PlayerListEntry(int i, long j, Object object, PlayerListEntry playerlistentry) {
         this.b = object;
         this.c = playerlistentry;
         this.a = j;
@@ -22,25 +25,24 @@ class PlayerListEntry {
         return this.b;
     }
 
+    public final int c() {
+        return this.d;
+    }
+
+    public final PlayerListEntry d() {
+        return this.c;
+    }
+
+    public final void a(Object object) {
+        this.b = object;
+    }
+
+    public final void a(PlayerListEntry playerlistentry) {
+        this.c = playerlistentry;
+    }
+
     public final boolean equals(Object object) {
-        if (!(object instanceof PlayerListEntry)) {
-            return false;
-        } else {
-            PlayerListEntry playerlistentry = (PlayerListEntry) object;
-            Long olong = Long.valueOf(this.a());
-            Long olong1 = Long.valueOf(playerlistentry.a());
-
-            if (olong == olong1 || olong != null && olong.equals(olong1)) {
-                Object object1 = this.b();
-                Object object2 = playerlistentry.b();
-
-                if (object1 == object2 || object1 != null && object1.equals(object2)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        return PLAYER_LIST_ENTRY_STATE_BEHAVIOUR.equalsEntry(this, object);
     }
 
     public final int hashCode() {
@@ -48,6 +50,6 @@ class PlayerListEntry {
     }
 
     public final String toString() {
-        return this.a() + "=" + this.b();
+        return PLAYER_LIST_ENTRY_STATE_BEHAVIOUR.toEntryString(this);
     }
 }

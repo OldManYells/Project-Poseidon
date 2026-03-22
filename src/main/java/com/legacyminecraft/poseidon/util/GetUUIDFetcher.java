@@ -6,15 +6,18 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static com.projectposeidon.johnymuffin.UUIDManager.generateOfflineUUID;
+import static com.legacyminecraft.poseidon.auth.uuid.UUIDManager.generateOfflineUUID;
 
 public class GetUUIDFetcher {
+    private static final int UUID_FETCH_TIMEOUT_MS = 5000;
 
     public static class UUIDAndUsernameResult {
         private UUIDResult uuidResult;
@@ -114,7 +117,14 @@ public class GetUUIDFetcher {
     }
 
     private static JSONObject readJsonFromUrl(String url) throws IOException, ParseException {
-        InputStream is = new URL(url).openStream();
+        URLConnection connection = new URL(url).openConnection();
+        connection.setConnectTimeout(UUID_FETCH_TIMEOUT_MS);
+        connection.setReadTimeout(UUID_FETCH_TIMEOUT_MS);
+        if (connection instanceof HttpURLConnection) {
+            ((HttpURLConnection) connection).setRequestMethod("GET");
+        }
+
+        InputStream is = connection.getInputStream();
         try {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
             String jsonText = readAll(rd);

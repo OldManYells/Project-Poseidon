@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.chunk.ChunkNbtLayoutBehaviour;
+
 import java.io.*;
 
 public class ChunkRegionLoader implements IChunkLoader {
+    private static final ChunkNbtLayoutBehaviour CHUNK_NBT_LAYOUT_BEHAVIOUR = ChunkNbtLayoutBehaviour.getInstance();
 
     private final File a;
 
@@ -16,20 +19,20 @@ public class ChunkRegionLoader implements IChunkLoader {
         if (datainputstream != null) {
             NBTTagCompound nbttagcompound = CompressedStreamTools.a((DataInput) datainputstream);
 
-            if (!nbttagcompound.hasKey("Level")) {
+            if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.hasLevelData(nbttagcompound)) {
                 System.out.println("Chunk file at " + i + "," + j + " is missing level data, skipping");
                 return null;
-            } else if (!nbttagcompound.k("Level").hasKey("Blocks")) {
+            } else if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.hasBlockData(nbttagcompound.k("Level"))) {
                 System.out.println("Chunk file at " + i + "," + j + " is missing block data, skipping");
                 return null;
             } else {
-                Chunk chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
+                NBTTagCompound levelTag = nbttagcompound.k("Level");
+                Chunk chunk = CHUNK_NBT_LAYOUT_BEHAVIOUR.loadChunk(world, levelTag);
 
-                if (!chunk.a(i, j)) {
+                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.isExpectedChunkLocation(chunk, i, j)) {
                     System.out.println("Chunk file at " + i + "," + j + " is in the wrong location; relocating. (Expected " + i + ", " + j + ", got " + chunk.x + ", " + chunk.z + ")");
-                    nbttagcompound.a("xPos", i);
-                    nbttagcompound.a("zPos", j);
-                    chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
+                    CHUNK_NBT_LAYOUT_BEHAVIOUR.overwriteChunkCoordinates(levelTag, i, j);
+                    chunk = CHUNK_NBT_LAYOUT_BEHAVIOUR.loadChunk(world, levelTag);
                 }
 
                 chunk.h();

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +12,7 @@ public class Packet5EntityEquipment extends Packet {
     public int b;
     public int c;
     public int d;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet5EntityEquipment() {}
 
@@ -26,17 +29,18 @@ public class Packet5EntityEquipment extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readShort();
-        this.c = datainputstream.readShort();
-        this.d = datainputstream.readShort();
+        PacketDataCodec.Packet5Data packetData = packetDataCodec.readPacket5(datainputstream);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getSlot();
+        this.c = packetData.getItemId();
+        this.d = packetData.getDataValue();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeShort(this.b);
-        dataoutputstream.writeShort(this.c);
-        dataoutputstream.writeShort(this.d);
+        packetDataCodec.writePacket5(
+                new PacketDataCodec.Packet5Data(this.a, this.b, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -44,6 +48,6 @@ public class Packet5EntityEquipment extends Packet {
     }
 
     public int a() {
-        return 8;
+        return packetDataCodec.packet5Length();
     }
 }

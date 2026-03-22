@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.tile.NoteBlockTileBehaviour;
+
 public class TileEntityNote extends TileEntity {
+    private static final NoteBlockTileBehaviour NOTE_BLOCK_TILE_BEHAVIOUR = NoteBlockTileBehaviour.getInstance();
 
     public byte note = 0;
     public boolean b = false;
@@ -9,48 +12,23 @@ public class TileEntityNote extends TileEntity {
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        nbttagcompound.a("note", this.note);
+        NOTE_BLOCK_TILE_BEHAVIOUR.writeNote(nbttagcompound, this.note);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.note = nbttagcompound.c("note");
-        if (this.note < 0) {
-            this.note = 0;
-        }
-
-        if (this.note > 24) {
-            this.note = 24;
-        }
+        this.note = NOTE_BLOCK_TILE_BEHAVIOUR.readNote(nbttagcompound);
     }
 
     public void a() {
-        this.note = (byte) ((this.note + 1) % 25);
+        this.note = NOTE_BLOCK_TILE_BEHAVIOUR.incrementNote(this.note);
         this.update();
     }
 
     public void play(World world, int i, int j, int k) {
-        if (world.getMaterial(i, j + 1, k) == Material.AIR) {
-            Material material = world.getMaterial(i, j - 1, k);
-            byte b0 = 0;
-
-            if (material == Material.STONE) {
-                b0 = 1;
-            }
-
-            if (material == Material.SAND) {
-                b0 = 2;
-            }
-
-            if (material == Material.SHATTERABLE) {
-                b0 = 3;
-            }
-
-            if (material == Material.WOOD) {
-                b0 = 4;
-            }
-
-            world.playNote(i, j, k, b0, this.note);
+        if (NOTE_BLOCK_TILE_BEHAVIOUR.canPlay(world, i, j, k)) {
+            byte instrument = NOTE_BLOCK_TILE_BEHAVIOUR.resolveInstrument(world, i, j, k);
+            world.playNote(i, j, k, instrument, this.note);
         }
     }
 }

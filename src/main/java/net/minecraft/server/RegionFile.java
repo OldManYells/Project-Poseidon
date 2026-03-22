@@ -1,12 +1,42 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.RegionChunkCompressionBehaviour;
+import com.legacyminecraft.poseidon.world.RegionChunkIndexBehaviour;
+import com.legacyminecraft.poseidon.world.RegionChunkLocationBehaviour;
+import com.legacyminecraft.poseidon.world.RegionChunkReadValidationBehaviour;
+import com.legacyminecraft.poseidon.world.RegionChunkReadOrchestrationBehaviour;
+import com.legacyminecraft.poseidon.world.RegionChunkWriteCommitBehaviour;
+import com.legacyminecraft.poseidon.world.RegionChunkWritePlanBehaviour;
+import com.legacyminecraft.poseidon.world.RegionFileBootstrapBehaviour;
+import com.legacyminecraft.poseidon.world.RegionHeaderTableCodecBehaviour;
+import com.legacyminecraft.poseidon.world.RegionSaveStrategyBehaviour;
+import com.legacyminecraft.poseidon.world.RegionSectorAllocationBehaviour;
+import com.legacyminecraft.poseidon.world.RegionSectorGrowBehaviour;
+import com.legacyminecraft.poseidon.world.RegionSectorMapBehaviour;
+import com.legacyminecraft.poseidon.world.RegionSectorWriteBehaviour;
+import com.legacyminecraft.poseidon.world.RegionTimestampBehaviour;
+import com.legacyminecraft.poseidon.world.RegionWriteStatsBehaviour;
+
 import java.io.*;
 import java.util.ArrayList;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
 
 public class RegionFile {
+    private static final RegionChunkCompressionBehaviour REGION_CHUNK_COMPRESSION_BEHAVIOUR = RegionChunkCompressionBehaviour.getInstance();
+    private static final RegionChunkIndexBehaviour REGION_CHUNK_INDEX_BEHAVIOUR = RegionChunkIndexBehaviour.getInstance();
+    private static final RegionChunkLocationBehaviour REGION_CHUNK_LOCATION_BEHAVIOUR = RegionChunkLocationBehaviour.getInstance();
+    private static final RegionChunkReadValidationBehaviour REGION_CHUNK_READ_VALIDATION_BEHAVIOUR = RegionChunkReadValidationBehaviour.getInstance();
+    private static final RegionChunkReadOrchestrationBehaviour REGION_CHUNK_READ_ORCHESTRATION_BEHAVIOUR = RegionChunkReadOrchestrationBehaviour.getInstance();
+    private static final RegionChunkWriteCommitBehaviour REGION_CHUNK_WRITE_COMMIT_BEHAVIOUR = RegionChunkWriteCommitBehaviour.getInstance();
+    private static final RegionChunkWritePlanBehaviour REGION_CHUNK_WRITE_PLAN_BEHAVIOUR = RegionChunkWritePlanBehaviour.getInstance();
+    private static final RegionFileBootstrapBehaviour REGION_FILE_BOOTSTRAP_BEHAVIOUR = RegionFileBootstrapBehaviour.getInstance();
+    private static final RegionHeaderTableCodecBehaviour REGION_HEADER_TABLE_CODEC_BEHAVIOUR = RegionHeaderTableCodecBehaviour.getInstance();
+    private static final RegionSaveStrategyBehaviour REGION_SAVE_STRATEGY_BEHAVIOUR = RegionSaveStrategyBehaviour.getInstance();
+    private static final RegionSectorAllocationBehaviour REGION_SECTOR_ALLOCATION_BEHAVIOUR = RegionSectorAllocationBehaviour.getInstance();
+    private static final RegionSectorGrowBehaviour REGION_SECTOR_GROW_BEHAVIOUR = RegionSectorGrowBehaviour.getInstance();
+    private static final RegionSectorMapBehaviour REGION_SECTOR_MAP_BEHAVIOUR = RegionSectorMapBehaviour.getInstance();
+    private static final RegionSectorWriteBehaviour REGION_SECTOR_WRITE_BEHAVIOUR = RegionSectorWriteBehaviour.getInstance();
+    private static final RegionTimestampBehaviour REGION_TIMESTAMP_BEHAVIOUR = RegionTimestampBehaviour.getInstance();
+    private static final RegionWriteStatsBehaviour REGION_WRITE_STATS_BEHAVIOUR = RegionWriteStatsBehaviour.getInstance();
 
     private static final byte[] a = new byte[4096];
     private final File b;
@@ -28,62 +58,28 @@ public class RegionFile {
             }
 
             this.c = new RandomAccessFile(file1, "rw");
-            int i;
+            this.g += REGION_FILE_BOOTSTRAP_BEHAVIOUR.ensureHeaderTables(this.c);
+            REGION_FILE_BOOTSTRAP_BEHAVIOUR.alignToSectorBoundary(this.c);
 
-            if (this.c.length() < 4096L) {
-                for (i = 0; i < 1024; ++i) {
-                    this.c.writeInt(0);
-                }
-
-                for (i = 0; i < 1024; ++i) {
-                    this.c.writeInt(0);
-                }
-
-                this.g += 8192;
-            }
-
-            if ((this.c.length() & 4095L) != 0L) {
-                for (i = 0; (long) i < (this.c.length() & 4095L); ++i) {
-                    this.c.write(0);
-                }
-            }
-
-            i = (int) this.c.length() / 4096;
-            this.f = new ArrayList(i);
-
+            int i = (int) this.c.length() / 4096;
+            this.f = REGION_FILE_BOOTSTRAP_BEHAVIOUR.createSectorUsageMap(i);
             int j;
-
-            for (j = 0; j < i; ++j) {
-                this.f.add(Boolean.valueOf(true));
-            }
-
-            this.f.set(0, Boolean.valueOf(false));
-            this.f.set(1, Boolean.valueOf(false));
             this.c.seek(0L);
 
-            int k;
-
+            REGION_HEADER_TABLE_CODEC_BEHAVIOUR.readTable(this.c, this.d);
             for (j = 0; j < 1024; ++j) {
-                k = this.c.readInt();
-                this.d[j] = k;
-                if (k != 0 && (k >> 8) + (k & 255) <= this.f.size()) {
-                    for (int l = 0; l < (k & 255); ++l) {
-                        this.f.set((k >> 8) + l, Boolean.valueOf(false));
-                    }
-                }
+                int k = this.d[j];
+                REGION_CHUNK_LOCATION_BEHAVIOUR.markAllocatedSectorsForLocation(this.f, k);
             }
 
-            for (j = 0; j < 1024; ++j) {
-                k = this.c.readInt();
-                this.e[j] = k;
-            }
+            REGION_HEADER_TABLE_CODEC_BEHAVIOUR.readTable(this.c, this.e);
         } catch (IOException ioexception) {
             ioexception.printStackTrace();
         }
     }
 
     public synchronized int a() {
-        int i = this.g;
+        int i = REGION_WRITE_STATS_BEHAVIOUR.pullAndResetBytesWritten(this.g);
 
         this.g = 0;
         return i;
@@ -118,40 +114,21 @@ public class RegionFile {
                 if (k == 0) {
                     return null;
                 } else {
-                    int l = k >> 8;
-                    int i1 = k & 255;
-
-                    if (l + i1 > this.f.size()) {
-                        this.b("READ", i, j, "invalid sector");
+                    RegionChunkReadOrchestrationBehaviour.ReadOutcome readOutcome =
+                            REGION_CHUNK_READ_ORCHESTRATION_BEHAVIOUR.readChunkInputStream(
+                                    k,
+                                    this.f.size(),
+                                    this.c,
+                                    REGION_CHUNK_LOCATION_BEHAVIOUR,
+                                    REGION_CHUNK_READ_VALIDATION_BEHAVIOUR,
+                                    REGION_CHUNK_COMPRESSION_BEHAVIOUR
+                            );
+                    if (!readOutcome.isSuccessful()) {
+                        this.b("READ", i, j, readOutcome.getFailureReason());
                         return null;
-                    } else {
-                        this.c.seek((long) (l * 4096));
-                        int j1 = this.c.readInt();
-
-                        if (j1 > 4096 * i1) {
-                            this.b("READ", i, j, "invalid length: " + j1 + " > 4096 * " + i1);
-                            return null;
-                        } else {
-                            byte b0 = this.c.readByte();
-                            byte[] abyte;
-                            DataInputStream datainputstream;
-
-                            if (b0 == 1) {
-                                abyte = new byte[j1 - 1];
-                                this.c.read(abyte);
-                                datainputstream = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(abyte)));
-                                return datainputstream;
-                            } else if (b0 == 2) {
-                                abyte = new byte[j1 - 1];
-                                this.c.read(abyte);
-                                datainputstream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(abyte)));
-                                return datainputstream;
-                            } else {
-                                this.b("READ", i, j, "unknown version " + b0);
-                                return null;
-                            }
-                        }
                     }
+
+                    return readOutcome.getStream();
                 }
             } catch (IOException ioexception) {
                 this.b("READ", i, j, "exception");
@@ -161,80 +138,60 @@ public class RegionFile {
     }
 
     public DataOutputStream b(int i, int j) {
-        return this.d(i, j) ? null : new DataOutputStream(new DeflaterOutputStream(new ChunkBuffer(this, i, j)));
+        return REGION_CHUNK_COMPRESSION_BEHAVIOUR.createChunkOutputStream(this.d(i, j), new ChunkBuffer(this, i, j));
+    }
+
+    public final void poseidonWriteChunkData(int i, int j, byte[] abyte, int k) {
+        this.a(i, j, abyte, k);
     }
 
     protected synchronized void a(int i, int j, byte[] abyte, int k) {
         try {
             int l = this.e(i, j);
-            int i1 = l >> 8;
-            int j1 = l & 255;
-            int k1 = (k + 5) / 4096 + 1;
-
-            if (k1 >= 256) {
-                return;
-            }
-
-            if (i1 != 0 && j1 == k1) {
-                this.a("SAVE", i, j, k, "rewrite");
-                this.a(i1, abyte, k);
-            } else {
-                int l1;
-
-                for (l1 = 0; l1 < j1; ++l1) {
-                    this.f.set(i1 + l1, Boolean.valueOf(true));
-                }
-
-                l1 = this.f.indexOf(Boolean.valueOf(true));
-                int i2 = 0;
-                int j2;
-
-                if (l1 != -1) {
-                    for (j2 = l1; j2 < this.f.size(); ++j2) {
-                        if (i2 != 0) {
-                            if (((Boolean) this.f.get(j2)).booleanValue()) {
-                                ++i2;
-                            } else {
-                                i2 = 0;
-                            }
-                        } else if (((Boolean) this.f.get(j2)).booleanValue()) {
-                            l1 = j2;
-                            i2 = 1;
+            RegionChunkWritePlanBehaviour.WritePlan writePlan = REGION_CHUNK_WRITE_PLAN_BEHAVIOUR.planWrite(
+                    l,
+                    k,
+                    this.f,
+                    REGION_CHUNK_LOCATION_BEHAVIOUR,
+                    REGION_SECTOR_ALLOCATION_BEHAVIOUR,
+                    REGION_SECTOR_MAP_BEHAVIOUR,
+                    REGION_SAVE_STRATEGY_BEHAVIOUR
+            );
+            REGION_CHUNK_WRITE_COMMIT_BEHAVIOUR.commitWrite(
+                    i,
+                    j,
+                    abyte,
+                    k,
+                    writePlan,
+                    this.f,
+                    this.c,
+                    a,
+                    REGION_CHUNK_LOCATION_BEHAVIOUR,
+                    REGION_SECTOR_GROW_BEHAVIOUR,
+                    REGION_SECTOR_MAP_BEHAVIOUR,
+                    REGION_TIMESTAMP_BEHAVIOUR,
+                    new RegionChunkWriteCommitBehaviour.CommitCallbacks() {
+                        public void logSave(int payloadSizeBytes, String strategyName) {
+                            RegionFile.this.a("SAVE", i, j, payloadSizeBytes, strategyName);
                         }
 
-                        if (i2 >= k1) {
-                            break;
+                        public void writeChunkPayload(int sectorOffset, byte[] compressedPayload, int payloadSizeBytes) throws IOException {
+                            RegionFile.this.a(sectorOffset, compressedPayload, payloadSizeBytes);
+                        }
+
+                        public void writeChunkLocation(int chunkX, int chunkZ, int packedLocation) throws IOException {
+                            RegionFile.this.a(chunkX, chunkZ, packedLocation);
+                        }
+
+                        public void writeChunkTimestamp(int chunkX, int chunkZ, int timestampSeconds) throws IOException {
+                            RegionFile.this.b(chunkX, chunkZ, timestampSeconds);
+                        }
+
+                        public void incrementWrittenBytes(int bytesAdded) {
+                            RegionFile.this.g += bytesAdded;
                         }
                     }
-                }
-
-                if (i2 >= k1) {
-                    this.a("SAVE", i, j, k, "reuse");
-                    i1 = l1;
-                    this.a(i, j, l1 << 8 | k1);
-
-                    for (j2 = 0; j2 < k1; ++j2) {
-                        this.f.set(i1 + j2, Boolean.valueOf(false));
-                    }
-
-                    this.a(i1, abyte, k);
-                } else {
-                    this.a("SAVE", i, j, k, "grow");
-                    this.c.seek(this.c.length());
-                    i1 = this.f.size();
-
-                    for (j2 = 0; j2 < k1; ++j2) {
-                        this.c.write(a);
-                        this.f.add(Boolean.valueOf(false));
-                    }
-
-                    this.g += 4096 * k1;
-                    this.a(i1, abyte, k);
-                    this.a(i, j, i1 << 8 | k1);
-                }
-            }
-
-            this.b(i, j, (int) (System.currentTimeMillis() / 1000L));
+            );
         } catch (IOException ioexception) {
             ioexception.printStackTrace();
         }
@@ -242,34 +199,31 @@ public class RegionFile {
 
     private void a(int i, byte[] abyte, int j) throws IOException {
         this.b(" " + i);
-        this.c.seek((long) (i * 4096));
-        this.c.writeInt(j + 1);
-        this.c.writeByte(2);
-        this.c.write(abyte, 0, j);
+        REGION_SECTOR_WRITE_BEHAVIOUR.writeCompressedChunk(this.c, i, abyte, j);
     }
 
     private boolean d(int i, int j) {
-        return i < 0 || i >= 32 || j < 0 || j >= 32;
+        return REGION_CHUNK_INDEX_BEHAVIOUR.isOutOfBounds(i, j);
     }
 
     private int e(int i, int j) {
-        return this.d[i + j * 32];
+        return REGION_CHUNK_INDEX_BEHAVIOUR.getChunkOffset(this.d, i, j);
     }
 
     public boolean c(int i, int j) {
-        return this.e(i, j) != 0;
+        return REGION_CHUNK_INDEX_BEHAVIOUR.hasChunk(this.d, i, j);
     }
 
     private void a(int i, int j, int k) throws IOException {
-        this.d[i + j * 32] = k;
-        this.c.seek((long) ((i + j * 32) * 4));
-        this.c.writeInt(k);
+        int tableIndex = REGION_CHUNK_INDEX_BEHAVIOUR.toTableIndex(i, j);
+        this.d[tableIndex] = k;
+        REGION_HEADER_TABLE_CODEC_BEHAVIOUR.writeTableEntry(this.c, 0L, tableIndex, k);
     }
 
     private void b(int i, int j, int k) throws IOException {
-        this.e[i + j * 32] = k;
-        this.c.seek((long) (4096 + (i + j * 32) * 4));
-        this.c.writeInt(k);
+        int tableIndex = REGION_CHUNK_INDEX_BEHAVIOUR.toTableIndex(i, j);
+        this.e[tableIndex] = k;
+        REGION_HEADER_TABLE_CODEC_BEHAVIOUR.writeTableEntry(this.c, 4096L, tableIndex, k);
     }
 
     public void b() throws IOException {

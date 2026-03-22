@@ -1,11 +1,14 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.chunk.NibbleArrayBehaviour;
+
 public class NibbleArray {
+    private static final NibbleArrayBehaviour NIBBLE_ARRAY_BEHAVIOUR = NibbleArrayBehaviour.getInstance();
 
     public final byte[] a;
 
     public NibbleArray(int i) {
-        this.a = new byte[i >> 1];
+        this.a = NIBBLE_ARRAY_BEHAVIOUR.createBackingArray(i);
     }
 
     public NibbleArray(byte[] abyte) {
@@ -13,26 +16,14 @@ public class NibbleArray {
     }
 
     public int a(int i, int j, int k) {
-        int l = i << 11 | k << 7 | j;
-        int i1 = l >> 1;
-        int j1 = l & 1;
-
-        return j1 == 0 ? this.a[i1] & 15 : this.a[i1] >> 4 & 15;
+        return NIBBLE_ARRAY_BEHAVIOUR.getValue(this.a, i, j, k);
     }
 
     public void a(int i, int j, int k, int l) {
-        int i1 = i << 11 | k << 7 | j;
-        int j1 = i1 >> 1;
-        int k1 = i1 & 1;
-
-        if (k1 == 0) {
-            this.a[j1] = (byte) (this.a[j1] & 240 | l & 15);
-        } else {
-            this.a[j1] = (byte) (this.a[j1] & 15 | (l & 15) << 4);
-        }
+        NIBBLE_ARRAY_BEHAVIOUR.setValue(this.a, i, j, k, l);
     }
 
     public boolean a() {
-        return this.a != null;
+        return NIBBLE_ARRAY_BEHAVIOUR.hasBackingArray(this.a);
     }
 }

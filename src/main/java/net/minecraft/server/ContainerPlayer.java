@@ -1,9 +1,12 @@
 package net.minecraft.server;
 
-public class ContainerPlayer extends Container {
+import com.legacyminecraft.poseidon.inventory.PlayerContainerBehaviour;
 
-    public InventoryCrafting craftInventory;
-    public IInventory resultInventory;
+public class ContainerPlayer extends Container {
+    private static final PlayerContainerBehaviour PLAYER_CONTAINER_BEHAVIOUR = PlayerContainerBehaviour.getInstance();
+
+    public InventoryCrafting craftInventory = PLAYER_CONTAINER_BEHAVIOUR.createCraftInventory(this);
+    public IInventory resultInventory = PLAYER_CONTAINER_BEHAVIOUR.createResultInventory();
     public boolean c;
 
     public ContainerPlayer(InventoryPlayer inventoryplayer) {
@@ -11,99 +14,31 @@ public class ContainerPlayer extends Container {
     }
 
     public ContainerPlayer(InventoryPlayer inventoryplayer, boolean flag) {
-        this.craftInventory = new InventoryCrafting(this, 2, 2);
-        this.resultInventory = new InventoryCraftResult();
         this.c = false;
         this.c = flag;
-        this.a((Slot) (new SlotResult(inventoryplayer.d, this.craftInventory, this.resultInventory, 0, 144, 36)));
-
-        int i;
-        int j;
-
-        for (i = 0; i < 2; ++i) {
-            for (j = 0; j < 2; ++j) {
-                this.a(new Slot(this.craftInventory, j + i * 2, 88 + j * 18, 26 + i * 18));
+        PLAYER_CONTAINER_BEHAVIOUR.initializeSlots(this, inventoryplayer, this.craftInventory, this.resultInventory, new PlayerContainerBehaviour.ArmorSlotFactory() {
+            public Slot create(int index) {
+                return new SlotArmor(ContainerPlayer.this, inventoryplayer, inventoryplayer.getSize() - 1 - index, 8, 8 + index * 18, index);
             }
-        }
-
-        for (i = 0; i < 4; ++i) {
-            this.a((Slot) (new SlotArmor(this, inventoryplayer, inventoryplayer.getSize() - 1 - i, 8, 8 + i * 18, i)));
-        }
-
-        for (i = 0; i < 3; ++i) {
-            for (j = 0; j < 9; ++j) {
-                this.a(new Slot(inventoryplayer, j + (i + 1) * 9, 8 + j * 18, 84 + i * 18));
-            }
-        }
-
-        for (i = 0; i < 9; ++i) {
-            this.a(new Slot(inventoryplayer, i, 8 + i * 18, 142));
-        }
+        });
 
         this.a((IInventory) this.craftInventory);
     }
 
     public void a(IInventory iinventory) {
-        // CraftBukkit start
-        ItemStack craftResult = CraftingManager.getInstance().craft(this.craftInventory);
-        this.resultInventory.setItem(0, craftResult);
-        if (super.listeners.size() < 1) {
-            return;
-        }
-
-        EntityPlayer player = (EntityPlayer) super.listeners.get(0); // TODO: Is this _always_ correct? Seems like it.
-        player.netServerHandler.sendPacket(new Packet103SetSlot(player.activeContainer.windowId, 0, craftResult));
-        // CraftBukkit end
+        PLAYER_CONTAINER_BEHAVIOUR.updateCraftResult(this.craftInventory, this.resultInventory, super.listeners);
     }
 
     public void a(EntityHuman entityhuman) {
         super.a(entityhuman);
-
-        for (int i = 0; i < 4; ++i) {
-            ItemStack itemstack = this.craftInventory.getItem(i);
-
-            if (itemstack != null) {
-                entityhuman.b(itemstack);
-                this.craftInventory.setItem(i, (ItemStack) null);
-            }
-        }
+        PLAYER_CONTAINER_BEHAVIOUR.onClose(this, entityhuman, this.craftInventory);
     }
 
     public boolean b(EntityHuman entityhuman) {
-        return true;
+        return PLAYER_CONTAINER_BEHAVIOUR.canUse(entityhuman);
     }
 
     public ItemStack a(int i) {
-        ItemStack itemstack = null;
-        Slot slot = (Slot) this.e.get(i);
-
-        if (slot != null && slot.b()) {
-            ItemStack itemstack1 = slot.getItem();
-
-            itemstack = itemstack1.cloneItemStack();
-            if (i == 0) {
-                this.a(itemstack1, 9, 45, true);
-            } else if (i >= 9 && i < 36) {
-                this.a(itemstack1, 36, 45, false);
-            } else if (i >= 36 && i < 45) {
-                this.a(itemstack1, 9, 36, false);
-            } else {
-                this.a(itemstack1, 9, 45, false);
-            }
-
-            if (itemstack1.count == 0) {
-                slot.c((ItemStack) null);
-            } else {
-                slot.c();
-            }
-
-            if (itemstack1.count == itemstack.count) {
-                return null;
-            }
-
-            slot.a(itemstack1);
-        }
-
-        return itemstack;
+        return PLAYER_CONTAINER_BEHAVIOUR.quickMove(this, this.e, i);
     }
 }

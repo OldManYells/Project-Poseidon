@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +12,7 @@ public class Packet130UpdateSign extends Packet {
     public int y;
     public int z;
     public String[] lines;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet130UpdateSign() {
         this.k = true;
@@ -24,24 +27,18 @@ public class Packet130UpdateSign extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.x = datainputstream.readInt();
-        this.y = datainputstream.readShort();
-        this.z = datainputstream.readInt();
-        this.lines = new String[4];
-
-        for (int i = 0; i < 4; ++i) {
-            this.lines[i] = a(datainputstream, 15);
-        }
+        PacketDataCodec.Packet130Data packetData = packetDataCodec.readPacket130(datainputstream);
+        this.x = packetData.getX();
+        this.y = packetData.getY();
+        this.z = packetData.getZ();
+        this.lines = packetData.getLines();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.x);
-        dataoutputstream.writeShort(this.y);
-        dataoutputstream.writeInt(this.z);
-
-        for (int i = 0; i < 4; ++i) {
-            a(this.lines[i], dataoutputstream);
-        }
+        packetDataCodec.writePacket130(
+                new PacketDataCodec.Packet130Data(this.x, this.y, this.z, this.lines),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -49,12 +46,6 @@ public class Packet130UpdateSign extends Packet {
     }
 
     public int a() {
-        int i = 0;
-
-        for (int j = 0; j < 4; ++j) {
-            i += this.lines[j].length();
-        }
-
-        return i;
+        return packetDataCodec.packet130Length(this.lines);
     }
 }

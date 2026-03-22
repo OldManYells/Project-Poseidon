@@ -1,13 +1,9 @@
 package net.minecraft.server;
 
-// CraftBukkit start
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.craftbukkit.block.CraftBlockState;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
-import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
+import com.legacyminecraft.poseidon.item.ItemBlockPlacementBehaviour;
 
 public class ItemBlock extends Item {
+    private static final ItemBlockPlacementBehaviour ITEM_BLOCK_PLACEMENT_BEHAVIOUR = ItemBlockPlacementBehaviour.getInstance();
 
     private int id;
 
@@ -18,113 +14,32 @@ public class ItemBlock extends Item {
     }
 
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
-        int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
-
-        if (world.getTypeId(i, j, k) == Block.SNOW.id) {
-            l = 0;
-        } else {
-            if (l == 0) {
-                --j;
-            }
-
-            if (l == 1) {
-                ++j;
-            }
-
-            if (l == 2) {
-                --k;
-            }
-
-            if (l == 3) {
-                ++k;
-            }
-
-            if (l == 4) {
-                --i;
-            }
-
-            if (l == 5) {
-                ++i;
-            }
+        ItemBlockPlacementBehaviour.PlacementResult result = ITEM_BLOCK_PLACEMENT_BEHAVIOUR.place(
+                itemstack, entityhuman, world, i, j, k, l, this.id, this.filterData(itemstack.getData()));
+        if (!result.handled) {
+            return false;
         }
-
-        if (itemstack.count == 0) {
-            return false;
-        } else if (j == 127 && Block.byId[this.id].material.isBuildable()) {
-            return false;
-        } else if (world.a(this.id, i, j, k, false, l)) {
-            Block block = Block.byId[this.id];
-
-            // CraftBukkit start - This executes the placement of the block
-            CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k);
-
-            // There are like 30 combinations you can mix and match steps and double steps
-            // of different materials, so there are a lot of different cases of what
-            // would happen if you place x step onto another y step, so let's just keep
-            // track of the entire state
-            CraftBlockState blockStateBelow = null;
-            // Toggles whether the normal or the block below is used for the place event 
-            boolean eventUseBlockBelow = false;
-            if ((world.getTypeId(i, j - 1, k) == Block.STEP.id || world.getTypeId(i, j - 1, k) == Block.DOUBLE_STEP.id)
-                    && (itemstack.id == Block.DOUBLE_STEP.id || itemstack.id == Block.STEP.id)) {
-                blockStateBelow = CraftBlockState.getBlockState(world, i, j - 1, k);
-                // Step is placed on step, forms a doublestep replacing the original step, so we need the lower block
-                eventUseBlockBelow = itemstack.id == Block.STEP.id && blockStateBelow.getTypeId() == Block.STEP.id;
-            }
-
-            /**
-            * @see net.minecraft.server.World#setTypeIdAndData(int i, int j, int k, int l, int i1)
-            *
-            * This replaces world.setTypeIdAndData(IIIII), we're doing this because we need to
-            * hook between the 'placement' and the informing to 'world' so we can
-            * sanely undo this.
-            *
-            * Whenever the call to 'world.setTypeIdAndData' changes we need to figure out again what to
-            * replace this with.
-            */
-            if (world.setRawTypeIdAndData(i, j, k, this.id, this.filterData(itemstack.getData()))) { // <-- world.setTypeIdAndData does this to place the block
-                BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, eventUseBlockBelow ? blockStateBelow : replacedBlockState, clickedX, clickedY, clickedZ, block);
-
-                if (event.isCancelled() || !event.canBuild()) {
-                    if (blockStateBelow != null) { // Used for steps
-                        world.setTypeIdAndData(i, j, k, replacedBlockState.getTypeId(), replacedBlockState.getRawData());
-                        world.setTypeIdAndData(i, j - 1, k, blockStateBelow.getTypeId(), blockStateBelow.getRawData());
-
-                    } else {
-
-                        if (this.id == Block.ICE.id) {
-                            // Ice will explode if we set straight to 0
-                            world.setTypeId(i, j, k, 20);
-                        }
-
-                        world.setTypeIdAndData(i, j, k, replacedBlockState.getTypeId(), replacedBlockState.getRawData());
-                    }
-                    return true;
-
-                }
-                // CraftBukkit end
-
-                if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true) && (this.id == 29 || this.id == 33)) {
-                    Block.byId[this.id].postPlace(world, i, j, k, l);
-                    Block.byId[this.id].postPlace(world, i, j, k, entityhuman);
-                    world.update(i, j, k, this.id); // <-- world.setTypeIdAndData does this on success (tell the world)
-                } else {
-                    world.update(i, j, k, this.id);
-                    Block.byId[this.id].postPlace(world, i, j, k, l);
-                    Block.byId[this.id].postPlace(world, i, j, k, entityhuman);
-                }
-
-                world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), block.stepSound.getName(), (block.stepSound.getVolume1() + 1.0F) / 2.0F, block.stepSound.getVolume2() * 0.8F);
-                --itemstack.count;
-            }
-
+        if (!result.placed) {
             return true;
-        } else {
-            return false;
         }
+
+        if (ITEM_BLOCK_PLACEMENT_BEHAVIOUR.usePistonPostPlaceOrderingFix(this.id)) {
+            Block.byId[this.id].postPlace(world, result.x, result.y, result.z, result.face);
+            Block.byId[this.id].postPlace(world, result.x, result.y, result.z, entityhuman);
+            world.update(result.x, result.y, result.z, this.id);
+        } else {
+            world.update(result.x, result.y, result.z, this.id);
+            Block.byId[this.id].postPlace(world, result.x, result.y, result.z, result.face);
+            Block.byId[this.id].postPlace(world, result.x, result.y, result.z, entityhuman);
+        }
+
+        world.makeSound((double) ((float) result.x + 0.5F), (double) ((float) result.y + 0.5F), (double) ((float) result.z + 0.5F),
+                result.block.stepSound.getName(), (result.block.stepSound.getVolume1() + 1.0F) / 2.0F, result.block.stepSound.getVolume2() * 0.8F);
+        --itemstack.count;
+        return true;
     }
 
     public String a() {
-        return Block.byId[this.id].l();
+        return ITEM_BLOCK_PLACEMENT_BEHAVIOUR.resolveTranslationKey(this.id);
     }
 }

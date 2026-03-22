@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public interface IInventory {
+import com.legacyminecraft.poseidon.inventory.InventoryContract;
+
+public interface IInventory extends InventoryContract {
 
     int getSize();
 
@@ -19,4 +21,8 @@ public interface IInventory {
     boolean a_(EntityHuman entityhuman);
 
     ItemStack[] getContents(); // CraftBukkit
+
+    default boolean canPlayerUse(EntityHuman player) {
+        return this.a_(player);
+    }
 }

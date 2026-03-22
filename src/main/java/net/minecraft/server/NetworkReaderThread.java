@@ -1,10 +1,52 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.network.NetworkReaderLoopSystem;
 
 class NetworkReaderThread extends Thread {
     private boolean fast; // Poseidon
     final NetworkManager a;
+    private final NetworkReaderLoopSystem networkReaderLoopSystem = NetworkReaderLoopSystem.getInstance();
+    private final NetworkReaderLoopSystem.ReaderLoopOperations readerLoopOperations =
+            new NetworkReaderLoopSystem.ReaderLoopOperations() {
+                @Override
+                public void incrementReaderThreadCount() {
+                    synchronized (NetworkManager.a) {
+                        ++NetworkManager.b;
+                    }
+                }
+
+                @Override
+                public void decrementReaderThreadCount() {
+                    synchronized (NetworkManager.a) {
+                        --NetworkManager.b;
+                    }
+                }
+
+                @Override
+                public boolean isConnectionOpen() {
+                    return NetworkManager.a(NetworkReaderThread.this.a);
+                }
+
+                @Override
+                public boolean isShuttingDown() {
+                    return NetworkManager.b(NetworkReaderThread.this.a);
+                }
+
+                @Override
+                public boolean readNextPacket() {
+                    return NetworkManager.c(NetworkReaderThread.this.a);
+                }
+
+                @Override
+                public void sleepQuietly(long millis) {
+                    try {
+                        Thread.sleep(millis);
+                    } catch (InterruptedException interruptedexception) {
+                        ;
+                    }
+                }
+            };
 
     NetworkReaderThread(NetworkManager networkmanager, String s) {
         super(s);
@@ -13,50 +55,6 @@ class NetworkReaderThread extends Thread {
     }
 
     public void run() {
-        Object object = NetworkManager.a;
-
-        synchronized (NetworkManager.a) {
-            ++NetworkManager.b;
-        }
-
-        while (true) {
-            boolean flag = false;
-
-            try {
-                flag = true;
-                if (!NetworkManager.a(this.a)) {
-                    flag = false;
-                    break;
-                }
-
-                if (NetworkManager.b(this.a)) {
-                    flag = false;
-                    break;
-                }
-
-                while (NetworkManager.c(this.a)) {
-                    ;
-                }
-
-                try {
-                    sleep(this.fast ? 2L : 100L);
-                } catch (InterruptedException interruptedexception) {
-                    ;
-                }
-            } finally {
-                if (flag) {
-                    Object object1 = NetworkManager.a;
-
-                    synchronized (NetworkManager.a) {
-                        --NetworkManager.b;
-                    }
-                }
-            }
-        }
-
-        object = NetworkManager.a;
-        synchronized (NetworkManager.a) {
-            --NetworkManager.b;
-        }
+        networkReaderLoopSystem.runLoop(this.fast, this.readerLoopOperations);
     }
 }

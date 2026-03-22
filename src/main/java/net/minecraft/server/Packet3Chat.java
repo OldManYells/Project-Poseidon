@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 public class Packet3Chat extends Packet {
 
     public String message;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet3Chat() {}
 
@@ -21,11 +24,11 @@ public class Packet3Chat extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException { // CraftBukkit
-        this.message = a(datainputstream, 119);
+        this.message = packetDataCodec.readPacket3(datainputstream).getMessage();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException { // CraftBukkit
-        a(this.message, dataoutputstream);
+        packetDataCodec.writePacket3(new PacketDataCodec.Packet3Data(this.message), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -33,6 +36,6 @@ public class Packet3Chat extends Packet {
     }
 
     public int a() {
-        return this.message.length();
+        return packetDataCodec.packet3Length(this.message);
     }
 }

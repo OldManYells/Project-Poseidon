@@ -1,8 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.ColumnPlantGrowthBehaviour;
+import com.legacyminecraft.poseidon.block.ReedStateBehaviour;
+
 import java.util.Random;
 
 public class BlockReed extends Block {
+    private final ColumnPlantGrowthBehaviour columnPlantGrowthService = ColumnPlantGrowthBehaviour.getInstance();
+    private final ReedStateBehaviour reedStateService = ReedStateBehaviour.getInstance();
 
     protected BlockReed(int i, int j) {
         super(i, Material.PLANT);
@@ -15,29 +20,32 @@ public class BlockReed extends Block {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (world.isEmpty(i, j + 1, k)) {
-            int l;
-
-            for (l = 1; world.getTypeId(i, j - l, k) == this.id; ++l) {
-                ;
-            }
-
-            if (l < 3) {
+            int l = columnPlantGrowthService.countContiguousBelow(this.blockIdQuery(world), i, j, k, this.id);
+            if (columnPlantGrowthService.shouldAttemptGrowth(true, l, 3)) {
                 int i1 = world.getData(i, j, k);
 
-                if (i1 == 15) {
+                if (columnPlantGrowthService.shouldSpawnNewSegment(i1, 15)) {
                     world.setTypeId(i, j + 1, k, this.id);
-                    world.setData(i, j, k, 0);
+                    world.setData(i, j, k, columnPlantGrowthService.nextGrowthData(i1, 15));
                 } else {
-                    world.setData(i, j, k, i1 + 1);
+                    world.setData(i, j, k, columnPlantGrowthService.nextGrowthData(i1, 15));
                 }
             }
         }
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        int l = world.getTypeId(i, j - 1, k);
-
-        return l == this.id ? true : (l != Block.GRASS.id && l != Block.DIRT.id ? false : (world.getMaterial(i - 1, j - 1, k) == Material.WATER ? true : (world.getMaterial(i + 1, j - 1, k) == Material.WATER ? true : (world.getMaterial(i, j - 1, k - 1) == Material.WATER ? true : world.getMaterial(i, j - 1, k + 1) == Material.WATER))));
+        return reedStateService.canRemainPlaced(
+                world.getTypeId(i, j - 1, k),
+                this.id,
+                Block.GRASS.id,
+                Block.DIRT.id,
+                world.getMaterial(i - 1, j - 1, k),
+                world.getMaterial(i + 1, j - 1, k),
+                world.getMaterial(i, j - 1, k - 1),
+                world.getMaterial(i, j - 1, k + 1),
+                Material.WATER
+        );
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
@@ -60,7 +68,7 @@ public class BlockReed extends Block {
     }
 
     public int a(int i, Random random) {
-        return Item.SUGAR_CANE.id;
+        return reedStateService.dropItemId(Item.SUGAR_CANE.id);
     }
 
     public boolean a() {
@@ -69,5 +77,13 @@ public class BlockReed extends Block {
 
     public boolean b() {
         return false;
+    }
+
+    private ColumnPlantGrowthBehaviour.BlockIdQuery blockIdQuery(final World world) {
+        return new ColumnPlantGrowthBehaviour.BlockIdQuery() {
+            public int getTypeId(int x, int y, int z) {
+                return world.getTypeId(x, y, z);
+            }
+        };
     }
 }

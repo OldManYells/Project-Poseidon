@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.RecordItemPlacementBehaviour;
+
 public class ItemRecord extends Item {
+    private static final RecordItemPlacementBehaviour RECORD_ITEM_PLACEMENT_BEHAVIOUR = RecordItemPlacementBehaviour.getInstance();
 
     public final String a;
 
@@ -11,17 +14,6 @@ public class ItemRecord extends Item {
     }
 
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
-        if (world.getTypeId(i, j, k) == Block.JUKEBOX.id && world.getData(i, j, k) == 0) {
-            if (world.isStatic) {
-                return true;
-            } else {
-                ((BlockJukeBox) Block.JUKEBOX).f(world, i, j, k, this.id);
-                world.a((EntityHuman) null, 1005, i, j, k, this.id);
-                --itemstack.count;
-                return true;
-            }
-        } else {
-            return false;
-        }
+        return RECORD_ITEM_PLACEMENT_BEHAVIOUR.placeRecord(itemstack, entityhuman, world, i, j, k, l, this.id);
     }
 }

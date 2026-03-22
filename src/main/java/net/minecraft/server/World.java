@@ -1,18 +1,34 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.WorldEntitySpawnEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.world.WorldSpawnPlacementBehaviour;
+import com.legacyminecraft.poseidon.world.WorldSavePipelineBehaviour;
+import com.legacyminecraft.poseidon.world.WorldChunkLoadWindowBehaviour;
+import com.legacyminecraft.poseidon.world.WorldBlockQueryBehaviour;
+import com.legacyminecraft.poseidon.world.WorldBlockMutationBehaviour;
+import com.legacyminecraft.poseidon.world.WorldBlockStateMutationBehaviour;
+import com.legacyminecraft.poseidon.world.WorldBlockUpdateBehaviour;
+import com.legacyminecraft.poseidon.world.WorldBlockPhysicsExecutionBehaviour;
+import com.legacyminecraft.poseidon.world.WorldAccessNotificationBehaviour;
+import com.legacyminecraft.poseidon.world.WorldChunkAccessCacheBehaviour;
+import com.legacyminecraft.poseidon.world.WorldPhysicsNeighbourBehaviour;
+import com.legacyminecraft.poseidon.world.WorldLightUpdateBehaviour;
+import com.legacyminecraft.poseidon.world.WorldLightWriteBehaviour;
+import com.legacyminecraft.poseidon.world.WorldLightQueryBehaviour;
+import com.legacyminecraft.poseidon.world.WorldEntityRemovalBehaviour;
+import com.legacyminecraft.poseidon.world.WorldEntityChunkDetachBehaviour;
+import com.legacyminecraft.poseidon.world.WorldEntityAdditionBehaviour;
+import com.legacyminecraft.poseidon.world.ExplosionDensityCacheBehaviour;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.generator.ChunkGenerator;
@@ -23,6 +39,25 @@ import java.util.*;
 // CraftBukkit end
 
 public class World implements IBlockAccess {
+    private static final WorldBlockQueryBehaviour WORLD_BLOCK_QUERY_BEHAVIOUR = WorldBlockQueryBehaviour.getInstance();
+    private static final WorldBlockMutationBehaviour WORLD_BLOCK_MUTATION_BEHAVIOUR = WorldBlockMutationBehaviour.getInstance();
+    private static final WorldBlockStateMutationBehaviour WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR = WorldBlockStateMutationBehaviour.getInstance();
+    private static final WorldBlockUpdateBehaviour WORLD_BLOCK_UPDATE_BEHAVIOUR = WorldBlockUpdateBehaviour.getInstance();
+    private static final WorldBlockPhysicsExecutionBehaviour WORLD_BLOCK_PHYSICS_EXECUTION_BEHAVIOUR = WorldBlockPhysicsExecutionBehaviour.getInstance();
+    private static final WorldAccessNotificationBehaviour WORLD_ACCESS_NOTIFICATION_BEHAVIOUR = WorldAccessNotificationBehaviour.getInstance();
+    private static final WorldBlockPhysicsEventBridgeBehaviour WORLD_BLOCK_PHYSICS_EVENT_BRIDGE_BEHAVIOUR = WorldBlockPhysicsEventBridgeBehaviour.getInstance();
+    private static final WorldEntitySpawnEventBridgeBehaviour WORLD_ENTITY_SPAWN_EVENT_BRIDGE_BEHAVIOUR = WorldEntitySpawnEventBridgeBehaviour.getInstance();
+    private static final WorldChunkAccessCacheBehaviour WORLD_CHUNK_ACCESS_CACHE_BEHAVIOUR = WorldChunkAccessCacheBehaviour.getInstance();
+    private static final WorldChunkLoadWindowBehaviour WORLD_CHUNK_LOAD_WINDOW_BEHAVIOUR = WorldChunkLoadWindowBehaviour.getInstance();
+    private static final WorldPhysicsNeighbourBehaviour WORLD_PHYSICS_NEIGHBOUR_BEHAVIOUR = WorldPhysicsNeighbourBehaviour.getInstance();
+    private static final WorldLightUpdateBehaviour WORLD_LIGHT_UPDATE_BEHAVIOUR = WorldLightUpdateBehaviour.getInstance();
+    private static final WorldLightWriteBehaviour WORLD_LIGHT_WRITE_BEHAVIOUR = WorldLightWriteBehaviour.getInstance();
+    private static final WorldLightQueryBehaviour WORLD_LIGHT_QUERY_BEHAVIOUR = WorldLightQueryBehaviour.getInstance();
+    private static final WorldEntityRemovalBehaviour WORLD_ENTITY_REMOVAL_BEHAVIOUR = WorldEntityRemovalBehaviour.getInstance();
+    private static final WorldEntityChunkDetachBehaviour WORLD_ENTITY_CHUNK_DETACH_BEHAVIOUR = WorldEntityChunkDetachBehaviour.getInstance();
+    private static final WorldEntityAdditionBehaviour WORLD_ENTITY_ADDITION_BEHAVIOUR = WorldEntityAdditionBehaviour.getInstance();
+    private static final WorldSpawnPlacementBehaviour WORLD_SPAWN_PLACEMENT_BEHAVIOUR = WorldSpawnPlacementBehaviour.getInstance();
+    private static final WorldSavePipelineBehaviour WORLD_SAVE_PIPELINE_BEHAVIOUR = WorldSavePipelineBehaviour.getInstance();
 
     public boolean a = false;
     private List C = new ArrayList();
@@ -68,7 +103,7 @@ public class World implements IBlockAccess {
     private int Q;
     private List R;
     public boolean isStatic;
-    public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<>(); // Paper - Optimize explosions
+    public final Map<ExplosionDensityCacheBehaviour.CacheKey, Float> explosionDensityCache = new HashMap<>(); // Paper - Optimize explosions
 
     public WorldChunkManager getWorldChunkManager() {
         return this.worldProvider.b;
@@ -86,11 +121,7 @@ public class World implements IBlockAccess {
     private List<TileEntity> tileEntitiesToUnload;
 
     private boolean canSpawn(int x, int z) {
-        if (this.generator != null) {
-            return this.generator.canSpawn(this.getWorld(), x, z);
-        } else {
-            return this.worldProvider.canSpawn(x, z);
-        }
+        return WORLD_SPAWN_PLACEMENT_BEHAVIOUR.canSpawn(this.getWorld(), this.worldProvider, this.generator, x, z);
     }
 
     public CraftWorld getWorld() {
@@ -180,11 +211,13 @@ public class World implements IBlockAccess {
         // Poseidon - Fix OOM in naive custom world generators
         int attempts = 0;
 
-        for (j = 0; !this.canSpawn(i, j); j += this.random.nextInt(64) - this.random.nextInt(64)) {
-            i += this.random.nextInt(64) - this.random.nextInt(64);
+        j = 0;
+        while (!this.canSpawn(i, j)) {
+            i = WORLD_SPAWN_PLACEMENT_BEHAVIOUR.nextSpawnCoordinate(i, this.random);
+            j = WORLD_SPAWN_PLACEMENT_BEHAVIOUR.nextSpawnCoordinate(j, this.random);
             attempts += 1;
 
-            if (attempts > 1024) {
+            if (WORLD_SPAWN_PLACEMENT_BEHAVIOUR.shouldFallbackToOrigin(attempts, 1024)) {
                 i = 0;
                 j = 0;
 
@@ -201,190 +234,110 @@ public class World implements IBlockAccess {
     }
 
     public int a(int i, int j) {
-        int k;
-
-        for (k = 63; !this.isEmpty(i, k + 1, j); ++k) {
-            ;
-        }
-
-        return this.getTypeId(i, k, j);
+        return WORLD_SPAWN_PLACEMENT_BEHAVIOUR.findTopSolidBlockType(this, i, j, 63);
     }
 
     public void save(boolean flag, IProgressUpdate iprogressupdate) {
-        if (this.chunkProvider.canSave()) {
-            if (iprogressupdate != null) {
-                iprogressupdate.a("Saving level");
-            }
-
+        if (WORLD_SAVE_PIPELINE_BEHAVIOUR.canSave(this.chunkProvider)) {
+            WORLD_SAVE_PIPELINE_BEHAVIOUR.notifySavingLevel(iprogressupdate);
             this.w();
-            if (iprogressupdate != null) {
-                iprogressupdate.b("Saving chunks");
-            }
-
-            this.chunkProvider.saveChunks(flag, iprogressupdate);
+            WORLD_SAVE_PIPELINE_BEHAVIOUR.notifySavingChunks(iprogressupdate);
+            WORLD_SAVE_PIPELINE_BEHAVIOUR.saveChunks(this.chunkProvider, flag, iprogressupdate);
         }
     }
 
     private void w() {
-        this.k();
-        this.w.a(this.worldData, this.players);
-        this.worldMaps.a();
+        WORLD_SAVE_PIPELINE_BEHAVIOUR.persistWorldState(this, this.w, this.worldData, this.players, this.worldMaps);
     }
 
     public int getTypeId(int i, int j, int k) {
-        return i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000 ? (j < 0 ? 0 : (j >= 128 ? 0 : this.getChunkAt(i >> 4, k >> 4).getTypeId(i & 15, j, k & 15))) : 0;
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getTypeId(this, i, j, k);
     }
 
     public boolean isEmpty(int i, int j, int k) {
-        return this.getTypeId(i, j, k) == 0;
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.isEmpty(this, i, j, k);
     }
 
     public boolean isLoaded(int i, int j, int k) {
-        return j >= 0 && j < 128 ? this.isChunkLoaded(i >> 4, k >> 4) : false;
+        return WORLD_CHUNK_LOAD_WINDOW_BEHAVIOUR.isBlockLoaded(this.chunkProvider, i, j, k);
     }
 
     public boolean areChunksLoaded(int i, int j, int k, int l) {
-        return this.a(i - l, j - l, k - l, i + l, j + l, k + l);
+        return WORLD_CHUNK_LOAD_WINDOW_BEHAVIOUR.areChunksLoadedAround(this.chunkProvider, i, j, k, l);
     }
 
     public boolean a(int i, int j, int k, int l, int i1, int j1) {
-        if (i1 >= 0 && j < 128) {
-            i >>= 4;
-            j >>= 4;
-            k >>= 4;
-            l >>= 4;
-            i1 >>= 4;
-            j1 >>= 4;
-
-            for (int k1 = i; k1 <= l; ++k1) {
-                for (int l1 = k; l1 <= j1; ++l1) {
-                    if (!this.isChunkLoaded(k1, l1)) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        } else {
-            return false;
-        }
+        return WORLD_CHUNK_LOAD_WINDOW_BEHAVIOUR.areChunksLoaded(this.chunkProvider, i, j, k, l, i1, j1);
     }
 
     private boolean isChunkLoaded(int i, int j) {
-        return this.chunkProvider.isChunkLoaded(i, j);
+        return WORLD_CHUNK_LOAD_WINDOW_BEHAVIOUR.isChunkLoaded(this.chunkProvider, i, j);
     }
 
     public Chunk getChunkAtWorldCoords(int i, int j) {
-        return this.getChunkAt(i >> 4, j >> 4);
+        return WORLD_CHUNK_ACCESS_CACHE_BEHAVIOUR.getChunkAtWorldCoords(this, i, j);
     }
 
     // CraftBukkit start
     public Chunk getChunkAt(int i, int j) {
-        Chunk result = null;
+        Chunk result;
         synchronized (this.chunkLock) {
-            if (this.lastChunkAccessed == null || this.lastXAccessed != i || this.lastZAccessed != j) {
-                this.lastXAccessed = i;
-                this.lastZAccessed = j;
-                this.lastChunkAccessed = this.chunkProvider.getOrCreateChunk(i, j);
-            }
-            result = this.lastChunkAccessed;
+            WorldChunkAccessCacheBehaviour.ChunkAccessResult accessResult = WORLD_CHUNK_ACCESS_CACHE_BEHAVIOUR.resolveCachedChunk(
+                    this.chunkProvider,
+                    this.lastChunkAccessed,
+                    this.lastXAccessed,
+                    this.lastZAccessed,
+                    i,
+                    j
+            );
+            this.lastXAccessed = accessResult.cachedChunkX;
+            this.lastZAccessed = accessResult.cachedChunkZ;
+            this.lastChunkAccessed = accessResult.chunk;
+            result = accessResult.chunk;
         }
         return result;
     }
     // CraftBukkit end
 
     public boolean setRawTypeIdAndData(int i, int j, int k, int l, int i1) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (j < 0) {
-                return false;
-            } else if (j >= 128) {
-                return false;
-            } else {
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                return chunk.a(i & 15, j, k & 15, l, i1);
-            }
-        } else {
-            return false;
-        }
+        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawTypeIdAndData(this, i, j, k, l, i1);
     }
 
     public boolean setRawTypeId(int i, int j, int k, int l) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (j < 0) {
-                return false;
-            } else if (j >= 128) {
-                return false;
-            } else {
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                return chunk.a(i & 15, j, k & 15, l);
-            }
-        } else {
-            return false;
-        }
+        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawTypeId(this, i, j, k, l);
     }
 
     public Material getMaterial(int i, int j, int k) {
-        int l = this.getTypeId(i, j, k);
-
-        return l == 0 ? Material.AIR : Block.byId[l].material;
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getMaterial(this, i, j, k);
     }
 
     public int getData(int i, int j, int k) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (j < 0) {
-                return 0;
-            } else if (j >= 128) {
-                return 0;
-            } else {
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                i &= 15;
-                k &= 15;
-                return chunk.getData(i, j, k);
-            }
-        } else {
-            return 0;
-        }
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getData(this, i, j, k);
     }
 
     public void setData(int i, int j, int k, int l) {
-        if (this.setRawData(i, j, k, l)) {
-            int i1 = this.getTypeId(i, j, k);
+        WorldBlockStateMutationBehaviour.DataMutationResult mutationResult =
+                WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawData(this, i, j, k, l);
+        if (!mutationResult.changed) {
+            return;
+        }
 
-            if (Block.t[i1 & 255]) {
-                this.update(i, j, k, i1);
-            } else {
-                this.applyPhysics(i, j, k, i1);
-            }
+        if (mutationResult.shouldNotifyUpdate) {
+            this.update(i, j, k, mutationResult.typeId);
+        } else {
+            this.applyPhysics(i, j, k, mutationResult.typeId);
         }
     }
 
     public boolean setRawData(int i, int j, int k, int l) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (j < 0) {
-                return false;
-            } else if (j >= 128) {
-                return false;
-            } else {
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                i &= 15;
-                k &= 15;
-                chunk.b(i, j, k, l);
-                return true;
-            }
-        } else {
-            return false;
-        }
+        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawData(this, i, j, k, l);
     }
 
     public boolean setTypeId(int i, int j, int k, int l) {
         // CraftBukkit start
         int old = this.getTypeId(i, j, k);
-        if (this.setRawTypeId(i, j, k, l)) {
-            this.update(i, j, k, l == 0 ? old : l);
+        if (WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawTypeId(this, i, j, k, l)) {
+            this.update(i, j, k, WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.resolveUpdateTypeId(old, l));
             return true;
         } else {
             return false;
@@ -395,8 +348,8 @@ public class World implements IBlockAccess {
     public boolean setTypeIdAndData(int i, int j, int k, int l, int i1) {
         // CraftBukkit start
         int old = this.getTypeId(i, j, k);
-        if (this.setRawTypeIdAndData(i, j, k, l, i1)) {
-            this.update(i, j, k, l == 0 ? old : l);
+        if (WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawTypeIdAndData(this, i, j, k, l, i1)) {
+            this.update(i, j, k, WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.resolveUpdateTypeId(old, l));
             return true;
         } else {
             return false;
@@ -405,84 +358,54 @@ public class World implements IBlockAccess {
     }
 
     public void notify(int i, int j, int k) {
-        for (int l = 0; l < this.u.size(); ++l) {
-            ((IWorldAccess) this.u.get(l)).a(i, j, k);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyBlockChanged(this.u, i, j, k);
     }
 
     protected void update(int i, int j, int k, int l) {
-        this.notify(i, j, k);
-        this.applyPhysics(i, j, k, l);
+        WORLD_BLOCK_UPDATE_BEHAVIOUR.notifyAndApplyPhysics(this, i, j, k, l);
     }
 
     public void g(int i, int j, int k, int l) {
-        if (k > l) {
-            int i1 = l;
-
-            l = k;
-            k = i1;
-        }
-
-        this.b(i, k, j, i, l, j);
+        WorldBlockUpdateBehaviour.VerticalRange verticalRange = WORLD_BLOCK_UPDATE_BEHAVIOUR.normalizeVerticalRange(k, l);
+        this.b(i, verticalRange.minY, j, i, verticalRange.maxY, j);
     }
 
     public void i(int i, int j, int k) {
-        for (int l = 0; l < this.u.size(); ++l) {
-            ((IWorldAccess) this.u.get(l)).a(i, j, k, i, j, k);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifySingleBlockRange(this.u, i, j, k);
     }
 
     public void b(int i, int j, int k, int l, int i1, int j1) {
-        for (int k1 = 0; k1 < this.u.size(); ++k1) {
-            ((IWorldAccess) this.u.get(k1)).a(i, j, k, l, i1, j1);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyBlockRange(this.u, i, j, k, l, i1, j1);
     }
 
     public void applyPhysics(int i, int j, int k, int l) {
-        this.k(i - 1, j, k, l);
-        this.k(i + 1, j, k, l);
-        this.k(i, j - 1, k, l);
-        this.k(i, j + 1, k, l);
-        this.k(i, j, k - 1, l);
-        this.k(i, j, k + 1, l);
+        int[][] neighbours = WORLD_PHYSICS_NEIGHBOUR_BEHAVIOUR.cardinalNeighbors(i, j, k);
+
+        for (int index = 0; index < neighbours.length; ++index) {
+            int[] neighbour = neighbours[index];
+            this.k(neighbour[0], neighbour[1], neighbour[2], l);
+        }
     }
 
     private void k(int i, int j, int k, int l) {
-        if (!this.suppressPhysics && !this.isStatic) {
-            Block block = Block.byId[this.getTypeId(i, j, k)];
-
-            if (block != null) {
-                // CraftBukkit start
-                CraftWorld world = ((WorldServer) this).getWorld();
-                if (world != null) {
-                    BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(i, j, k), l);
-                    this.getServer().getPluginManager().callEvent(event);
-
-                    if (event.isCancelled()) {
-                        return;
-                    }
-                }
-                // CraftBukkit end
-
-                block.doPhysics(this, i, j, k, l);
-            }
-        }
+        WORLD_BLOCK_PHYSICS_EXECUTION_BEHAVIOUR.applyNeighbourPhysics(
+                this,
+                this.suppressPhysics,
+                this.isStatic,
+                i,
+                j,
+                k,
+                l,
+                WORLD_BLOCK_PHYSICS_EVENT_BRIDGE_BEHAVIOUR
+        );
     }
 
     public boolean isChunkLoaded(int i, int j, int k) {
-        return this.getChunkAt(i >> 4, k >> 4).c(i & 15, j, k & 15);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.isChunkCellLoaded(this, i, j, k);
     }
 
     public int k(int i, int j, int k) {
-        if (j < 0) {
-            return 0;
-        } else {
-            if (j >= 128) {
-                j = 127;
-            }
-
-            return this.getChunkAt(i >> 4, k >> 4).c(i & 15, j, k & 15, 0);
-        }
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getLightLevelClamped(this, i, j, k, 0);
     }
 
     public int getLightLevel(int i, int j, int k) {
@@ -490,156 +413,50 @@ public class World implements IBlockAccess {
     }
 
     public int a(int i, int j, int k, boolean flag) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (flag) {
-                int l = this.getTypeId(i, j, k);
+        if (flag) {
+            int l = this.getTypeId(i, j, k);
 
-                if (l == Block.STEP.id || l == Block.SOIL.id || l == Block.COBBLESTONE_STAIRS.id || l == Block.WOOD_STAIRS.id) {
-                    int i1 = this.a(i, j + 1, k, false);
-                    int j1 = this.a(i + 1, j, k, false);
-                    int k1 = this.a(i - 1, j, k, false);
-                    int l1 = this.a(i, j, k + 1, false);
-                    int i2 = this.a(i, j, k - 1, false);
+            if (WORLD_BLOCK_QUERY_BEHAVIOUR.usesNeighborBrightness(l)) {
+                int i1 = this.a(i, j + 1, k, false);
+                int j1 = this.a(i + 1, j, k, false);
+                int k1 = this.a(i - 1, j, k, false);
+                int l1 = this.a(i, j, k + 1, false);
+                int i2 = this.a(i, j, k - 1, false);
 
-                    if (j1 > i1) {
-                        i1 = j1;
-                    }
-
-                    if (k1 > i1) {
-                        i1 = k1;
-                    }
-
-                    if (l1 > i1) {
-                        i1 = l1;
-                    }
-
-                    if (i2 > i1) {
-                        i1 = i2;
-                    }
-
-                    return i1;
-                }
+                return WORLD_BLOCK_QUERY_BEHAVIOUR.maxNeighborBrightness(i1, j1, k1, l1, i2);
             }
-
-            if (j < 0) {
-                return 0;
-            } else {
-                if (j >= 128) {
-                    j = 127;
-                }
-
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                i &= 15;
-                k &= 15;
-                return chunk.c(i, j, k, this.f);
-            }
-        } else {
-            return 15;
         }
+
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getLightLevel(this, i, j, k, 15, this.f);
     }
 
     public boolean m(int i, int j, int k) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (j < 0) {
-                return false;
-            } else if (j >= 128) {
-                return true;
-            } else if (!this.isChunkLoaded(i >> 4, k >> 4)) {
-                return false;
-            } else {
-                Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                i &= 15;
-                k &= 15;
-                return chunk.c(i, j, k);
-            }
-        } else {
-            return false;
-        }
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.hasDirectSkyAccess(this, i, j, k);
     }
 
     public int getHighestBlockYAt(int i, int j) {
-        if (i >= -32000000 && j >= -32000000 && i < 32000000 && j <= 32000000) {
-            if (!this.isChunkLoaded(i >> 4, j >> 4)) {
-                return 0;
-            } else {
-                Chunk chunk = this.getChunkAt(i >> 4, j >> 4);
-
-                return chunk.b(i & 15, j & 15);
-            }
-        } else {
-            return 0;
-        }
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getHighestBlockYAt(this, i, j);
     }
 
     public void a(EnumSkyBlock enumskyblock, int i, int j, int k, int l) {
-        if (!this.worldProvider.e || enumskyblock != EnumSkyBlock.SKY) {
-            if (this.isLoaded(i, j, k)) {
-                if (enumskyblock == EnumSkyBlock.SKY) {
-                    if (this.m(i, j, k)) {
-                        l = 15;
-                    }
-                } else if (enumskyblock == EnumSkyBlock.BLOCK) {
-                    int i1 = this.getTypeId(i, j, k);
-
-                    if (Block.s[i1] > l) {
-                        l = Block.s[i1];
-                    }
-                }
-
-                if (this.a(enumskyblock, i, j, k) != l) {
-                    this.a(enumskyblock, i, j, k, i, j, k);
-                }
+        if (WORLD_LIGHT_UPDATE_BEHAVIOUR.shouldProcessUpdate(this.worldProvider.e, enumskyblock) && this.isLoaded(i, j, k)) {
+            int targetLightValue = WORLD_LIGHT_UPDATE_BEHAVIOUR.resolveTargetLightValue(this, enumskyblock, i, j, k, l);
+            if (WORLD_LIGHT_UPDATE_BEHAVIOUR.shouldPropagateUpdate(this.a(enumskyblock, i, j, k), targetLightValue)) {
+                this.a(enumskyblock, i, j, k, i, j, k);
             }
         }
     }
 
     public int a(EnumSkyBlock enumskyblock, int i, int j, int k) {
-        if (j < 0) {
-            j = 0;
-        }
-
-        if (j >= 128) {
-            j = 127;
-        }
-
-        if (j >= 0 && j < 128 && i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            int l = i >> 4;
-            int i1 = k >> 4;
-
-            if (!this.isChunkLoaded(l, i1)) {
-                return 0;
-            } else {
-                Chunk chunk = this.getChunkAt(l, i1);
-
-                return chunk.a(enumskyblock, i & 15, j, k & 15);
-            }
-        } else {
-            return enumskyblock.c;
-        }
+        return WORLD_LIGHT_QUERY_BEHAVIOUR.queryLightValue(this, enumskyblock, i, j, k, enumskyblock.c);
     }
 
     public void b(EnumSkyBlock enumskyblock, int i, int j, int k, int l) {
-        if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
-            if (j >= 0) {
-                if (j < 128) {
-                    if (this.isChunkLoaded(i >> 4, k >> 4)) {
-                        Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
-
-                        chunk.a(enumskyblock, i & 15, j, k & 15, l);
-
-                        for (int i1 = 0; i1 < this.u.size(); ++i1) {
-                            ((IWorldAccess) this.u.get(i1)).a(i, j, k);
-                        }
-                    }
-                }
-            }
-        }
+        WORLD_LIGHT_WRITE_BEHAVIOUR.writeLightValue(this, this.u, enumskyblock, i, j, k, l);
     }
 
     public float n(int i, int j, int k) {
-        return this.worldProvider.f[this.getLightLevel(i, j, k)];
+        return WORLD_LIGHT_QUERY_BEHAVIOUR.mapBrightness(this.worldProvider.f, this.getLightLevel(i, j, k));
     }
 
     public boolean d() {
@@ -814,27 +631,19 @@ public class World implements IBlockAccess {
     }
 
     public void makeSound(Entity entity, String s, float f, float f1) {
-        for (int i = 0; i < this.u.size(); ++i) {
-            ((IWorldAccess) this.u.get(i)).a(s, entity.locX, entity.locY - (double) entity.height, entity.locZ, f, f1);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifySound(this.u, s, entity.locX, entity.locY - (double) entity.height, entity.locZ, f, f1);
     }
 
     public void makeSound(double d0, double d1, double d2, String s, float f, float f1) {
-        for (int i = 0; i < this.u.size(); ++i) {
-            ((IWorldAccess) this.u.get(i)).a(s, d0, d1, d2, f, f1);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifySound(this.u, s, d0, d1, d2, f, f1);
     }
 
     public void a(String s, int i, int j, int k) {
-        for (int l = 0; l < this.u.size(); ++l) {
-            ((IWorldAccess) this.u.get(l)).a(s, i, j, k);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyLevelEvent(this.u, s, i, j, k);
     }
 
     public void a(String s, double d0, double d1, double d2, double d3, double d4, double d5) {
-        for (int i = 0; i < this.u.size(); ++i) {
-            ((IWorldAccess) this.u.get(i)).a(s, d0, d1, d2, d3, d4, d5);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyParticle(this.u, s, d0, d1, d2, d3, d4, d5);
     }
 
     public boolean strikeLightning(Entity entity) {
@@ -850,94 +659,62 @@ public class World implements IBlockAccess {
 
     public boolean addEntity(Entity entity, SpawnReason spawnReason) { // Changed signature, added SpawnReason
     // CraftBukkit end
-        int i = MathHelper.floor(entity.locX / 16.0D);
-        int j = MathHelper.floor(entity.locZ / 16.0D);
-        boolean flag = false;
-
-        if (entity instanceof EntityHuman) {
-            flag = true;
-        }
+        int i = WORLD_ENTITY_ADDITION_BEHAVIOUR.entityChunkCoordinate(entity.locX);
+        int j = WORLD_ENTITY_ADDITION_BEHAVIOUR.entityChunkCoordinate(entity.locZ);
+        boolean flag = WORLD_ENTITY_REMOVAL_BEHAVIOUR.isPlayer(entity);
 
         // CraftBukkit start
-        if (entity instanceof EntityLiving && !(entity instanceof EntityPlayer)) {
-            CreatureSpawnEvent event = CraftEventFactory.callCreatureSpawnEvent((EntityLiving) entity, spawnReason);
-
-            if (event.isCancelled()) {
-                return false;
-            }
-        } else if (entity instanceof EntityItem) {
-            ItemSpawnEvent event = CraftEventFactory.callItemSpawnEvent((EntityItem) entity);
-            if (event.isCancelled()) {
-                return false;
-            }
+        if (WORLD_ENTITY_SPAWN_EVENT_BRIDGE_BEHAVIOUR.shouldCancelSpawn(entity, spawnReason)) {
+            return false;
         }
         // CraftBukkit end
 
-        if (!flag && !this.isChunkLoaded(i, j)) {
+        if (WORLD_ENTITY_ADDITION_BEHAVIOUR.shouldRejectBecauseChunkNotLoaded(flag, this.isChunkLoaded(i, j))) {
             return false;
         } else {
             if (entity instanceof EntityHuman) {
-                EntityHuman entityhuman = (EntityHuman) entity;
-
-                this.players.add(entityhuman);
+                WORLD_ENTITY_REMOVAL_BEHAVIOUR.addPlayer(this.players, entity);
                 this.everyoneSleeping();
             }
 
-            this.getChunkAt(i, j).a(entity);
-            this.entityList.add(entity);
+            WORLD_ENTITY_ADDITION_BEHAVIOUR.addEntityToChunkAndList(this, this.entityList, entity, i, j);
             this.c(entity);
             return true;
         }
     }
 
     protected void c(Entity entity) {
-        for (int i = 0; i < this.u.size(); ++i) {
-            ((IWorldAccess) this.u.get(i)).a(entity);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyEntityAdded(this.u, entity);
     }
 
     protected void d(Entity entity) {
-        for (int i = 0; i < this.u.size(); ++i) {
-            ((IWorldAccess) this.u.get(i)).b(entity);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyEntityRemoved(this.u, entity);
     }
 
     public void kill(Entity entity) {
-        if (entity.passenger != null) {
-            entity.passenger.mount((Entity) null);
-        }
-
-        if (entity.vehicle != null) {
-            entity.mount((Entity) null);
-        }
-
-        entity.die();
-        if (entity instanceof EntityHuman) {
-            this.players.remove((EntityHuman) entity);
+        WORLD_ENTITY_REMOVAL_BEHAVIOUR.detachMounts(entity);
+        if (WORLD_ENTITY_REMOVAL_BEHAVIOUR.markDeadAndWasPlayer(entity)) {
+            WORLD_ENTITY_REMOVAL_BEHAVIOUR.removePlayer(this.players, entity);
             this.everyoneSleeping();
         }
     }
 
     public void removeEntity(Entity entity) {
-        entity.die();
-        if (entity instanceof EntityHuman) {
-            this.players.remove((EntityHuman) entity);
+        if (WORLD_ENTITY_REMOVAL_BEHAVIOUR.markDeadAndWasPlayer(entity)) {
+            WORLD_ENTITY_REMOVAL_BEHAVIOUR.removePlayer(this.players, entity);
             this.everyoneSleeping();
         }
 
         int i = entity.bH;
         int j = entity.bJ;
-
-        if (entity.bG && this.isChunkLoaded(i, j)) {
-            this.getChunkAt(i, j).b(entity);
-        }
+        WORLD_ENTITY_CHUNK_DETACH_BEHAVIOUR.detachFromChunkIfPresent(this, entity, i, j);
 
         this.entityList.remove(entity);
         this.d(entity);
     }
 
     public void addIWorldAccess(IWorldAccess iworldaccess) {
-        this.u.add(iworldaccess);
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.addWorldAccessListener(this.u, iworldaccess);
     }
 
     public List getEntities(Entity entity, AxisAlignedBB axisalignedbb) {
@@ -1741,10 +1518,7 @@ public class World implements IBlockAccess {
 
         if (j != this.f) {
             this.f = j;
-
-            for (int k = 0; k < this.u.size(); ++k) {
-                ((IWorldAccess) this.u.get(k)).a();
-            }
+            WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyLightLevelChanged(this.u);
         }
 
         i = this.worldData.f() + 1L;
@@ -2064,9 +1838,7 @@ public class World implements IBlockAccess {
             this.getChunkAtWorldCoords(i, k).f();
         }
 
-        for (int l = 0; l < this.u.size(); ++l) {
-            ((IWorldAccess) this.u.get(l)).a(i, j, k, tileentity);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyTileEntityChanged(this.u, i, j, k, tileentity);
     }
 
     public int a(Class oclass) {
@@ -2448,9 +2220,7 @@ public class World implements IBlockAccess {
     }
 
     public void a(EntityHuman entityhuman, int i, int j, int k, int l, int i1) {
-        for (int j1 = 0; j1 < this.u.size(); ++j1) {
-            ((IWorldAccess) this.u.get(j1)).a(entityhuman, i, j, k, l, i1);
-        }
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyAuxEffect(this.u, entityhuman, i, j, k, l, i1);
     }
 
     // CraftBukkit start

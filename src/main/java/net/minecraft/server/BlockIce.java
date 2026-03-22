@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.FrozenBlockMeltBehaviour;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 
 import java.util.Random;
 
 public class BlockIce extends BlockBreakable {
+    private final FrozenBlockMeltBehaviour frozenBlockMeltService = FrozenBlockMeltBehaviour.getInstance();
 
     public BlockIce(int i, int j) {
         super(i, j, Material.ICE, false);
@@ -16,7 +18,7 @@ public class BlockIce extends BlockBreakable {
         super.a(world, entityhuman, i, j, k, l);
         Material material = world.getMaterial(i, j - 1, k);
 
-        if (material.isSolid() || material.isLiquid()) {
+        if (frozenBlockMeltService.shouldConvertHarvestedIceToWater(material.isSolid(), material.isLiquid())) {
             world.setTypeId(i, j, k, Block.WATER.id);
         }
     }
@@ -26,7 +28,10 @@ public class BlockIce extends BlockBreakable {
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (world.a(EnumSkyBlock.BLOCK, i, j, k) > 11 - Block.q[this.id]) {
+        if (frozenBlockMeltService.shouldMelt(
+                world.a(EnumSkyBlock.BLOCK, i, j, k),
+                frozenBlockMeltService.iceMeltThreshold(Block.q[this.id])
+        )) {
             // CraftBukkit start
             if (CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(i, j, k), Block.STATIONARY_WATER.id).isCancelled()) {
                 return;

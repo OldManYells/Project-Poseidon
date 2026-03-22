@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public class WorldProviderNormal extends WorldProvider {
+import com.legacyminecraft.poseidon.world.OverworldProviderContract;
+
+public class WorldProviderNormal extends WorldProvider implements OverworldProviderContract {
 
     public WorldProviderNormal() {}
 }

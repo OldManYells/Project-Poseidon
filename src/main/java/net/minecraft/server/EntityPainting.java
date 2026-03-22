@@ -1,7 +1,6 @@
 package net.minecraft.server;
 
-import org.bukkit.event.painting.PaintingBreakByEntityEvent;
-import org.bukkit.event.painting.PaintingBreakByWorldEvent;
+import com.legacyminecraft.poseidon.entity.PaintingEntityBehaviour;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.List;
 // CraftBukkit end
 
 public class EntityPainting extends Entity {
+    private static final PaintingEntityBehaviour PAINTING_ENTITY_BEHAVIOUR = PaintingEntityBehaviour.getInstance();
 
     private int f;
     public int a;
@@ -119,20 +119,13 @@ public class EntityPainting extends Entity {
     }
 
     public void m_() {
-        if (this.f++ == 100 && !this.world.isStatic) {
-            this.f = 0;
+        int previousTickCounter = this.f;
+        this.f = PAINTING_ENTITY_BEHAVIOUR.tickAndMaybeResetCounter(this.f);
+        if (PAINTING_ENTITY_BEHAVIOUR.shouldRunStabilityCheck(previousTickCounter, this.f, this.world.isStatic)) {
             if (!this.h()) {
-                // CraftBukkit start
-                PaintingBreakByWorldEvent event = new PaintingBreakByWorldEvent((org.bukkit.entity.Painting) this.getBukkitEntity());
-                this.world.getServer().getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
+                if (!PAINTING_ENTITY_BEHAVIOUR.breakFromWorldIfUnstable(this)) {
                     return;
                 }
-                // CraftBukkit end
-
-                this.die();
-                this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
             }
         }
     }
@@ -201,66 +194,38 @@ public class EntityPainting extends Entity {
 
     public boolean damageEntity(Entity entity, int i) {
         if (!this.dead && !this.world.isStatic) {
-            // CraftBukkit start
-            PaintingBreakByEntityEvent event = new PaintingBreakByEntityEvent((org.bukkit.entity.Painting) this.getBukkitEntity(), entity == null ? null : entity.getBukkitEntity());
-            this.world.getServer().getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) {
+            if (!PAINTING_ENTITY_BEHAVIOUR.breakFromEntity(this, entity)) {
                 return true;
             }
-            // CraftBukkit end
-
-            this.die();
             this.af();
-            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
         }
 
         return true;
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Dir", (byte) this.a);
-        nbttagcompound.setString("Motive", this.e.A);
-        nbttagcompound.a("TileX", this.b);
-        nbttagcompound.a("TileY", this.c);
-        nbttagcompound.a("TileZ", this.d);
+        PAINTING_ENTITY_BEHAVIOUR.writeNbt(nbttagcompound, this.a, this.e, this.b, this.c, this.d);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.a = nbttagcompound.c("Dir");
-        this.b = nbttagcompound.e("TileX");
-        this.c = nbttagcompound.e("TileY");
-        this.d = nbttagcompound.e("TileZ");
-        String s = nbttagcompound.getString("Motive");
-        EnumArt[] aenumart = EnumArt.values();
-        int i = aenumart.length;
-
-        for (int j = 0; j < i; ++j) {
-            EnumArt enumart = aenumart[j];
-
-            if (enumart.A.equals(s)) {
-                this.e = enumart;
-            }
-        }
-
-        if (this.e == null) {
-            this.e = EnumArt.KEBAB;
-        }
-
+        PaintingEntityBehaviour.LoadedState loadedState = PAINTING_ENTITY_BEHAVIOUR.readNbt(nbttagcompound);
+        this.a = loadedState.direction;
+        this.b = loadedState.tileX;
+        this.c = loadedState.tileY;
+        this.d = loadedState.tileZ;
+        this.e = loadedState.art;
         this.b(this.a);
     }
 
     public void a(double d0, double d1, double d2) {
-        if (!this.world.isStatic && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
-            this.die();
-            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
+        if (PAINTING_ENTITY_BEHAVIOUR.shouldBreakFromMotion(this.world.isStatic, d0, d1, d2)) {
+            PAINTING_ENTITY_BEHAVIOUR.dropPaintingItem(this);
         }
     }
 
     public void b(double d0, double d1, double d2) {
-        if (!this.world.isStatic && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
-            this.die();
-            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
+        if (PAINTING_ENTITY_BEHAVIOUR.shouldBreakFromMotion(this.world.isStatic, d0, d1, d2)) {
+            PAINTING_ENTITY_BEHAVIOUR.dropPaintingItem(this);
         }
     }
 }

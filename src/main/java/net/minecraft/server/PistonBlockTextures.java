@@ -1,11 +1,14 @@
 package net.minecraft.server;
 
-public class PistonBlockTextures {
+import com.legacyminecraft.poseidon.block.PistonTextureOrientationBehaviour;
 
-    public static final int[] a = new int[] { 1, 0, 3, 2, 5, 4};
-    public static final int[] b = new int[] { 0, 0, 0, 0, -1, 1};
-    public static final int[] c = new int[] { -1, 1, 0, 0, 0, 0};
-    public static final int[] d = new int[] { 0, 0, -1, 1, 0, 0};
+public class PistonBlockTextures {
+    private static final PistonTextureOrientationBehaviour PISTON_TEXTURE_ORIENTATION_BEHAVIOUR = PistonTextureOrientationBehaviour.getInstance();
+
+    public static final int[] a = PISTON_TEXTURE_ORIENTATION_BEHAVIOUR.getFaceRotationMap();
+    public static final int[] b = PISTON_TEXTURE_ORIENTATION_BEHAVIOUR.getXOffsets();
+    public static final int[] c = PISTON_TEXTURE_ORIENTATION_BEHAVIOUR.getYOffsets();
+    public static final int[] d = PISTON_TEXTURE_ORIENTATION_BEHAVIOUR.getZOffsets();
 
     public PistonBlockTextures() {}
 }

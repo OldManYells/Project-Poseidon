@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit;
 
+import com.legacyminecraft.poseidon.compat.bukkit.ChunkMapPacketCompressionBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.ChunkCompressionQueueBehaviour;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.Packet;
 import net.minecraft.server.Packet51MapChunk;
@@ -25,6 +27,10 @@ public final class ChunkCompressionThread implements Runnable {
 
     private final Deflater deflater = new Deflater();
     private byte[] deflateBuffer = new byte[CHUNK_SIZE + 100];
+    private final ChunkMapPacketCompressionBehaviour chunkMapPacketCompressionBehaviour =
+            ChunkMapPacketCompressionBehaviour.getInstance();
+    private final ChunkCompressionQueueBehaviour chunkCompressionQueueBehaviour =
+            ChunkCompressionQueueBehaviour.getInstance();
 
     public static void startThread() {
         if (!isRunning) {
@@ -34,14 +40,19 @@ public final class ChunkCompressionThread implements Runnable {
     }
 
     public void run() {
-        while (true) {
-            try {
-                handleQueuedPacket(packetQueue.take());
-            } catch (InterruptedException ie) {
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        chunkCompressionQueueBehaviour.runLoop(
+                packetQueue,
+                new ChunkCompressionQueueBehaviour.QueueItemHandler<QueuedPacket>() {
+                    public void handle(QueuedPacket queuedPacket) {
+                        handleQueuedPacket(queuedPacket);
+                    }
+                },
+                new ChunkCompressionQueueBehaviour.ExceptionHandler() {
+                    public void handle(Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+        );
     }
 
     private void handleQueuedPacket(QueuedPacket queuedPacket) {
@@ -61,24 +72,22 @@ public final class ChunkCompressionThread implements Runnable {
             return;
         }
 
-        int dataSize = packet.rawData.length;
-        if (deflateBuffer.length < dataSize + 100) {
-            deflateBuffer = new byte[dataSize + 100];
-        }
-
-        deflater.reset();
-        deflater.setLevel(dataSize < REDUCED_DEFLATE_THRESHOLD ? DEFLATE_LEVEL_PARTS : DEFLATE_LEVEL_CHUNKS);
-        deflater.setInput(packet.rawData);
-        deflater.finish();
-        int size = deflater.deflate(deflateBuffer);
-        if (size == 0) {
-            size = deflater.deflate(deflateBuffer);
-        }
+        ChunkMapPacketCompressionBehaviour.CompressionResult compressionResult =
+                chunkMapPacketCompressionBehaviour.compress(
+                        packet.rawData,
+                        deflater,
+                        deflateBuffer,
+                        REDUCED_DEFLATE_THRESHOLD,
+                        DEFLATE_LEVEL_CHUNKS,
+                        DEFLATE_LEVEL_PARTS
+                );
+        deflateBuffer = compressionResult.getOutputBuffer();
+        int compressedSize = compressionResult.getCompressedSize();
 
         // copy compressed data to packet
-        packet.g = new byte[size];
-        packet.h = size;
-        System.arraycopy(deflateBuffer, 0, packet.g, 0, size);
+        packet.g = new byte[compressedSize];
+        packet.h = compressedSize;
+        System.arraycopy(deflateBuffer, 0, packet.g, 0, compressedSize);
     }
 
     private void sendToNetworkQueue(QueuedPacket queuedPacket) {
@@ -86,7 +95,7 @@ public final class ChunkCompressionThread implements Runnable {
     }
 
     public static void sendPacket(EntityPlayer player, Packet packet) {
-        if (packet instanceof Packet51MapChunk) {
+        if (instance.chunkCompressionQueueBehaviour.shouldCompress(packet)) {
             // MapChunk Packets need compressing.
             instance.addQueuedPacket(new QueuedPacket(player, packet, true));
         } else {
@@ -96,34 +105,16 @@ public final class ChunkCompressionThread implements Runnable {
     }
 
     private void addToPlayerQueueSize(EntityPlayer player, int amount) {
-        synchronized (queueSizePerPlayer) {
-            Integer count = queueSizePerPlayer.get(player);
-            amount += (count == null) ? 0 : count;
-            if (amount == 0) {
-                queueSizePerPlayer.remove(player);
-            } else {
-                queueSizePerPlayer.put(player, amount);
-            }
-        }
+        chunkCompressionQueueBehaviour.updateQueueSize(queueSizePerPlayer, player, amount);
     }
 
     public static int getPlayerQueueSize(EntityPlayer player) {
-        synchronized (instance.queueSizePerPlayer) {
-            Integer count = instance.queueSizePerPlayer.get(player);
-            return count == null ? 0 : count;
-        }
+        return instance.chunkCompressionQueueBehaviour.getQueueSize(instance.queueSizePerPlayer, player);
     }
 
     private void addQueuedPacket(QueuedPacket task) {
         addToPlayerQueueSize(task.player, +1);
-
-        while (true) {
-            try {
-                packetQueue.put(task);
-                return;
-            } catch (InterruptedException e) {
-            }
-        }
+        chunkCompressionQueueBehaviour.enqueueRetry(packetQueue, task);
     }
 
     private static class QueuedPacket {

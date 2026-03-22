@@ -1,9 +1,12 @@
 package org.bukkit.craftbukkit;
 
+import com.legacyminecraft.poseidon.compat.bukkit.OfflinePlayerAccessBehaviour;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 
 public class CraftOfflinePlayer implements OfflinePlayer {
+    private static final OfflinePlayerAccessBehaviour OFFLINE_PLAYER_ACCESS_BEHAVIOUR =
+            OfflinePlayerAccessBehaviour.getInstance();
     private final String name;
     private final CraftServer server;
 
@@ -25,40 +28,27 @@ public class CraftOfflinePlayer implements OfflinePlayer {
     }
 
     public boolean isOp() {
-        return server.getHandle().isOp(getName().toLowerCase());
+        return OFFLINE_PLAYER_ACCESS_BEHAVIOUR.isOperator(server, getName());
     }
 
     public void setOp(boolean value) {
         if (value == isOp()) return;
-
-        if (value) {
-            server.getHandle().e(getName().toLowerCase());
-        } else {
-            server.getHandle().f(getName().toLowerCase());
-        }
+        OFFLINE_PLAYER_ACCESS_BEHAVIOUR.setOperator(server, getName(), value);
     }
 
     public boolean isBanned() {
-        return server.getHandle().banByName.contains(name.toLowerCase());
+        return OFFLINE_PLAYER_ACCESS_BEHAVIOUR.isBanned(server, name);
     }
 
     public void setBanned(boolean value) {
-        if (value) {
-            server.getHandle().a(name.toLowerCase());
-        } else {
-            server.getHandle().b(name.toLowerCase());
-        }
+        OFFLINE_PLAYER_ACCESS_BEHAVIOUR.setBanned(server, name, value);
     }
 
     public boolean isWhitelisted() {
-        return server.getHandle().e().contains(name.toLowerCase());
+        return OFFLINE_PLAYER_ACCESS_BEHAVIOUR.isWhitelisted(server, name);
     }
 
     public void setWhitelisted(boolean value) {
-        if (value) {
-            server.getHandle().k(name.toLowerCase());
-        } else {
-            server.getHandle().l(name.toLowerCase());
-        }
+        OFFLINE_PLAYER_ACCESS_BEHAVIOUR.setWhitelisted(server, name, value);
     }
 }

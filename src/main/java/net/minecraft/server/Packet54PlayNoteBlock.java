@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,6 +13,7 @@ public class Packet54PlayNoteBlock extends Packet {
     public int c;
     public int d;
     public int e;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet54PlayNoteBlock() {}
 
@@ -23,19 +26,19 @@ public class Packet54PlayNoteBlock extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readShort();
-        this.c = datainputstream.readInt();
-        this.d = datainputstream.read();
-        this.e = datainputstream.read();
+        PacketDataCodec.Packet54Data packetData = packetDataCodec.readPacket54(datainputstream);
+        this.a = packetData.getX();
+        this.b = packetData.getY();
+        this.c = packetData.getZ();
+        this.d = packetData.getInstrument();
+        this.e = packetData.getPitch();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeShort(this.b);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.write(this.d);
-        dataoutputstream.write(this.e);
+        packetDataCodec.writePacket54(
+                new PacketDataCodec.Packet54Data(this.a, this.b, this.c, this.d, this.e),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -43,6 +46,6 @@ public class Packet54PlayNoteBlock extends Packet {
     }
 
     public int a() {
-        return 12;
+        return packetDataCodec.packet54Length();
     }
 }

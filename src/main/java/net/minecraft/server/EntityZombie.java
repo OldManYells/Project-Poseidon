@@ -1,8 +1,9 @@
 package net.minecraft.server;
 
-import org.bukkit.event.entity.EntityCombustEvent;
+import com.legacyminecraft.poseidon.entity.ZombieLifecycleBehaviour;
 
 public class EntityZombie extends EntityMonster {
+    private static final ZombieLifecycleBehaviour ZOMBIE_LIFECYCLE_BEHAVIOUR = ZombieLifecycleBehaviour.getInstance();
 
     public EntityZombie(World world) {
         super(world);
@@ -12,37 +13,23 @@ public class EntityZombie extends EntityMonster {
     }
 
     public void v() {
-        if (this.world.d()) {
-            float f = this.c(1.0F);
-
-            if (f > 0.5F && this.world.isChunkLoaded(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ)) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
-                // CraftBukkit start
-                EntityCombustEvent event = new EntityCombustEvent(this.getBukkitEntity());
-                this.world.getServer().getPluginManager().callEvent(event);
-
-                if (!event.isCancelled()) {
-                    this.fireTicks = 300;
-                }
-                // CraftBukkit end
-            }
-        }
-
+        ZOMBIE_LIFECYCLE_BEHAVIOUR.tickSunlightCombustion(this, this.c(1.0F), this.random.nextFloat());
         super.v();
     }
 
     protected String g() {
-        return "mob.zombie";
+        return ZOMBIE_LIFECYCLE_BEHAVIOUR.getAmbientSound();
     }
 
     protected String h() {
-        return "mob.zombiehurt";
+        return ZOMBIE_LIFECYCLE_BEHAVIOUR.getHurtSound();
     }
 
     protected String i() {
-        return "mob.zombiedeath";
+        return ZOMBIE_LIFECYCLE_BEHAVIOUR.getDeathSound();
     }
 
     protected int j() {
-        return Item.FEATHER.id;
+        return ZOMBIE_LIFECYCLE_BEHAVIOUR.getDropItemId();
     }
 }

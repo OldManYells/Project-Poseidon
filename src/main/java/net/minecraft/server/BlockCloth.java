@@ -1,29 +1,27 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.WoolColorStateBehaviour;
+
 public class BlockCloth extends Block {
+    private static final WoolColorStateBehaviour WOOL_COLOR_STATE_SERVICE = WoolColorStateBehaviour.getInstance();
 
     public BlockCloth() {
         super(35, 64, Material.CLOTH);
     }
 
     public int a(int i, int j) {
-        if (j == 0) {
-            return this.textureId;
-        } else {
-            j = ~(j & 15);
-            return 113 + ((j & 8) >> 3) + (j & 7) * 16;
-        }
+        return WOOL_COLOR_STATE_SERVICE.resolveTextureByData(this.textureId, j);
     }
 
     protected int a_(int i) {
-        return i;
+        return WOOL_COLOR_STATE_SERVICE.resolveDroppedData(i);
     }
 
     public static int c(int i) {
-        return ~i & 15;
+        return WOOL_COLOR_STATE_SERVICE.invertColorData(i);
     }
 
     public static int d(int i) {
-        return ~i & 15;
+        return WOOL_COLOR_STATE_SERVICE.invertColorData(i);
     }
 }

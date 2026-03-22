@@ -1,13 +1,27 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.EntityBoundingBoxBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityCollisionPushBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityCollisionQueryBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityFallDistanceBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityFlagStateBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityFluidContactBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityInputMovementBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityLightLevelBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityMotionClampBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityNbtListBehaviour;
+import com.legacyminecraft.poseidon.entity.EntityPassengerBehaviour;
+import com.legacyminecraft.poseidon.entity.EntitySpatialBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.EntityWorldBindingBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.EntityRotationValidationBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.EntityLightningStrikeBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.EntityFireDamageBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.EntityLavaDamageBridgeBehaviour;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
@@ -20,6 +34,23 @@ import java.util.UUID;
 // CraftBukkit end
 
 public abstract class Entity {
+    private static final EntityWorldBindingBehaviour ENTITY_WORLD_BINDING_BEHAVIOUR = EntityWorldBindingBehaviour.getInstance();
+    private static final EntityRotationValidationBehaviour ENTITY_ROTATION_VALIDATION_BEHAVIOUR = EntityRotationValidationBehaviour.getInstance();
+    private static final EntityLightningStrikeBridgeBehaviour ENTITY_LIGHTNING_STRIKE_BRIDGE_BEHAVIOUR = EntityLightningStrikeBridgeBehaviour.getInstance();
+    private static final EntityFireDamageBridgeBehaviour ENTITY_FIRE_DAMAGE_BRIDGE_BEHAVIOUR = EntityFireDamageBridgeBehaviour.getInstance();
+    private static final EntityLavaDamageBridgeBehaviour ENTITY_LAVA_DAMAGE_BRIDGE_BEHAVIOUR = EntityLavaDamageBridgeBehaviour.getInstance();
+    private static final EntityBoundingBoxBehaviour ENTITY_BOUNDING_BOX_BEHAVIOUR = EntityBoundingBoxBehaviour.getInstance();
+    private static final EntityCollisionPushBehaviour ENTITY_COLLISION_PUSH_BEHAVIOUR = EntityCollisionPushBehaviour.getInstance();
+    private static final EntityCollisionQueryBehaviour ENTITY_COLLISION_QUERY_BEHAVIOUR = EntityCollisionQueryBehaviour.getInstance();
+    private static final EntityFallDistanceBehaviour ENTITY_FALL_DISTANCE_BEHAVIOUR = EntityFallDistanceBehaviour.getInstance();
+    private static final EntityFlagStateBehaviour ENTITY_FLAG_STATE_BEHAVIOUR = EntityFlagStateBehaviour.getInstance();
+    private static final EntityFluidContactBehaviour ENTITY_FLUID_CONTACT_BEHAVIOUR = EntityFluidContactBehaviour.getInstance();
+    private static final EntityInputMovementBehaviour ENTITY_INPUT_MOVEMENT_BEHAVIOUR = EntityInputMovementBehaviour.getInstance();
+    private static final EntityLightLevelBehaviour ENTITY_LIGHT_LEVEL_BEHAVIOUR = EntityLightLevelBehaviour.getInstance();
+    private static final EntityMotionClampBehaviour ENTITY_MOTION_CLAMP_BEHAVIOUR = EntityMotionClampBehaviour.getInstance();
+    private static final EntityNbtListBehaviour ENTITY_NBT_LIST_BEHAVIOUR = EntityNbtListBehaviour.getInstance();
+    private static final EntityPassengerBehaviour ENTITY_PASSENGER_BEHAVIOUR = EntityPassengerBehaviour.getInstance();
+    private static final EntitySpatialBehaviour ENTITY_SPATIAL_BEHAVIOUR = EntitySpatialBehaviour.getInstance();
 
     // Poseidon start - Backport of 0070-Use-a-Shared-Random-for-Entities.patch from PaperSpigot
     public static Random SHARED_RANDOM = new Random() {
@@ -165,45 +196,17 @@ public abstract class Entity {
     }
 
     protected void c(float f, float f1) {
-        // CraftBukkit start - yaw was sometimes set to NaN, so we need to set it back to 0.
-        if (Float.isNaN(f)) {
-            f = 0;
-        }
-
-        if ((f == Float.POSITIVE_INFINITY) || (f == Float.NEGATIVE_INFINITY)) {
-            if (this instanceof EntityPlayer) {
-                System.err.println(((CraftPlayer) this.getBukkitEntity()).getName() + " was caught trying to crash the server with an invalid yaw");
-                ((CraftPlayer) this.getBukkitEntity()).kickPlayer("Nope");
-            }
-            f = 0;
-        }
-
-        // pitch was sometimes set to NaN, so we need to set it back to 0.
-        if (Float.isNaN(f1)) {
-            f1 = 0;
-        }
-
-        if ((f1 == Float.POSITIVE_INFINITY) || (f1 == Float.NEGATIVE_INFINITY)) {
-            if (this instanceof EntityPlayer) {
-                System.err.println(((CraftPlayer) this.getBukkitEntity()).getName() + " was caught trying to crash the server with an invalid pitch");
-                ((CraftPlayer) this.getBukkitEntity()).kickPlayer("Nope");
-            }
-            f1 = 0;
-        }
-        // CraftBukkit end
-
-        this.yaw = f % 360.0F;
-        this.pitch = f1 % 360.0F;
+        EntityRotationValidationBehaviour.Rotation sanitizedRotation =
+                ENTITY_ROTATION_VALIDATION_BEHAVIOUR.sanitizeRotation(this, f, f1);
+        this.yaw = sanitizedRotation.yaw % 360.0F;
+        this.pitch = sanitizedRotation.pitch % 360.0F;
     }
 
     public void setPosition(double d0, double d1, double d2) {
         this.locX = d0;
         this.locY = d1;
         this.locZ = d2;
-        float f = this.length / 2.0F;
-        float f1 = this.width;
-
-        this.boundingBox.c(d0 - (double) f, d1 - (double) this.height + (double) this.br, d2 - (double) f, d0 + (double) f, d1 - (double) this.height + (double) this.br + (double) f1, d2 + (double) f);
+        ENTITY_BOUNDING_BOX_BEHAVIOUR.updateBoundingBox(this.boundingBox, d0, d1, d2, this.length, this.width, this.height, this.br);
     }
 
     public void m_() {
@@ -303,39 +306,12 @@ public abstract class Entity {
 
     protected void ab() {
         if (!this.fireProof) {
-            // CraftBukkit start - TODO: this event spams!
-            if (this instanceof EntityLiving) {
-                org.bukkit.Server server = this.world.getServer();
-
-                // TODO: shouldn't be sending null for the block.
-                org.bukkit.block.Block damager = null; // ((WorldServer) this.l).getWorld().getBlockAt(i, j, k);
-                org.bukkit.entity.Entity damagee = this.getBukkitEntity();
-
-                EntityDamageByBlockEvent event = new EntityDamageByBlockEvent(damager, damagee, EntityDamageEvent.DamageCause.LAVA, 4);
-                server.getPluginManager().callEvent(event);
-
-                if (!event.isCancelled()) {
-                    this.damageEntity((Entity) null, event.getDamage());
-                }
-
-                if (this.fireTicks <= 0) {
-                    // not on fire yet
-                    EntityCombustEvent combustEvent = new EntityCombustEvent(damagee);
-                    server.getPluginManager().callEvent(combustEvent);
-
-                    if (!combustEvent.isCancelled()) {
-                        this.fireTicks = 600;
-                    }
-                } else {
-                    // reset fire level back to max
-                    this.fireTicks = 600;
-                }
-                return;
+            EntityLavaDamageBridgeBehaviour.LavaContactResult lavaContactResult =
+                    ENTITY_LAVA_DAMAGE_BRIDGE_BEHAVIOUR.resolveLavaContact(this, this.fireTicks);
+            if (lavaContactResult.applyDamage) {
+                this.damageEntity((Entity) null, lavaContactResult.damage);
             }
-            // CraftBukkit end
-
-            this.damageEntity((Entity) null, 4);
-            this.fireTicks = 600;
+            this.fireTicks = lavaContactResult.updatedFireTicks;
         }
     }
 
@@ -344,10 +320,7 @@ public abstract class Entity {
     }
 
     public boolean d(double d0, double d1, double d2) {
-        AxisAlignedBB axisalignedbb = this.boundingBox.c(d0, d1, d2);
-        List list = this.world.getEntities(this, axisalignedbb);
-
-        return list.size() > 0 ? false : !this.world.c(axisalignedbb);
+        return ENTITY_COLLISION_QUERY_BEHAVIOUR.canMove(this.world, this, this.boundingBox, d0, d1, d2);
     }
 
     public void move(double d0, double d1, double d2) {
@@ -645,14 +618,12 @@ public abstract class Entity {
     }
 
     protected void a(double d0, boolean flag) {
-        if (flag) {
-            if (this.fallDistance > 0.0F) {
-                this.a(this.fallDistance);
-                this.fallDistance = 0.0F;
-            }
-        } else if (d0 < 0.0D) {
-            this.fallDistance = (float) ((double) this.fallDistance - d0);
+        EntityFallDistanceBehaviour.FallDistanceUpdate fallDistanceUpdate =
+                ENTITY_FALL_DISTANCE_BEHAVIOUR.update(d0, flag, this.fallDistance);
+        if (fallDistanceUpdate.shouldApplyLandingEffect) {
+            this.a(fallDistanceUpdate.landingDistance);
         }
+        this.fallDistance = fallDistanceUpdate.updatedFallDistance;
     }
 
     public AxisAlignedBB e_() {
@@ -662,29 +633,23 @@ public abstract class Entity {
     protected void burn(int i) {
         if (!this.fireProof) {
             // CraftBukkit start
-            if (this instanceof EntityLiving) {
-                EntityDamageEvent event = new EntityDamageEvent(this.getBukkitEntity(), EntityDamageEvent.DamageCause.FIRE, i);
-                this.world.getServer().getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
-                    return;
-                }
-
-                i = event.getDamage();
+            EntityFireDamageBridgeBehaviour.FireDamageResult fireDamageResult = ENTITY_FIRE_DAMAGE_BRIDGE_BEHAVIOUR.resolveFireDamage(this, i);
+            if (fireDamageResult.cancelled) {
+                return;
             }
             // CraftBukkit end
-            this.damageEntity((Entity) null, i);
+            this.damageEntity((Entity) null, fireDamageResult.damage);
         }
     }
 
     protected void a(float f) {
-        if (this.passenger != null) {
+        if (ENTITY_PASSENGER_BEHAVIOUR.shouldPropagateFallDistance(this.passenger)) {
             this.passenger.a(f);
         }
     }
 
     public boolean ac() {
-        return this.bA || this.world.s(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ));
+        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isWet(this.world, this.locX, this.locY, this.locZ, this.bA);
     }
 
     public boolean ad() {
@@ -692,24 +657,18 @@ public abstract class Entity {
     }
 
     public boolean f_() {
-        return this.world.a(this.boundingBox.b(0.0D, -0.4000000059604645D, 0.0D).shrink(0.0010D, 0.0010D, 0.0010D), Material.WATER, this);
+        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isInWater(this.world, this.boundingBox, this);
     }
 
     public boolean a(Material material) {
-        double d0 = this.locY + (double) this.t();
-        int i = MathHelper.floor(this.locX);
-        int j = MathHelper.d((float) MathHelper.floor(d0));
-        int k = MathHelper.floor(this.locZ);
-        int l = this.world.getTypeId(i, j, k);
-
-        if (l != 0 && Block.byId[l].material == material) {
-            float f = BlockFluids.c(this.world.getData(i, j, k)) - 0.11111111F;
-            float f1 = (float) (j + 1) - f;
-
-            return d0 < (double) f1;
-        } else {
-            return false;
-        }
+        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isSubmergedInMaterial(
+                this.world,
+                this.locX,
+                this.locY,
+                this.locZ,
+                this.t(),
+                material
+        );
     }
 
     public float t() {
@@ -717,56 +676,38 @@ public abstract class Entity {
     }
 
     public boolean ae() {
-        return this.world.a(this.boundingBox.b(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
+        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isInLava(this.world, this.boundingBox);
     }
 
     public void a(float f, float f1, float f2) {
-        float f3 = MathHelper.c(f * f + f1 * f1);
-
-        if (f3 >= 0.01F) {
-            if (f3 < 1.0F) {
-                f3 = 1.0F;
-            }
-
-            f3 = f2 / f3;
-            f *= f3;
-            f1 *= f3;
-            float f4 = MathHelper.sin(this.yaw * 3.1415927F / 180.0F);
-            float f5 = MathHelper.cos(this.yaw * 3.1415927F / 180.0F);
-
-            this.motX += (double) (f * f5 - f1 * f4);
-            this.motZ += (double) (f1 * f5 + f * f4);
+        EntityInputMovementBehaviour.MotionDelta motionDelta = ENTITY_INPUT_MOVEMENT_BEHAVIOUR.computeMotionDelta(f, f1, f2, this.yaw);
+        if (!motionDelta.isZero()) {
+            this.motX += motionDelta.x;
+            this.motZ += motionDelta.z;
         }
     }
 
     public float c(float f) {
-        int i = MathHelper.floor(this.locX);
-        double d0 = (this.boundingBox.e - this.boundingBox.b) * 0.66D;
-        int j = MathHelper.floor(this.locY - (double) this.height + d0);
-        int k = MathHelper.floor(this.locZ);
-
-        if (this.world.a(MathHelper.floor(this.boundingBox.a), MathHelper.floor(this.boundingBox.b), MathHelper.floor(this.boundingBox.c), MathHelper.floor(this.boundingBox.d), MathHelper.floor(this.boundingBox.e), MathHelper.floor(this.boundingBox.f))) {
-            float f1 = this.world.n(i, j, k);
-
-            if (f1 < this.bF) {
-                f1 = this.bF;
-            }
-
-            return f1;
-        } else {
-            return this.bF;
-        }
+        return ENTITY_LIGHT_LEVEL_BEHAVIOUR.sampleAmbientBrightness(
+                this.world,
+                this.boundingBox,
+                this.locX,
+                this.locY,
+                this.locZ,
+                this.height,
+                this.bF
+        );
     }
 
     public void spawnIn(World world) {
         // CraftBukkit start
-        if (world == null) {
+        if (ENTITY_WORLD_BINDING_BEHAVIOUR.shouldUseFallbackWorld(world)) {
             this.die();
-            this.world = ((org.bukkit.craftbukkit.CraftWorld) Bukkit.getServer().getWorlds().get(0)).getHandle();
+            this.world = ENTITY_WORLD_BINDING_BEHAVIOUR.resolveFallbackWorld();
             return;
         }
         // CraftBukkit end
-        this.world = world;
+        this.world = ENTITY_WORLD_BINDING_BEHAVIOUR.resolveWorld(world);
     }
 
     public void setLocation(double d0, double d1, double d2, float f, float f1) {
@@ -776,15 +717,7 @@ public abstract class Entity {
         this.lastYaw = this.yaw = f;
         this.lastPitch = this.pitch = f1;
         this.br = 0.0F;
-        double d3 = (double) (this.lastYaw - f);
-
-        if (d3 < -180.0D) {
-            this.lastYaw += 360.0F;
-        }
-
-        if (d3 >= 180.0D) {
-            this.lastYaw -= 360.0F;
-        }
+        this.lastYaw = ENTITY_SPATIAL_BEHAVIOUR.wrapPreviousYaw(this.lastYaw, f);
 
         this.setPosition(this.locX, this.locY, this.locZ);
         this.c(f, f1);
@@ -792,7 +725,7 @@ public abstract class Entity {
 
     public void setPositionRotation(double d0, double d1, double d2, float f, float f1) {
         this.bo = this.lastX = this.locX = d0;
-        this.bp = this.lastY = this.locY = d1 + (double) this.height;
+        this.bp = this.lastY = this.locY = ENTITY_SPATIAL_BEHAVIOUR.elevatedY(d1, this.height);
         this.bq = this.lastZ = this.locZ = d2;
         this.yaw = f;
         this.pitch = f1;
@@ -800,63 +733,29 @@ public abstract class Entity {
     }
 
     public float f(Entity entity) {
-        float f = (float) (this.locX - entity.locX);
-        float f1 = (float) (this.locY - entity.locY);
-        float f2 = (float) (this.locZ - entity.locZ);
-
-        return MathHelper.c(f * f + f1 * f1 + f2 * f2);
+        return ENTITY_SPATIAL_BEHAVIOUR.distanceToEntity(this.locX, this.locY, this.locZ, entity.locX, entity.locY, entity.locZ);
     }
 
     public double e(double d0, double d1, double d2) {
-        double d3 = this.locX - d0;
-        double d4 = this.locY - d1;
-        double d5 = this.locZ - d2;
-
-        return d3 * d3 + d4 * d4 + d5 * d5;
+        return ENTITY_SPATIAL_BEHAVIOUR.distanceSquared(this.locX, this.locY, this.locZ, d0, d1, d2);
     }
 
     public double f(double d0, double d1, double d2) {
-        double d3 = this.locX - d0;
-        double d4 = this.locY - d1;
-        double d5 = this.locZ - d2;
-
-        return (double) MathHelper.a(d3 * d3 + d4 * d4 + d5 * d5);
+        return ENTITY_SPATIAL_BEHAVIOUR.distance(this.locX, this.locY, this.locZ, d0, d1, d2);
     }
 
     public double g(Entity entity) {
-        double d0 = this.locX - entity.locX;
-        double d1 = this.locY - entity.locY;
-        double d2 = this.locZ - entity.locZ;
-
-        return d0 * d0 + d1 * d1 + d2 * d2;
+        return ENTITY_SPATIAL_BEHAVIOUR.distanceSquared(this.locX, this.locY, this.locZ, entity.locX, entity.locY, entity.locZ);
     }
 
     public void b(EntityHuman entityhuman) {}
 
     public void collide(Entity entity) {
         if (entity.passenger != this && entity.vehicle != this) {
-            double d0 = entity.locX - this.locX;
-            double d1 = entity.locZ - this.locZ;
-            double d2 = MathHelper.a(d0, d1);
-
-            if (d2 >= 0.009999999776482582D) {
-                d2 = (double) MathHelper.a(d2);
-                d0 /= d2;
-                d1 /= d2;
-                double d3 = 1.0D / d2;
-
-                if (d3 > 1.0D) {
-                    d3 = 1.0D;
-                }
-
-                d0 *= d3;
-                d1 *= d3;
-                d0 *= 0.05000000074505806D;
-                d1 *= 0.05000000074505806D;
-                d0 *= (double) (1.0F - this.bu);
-                d1 *= (double) (1.0F - this.bu);
-                this.b(-d0, 0.0D, -d1);
-                entity.b(d0, 0.0D, d1);
+            EntityCollisionPushBehaviour.PushVector pushVector = ENTITY_COLLISION_PUSH_BEHAVIOUR.computeHorizontalPush(this.locX, this.locZ, entity.locX, entity.locZ, this.bu);
+            if (!pushVector.isZero()) {
+                this.b(-pushVector.x, 0.0D, -pushVector.z);
+                entity.b(pushVector.x, 0.0D, pushVector.z);
             }
         }
     }
@@ -974,39 +873,17 @@ public abstract class Entity {
         this.a(nbttagcompound);
 
         // CraftBukkit start - Exempt Vehicles from notch's sanity check
-        if (!(this.getBukkitEntity() instanceof Vehicle)) {
-            if (Math.abs(this.motX) > 10.0D) {
-                this.motX = 0.0D;
-            }
-
-            if (Math.abs(this.motY) > 10.0D) {
-                this.motY = 0.0D;
-            }
-
-            if (Math.abs(this.motZ) > 10.0D) {
-                this.motZ = 0.0D;
-            }
+        if (ENTITY_MOTION_CLAMP_BEHAVIOUR.shouldClamp(this.getBukkitEntity() instanceof Vehicle)) {
+            this.motX = ENTITY_MOTION_CLAMP_BEHAVIOUR.clampMotionComponent(this.motX, 10.0D);
+            this.motY = ENTITY_MOTION_CLAMP_BEHAVIOUR.clampMotionComponent(this.motY, 10.0D);
+            this.motZ = ENTITY_MOTION_CLAMP_BEHAVIOUR.clampMotionComponent(this.motZ, 10.0D);
         }
         // CraftBukkit end
 
         // CraftBukkit start - reset world
         if (this instanceof EntityPlayer) {
             org.bukkit.Server server = Bukkit.getServer();
-            org.bukkit.World bworld = null;
-
-            // TODO: Remove World related checks, replaced with WorldUID.
-            String worldName = nbttagcompound.getString("World");
-
-            if (nbttagcompound.hasKey("WorldUUIDMost") && nbttagcompound.hasKey("WorldUUIDLeast")) {
-                UUID uid = new UUID(nbttagcompound.getLong("WorldUUIDMost"), nbttagcompound.getLong("WorldUUIDLeast"));
-                bworld = server.getWorld(uid);
-            } else {
-                bworld = server.getWorld(worldName);
-            }
-            if (bworld == null) {
-                EntityPlayer entityPlayer = (EntityPlayer) this;
-                bworld = ((org.bukkit.craftbukkit.CraftServer) server).getServer().getWorldServer(entityPlayer.dimension).getWorld();
-            }
+            org.bukkit.World bworld = ENTITY_WORLD_BINDING_BEHAVIOUR.resolvePlayerWorld(server, nbttagcompound, (EntityPlayer) this);
 
             this.spawnIn(bworld == null ? null : ((org.bukkit.craftbukkit.CraftWorld) bworld).getHandle());
         }
@@ -1022,31 +899,11 @@ public abstract class Entity {
     protected abstract void b(NBTTagCompound nbttagcompound);
 
     protected NBTTagList a(double... adouble) {
-        NBTTagList nbttaglist = new NBTTagList();
-        double[] adouble1 = adouble;
-        int i = adouble.length;
-
-        for (int j = 0; j < i; ++j) {
-            double d0 = adouble1[j];
-
-            nbttaglist.a((NBTBase) (new NBTTagDouble(d0)));
-        }
-
-        return nbttaglist;
+        return ENTITY_NBT_LIST_BEHAVIOUR.buildDoubleList(adouble);
     }
 
     protected NBTTagList a(float... afloat) {
-        NBTTagList nbttaglist = new NBTTagList();
-        float[] afloat1 = afloat;
-        int i = afloat.length;
-
-        for (int j = 0; j < i; ++j) {
-            float f = afloat1[j];
-
-            nbttaglist.a((NBTBase) (new NBTTagFloat(f)));
-        }
-
-        return nbttaglist;
+        return ENTITY_NBT_LIST_BEHAVIOUR.buildFloatList(afloat);
     }
 
     public EntityItem b(int i, int j) {
@@ -1233,43 +1090,35 @@ public abstract class Entity {
     }
 
     public boolean isSneaking() {
-        return this.d(1);
+        return ENTITY_FLAG_STATE_BEHAVIOUR.isSneaking(this.datawatcher.a(0));
     }
 
     public void setSneak(boolean flag) {
-        this.a(1, flag);
+        byte flags = this.datawatcher.a(0);
+        byte updatedFlags = ENTITY_FLAG_STATE_BEHAVIOUR.withSneaking(flags, flag);
+        this.datawatcher.watch(0, Byte.valueOf(updatedFlags));
     }
 
     protected boolean d(int i) {
-        return (this.datawatcher.a(0) & 1 << i) != 0;
+        return ENTITY_FLAG_STATE_BEHAVIOUR.isFlagSet(this.datawatcher.a(0), i);
     }
 
     protected void a(int i, boolean flag) {
         byte b0 = this.datawatcher.a(0);
-
-        if (flag) {
-            this.datawatcher.watch(0, Byte.valueOf((byte) (b0 | 1 << i)));
-        } else {
-            this.datawatcher.watch(0, Byte.valueOf((byte) (b0 & ~(1 << i))));
-        }
+        byte updatedFlags = ENTITY_FLAG_STATE_BEHAVIOUR.setFlag(b0, i, flag);
+        this.datawatcher.watch(0, Byte.valueOf(updatedFlags));
     }
 
     public void a(EntityWeatherStorm entityweatherstorm) {
         // CraftBukkit start
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(entityweatherstorm.getBukkitEntity(), this.getBukkitEntity(), EntityDamageEvent.DamageCause.LIGHTNING, 5);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
+        EntityLightningStrikeBridgeBehaviour.LightningStrikeResult lightningStrikeResult =
+                ENTITY_LIGHTNING_STRIKE_BRIDGE_BEHAVIOUR.handleStrike(this, entityweatherstorm, this.fireTicks, 300);
+        if (lightningStrikeResult.cancelled) {
             return;
         }
-
-        this.burn(event.getDamage());
+        this.burn(lightningStrikeResult.damage);
         // CraftBukkit end
-
-        ++this.fireTicks;
-        if (this.fireTicks == 0) {
-            this.fireTicks = 300;
-        }
+        this.fireTicks = lightningStrikeResult.updatedFireTicks;
     }
 
     public void a(EntityLiving entityliving) {}

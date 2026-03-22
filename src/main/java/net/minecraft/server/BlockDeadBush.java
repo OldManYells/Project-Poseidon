@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.DecorationPlantStateBehaviour;
+
 import java.util.Random;
 
 public class BlockDeadBush extends BlockFlower {
+    private final DecorationPlantStateBehaviour decorationPlantStateService = DecorationPlantStateBehaviour.getInstance();
 
     protected BlockDeadBush(int i, int j) {
         super(i, j);
@@ -12,14 +15,14 @@ public class BlockDeadBush extends BlockFlower {
     }
 
     protected boolean c(int i) {
-        return i == Block.SAND.id;
+        return decorationPlantStateService.deadBushCanPlaceOn(i, Block.SAND.id);
     }
 
     public int a(int i, int j) {
-        return this.textureId;
+        return decorationPlantStateService.deadBushTexture(this.textureId);
     }
 
     public int a(int i, Random random) {
-        return -1;
+        return decorationPlantStateService.noDropItemId();
     }
 }

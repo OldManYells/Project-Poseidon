@@ -1,15 +1,48 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.network.ConnectionAcceptLoopSystem;
+
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.HashMap;
 
 class NetworkAcceptThread extends Thread {
 
     final MinecraftServer a;
 
     final NetworkListenThread b;
+    private final ConnectionAcceptLoopSystem connectionAcceptLoopSystem = ConnectionAcceptLoopSystem.getInstance();
+    private final ConnectionAcceptLoopSystem.AcceptLoopOperations acceptLoopOperations =
+            new ConnectionAcceptLoopSystem.AcceptLoopOperations() {
+                @Override
+                public boolean isRunning() {
+                    return NetworkAcceptThread.this.b.b;
+                }
+
+                @Override
+                public Socket accept() throws IOException {
+                    return NetworkListenThread.a(NetworkAcceptThread.this.b).accept();
+                }
+
+                @Override
+                public long currentTimeMillis() {
+                    return System.currentTimeMillis();
+                }
+
+                @Override
+                public void onAccepted(Socket socket) {
+                    NetLoginHandler netloginhandler = new NetLoginHandler(
+                            NetworkAcceptThread.this.a,
+                            socket,
+                            "Connection #" + NetworkListenThread.b(NetworkAcceptThread.this.b)
+                    );
+                    NetworkListenThread.a(NetworkAcceptThread.this.b, netloginhandler);
+                }
+
+                @Override
+                public void onAcceptError(IOException ioexception) {
+                    ioexception.printStackTrace();
+                }
+            };
 
     NetworkAcceptThread(NetworkListenThread networklistenthread, String s, MinecraftServer minecraftserver) {
         super(s);
@@ -18,28 +51,6 @@ class NetworkAcceptThread extends Thread {
     }
 
     public void run() {
-        HashMap hashmap = new HashMap();
-
-        while (this.b.b) {
-            try {
-                Socket socket = NetworkListenThread.a(this.b).accept();
-
-                if (socket != null) {
-                    InetAddress inetaddress = socket.getInetAddress();
-
-                    if (hashmap.containsKey(inetaddress) && !"127.0.0.1".equals(inetaddress.getHostAddress()) && System.currentTimeMillis() - ((Long) hashmap.get(inetaddress)).longValue() < 5000L) {
-                        hashmap.put(inetaddress, Long.valueOf(System.currentTimeMillis()));
-                        socket.close();
-                    } else {
-                        hashmap.put(inetaddress, Long.valueOf(System.currentTimeMillis()));
-                        NetLoginHandler netloginhandler = new NetLoginHandler(this.a, socket, "Connection #" + NetworkListenThread.b(this.b));
-
-                        NetworkListenThread.a(this.b, netloginhandler);
-                    }
-                }
-            } catch (IOException ioexception) {
-                ioexception.printStackTrace();
-            }
-        }
+        connectionAcceptLoopSystem.runLoop(this.acceptLoopOperations);
     }
 }

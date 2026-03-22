@@ -1,9 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
 
+import com.legacyminecraft.poseidon.compat.bukkit.CraftItemStackStateBridgeBehaviour;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftItemStack extends ItemStack {
+    private static final CraftItemStackStateBridgeBehaviour CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR =
+            CraftItemStackStateBridgeBehaviour.getInstance();
+
     protected net.minecraft.server.ItemStack item;
 
     public CraftItemStack(net.minecraft.server.ItemStack item) {
@@ -55,72 +59,62 @@ public class CraftItemStack extends ItemStack {
 
     @Override
     public Material getType() {
-        super.setTypeId(item != null ? item.id : 0); // sync, needed?
+        super.setTypeId(CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.syncTypeId(item));
         return super.getType();
     }
 
     @Override
     public int getTypeId() {
-        super.setTypeId(item != null ? item.id : 0); // sync, needed?
-        return item != null ? item.id : 0;
+        int typeId = CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.syncTypeId(item);
+        super.setTypeId(typeId);
+        return typeId;
     }
 
     @Override
     public void setTypeId(int type) {
-        if (type == 0) {
-            super.setTypeId(0);
-            super.setAmount(0);
-            item = null;
-        } else {
-            if (item == null) {
-                item = new net.minecraft.server.ItemStack(type, 1, 0);
-                super.setAmount(1);
-            } else {
-                item.id = type;
-                super.setTypeId(item.id);
-            }
-        }
+        item = CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.applyTypeId(item, type, createSuperItemAccess());
     }
 
     @Override
     public int getAmount() {
-        super.setAmount(item != null ? item.count : 0); // sync, needed?
-        return (item != null ? item.count : 0);
+        int amount = CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.syncAmount(item);
+        super.setAmount(amount);
+        return amount;
     }
 
     @Override
     public void setAmount(int amount) {
-        if (amount == 0) {
-            super.setTypeId(0);
-            super.setAmount(0);
-            item = null;
-        } else {
-            super.setAmount(amount);
-            item.count = amount;
-        }
+        item = CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.applyAmount(item, amount, createSuperItemAccess());
     }
 
     @Override
     public void setDurability(final short durability) {
-        // Ignore damage if item is null
-        if (item != null) {
-            super.setDurability(durability);
-            item.damage = durability;
-        }
+        CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.applyDurability(item, durability, createSuperItemAccess());
     }
 
     @Override
     public short getDurability() {
-        if (item != null) {
-            super.setDurability((short) item.damage); // sync, needed?
-            return (short) item.damage;
-        } else {
-            return -1;
-        }
+        return CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.syncDurability(item, createSuperItemAccess());
     }
 
     @Override
     public int getMaxStackSize() {
-        return item.getItem().getMaxStackSize();
+        return CRAFT_ITEM_STACK_STATE_BRIDGE_BEHAVIOUR.maxStackSize(item);
+    }
+
+    private CraftItemStackStateBridgeBehaviour.SuperItemAccess createSuperItemAccess() {
+        return new CraftItemStackStateBridgeBehaviour.SuperItemAccess() {
+            public void setTypeId(int typeId) {
+                CraftItemStack.super.setTypeId(typeId);
+            }
+
+            public void setAmount(int amount) {
+                CraftItemStack.super.setAmount(amount);
+            }
+
+            public void setDurability(short durability) {
+                CraftItemStack.super.setDurability(durability);
+            }
+        };
     }
 }

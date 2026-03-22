@@ -1,14 +1,26 @@
 package org.bukkit.craftbukkit;
 
+import com.legacyminecraft.poseidon.compat.bukkit.BiomeConversionBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.ChunkSnapshotDataAccessBehaviour;
 import net.minecraft.server.BiomeBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.block.CraftBlock;
 /**
  * Represents a static, thread-safe snapshot of chunk of blocks
  * Purpose is to allow clean, efficient copy of a chunk data to be made, and then handed off for processing in another thread (e.g. map rendering)
  */
 public class CraftChunkSnapshot implements ChunkSnapshot {
+    private static final BiomeConversionBehaviour BIOME_CONVERSION_BEHAVIOUR =
+            BiomeConversionBehaviour.getInstance();
+    private static final ChunkSnapshotDataAccessBehaviour CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR =
+            ChunkSnapshotDataAccessBehaviour.getInstance();
+    private static final ChunkSnapshotDataAccessBehaviour.BiomeResolver BIOME_RESOLVER =
+            new ChunkSnapshotDataAccessBehaviour.BiomeResolver() {
+                public Biome resolve(BiomeBase biomeBase) {
+                    return BIOME_CONVERSION_BEHAVIOUR.biomeBaseToBiome(biomeBase);
+                }
+            };
+
     private final int x, z;
     private final String worldname;
     private final byte[] buf; // Flat buffer in uncompressed chunk file format
@@ -73,7 +85,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-255
      */
     public int getBlockTypeId(int x, int y, int z) {
-        return buf[x << 11 | z << 7 | y] & 255;
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readBlockTypeId(buf, x, y, z);
     }
 
     /**
@@ -85,9 +97,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-15
      */
     public int getBlockData(int x, int y, int z) {
-        int off = ((x << 10) | (z << 6) | (y >> 1)) + BLOCKDATA_OFF;
-
-        return ((y & 1) == 0) ? (buf[off] & 0xF) : ((buf[off] >> 4) & 0xF);
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readBlockData(buf, BLOCKDATA_OFF, x, y, z);
     }
 
     /**
@@ -99,9 +109,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-15
      */
     public int getBlockSkyLight(int x, int y, int z) {
-        int off = ((x << 10) | (z << 6) | (y >> 1)) + SKYLIGHT_OFF;
-
-        return ((y & 1) == 0) ? (buf[off] & 0xF) : ((buf[off] >> 4) & 0xF);
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readSkyLight(buf, SKYLIGHT_OFF, x, y, z);
     }
 
     /**
@@ -113,9 +121,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-15
      */
     public int getBlockEmittedLight(int x, int y, int z) {
-        int off = ((x << 10) | (z << 6) | (y >> 1)) + BLOCKLIGHT_OFF;
-
-        return ((y & 1) == 0) ? (buf[off] & 0xF) : ((buf[off] >> 4) & 0xF);
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readEmittedLight(buf, BLOCKLIGHT_OFF, x, y, z);
     }
 
     /**
@@ -126,7 +132,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return Y-coordinate of the highest non-air block
      */
     public int getHighestBlockYAt(int x, int z) {
-        return hmap[z << 4 | x] & 255;
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readHighestBlockY(hmap, x, z);
     }
 
     /**
@@ -137,7 +143,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return Biome at given coordinate
      */
     public Biome getBiome(int x, int z) {
-        return CraftBlock.biomeBaseToBiome(biome[x << 4 | z]);
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readBiome(biome, x, z, BIOME_RESOLVER);
     }
 
     /**
@@ -148,7 +154,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return temperature at given coordinate
      */
     public double getRawBiomeTemperature(int x, int z) {
-        return biomeTemp[x << 4 | z];
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readClimateValue(biomeTemp, x, z);
     }
 
     /**
@@ -159,7 +165,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return rainfall at given coordinate
      */
     public double getRawBiomeRainfall(int x, int z) {
-        return biomeRain[x << 4 | z];
+        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readClimateValue(biomeRain, x, z);
     }
 
     /**

@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.block.BlockCoreStateBehaviour;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -140,6 +141,7 @@ public class Block {
     public final Material material;
     public float frictionFactor;
     private String name;
+    private static final BlockCoreStateBehaviour BLOCK_CORE_STATE_SERVICE = BlockCoreStateBehaviour.getInstance();
 
     protected Block(int i, Material material) {
         this.bq = true;
@@ -231,7 +233,7 @@ public class Block {
     }
 
     public boolean b(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        return iblockaccess.getMaterial(i, j, k).isBuildable();
+        return BLOCK_CORE_STATE_SERVICE.isNeighborBuildable(iblockaccess.getMaterial(i, j, k).isBuildable());
     }
 
     public int a(int i, int j) {
@@ -294,7 +296,7 @@ public class Block {
     }
 
     public float getDamage(EntityHuman entityhuman) {
-        return this.strength < 0.0F ? 0.0F : (!entityhuman.b(this) ? 1.0F / this.strength / 100.0F : entityhuman.a(this) / this.strength / 30.0F);
+        return BLOCK_CORE_STATE_SERVICE.resolveDamageProgress(this.strength, entityhuman.b(this), entityhuman.a(this));
     }
 
     public final void g(World world, int i, int j, int k, int l) {
@@ -302,12 +304,12 @@ public class Block {
     }
 
     public void dropNaturally(World world, int i, int j, int k, int l, float f) {
-        if (!world.isStatic) {
+        if (BLOCK_CORE_STATE_SERVICE.shouldProcessDrops(world.isStatic)) {
             int i1 = this.a(world.random);
 
             for (int j1 = 0; j1 < i1; ++j1) {
                 // CraftBukkit - <= to < to allow for plugins to completely disable block drops from explosions
-                if (world.random.nextFloat() < f) {
+                if (BLOCK_CORE_STATE_SERVICE.shouldDropItem(world.random.nextFloat(), f)) {
                     int k1 = this.a(l, world.random);
 
                     if (k1 > 0) {
@@ -319,14 +321,14 @@ public class Block {
     }
 
     protected void a(World world, int i, int j, int k, ItemStack itemstack) {
-        if (!world.isStatic) {
+        if (BLOCK_CORE_STATE_SERVICE.shouldProcessDrops(world.isStatic)) {
             float f = 0.7F;
-            double d0 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-            double d1 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-            double d2 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+            double d0 = BLOCK_CORE_STATE_SERVICE.resolveDropOffset(world.random.nextFloat(), f);
+            double d1 = BLOCK_CORE_STATE_SERVICE.resolveDropOffset(world.random.nextFloat(), f);
+            double d2 = BLOCK_CORE_STATE_SERVICE.resolveDropOffset(world.random.nextFloat(), f);
             EntityItem entityitem = new EntityItem(world, (double) i + d0, (double) j + d1, (double) k + d2, itemstack);
 
-            entityitem.pickupDelay = 10;
+            entityitem.pickupDelay = BLOCK_CORE_STATE_SERVICE.resolvePickupDelay();
             world.addEntity(entityitem);
         }
     }
@@ -434,15 +436,15 @@ public class Block {
     }
 
     private boolean a(Vec3D vec3d) {
-        return vec3d == null ? false : vec3d.b >= this.minY && vec3d.b <= this.maxY && vec3d.c >= this.minZ && vec3d.c <= this.maxZ;
+        return vec3d != null && BLOCK_CORE_STATE_SERVICE.isWithinYZ(vec3d.b, vec3d.c, this.minY, this.maxY, this.minZ, this.maxZ);
     }
 
     private boolean b(Vec3D vec3d) {
-        return vec3d == null ? false : vec3d.a >= this.minX && vec3d.a <= this.maxX && vec3d.c >= this.minZ && vec3d.c <= this.maxZ;
+        return vec3d != null && BLOCK_CORE_STATE_SERVICE.isWithinXZ(vec3d.a, vec3d.c, this.minX, this.maxX, this.minZ, this.maxZ);
     }
 
     private boolean c(Vec3D vec3d) {
-        return vec3d == null ? false : vec3d.a >= this.minX && vec3d.a <= this.maxX && vec3d.b >= this.minY && vec3d.b <= this.maxY;
+        return vec3d != null && BLOCK_CORE_STATE_SERVICE.isWithinXY(vec3d.a, vec3d.b, this.minX, this.maxX, this.minY, this.maxY);
     }
 
     public void d(World world, int i, int j, int k) {
@@ -454,8 +456,7 @@ public class Block {
 
     public boolean canPlace(World world, int i, int j, int k) {
         int l = world.getTypeId(i, j, k);
-
-        return l == 0 || byId[l].material.isReplacable();
+        return BLOCK_CORE_STATE_SERVICE.canReplace(l, l != 0 && byId[l].material.isReplacable());
     }
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {

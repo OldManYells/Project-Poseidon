@@ -1,8 +1,9 @@
 package net.minecraft.server;
 
-import org.bukkit.event.entity.EntityDeathEvent;
+import com.legacyminecraft.poseidon.entity.SquidLifecycleBehaviour;
 
 public class EntitySquid extends EntityWaterAnimal {
+    private static final SquidLifecycleBehaviour SQUID_LIFECYCLE_BEHAVIOUR = SquidLifecycleBehaviour.getInstance();
 
     public float a = 0.0F;
     public float b = 0.0F;
@@ -23,7 +24,7 @@ public class EntitySquid extends EntityWaterAnimal {
         super(world);
         this.texture = "/mob/squid.png";
         this.b(0.95F, 0.95F);
-        this.l = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
+        this.l = SQUID_LIFECYCLE_BEHAVIOUR.createInitialTentacleSpeed(this.random);
     }
 
     public void b(NBTTagCompound nbttagcompound) {
@@ -35,44 +36,27 @@ public class EntitySquid extends EntityWaterAnimal {
     }
 
     protected String g() {
-        return null;
+        return SQUID_LIFECYCLE_BEHAVIOUR.getAmbientSound();
     }
 
     protected String h() {
-        return null;
+        return SQUID_LIFECYCLE_BEHAVIOUR.getHurtSound();
     }
 
     protected String i() {
-        return null;
+        return SQUID_LIFECYCLE_BEHAVIOUR.getDeathSound();
     }
 
     protected float k() {
-        return 0.4F;
+        return SQUID_LIFECYCLE_BEHAVIOUR.getSoundVolume();
     }
 
     protected int j() {
-        return 0;
+        return SQUID_LIFECYCLE_BEHAVIOUR.getDropItemId();
     }
 
     protected void q() {
-        // CraftBukkit start - whole method
-        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-
-        int count = this.random.nextInt(3) + 1;
-        if (count > 0) {
-            loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.INK_SACK, count));
-        }
-
-        org.bukkit.World bworld = this.world.getWorld();
-        org.bukkit.entity.Entity entity = this.getBukkitEntity();
-
-        EntityDeathEvent event = new EntityDeathEvent(entity, loot);
-        this.world.getServer().getPluginManager().callEvent(event);
-
-        for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
-            bworld.dropItemNaturally(entity.getLocation(), stack);
-        }
-        // CraftBukkit end
+        SQUID_LIFECYCLE_BEHAVIOUR.dropDeathLoot(this.world, this.getBukkitEntity(), this.random);
     }
 
     public boolean a(EntityHuman entityhuman) {
@@ -80,63 +64,57 @@ public class EntitySquid extends EntityWaterAnimal {
     }
 
     public boolean ad() {
-        return this.world.a(this.boundingBox.b(0.0D, -0.6000000238418579D, 0.0D), Material.WATER, this);
+        return SQUID_LIFECYCLE_BEHAVIOUR.isInWater(this.world, this.boundingBox, this);
     }
 
     public void v() {
         super.v();
-        this.b = this.a;
-        this.f = this.c;
-        this.h = this.g;
-        this.j = this.i;
-        this.g += this.l;
-        if (this.g > 6.2831855F) {
-            this.g -= 6.2831855F;
-            if (this.random.nextInt(10) == 0) {
-                this.l = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
-            }
-        }
+        SquidLifecycleBehaviour.SquidMotionState updatedMotion = SQUID_LIFECYCLE_BEHAVIOUR.tick(
+                new SquidLifecycleBehaviour.SquidMotionState(
+                        this.a,
+                        this.b,
+                        this.c,
+                        this.f,
+                        this.g,
+                        this.h,
+                        this.k,
+                        this.j,
+                        this.i,
+                        this.l,
+                        this.m,
+                        this.n,
+                        this.o,
+                        this.p,
+                        this.motX,
+                        this.motY,
+                        this.motZ,
+                        this.K,
+                        this.yaw,
+                        this.ad(),
+                        this.Y,
+                        this.random
+                )
+        );
 
-        if (this.ad()) {
-            float f;
-
-            if (this.g < 3.1415927F) {
-                f = this.g / 3.1415927F;
-                this.i = MathHelper.sin(f * f * 3.1415927F) * 3.1415927F * 0.25F;
-                if ((double) f > 0.75D) {
-                    this.k = 1.0F;
-                    this.m = 1.0F;
-                } else {
-                    this.m *= 0.8F;
-                }
-            } else {
-                this.i = 0.0F;
-                this.k *= 0.9F;
-                this.m *= 0.99F;
-            }
-
-            if (!this.Y) {
-                this.motX = (double) (this.n * this.k);
-                this.motY = (double) (this.o * this.k);
-                this.motZ = (double) (this.p * this.k);
-            }
-
-            f = MathHelper.a(this.motX * this.motX + this.motZ * this.motZ);
-            this.K += (-((float) Math.atan2(this.motX, this.motZ)) * 180.0F / 3.1415927F - this.K) * 0.1F;
-            this.yaw = this.K;
-            this.c += 3.1415927F * this.m * 1.5F;
-            this.a += (-((float) Math.atan2((double) f, this.motY)) * 180.0F / 3.1415927F - this.a) * 0.1F;
-        } else {
-            this.i = MathHelper.abs(MathHelper.sin(this.g)) * 3.1415927F * 0.25F;
-            if (!this.Y) {
-                this.motX = 0.0D;
-                this.motY -= 0.08D;
-                this.motY *= 0.9800000190734863D;
-                this.motZ = 0.0D;
-            }
-
-            this.a = (float) ((double) this.a + (double) (-90.0F - this.a) * 0.02D);
-        }
+        this.a = updatedMotion.pitch;
+        this.b = updatedMotion.previousPitch;
+        this.c = updatedMotion.bodyYaw;
+        this.f = updatedMotion.previousBodyYaw;
+        this.g = updatedMotion.tentacleAngle;
+        this.h = updatedMotion.previousTentacleAngle;
+        this.k = updatedMotion.swimVelocity;
+        this.j = updatedMotion.previousRotationVelocity;
+        this.i = updatedMotion.rotationVelocity;
+        this.l = updatedMotion.tentacleSpeed;
+        this.m = updatedMotion.bodyBob;
+        this.motX = updatedMotion.motionX;
+        this.motY = updatedMotion.motionY;
+        this.motZ = updatedMotion.motionZ;
+        this.K = updatedMotion.renderYawOffset;
+        this.yaw = updatedMotion.yaw;
+        this.n = updatedMotion.swimDirectionX;
+        this.o = updatedMotion.swimDirectionY;
+        this.p = updatedMotion.swimDirectionZ;
     }
 
     public void a(float f, float f1) {
@@ -144,12 +122,11 @@ public class EntitySquid extends EntityWaterAnimal {
     }
 
     protected void c_() {
-        if (this.random.nextInt(50) == 0 || !this.bA || this.n == 0.0F && this.o == 0.0F && this.p == 0.0F) {
-            float f = this.random.nextFloat() * 3.1415927F * 2.0F;
-
-            this.n = MathHelper.cos(f) * 0.2F;
-            this.o = -0.1F + this.random.nextFloat() * 0.2F;
-            this.p = MathHelper.sin(f) * 0.2F;
+        if (SQUID_LIFECYCLE_BEHAVIOUR.shouldRetargetSwimDirection(this.random.nextInt(50), this.bA, this.n, this.o, this.p)) {
+            SquidLifecycleBehaviour.SwimDirection direction = SQUID_LIFECYCLE_BEHAVIOUR.randomSwimDirection(this.random);
+            this.n = direction.x;
+            this.o = direction.y;
+            this.p = direction.z;
         }
 
         this.U();

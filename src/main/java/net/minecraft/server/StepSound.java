@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.StepSoundBehaviour;
+
 public class StepSound {
+    private static final StepSoundBehaviour STEP_SOUND_BEHAVIOUR = StepSoundBehaviour.getInstance();
 
     public final String a;
     public final float b;
@@ -13,14 +16,14 @@ public class StepSound {
     }
 
     public float getVolume1() {
-        return this.b;
+        return STEP_SOUND_BEHAVIOUR.getPrimaryVolume(this.b);
     }
 
     public float getVolume2() {
-        return this.c;
+        return STEP_SOUND_BEHAVIOUR.getSecondaryVolume(this.c);
     }
 
     public String getName() {
-        return "step." + this.a;
+        return STEP_SOUND_BEHAVIOUR.getStepSoundName(this.a);
     }
 }

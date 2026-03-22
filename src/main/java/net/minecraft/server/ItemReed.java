@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.ItemPlacementMathBehaviour;
+import com.legacyminecraft.poseidon.item.ReedItemPlacementBehaviour;
 // CraftBukkit start
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
@@ -9,6 +11,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 public class ItemReed extends Item {
 
     private int id;
+    private static final ItemPlacementMathBehaviour ITEM_PLACEMENT_MATH_BEHAVIOUR = ItemPlacementMathBehaviour.getInstance();
+    private static final ReedItemPlacementBehaviour REED_ITEM_PLACEMENT_BEHAVIOUR = ReedItemPlacementBehaviour.getInstance();
 
     public ItemReed(int i, Block block) {
         super(i);
@@ -18,35 +22,13 @@ public class ItemReed extends Item {
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
         int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
 
-        if (world.getTypeId(i, j, k) == Block.SNOW.id) {
-            l = 0;
-        } else {
-            if (l == 0) {
-                --j;
-            }
+        ReedItemPlacementBehaviour.Placement placement = REED_ITEM_PLACEMENT_BEHAVIOUR.resolveTargetAndFace(i, j, k, l, world.getTypeId(i, j, k), Block.SNOW.id, ITEM_PLACEMENT_MATH_BEHAVIOUR);
+        i = placement.x;
+        j = placement.y;
+        k = placement.z;
+        l = placement.face;
 
-            if (l == 1) {
-                ++j;
-            }
-
-            if (l == 2) {
-                --k;
-            }
-
-            if (l == 3) {
-                ++k;
-            }
-
-            if (l == 4) {
-                --i;
-            }
-
-            if (l == 5) {
-                ++i;
-            }
-        }
-
-        if (itemstack.count == 0) {
+        if (!REED_ITEM_PLACEMENT_BEHAVIOUR.hasItemsLeft(itemstack.count)) {
             return false;
         } else {
             if (world.a(this.id, i, j, k, false, l)) {

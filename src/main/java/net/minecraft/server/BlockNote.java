@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.NoteBlockStateBehaviour;
+
 public class BlockNote extends BlockContainer {
+    private final NoteBlockStateBehaviour noteBlockStateService = NoteBlockStateBehaviour.getInstance();
 
     public BlockNote(int i) {
         super(i, 74, Material.WOOD);
@@ -11,12 +14,12 @@ public class BlockNote extends BlockContainer {
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        if (l > 0 && Block.byId[l].isPowerSource()) {
+        if (noteBlockStateService.shouldHandleNeighborPowerUpdate(l, l > 0 && Block.byId[l].isPowerSource())) {
             boolean flag = world.isBlockPowered(i, j, k);
             TileEntityNote tileentitynote = (TileEntityNote) world.getTileEntity(i, j, k);
 
-            if (tileentitynote.b != flag) {
-                if (flag) {
+            if (noteBlockStateService.hasPowerStateChanged(tileentitynote.b, flag)) {
+                if (noteBlockStateService.shouldPlayOnPowerChange(flag)) {
                     tileentitynote.play(world, i, j, k);
                 }
 
@@ -26,7 +29,7 @@ public class BlockNote extends BlockContainer {
     }
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {
-        if (world.isStatic) {
+        if (noteBlockStateService.shouldIgnoreClientInteraction(world.isStatic)) {
             return true;
         } else {
             TileEntityNote tileentitynote = (TileEntityNote) world.getTileEntity(i, j, k);
@@ -50,26 +53,25 @@ public class BlockNote extends BlockContainer {
     }
 
     public void a(World world, int i, int j, int k, int l, int i1) {
-        float f = (float) Math.pow(2.0D, (double) (i1 - 12) / 12.0D);
-        String s = "harp";
+        float f = noteBlockStateService.resolvePitchFromNoteValue(i1);
+        String s = noteBlockStateService.resolveInstrumentName(l);
 
-        if (l == 1) {
-            s = "bd";
-        }
-
-        if (l == 2) {
-            s = "snare";
-        }
-
-        if (l == 3) {
-            s = "hat";
-        }
-
-        if (l == 4) {
-            s = "bassattack";
-        }
-
-        world.makeSound((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D, "note." + s, 3.0F, f);
-        world.a("note", (double) i + 0.5D, (double) j + 1.2D, (double) k + 0.5D, (double) i1 / 24.0D, 0.0D, 0.0D);
+        world.makeSound(
+                noteBlockStateService.resolveCenteredCoordinate(i),
+                noteBlockStateService.resolveCenteredCoordinate(j),
+                noteBlockStateService.resolveCenteredCoordinate(k),
+                noteBlockStateService.resolveSoundEffectName(s),
+                3.0F,
+                f
+        );
+        world.a(
+                "note",
+                noteBlockStateService.resolveCenteredCoordinate(i),
+                noteBlockStateService.resolveNoteParticleY(j),
+                noteBlockStateService.resolveCenteredCoordinate(k),
+                noteBlockStateService.resolveNoteParticleData(i1),
+                0.0D,
+                0.0D
+        );
     }
 }

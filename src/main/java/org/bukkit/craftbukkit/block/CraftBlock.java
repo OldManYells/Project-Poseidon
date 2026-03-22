@@ -1,7 +1,11 @@
 package org.bukkit.craftbukkit.block;
 
+import com.legacyminecraft.poseidon.compat.bukkit.BlockFaceConversionBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.BlockMaterialPropertyBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.BiomeConversionBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.BlockPowerQueryBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.CraftBlockStateFactoryBehaviour;
 import net.minecraft.server.BiomeBase;
-import net.minecraft.server.BlockRedstoneWire;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,6 +15,16 @@ import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.util.BlockVector;
 
 public class CraftBlock implements Block {
+    private static final BlockFaceConversionBehaviour BLOCK_FACE_CONVERSION_BEHAVIOUR =
+            BlockFaceConversionBehaviour.getInstance();
+    private static final BiomeConversionBehaviour BIOME_CONVERSION_BEHAVIOUR =
+            BiomeConversionBehaviour.getInstance();
+    private static final BlockPowerQueryBehaviour BLOCK_POWER_QUERY_BEHAVIOUR =
+            BlockPowerQueryBehaviour.getInstance();
+    private static final BlockMaterialPropertyBehaviour BLOCK_MATERIAL_PROPERTY_BEHAVIOUR =
+            BlockMaterialPropertyBehaviour.getInstance();
+    private static final CraftBlockStateFactoryBehaviour CRAFT_BLOCK_STATE_FACTORY_BEHAVIOUR =
+            CraftBlockStateFactoryBehaviour.getInstance();
     private final CraftChunk chunk;
     private final int x;
     private final int y;
@@ -128,18 +142,7 @@ public class CraftBlock implements Block {
     }
 
     public BlockFace getFace(final Block block) {
-        BlockFace[] values = BlockFace.values();
-
-        for (BlockFace face : values) {
-            if ((this.getX() + face.getModX() == block.getX()) &&
-                (this.getY() + face.getModY() == block.getY()) &&
-                (this.getZ() + face.getModZ() == block.getZ())
-            ) {
-                return face;
-            }
-        }
-
-        return null;
+        return BLOCK_FACE_CONVERSION_BEHAVIOUR.resolveAdjacentFace(this.getX(), this.getY(), this.getZ(), block);
     }
 
     @Override
@@ -154,65 +157,15 @@ public class CraftBlock implements Block {
      * @return BlockFace the BlockFace represented by this number
      */
     public static BlockFace notchToBlockFace(int notch) {
-        switch (notch) {
-        case 0:
-            return BlockFace.DOWN;
-        case 1:
-            return BlockFace.UP;
-        case 2:
-            return BlockFace.EAST;
-        case 3:
-            return BlockFace.WEST;
-        case 4:
-            return BlockFace.NORTH;
-        case 5:
-            return BlockFace.SOUTH;
-        default:
-            return BlockFace.SELF;
-        }
+        return BLOCK_FACE_CONVERSION_BEHAVIOUR.notchToBlockFace(notch);
     }
 
     public static int blockFaceToNotch(BlockFace face) {
-        switch(face) {
-            case DOWN:
-                return 0;
-            case UP:
-                return 1;
-            case EAST:
-                return 2;
-            case WEST:
-                return 3;
-            case NORTH:
-                return 4;
-            case SOUTH:
-                return 5;
-            default:
-                return 7; // Good as anything here, but technically invalid
-        }
+        return BLOCK_FACE_CONVERSION_BEHAVIOUR.blockFaceToNotch(face);
     }
 
     public BlockState getState() {
-        Material material = getType();
-
-        switch (material) {
-            case SIGN:
-            case SIGN_POST:
-            case WALL_SIGN:
-                return new CraftSign(this);
-            case CHEST:
-                return new CraftChest(this);
-            case BURNING_FURNACE:
-            case FURNACE:
-                return new CraftFurnace(this);
-            case DISPENSER:
-                return new CraftDispenser(this);
-            case MOB_SPAWNER:
-                return new CraftCreatureSpawner(this);
-            case NOTE_BLOCK:
-                return new CraftNoteBlock(this);
-            default:
-                return new CraftBlockState(this);
-        }
+        return CRAFT_BLOCK_STATE_FACTORY_BEHAVIOUR.createState(this, getType());
     }
 
     public Biome getBiome() {
@@ -220,35 +173,7 @@ public class CraftBlock implements Block {
     }
 
     public static final Biome biomeBaseToBiome(BiomeBase base) {
-        if (base == BiomeBase.RAINFOREST) {
-            return Biome.RAINFOREST;
-        } else if (base == BiomeBase.SWAMPLAND) {
-            return Biome.SWAMPLAND;
-        } else if (base == BiomeBase.SEASONAL_FOREST) {
-            return Biome.SEASONAL_FOREST;
-        } else if (base == BiomeBase.FOREST) {
-            return Biome.FOREST;
-        } else if (base == BiomeBase.SAVANNA) {
-            return Biome.SAVANNA;
-        } else if (base == BiomeBase.SHRUBLAND) {
-            return Biome.SHRUBLAND;
-        } else if (base == BiomeBase.TAIGA) {
-            return Biome.TAIGA;
-        } else if (base == BiomeBase.DESERT) {
-            return Biome.DESERT;
-        } else if (base == BiomeBase.PLAINS) {
-            return Biome.PLAINS;
-        } else if (base == BiomeBase.ICE_DESERT) {
-            return Biome.ICE_DESERT;
-        } else if (base == BiomeBase.TUNDRA) {
-            return Biome.TUNDRA;
-        } else if (base == BiomeBase.HELL) {
-            return Biome.HELL;
-        } else if (base == BiomeBase.SKY) {
-            return Biome.SKY;
-        }
-
-        return null;
+        return BIOME_CONVERSION_BEHAVIOUR.biomeBaseToBiome(base);
     }
 
     public double getTemperature() {
@@ -260,11 +185,11 @@ public class CraftBlock implements Block {
     }
 
     public boolean isBlockPowered() {
-        return chunk.getHandle().world.isBlockPowered(x, y, z);
+        return BLOCK_POWER_QUERY_BEHAVIOUR.isBlockPowered(chunk.getHandle().world, x, y, z);
     }
 
     public boolean isBlockIndirectlyPowered() {
-        return chunk.getHandle().world.isBlockIndirectlyPowered(x, y, z);
+        return BLOCK_POWER_QUERY_BEHAVIOUR.isBlockIndirectlyPowered(chunk.getHandle().world, x, y, z);
     }
 
     @Override
@@ -273,24 +198,29 @@ public class CraftBlock implements Block {
     }
 
     public boolean isBlockFacePowered(BlockFace face) {
-        return chunk.getHandle().world.isBlockFacePowered(x, y, z, blockFaceToNotch(face));
+        return BLOCK_POWER_QUERY_BEHAVIOUR.isBlockFacePowered(
+                chunk.getHandle().world,
+                x,
+                y,
+                z,
+                face,
+                BLOCK_FACE_CONVERSION_BEHAVIOUR
+        );
     }
 
     public boolean isBlockFaceIndirectlyPowered(BlockFace face) {
-        return chunk.getHandle().world.isBlockFaceIndirectlyPowered(x, y, z, blockFaceToNotch(face));
+        return BLOCK_POWER_QUERY_BEHAVIOUR.isBlockFaceIndirectlyPowered(
+                chunk.getHandle().world,
+                x,
+                y,
+                z,
+                face,
+                BLOCK_FACE_CONVERSION_BEHAVIOUR
+        );
     }
 
     public int getBlockPower(BlockFace face) {
-        int power = 0;
-        BlockRedstoneWire wire = (BlockRedstoneWire) net.minecraft.server.Block.REDSTONE_WIRE;
-        net.minecraft.server.World world = chunk.getHandle().world;
-        if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(x, y - 1, z, 0)) power = wire.getPower(world, x, y - 1, z, power);
-        if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(x, y + 1, z, 1)) power = wire.getPower(world, x, y + 1, z, power);
-        if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z - 1, 2)) power = wire.getPower(world, x, y, z - 1, power);
-        if ((face == BlockFace.WEST || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z + 1, 3)) power = wire.getPower(world, x, y, z + 1, power);
-        if ((face == BlockFace.NORTH || face == BlockFace.SELF) && world.isBlockFacePowered(x - 1, y, z, 4)) power = wire.getPower(world, x - 1, y, z, power);
-        if ((face == BlockFace.SOUTH || face == BlockFace.SELF) && world.isBlockFacePowered(x + 1, y, z, 5)) power = wire.getPower(world, x + 1, y, z, power);
-        return power > 0 ? power : (face == BlockFace.SELF ? isBlockIndirectlyPowered() : isBlockFaceIndirectlyPowered(face)) ? 15 : 0;
+        return BLOCK_POWER_QUERY_BEHAVIOUR.getBlockPower(chunk.getHandle().world, x, y, z, face);
     }
 
     public int getBlockPower() {
@@ -298,15 +228,14 @@ public class CraftBlock implements Block {
     }
 
     public boolean isEmpty() {
-        return getType() == Material.AIR;
+        return BLOCK_MATERIAL_PROPERTY_BEHAVIOUR.isEmpty(getType());
     }
 
     public boolean isLiquid() {
-        return (getType() == Material.WATER) || (getType() == Material.STATIONARY_WATER) || (getType() == Material.LAVA) || (getType() == Material.STATIONARY_LAVA);
+        return BLOCK_MATERIAL_PROPERTY_BEHAVIOUR.isLiquid(getType());
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(net.minecraft.server.Block.byId[this.getTypeId()].material.j());
-
+        return BLOCK_MATERIAL_PROPERTY_BEHAVIOUR.getPistonMoveReaction(this.getTypeId());
     }
 }

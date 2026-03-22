@@ -1,22 +1,28 @@
 package org.bukkit.craftbukkit;
 
+import com.legacyminecraft.poseidon.compat.bukkit.CraftChunkAccessBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.CraftChunkHandleResolutionBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.ChunkSnapshotCaptureBehaviour;
 import com.google.common.collect.MapMaker;
 import net.minecraft.server.BiomeBase;
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.WorldChunkManager;
 import net.minecraft.server.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.entity.Entity;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentMap;
 
 public class CraftChunk implements Chunk {
+    private static final CraftChunkAccessBehaviour CRAFT_CHUNK_ACCESS_BEHAVIOUR =
+            CraftChunkAccessBehaviour.getInstance();
+    private static final CraftChunkHandleResolutionBehaviour CRAFT_CHUNK_HANDLE_RESOLUTION_BEHAVIOUR =
+            CraftChunkHandleResolutionBehaviour.getInstance();
+    private static final ChunkSnapshotCaptureBehaviour CHUNK_SNAPSHOT_CAPTURE_BEHAVIOUR =
+            ChunkSnapshotCaptureBehaviour.getInstance();
     private WeakReference<net.minecraft.server.Chunk> weakChunk;
     private final ConcurrentMap<Integer, Block> cache = new MapMaker().softValues().makeMap();
     private WorldServer worldServer;
@@ -35,12 +41,10 @@ public class CraftChunk implements Chunk {
     }
 
     public net.minecraft.server.Chunk getHandle() {
-        net.minecraft.server.Chunk c = weakChunk.get();
-        if (c == null) {
-            c = worldServer.getChunkAt(x, z);
-            weakChunk = new WeakReference<net.minecraft.server.Chunk>(c);
-        }
-        return c;
+        CraftChunkHandleResolutionBehaviour.ResolutionResult resolutionResult =
+                CRAFT_CHUNK_HANDLE_RESOLUTION_BEHAVIOUR.resolveHandle(weakChunk, worldServer, x, z);
+        weakChunk = resolutionResult.getRefreshedWeakChunk();
+        return resolutionResult.getChunk();
     }
 
     void breakLink() {
@@ -61,51 +65,15 @@ public class CraftChunk implements Chunk {
     }
 
     public Block getBlock(int x, int y, int z) {
-        int pos = (x & 0xF) << 11 | (z & 0xF) << 7 | (y & 0x7F);
-        Block block = this.cache.get(pos);
-        if (block == null) {
-            Block newBlock = new CraftBlock(this, (getX() << 4) | (x & 0xF), y & 0x7F, (getZ() << 4) | (z & 0xF));
-            Block oldBlock = this.cache.put(pos, newBlock);
-            if (oldBlock == null) {
-                block = newBlock;
-            } else {
-                block = oldBlock;
-            }
-        }
-        return block;
+        return CRAFT_CHUNK_ACCESS_BEHAVIOUR.resolveBlock(this.cache, this, getX(), getZ(), x, y, z);
     }
 
     public Entity[] getEntities() {
-        int count = 0, index = 0;
-        net.minecraft.server.Chunk chunk = getHandle();
-        for (int i = 0; i < 8; i++) {
-            count += chunk.entitySlices[i].size();
-        }
-
-        Entity[] entities = new Entity[count];
-        for (int i = 0; i < 8; i++) {
-            for (Object obj: chunk.entitySlices[i].toArray()) {
-                if (!(obj instanceof net.minecraft.server.Entity)) {
-                    continue;
-                }
-                entities[index++] = ((net.minecraft.server.Entity) obj).getBukkitEntity();
-            }
-        }
-        return entities;
+        return CRAFT_CHUNK_ACCESS_BEHAVIOUR.collectEntities(getHandle());
     }
 
     public BlockState[] getTileEntities() {
-        int index = 0;
-        net.minecraft.server.Chunk chunk = getHandle();
-        BlockState[] entities = new BlockState[chunk.tileEntities.size()];
-        for (Object obj : chunk.tileEntities.keySet().toArray()) {
-            if (!(obj instanceof ChunkPosition)) {
-                continue;
-            }
-            ChunkPosition position = (ChunkPosition) obj;
-            entities[index++] = worldServer.getWorld().getBlockAt(position.x + (chunk.x << 4), position.y, position.z + (chunk.z << 4)).getState();
-        }
-        return entities;
+        return CRAFT_CHUNK_ACCESS_BEHAVIOUR.collectTileEntityStates(getHandle(), worldServer);
     }
 
     public boolean isLoaded() {
@@ -138,37 +106,26 @@ public class CraftChunk implements Chunk {
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain) {
         net.minecraft.server.Chunk chunk = getHandle();
-        byte[] buf = new byte[32768 + 16384 + 16384 + 16384]; // Get big enough buffer for whole chunk
-        chunk.getData(buf, 0, 0, 0, 16, 128, 16, 0); // Get whole chunk
-        byte[] hmap = null;
-
-        if (includeMaxblocky) {
-            hmap = new byte[256]; // Get copy of height map
-            System.arraycopy(chunk.heightMap, 0, hmap, 0, 256);
-        }
-
-        BiomeBase[] biome = null;
-        double[] biomeTemp = null;
-        double[] biomeRain = null;
-
-        if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager wcm = chunk.world.getWorldChunkManager();
-            BiomeBase[] biomeBase = wcm.getBiomeData(getX() << 4, getZ() << 4, 16, 16);
-
-            if (includeBiome) {
-                biome = new BiomeBase[256];
-                System.arraycopy(biomeBase, 0, biome, 0, biome.length);
-            }
-
-            if (includeBiomeTempRain) {
-                biomeTemp = new double[256];
-                biomeRain = new double[256];
-                System.arraycopy(wcm.temperature, 0, biomeTemp, 0, biomeTemp.length);
-                System.arraycopy(wcm.rain, 0, biomeRain, 0, biomeRain.length);
-            }
-        }
+        ChunkSnapshotCaptureBehaviour.SnapshotData snapshotData = CHUNK_SNAPSHOT_CAPTURE_BEHAVIOUR.captureFromChunk(
+                chunk,
+                getX(),
+                getZ(),
+                includeMaxblocky,
+                includeBiome,
+                includeBiomeTempRain
+        );
         World world = getWorld();
-        return new CraftChunkSnapshot(getX(), getZ(), world.getName(), world.getFullTime(), buf, hmap, biome, biomeTemp, biomeRain);
+        return new CraftChunkSnapshot(
+                getX(),
+                getZ(),
+                world.getName(),
+                world.getFullTime(),
+                snapshotData.getChunkBuffer(),
+                snapshotData.getHeightMap(),
+                snapshotData.getBiomes(),
+                snapshotData.getTemperatures(),
+                snapshotData.getRainfall()
+        );
     }
 
     /**
@@ -201,26 +158,21 @@ public class CraftChunk implements Chunk {
     }
 
     public static ChunkSnapshot getEmptyChunkSnapshot(int x, int z, CraftWorld world, boolean includeBiome, boolean includeBiomeTempRain) {
-        BiomeBase[] biome = null;
-        double[] biomeTemp = null;
-        double[] biomeRain = null;
-
-        if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager wcm = world.getHandle().getWorldChunkManager();
-            BiomeBase[] biomeBase = wcm.getBiomeData(x << 4, z << 4, 16, 16);
-
-            if (includeBiome) {
-                biome = new BiomeBase[256];
-                System.arraycopy(biomeBase, 0, biome, 0, biome.length);
-            }
-
-            if (includeBiomeTempRain) {
-                biomeTemp = new double[256];
-                biomeRain = new double[256];
-                System.arraycopy(wcm.temperature, 0, biomeTemp, 0, biomeTemp.length);
-                System.arraycopy(wcm.rain, 0, biomeRain, 0, biomeRain.length);
-            }
-        }
-        return new EmptyChunkSnapshot(x, z, world.getName(), world.getFullTime(), biome, biomeTemp, biomeRain);
+        ChunkSnapshotCaptureBehaviour.SnapshotData snapshotData = CHUNK_SNAPSHOT_CAPTURE_BEHAVIOUR.captureEmpty(
+                world.getHandle().getWorldChunkManager(),
+                x,
+                z,
+                includeBiome,
+                includeBiomeTempRain
+        );
+        return new EmptyChunkSnapshot(
+                x,
+                z,
+                world.getName(),
+                world.getFullTime(),
+                snapshotData.getBiomes(),
+                snapshotData.getTemperatures(),
+                snapshotData.getRainfall()
+        );
     }
 }

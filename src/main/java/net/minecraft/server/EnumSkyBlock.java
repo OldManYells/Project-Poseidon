@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public enum EnumSkyBlock {
+import com.legacyminecraft.poseidon.world.types.SkyLightTypeContract;
+
+public enum EnumSkyBlock implements SkyLightTypeContract {
 
     SKY("Sky", 0, 15), BLOCK("Block", 1, 0);
     public final int c;
@@ -9,5 +11,9 @@ public enum EnumSkyBlock {
 
     private EnumSkyBlock(String s, int i, int j) {
         this.c = j;
+    }
+
+    public int getDefaultLightValue() {
+        return this.c;
     }
 }

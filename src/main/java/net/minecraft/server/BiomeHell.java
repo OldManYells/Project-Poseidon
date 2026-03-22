@@ -1,12 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.biome.BiomeSpawnListBehaviour;
+
 public class BiomeHell extends BiomeBase {
+    private final BiomeSpawnListBehaviour biomeSpawnListService = BiomeSpawnListBehaviour.getInstance();
 
     public BiomeHell() {
-        this.s.clear();
-        this.t.clear();
-        this.u.clear();
-        this.s.add(new BiomeMeta(EntityGhast.class, 10));
-        this.s.add(new BiomeMeta(EntityPigZombie.class, 10));
+        biomeSpawnListService.configureHellBiomeSpawns(this.s, this.t, this.u);
     }
 }

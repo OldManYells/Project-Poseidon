@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.MetadataLightUpdateBoundsBehaviour;
+
 public class MetadataChunkBlock {
+    private static final MetadataLightUpdateBoundsBehaviour METADATA_LIGHT_UPDATE_BOUNDS_BEHAVIOUR = MetadataLightUpdateBoundsBehaviour.getInstance();
 
     public final EnumSkyBlock a;
     public int b;
@@ -160,58 +163,6 @@ public class MetadataChunkBlock {
     }
 
     public boolean a(int i, int j, int k, int l, int i1, int j1) {
-        if (i >= this.b && j >= this.c && k >= this.d && l <= this.e && i1 <= this.f && j1 <= this.g) {
-            return true;
-        } else {
-            byte b0 = 1;
-
-            if (i >= this.b - b0 && j >= this.c - b0 && k >= this.d - b0 && l <= this.e + b0 && i1 <= this.f + b0 && j1 <= this.g + b0) {
-                int k1 = this.e - this.b;
-                int l1 = this.f - this.c;
-                int i2 = this.g - this.d;
-
-                if (i > this.b) {
-                    i = this.b;
-                }
-
-                if (j > this.c) {
-                    j = this.c;
-                }
-
-                if (k > this.d) {
-                    k = this.d;
-                }
-
-                if (l < this.e) {
-                    l = this.e;
-                }
-
-                if (i1 < this.f) {
-                    i1 = this.f;
-                }
-
-                if (j1 < this.g) {
-                    j1 = this.g;
-                }
-
-                int j2 = l - i;
-                int k2 = i1 - j;
-                int l2 = j1 - k;
-                int i3 = k1 * l1 * i2;
-                int j3 = j2 * k2 * l2;
-
-                if (j3 - i3 <= 2) {
-                    this.b = i;
-                    this.c = j;
-                    this.d = k;
-                    this.e = l;
-                    this.f = i1;
-                    this.g = j1;
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        return METADATA_LIGHT_UPDATE_BOUNDS_BEHAVIOUR.tryMergeBounds(this, i, j, k, l, i1, j1);
     }
 }

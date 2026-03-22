@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,20 +18,21 @@ public class Packet31RelEntityMove extends Packet30Entity {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        super.a(datainputstream);
-        this.b = datainputstream.readByte();
-        this.c = datainputstream.readByte();
-        this.d = datainputstream.readByte();
+        PacketDataCodec.Packet31Data packetData = PacketDataCodec.getInstance().readPacket31(datainputstream);
+        this.a = packetData.getEntityId();
+        this.b = packetData.getDeltaX();
+        this.c = packetData.getDeltaY();
+        this.d = packetData.getDeltaZ();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        super.a(dataoutputstream);
-        dataoutputstream.writeByte(this.b);
-        dataoutputstream.writeByte(this.c);
-        dataoutputstream.writeByte(this.d);
+        PacketDataCodec.getInstance().writePacket31(
+                new PacketDataCodec.Packet31Data(this.a, this.b, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 7;
+        return packetDataCodec.packet31Length();
     }
 }

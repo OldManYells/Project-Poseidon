@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.FlyingMovementBehaviour;
+
 public class EntityFlying extends EntityLiving {
+    private static final FlyingMovementBehaviour FLYING_MOVEMENT_BEHAVIOUR = FlyingMovementBehaviour.getInstance();
 
     public EntityFlying(World world) {
         super(world);
@@ -22,29 +25,9 @@ public class EntityFlying extends EntityLiving {
             this.motY *= 0.5D;
             this.motZ *= 0.5D;
         } else {
-            float f2 = 0.91F;
-
-            if (this.onGround) {
-                f2 = 0.54600006F;
-                int i = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
-
-                if (i > 0) {
-                    f2 = Block.byId[i].frictionFactor * 0.91F;
-                }
-            }
-
-            float f3 = 0.16277136F / (f2 * f2 * f2);
-
-            this.a(f, f1, this.onGround ? 0.1F * f3 : 0.02F);
-            f2 = 0.91F;
-            if (this.onGround) {
-                f2 = 0.54600006F;
-                int j = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
-
-                if (j > 0) {
-                    f2 = Block.byId[j].frictionFactor * 0.91F;
-                }
-            }
+            float f2 = FLYING_MOVEMENT_BEHAVIOUR.resolveGroundFriction(this.onGround, this.world, this.locX, this.boundingBox.b, this.locZ);
+            this.a(f, f1, FLYING_MOVEMENT_BEHAVIOUR.resolveTravelFactor(this.onGround, f2));
+            f2 = FLYING_MOVEMENT_BEHAVIOUR.resolveGroundFriction(this.onGround, this.world, this.locX, this.boundingBox.b, this.locZ);
 
             this.move(this.motX, this.motY, this.motZ);
             this.motX *= (double) f2;
@@ -53,16 +36,9 @@ public class EntityFlying extends EntityLiving {
         }
 
         this.an = this.ao;
-        double d0 = this.locX - this.lastX;
-        double d1 = this.locZ - this.lastZ;
-        float f4 = MathHelper.a(d0 * d0 + d1 * d1) * 4.0F;
-
-        if (f4 > 1.0F) {
-            f4 = 1.0F;
-        }
-
-        this.ao += (f4 - this.ao) * 0.4F;
-        this.ap += this.ao;
+        FlyingMovementBehaviour.AnimationState animationState = FLYING_MOVEMENT_BEHAVIOUR.updateAnimation(this.locX, this.locZ, this.lastX, this.lastZ, this.ao, this.ap);
+        this.ao = animationState.ao;
+        this.ap = animationState.ap;
     }
 
     public boolean p() {

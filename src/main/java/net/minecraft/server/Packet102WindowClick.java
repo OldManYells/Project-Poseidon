@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,6 +14,7 @@ public class Packet102WindowClick extends Packet {
     public short d;
     public ItemStack e;
     public boolean f;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet102WindowClick() {}
 
@@ -20,39 +23,31 @@ public class Packet102WindowClick extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readByte();
-        this.b = datainputstream.readShort();
-        this.c = datainputstream.readByte();
-        this.d = datainputstream.readShort();
-        this.f = datainputstream.readBoolean();
-        short short1 = datainputstream.readShort();
-
-        if (short1 >= 0) {
-            byte b0 = datainputstream.readByte();
-            short short2 = datainputstream.readShort();
-
-            this.e = new ItemStack(short1, b0, short2);
-        } else {
+        PacketDataCodec.Packet102Data packetData = packetDataCodec.readPacket102(datainputstream);
+        this.a = packetData.getWindowId();
+        this.b = packetData.getSlot();
+        this.c = packetData.getButton();
+        this.d = packetData.getActionNumber();
+        this.f = packetData.isShift();
+        PacketDataCodec.ItemSlotData itemSlot = packetData.getItemSlot();
+        if (itemSlot == null) {
             this.e = null;
+        } else {
+            this.e = new ItemStack(itemSlot.getItemId(), itemSlot.getCount(), itemSlot.getData());
         }
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeByte(this.a);
-        dataoutputstream.writeShort(this.b);
-        dataoutputstream.writeByte(this.c);
-        dataoutputstream.writeShort(this.d);
-        dataoutputstream.writeBoolean(this.f);
-        if (this.e == null) {
-            dataoutputstream.writeShort(-1);
-        } else {
-            dataoutputstream.writeShort(this.e.id);
-            dataoutputstream.writeByte(this.e.count);
-            dataoutputstream.writeShort(this.e.getData());
-        }
+        PacketDataCodec.ItemSlotData itemSlot = this.e == null
+                ? null
+                : new PacketDataCodec.ItemSlotData((short) this.e.id, this.e.count, (short) this.e.getData());
+        packetDataCodec.writePacket102(
+                new PacketDataCodec.Packet102Data(this.a, this.b, this.c, this.d, this.f, itemSlot),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 11;
+        return packetDataCodec.packet102Length();
     }
 }

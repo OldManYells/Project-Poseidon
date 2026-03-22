@@ -1,9 +1,20 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.player.PlayerChunkDirtyBlockBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkDirtyFlushBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkMembershipBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkPacketDispatchBehaviour;
+import com.legacyminecraft.poseidon.world.player.PlayerChunkTileEntityPacketBehaviour;
+
 import java.util.ArrayList;
 import java.util.List;
 
 class PlayerInstance {
+    private static final PlayerChunkDirtyBlockBehaviour PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR = PlayerChunkDirtyBlockBehaviour.getInstance();
+    private static final PlayerChunkDirtyFlushBehaviour PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR = PlayerChunkDirtyFlushBehaviour.getInstance();
+    private static final PlayerChunkMembershipBehaviour PLAYER_CHUNK_MEMBERSHIP_BEHAVIOUR = PlayerChunkMembershipBehaviour.getInstance();
+    private static final PlayerChunkPacketDispatchBehaviour PLAYER_CHUNK_PACKET_DISPATCH_BEHAVIOUR = PlayerChunkPacketDispatchBehaviour.getInstance();
+    private static final PlayerChunkTileEntityPacketBehaviour PLAYER_CHUNK_TILE_ENTITY_PACKET_BEHAVIOUR = PlayerChunkTileEntityPacketBehaviour.getInstance();
 
     private List b;
     private int chunkX;
@@ -36,7 +47,8 @@ class PlayerInstance {
             throw new IllegalStateException("Failed to add player. " + entityplayer + " already is in chunk " + this.chunkX + ", " + this.chunkZ);
         } else {
             // CraftBukkit start
-            if (entityplayer.playerChunkCoordIntPairs.add(this.location)) {
+            boolean chunkSubscriptionAdded = entityplayer.playerChunkCoordIntPairs.add(this.location);
+            if (PLAYER_CHUNK_MEMBERSHIP_BEHAVIOUR.shouldSendPreChunkLoad(chunkSubscriptionAdded)) {
                 entityplayer.netServerHandler.sendPacket(new Packet50PreChunk(this.location.x, this.location.z, true));
             }
             // CraftBukkit end
@@ -49,11 +61,11 @@ class PlayerInstance {
     public void b(EntityPlayer entityplayer) {
         if (this.b.contains(entityplayer)) {
             this.b.remove(entityplayer);
-            if (this.b.size() == 0) {
-                long i = (long) this.chunkX + 2147483647L | (long) this.chunkZ + 2147483647L << 32;
+            if (PLAYER_CHUNK_MEMBERSHIP_BEHAVIOUR.isChunkNowEmpty(this.b.size())) {
+                long i = PLAYER_CHUNK_MEMBERSHIP_BEHAVIOUR.chunkKey(this.chunkX, this.chunkZ);
 
                 PlayerManager.a(this.playerManager).b(i);
-                if (this.dirtyCount > 0) {
+                if (PLAYER_CHUNK_MEMBERSHIP_BEHAVIOUR.shouldUntrackDirtyInstance(this.dirtyCount)) {
                     PlayerManager.b(this.playerManager).remove(this);
                 }
 
@@ -62,7 +74,8 @@ class PlayerInstance {
 
             entityplayer.chunkCoordIntPairQueue.remove(this.location);
             // CraftBukkit - contains -> remove -- TODO VERIFY!!!!
-            if (entityplayer.playerChunkCoordIntPairs.remove(this.location)) {
+            boolean chunkSubscriptionRemoved = entityplayer.playerChunkCoordIntPairs.remove(this.location);
+            if (PLAYER_CHUNK_MEMBERSHIP_BEHAVIOUR.shouldSendPreChunkUnload(chunkSubscriptionRemoved)) {
                 entityplayer.netServerHandler.sendPacket(new Packet50PreChunk(this.chunkX, this.chunkZ, false));
             }
         }
@@ -76,51 +89,25 @@ class PlayerInstance {
             this.l = this.m = k;
         }
 
-        if (this.h > i) {
-            this.h = i;
-        }
-
-        if (this.i < i) {
-            this.i = i;
-        }
-
-        if (this.j > j) {
-            this.j = j;
-        }
-
-        if (this.k < j) {
-            this.k = j;
-        }
-
-        if (this.l > k) {
-            this.l = k;
-        }
-
-        if (this.m < k) {
-            this.m = k;
-        }
+        this.h = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.min(this.h, i);
+        this.i = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.max(this.i, i);
+        this.j = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.min(this.j, j);
+        this.k = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.max(this.k, j);
+        this.l = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.min(this.l, k);
+        this.m = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.max(this.m, k);
 
         if (this.dirtyCount < 10) {
-            short short1 = (short) (i << 12 | k << 8 | j);
-
-            for (int l = 0; l < this.dirtyCount; ++l) {
-                if (this.dirtyBlocks[l] == short1) {
-                    return;
-                }
+            short encodedDirtyBlock = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.encodeDirtyBlock(i, j, k);
+            if (PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.containsDirtyBlock(this.dirtyBlocks, this.dirtyCount, encodedDirtyBlock)) {
+                return;
             }
 
-            this.dirtyBlocks[this.dirtyCount++] = short1;
+            this.dirtyCount = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.appendDirtyBlock(this.dirtyBlocks, this.dirtyCount, encodedDirtyBlock);
         }
     }
 
     public void sendAll(Packet packet) {
-        for (int i = 0; i < this.b.size(); ++i) {
-            EntityPlayer entityplayer = (EntityPlayer) this.b.get(i);
-
-            if (entityplayer.playerChunkCoordIntPairs.contains(this.location)) {
-                entityplayer.netServerHandler.sendPacket(packet);
-            }
-        }
+        PLAYER_CHUNK_PACKET_DISPATCH_BEHAVIOUR.sendToSubscribedPlayers(this.b, this.location, packet);
     }
 
     public void a() {
@@ -131,10 +118,10 @@ class PlayerInstance {
             int j;
             int k;
 
-            if (this.dirtyCount == 1) {
-                i = this.chunkX * 16 + this.h;
+            if (PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.isSingleBlockUpdate(this.dirtyCount)) {
+                i = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.worldCoordinate(this.chunkX, this.h);
                 j = this.j;
-                k = this.chunkZ * 16 + this.l;
+                k = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.worldCoordinate(this.chunkZ, this.l);
                 this.sendAll(new Packet53BlockChange(i, j, k, worldserver));
                 if (Block.isTileEntity[worldserver.getTypeId(i, j, k)]) {
                     this.sendTileEntity(worldserver.getTileEntity(i, j, k));
@@ -142,15 +129,15 @@ class PlayerInstance {
             } else {
                 int l;
 
-                if (this.dirtyCount == 10) {
-                    this.j = this.j / 2 * 2;
-                    this.k = (this.k / 2 + 1) * 2;
-                    i = this.h + this.chunkX * 16;
+                if (PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.isFullChunkSectionUpdate(this.dirtyCount)) {
+                    this.j = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.alignSectionMinY(this.j);
+                    this.k = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.alignSectionMaxY(this.k);
+                    i = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.worldCoordinate(this.chunkX, this.h);
                     j = this.j;
-                    k = this.l + this.chunkZ * 16;
-                    l = this.i - this.h + 1;
-                    int i1 = this.k - this.j + 2;
-                    int j1 = this.m - this.l + 1;
+                    k = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.worldCoordinate(this.chunkZ, this.l);
+                    l = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.sectionWidth(this.h, this.i);
+                    int i1 = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.sectionHeight(this.j, this.k);
+                    int j1 = PLAYER_CHUNK_DIRTY_FLUSH_BEHAVIOUR.sectionDepth(this.l, this.m);
 
                     this.sendAll(new Packet51MapChunk(i, j, k, l, i1, j1, worldserver));
                     List list = worldserver.getTileEntities(i, j, k, i + l, j + i1, k + j1);
@@ -163,9 +150,10 @@ class PlayerInstance {
 
                     for (i = 0; i < this.dirtyCount; ++i) {
                         // CraftBukkit start - Fixes TileEntity updates occurring upon a multi-block change; dirtyCount -> dirtyBlocks[i]
-                        j = this.chunkX * 16 + (this.dirtyBlocks[i] >> 12 & 15);
-                        k = this.dirtyBlocks[i] & 255;
-                        l = this.chunkZ * 16 + (this.dirtyBlocks[i] >> 8 & 15);
+                        short encodedDirtyBlock = this.dirtyBlocks[i];
+                        j = this.chunkX * 16 + PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.decodeLocalX(encodedDirtyBlock);
+                        k = PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.decodeY(encodedDirtyBlock);
+                        l = this.chunkZ * 16 + PLAYER_CHUNK_DIRTY_BLOCK_BEHAVIOUR.decodeLocalZ(encodedDirtyBlock);
                         // CraftBukkit end
 
                         if (Block.isTileEntity[worldserver.getTypeId(j, k, l)]) {
@@ -181,12 +169,9 @@ class PlayerInstance {
     }
 
     private void sendTileEntity(TileEntity tileentity) {
-        if (tileentity != null) {
-            Packet packet = tileentity.f();
-
-            if (packet != null) {
-                this.sendAll(packet);
-            }
+        Packet packet = PLAYER_CHUNK_TILE_ENTITY_PACKET_BEHAVIOUR.extractUpdatePacket(tileentity);
+        if (packet != null) {
+            this.sendAll(packet);
         }
     }
     

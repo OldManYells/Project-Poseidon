@@ -1,9 +1,14 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.chunk.ChunkFilePathBehaviour;
+import com.legacyminecraft.poseidon.world.chunk.ChunkNbtLayoutBehaviour;
+
 import java.io.*;
 import java.util.Iterator;
 
 public class ChunkLoader implements IChunkLoader {
+    private static final ChunkFilePathBehaviour CHUNK_FILE_PATH_BEHAVIOUR = ChunkFilePathBehaviour.getInstance();
+    private static final ChunkNbtLayoutBehaviour CHUNK_NBT_LAYOUT_BEHAVIOUR = ChunkNbtLayoutBehaviour.getInstance();
 
     private File a;
     private boolean b;
@@ -14,30 +19,7 @@ public class ChunkLoader implements IChunkLoader {
     }
 
     private File a(int i, int j) {
-        String s = "c." + Integer.toString(i, 36) + "." + Integer.toString(j, 36) + ".dat";
-        String s1 = Integer.toString(i & 63, 36);
-        String s2 = Integer.toString(j & 63, 36);
-        File file1 = new File(this.a, s1);
-
-        if (!file1.exists()) {
-            if (!this.b) {
-                return null;
-            }
-
-            file1.mkdir();
-        }
-
-        file1 = new File(file1, s2);
-        if (!file1.exists()) {
-            if (!this.b) {
-                return null;
-            }
-
-            file1.mkdir();
-        }
-
-        file1 = new File(file1, s);
-        return !file1.exists() && !this.b ? null : file1;
+        return CHUNK_FILE_PATH_BEHAVIOUR.resolveChunkFile(this.a, this.b, i, j);
     }
 
     public Chunk a(World world, int i, int j) {
@@ -48,23 +30,23 @@ public class ChunkLoader implements IChunkLoader {
                 FileInputStream fileinputstream = new FileInputStream(file1);
                 NBTTagCompound nbttagcompound = CompressedStreamTools.a((InputStream) fileinputstream);
 
-                if (!nbttagcompound.hasKey("Level")) {
+                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.hasLevelData(nbttagcompound)) {
                     System.out.println("Chunk file at " + i + "," + j + " is missing level data, skipping");
                     return null;
                 }
 
-                if (!nbttagcompound.k("Level").hasKey("Blocks")) {
+                NBTTagCompound levelTag = nbttagcompound.k("Level");
+                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.hasBlockData(levelTag)) {
                     System.out.println("Chunk file at " + i + "," + j + " is missing block data, skipping");
                     return null;
                 }
 
-                Chunk chunk = a(world, nbttagcompound.k("Level"));
+                Chunk chunk = CHUNK_NBT_LAYOUT_BEHAVIOUR.loadChunk(world, levelTag);
 
-                if (!chunk.a(i, j)) {
+                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.isExpectedChunkLocation(chunk, i, j)) {
                     System.out.println("Chunk file at " + i + "," + j + " is in the wrong location; relocating. (Expected " + i + ", " + j + ", got " + chunk.x + ", " + chunk.z + ")");
-                    nbttagcompound.a("xPos", i);
-                    nbttagcompound.a("zPos", j);
-                    chunk = a(world, nbttagcompound.k("Level"));
+                    CHUNK_NBT_LAYOUT_BEHAVIOUR.overwriteChunkCoordinates(levelTag, i, j);
+                    chunk = CHUNK_NBT_LAYOUT_BEHAVIOUR.loadChunk(world, levelTag);
                 }
 
                 chunk.h();

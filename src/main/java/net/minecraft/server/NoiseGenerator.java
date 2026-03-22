@@ -1,6 +1,11 @@
 package net.minecraft.server;
 
-public abstract class NoiseGenerator {
+import com.legacyminecraft.poseidon.world.gen.NoiseGeneratorBaseBehaviour;
 
-    public NoiseGenerator() {}
+public abstract class NoiseGenerator {
+    private static final NoiseGeneratorBaseBehaviour NOISE_GENERATOR_BASE_BEHAVIOUR = NoiseGeneratorBaseBehaviour.getInstance();
+
+    public NoiseGenerator() {
+        NOISE_GENERATOR_BASE_BEHAVIOUR.initialize(this);
+    }
 }

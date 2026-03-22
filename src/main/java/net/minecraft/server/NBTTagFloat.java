@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.nbt.NbtPrimitiveCodecService;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 public class NBTTagFloat extends NBTBase {
 
     public float a;
+    private final NbtPrimitiveCodecService nbtPrimitiveCodec = NbtPrimitiveCodecService.getInstance();
 
     public NBTTagFloat() {}
 
@@ -15,11 +18,11 @@ public class NBTTagFloat extends NBTBase {
     }
 
     void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeFloat(this.a);
+        nbtPrimitiveCodec.writeFloat(dataoutput, this.a);
     }
 
     void a(DataInput datainput) throws IOException {
-        this.a = datainput.readFloat();
+        this.a = nbtPrimitiveCodec.readFloat(datainput);
     }
 
     public byte a() {

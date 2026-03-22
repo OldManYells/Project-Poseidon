@@ -1,10 +1,13 @@
 package net.minecraft.server;
 
-public class ItemAxe extends ItemTool {
+import com.legacyminecraft.poseidon.item.AxeToolProfileBehaviour;
 
-    private static Block[] bk = new Block[] { Block.WOOD, Block.BOOKSHELF, Block.LOG, Block.CHEST};
+public class ItemAxe extends ItemTool {
+    private static final AxeToolProfileBehaviour AXE_TOOL_PROFILE_BEHAVIOUR = AxeToolProfileBehaviour.getInstance();
+
+    private static Block[] bk = AXE_TOOL_PROFILE_BEHAVIOUR.effectiveBlocks();
 
     protected ItemAxe(int i, EnumToolMaterial enumtoolmaterial) {
-        super(i, 3, enumtoolmaterial, bk);
+        super(i, AXE_TOOL_PROFILE_BEHAVIOUR.baseAttackOffset(), enumtoolmaterial, bk);
     }
 }

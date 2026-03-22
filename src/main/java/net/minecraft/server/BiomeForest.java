@@ -1,14 +1,19 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.biome.BiomeSpawnListBehaviour;
+import com.legacyminecraft.poseidon.world.biome.BiomeTreeGeneratorSelectionBehaviour;
+
 import java.util.Random;
 
 public class BiomeForest extends BiomeBase {
+    private final BiomeSpawnListBehaviour biomeSpawnListService = BiomeSpawnListBehaviour.getInstance();
+    private final BiomeTreeGeneratorSelectionBehaviour biomeTreeGeneratorSelectionService = BiomeTreeGeneratorSelectionBehaviour.getInstance();
 
     public BiomeForest() {
-        this.t.add(new BiomeMeta(EntityWolf.class, 2));
+        biomeSpawnListService.configureForestBiomeSpawns(this.t);
     }
 
     public WorldGenerator a(Random random) {
-        return (WorldGenerator) (random.nextInt(5) == 0 ? new WorldGenForest() : (random.nextInt(3) == 0 ? new WorldGenBigTree() : new WorldGenTrees()));
+        return biomeTreeGeneratorSelectionService.selectForestTreeGenerator(random);
     }
 }

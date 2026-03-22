@@ -1,33 +1,18 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.DispenserContainerBehaviour;
+
 public class ContainerDispenser extends Container {
+    private static final DispenserContainerBehaviour DISPENSER_CONTAINER_BEHAVIOUR = DispenserContainerBehaviour.getInstance();
 
     private TileEntityDispenser a;
 
     public ContainerDispenser(IInventory iinventory, TileEntityDispenser tileentitydispenser) {
         this.a = tileentitydispenser;
-
-        int i;
-        int j;
-
-        for (i = 0; i < 3; ++i) {
-            for (j = 0; j < 3; ++j) {
-                this.a(new Slot(tileentitydispenser, j + i * 3, 62 + j * 18, 17 + i * 18));
-            }
-        }
-
-        for (i = 0; i < 3; ++i) {
-            for (j = 0; j < 9; ++j) {
-                this.a(new Slot(iinventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
-            }
-        }
-
-        for (i = 0; i < 9; ++i) {
-            this.a(new Slot(iinventory, i, 8 + i * 18, 142));
-        }
+        DISPENSER_CONTAINER_BEHAVIOUR.initializeSlots(this, iinventory, tileentitydispenser);
     }
 
     public boolean b(EntityHuman entityhuman) {
-        return this.a.a_(entityhuman);
+        return DISPENSER_CONTAINER_BEHAVIOUR.canUse(this.a, entityhuman);
     }
 }

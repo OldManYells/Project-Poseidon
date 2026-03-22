@@ -1,10 +1,24 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.PistonEntityPushBehaviour;
+import com.legacyminecraft.poseidon.block.PistonLifecycleGateBehaviour;
+import com.legacyminecraft.poseidon.block.PistonTileNbtBehaviour;
+import com.legacyminecraft.poseidon.block.PistonProgressInterpolationBehaviour;
+import com.legacyminecraft.poseidon.block.PistonTickProgressionBehaviour;
+import com.legacyminecraft.poseidon.block.PistonTileFinalizationBehaviour;
+import com.legacyminecraft.poseidon.block.PistonTileTickOrchestrationBehaviour;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class TileEntityPiston extends TileEntity {
+    private static final PistonEntityPushBehaviour PISTON_ENTITY_PUSH_BEHAVIOUR = PistonEntityPushBehaviour.getInstance();
+    private static final PistonLifecycleGateBehaviour PISTON_LIFECYCLE_GATE_BEHAVIOUR = PistonLifecycleGateBehaviour.getInstance();
+    private static final PistonTileNbtBehaviour PISTON_TILE_NBT_BEHAVIOUR = PistonTileNbtBehaviour.getInstance();
+    private static final PistonProgressInterpolationBehaviour PISTON_PROGRESS_INTERPOLATION_BEHAVIOUR = PistonProgressInterpolationBehaviour.getInstance();
+    private static final PistonTickProgressionBehaviour PISTON_TICK_PROGRESSION_BEHAVIOUR = PistonTickProgressionBehaviour.getInstance();
+    private static final PistonTileFinalizationBehaviour PISTON_TILE_FINALIZATION_BEHAVIOUR = PistonTileFinalizationBehaviour.getInstance();
+    private static final PistonTileTickOrchestrationBehaviour PISTON_TILE_TICK_ORCHESTRATION_BEHAVIOUR = PistonTileTickOrchestrationBehaviour.getInstance();
 
     private int a;
     private int b;
@@ -42,89 +56,64 @@ public class TileEntityPiston extends TileEntity {
     }
 
     public float a(float f) {
-        if (f > 1.0F) {
-            f = 1.0F;
-        }
-
-        return this.l + (this.k - this.l) * f;
+        return PISTON_PROGRESS_INTERPOLATION_BEHAVIOUR.interpolate(this.l, this.k, f);
     }
 
     private void a(float f, float f1) {
-        if (!this.i) {
-            --f;
-        } else {
-            f = 1.0F - f;
-        }
-
-        AxisAlignedBB axisalignedbb = Block.PISTON_MOVING.a(this.world, this.x, this.y, this.z, this.a, f, this.c);
-
-        if (axisalignedbb != null) {
-            List list = this.world.b((Entity) null, axisalignedbb);
-
-            if (!list.isEmpty()) {
-                m.addAll(list);
-                Iterator iterator = m.iterator();
-
-                while (iterator.hasNext()) {
-                    Entity entity = (Entity) iterator.next();
-
-                    entity.move((double) (f1 * (float) PistonBlockTextures.b[this.c]), (double) (f1 * (float) PistonBlockTextures.c[this.c]), (double) (f1 * (float) PistonBlockTextures.d[this.c]));
-                }
-
-                m.clear();
-            }
-        }
+        PISTON_ENTITY_PUSH_BEHAVIOUR.moveCollidingEntities(this.world, this.x, this.y, this.z, this.a, this.c, this.i, f, f1, m);
     }
 
     public void k() {
-        if (this.l < 1.0F) {
-            this.l = this.k = 1.0F;
-            this.world.o(this.x, this.y, this.z);
-            this.h();
-            if (this.world.getTypeId(this.x, this.y, this.z) == Block.PISTON_MOVING.id) {
-                this.world.setTypeIdAndData(this.x, this.y, this.z, this.a, this.b);
-            }
+        PistonTileTickOrchestrationBehaviour.FinalizationDecision finalizationDecision =
+                PISTON_TILE_TICK_ORCHESTRATION_BEHAVIOUR.resolveImmediateFinalization(this.l, PISTON_LIFECYCLE_GATE_BEHAVIOUR);
+        if (finalizationDecision.shouldFinalize()) {
+            this.l = this.k = finalizationDecision.getCompletionProgress();
+            PISTON_TILE_FINALIZATION_BEHAVIOUR.finalizeMovingTile(this.world, this.x, this.y, this.z, this.a, this.b, new Runnable() {
+                public void run() {
+                    h();
+                }
+            });
         }
     }
 
     public void g_() {
         // CraftBukkit
-        if (this.world == null) return;
-        this.l = this.k;
-        if (this.l >= 1.0F) {
-            this.a(1.0F, 0.25F);
-            this.world.o(this.x, this.y, this.z);
-            this.h();
-            if (this.world.getTypeId(this.x, this.y, this.z) == Block.PISTON_MOVING.id) {
-                this.world.setTypeIdAndData(this.x, this.y, this.z, this.a, this.b);
-            }
-        } else {
-            this.k += 0.5F;
-            if (this.k >= 1.0F) {
-                this.k = 1.0F;
-            }
+        if (PISTON_LIFECYCLE_GATE_BEHAVIOUR.shouldSkipTick(this.world)) return;
+        PistonTileTickOrchestrationBehaviour.TickDecision tickDecision = PISTON_TILE_TICK_ORCHESTRATION_BEHAVIOUR.resolveTickProgression(
+                this.l,
+                this.k,
+                this.i,
+                PISTON_LIFECYCLE_GATE_BEHAVIOUR,
+                PISTON_TICK_PROGRESSION_BEHAVIOUR
+        );
+        this.l = tickDecision.getPreviousProgress();
+        this.k = tickDecision.getCurrentProgress();
 
-            if (this.i) {
-                this.a(this.k, this.k - this.l + 0.0625F);
-            }
+        if (tickDecision.shouldPushEntities()) {
+            this.a(tickDecision.getPushProgress(), tickDecision.getPushDelta());
+        }
+
+        if (tickDecision.shouldFinalize()) {
+            PISTON_TILE_FINALIZATION_BEHAVIOUR.finalizeMovingTile(this.world, this.x, this.y, this.z, this.a, this.b, new Runnable() {
+                public void run() {
+                    h();
+                }
+            });
         }
     }
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.a = nbttagcompound.e("blockId");
-        this.b = nbttagcompound.e("blockData");
-        this.c = nbttagcompound.e("facing");
-        this.l = this.k = nbttagcompound.g("progress");
-        this.i = nbttagcompound.m("extending");
+        PistonTileNbtBehaviour.PistonTileState state = PISTON_TILE_NBT_BEHAVIOUR.readState(nbttagcompound);
+        this.a = state.getMovedBlockId();
+        this.b = state.getMovedBlockData();
+        this.c = state.getFacing();
+        this.l = this.k = state.getProgress();
+        this.i = state.isExtending();
     }
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        nbttagcompound.a("blockId", this.a);
-        nbttagcompound.a("blockData", this.b);
-        nbttagcompound.a("facing", this.c);
-        nbttagcompound.a("progress", this.l);
-        nbttagcompound.a("extending", this.i);
+        PISTON_TILE_NBT_BEHAVIOUR.writeState(nbttagcompound, this.a, this.b, this.c, this.l, this.i);
     }
 }

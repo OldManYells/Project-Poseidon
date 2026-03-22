@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.stats.AchievementDefinitionBehaviour;
+import com.legacyminecraft.poseidon.world.stats.AchievementRegistry;
+
 public class Achievement extends Statistic {
 
     public final int a;
@@ -8,6 +11,7 @@ public class Achievement extends Statistic {
     private final String l;
     public final ItemStack d;
     private boolean m;
+    private static final AchievementDefinitionBehaviour achievementDefinitionService = AchievementDefinitionBehaviour.getInstance();
 
     public Achievement(int i, String s, int j, int k, Item item, Achievement achievement) {
         this(i, s, j, k, new ItemStack(item), achievement);
@@ -18,27 +22,12 @@ public class Achievement extends Statistic {
     }
 
     public Achievement(int i, String s, int j, int k, ItemStack itemstack, Achievement achievement) {
-        super(5242880 + i, StatisticCollector.a("achievement." + s));
+        super(achievementDefinitionService.toStatisticId(i), achievementDefinitionService.resolveTitle(s));
         this.d = itemstack;
-        this.l = StatisticCollector.a("achievement." + s + ".desc");
+        this.l = achievementDefinitionService.resolveDescription(s);
         this.a = j;
         this.b = k;
-        if (j < AchievementList.a) {
-            AchievementList.a = j;
-        }
-
-        if (k < AchievementList.b) {
-            AchievementList.b = k;
-        }
-
-        if (j > AchievementList.c) {
-            AchievementList.c = j;
-        }
-
-        if (k > AchievementList.d) {
-            AchievementList.d = k;
-        }
-
+        achievementDefinitionService.trackBounds(j, k);
         this.c = achievement;
     }
 
@@ -53,8 +42,6 @@ public class Achievement extends Statistic {
     }
 
     public Achievement c() {
-        super.d();
-        AchievementList.e.add(this);
-        return this;
+        return AchievementRegistry.getInstance().register(this);
     }
 }

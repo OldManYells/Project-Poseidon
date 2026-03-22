@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.WorkbenchStateBehaviour;
+
 public class BlockWorkbench extends Block {
+    private final WorkbenchStateBehaviour workbenchStateService = WorkbenchStateBehaviour.getInstance();
 
     protected BlockWorkbench(int i) {
         super(i, Material.WOOD);
@@ -8,11 +11,11 @@ public class BlockWorkbench extends Block {
     }
 
     public int a(int i) {
-        return i == 1 ? this.textureId - 16 : (i == 0 ? Block.WOOD.a(0) : (i != 2 && i != 4 ? this.textureId : this.textureId + 1));
+        return workbenchStateService.resolveTextureBySide(i, this.textureId, Block.WOOD.a(0));
     }
 
     public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman) {
-        if (world.isStatic) {
+        if (workbenchStateService.shouldIgnoreClientInteraction(world.isStatic)) {
             return true;
         } else {
             entityhuman.b(i, j, k);

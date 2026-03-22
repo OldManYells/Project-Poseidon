@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.StationaryFluidStateBehaviour;
 import org.bukkit.event.block.BlockIgniteEvent;
 
 import java.util.Random;
 
 public class BlockStationary extends BlockFluids {
+    private final StationaryFluidStateBehaviour stationaryFluidStateService = StationaryFluidStateBehaviour.getInstance();
 
     protected BlockStationary(int i, Material material) {
         super(i, material);
@@ -16,24 +18,25 @@ public class BlockStationary extends BlockFluids {
 
     public void doPhysics(World world, int i, int j, int k, int l) {
         super.doPhysics(world, i, j, k, l);
-        if (world.getTypeId(i, j, k) == this.id) {
+        if (stationaryFluidStateService.shouldConvertToFlowing(world.getTypeId(i, j, k), this.id)) {
             this.i(world, i, j, k);
         }
     }
 
     private void i(World world, int i, int j, int k) {
         int l = world.getData(i, j, k);
+        int flowingBlockId = stationaryFluidStateService.resolveFlowingBlockId(this.id);
 
         world.suppressPhysics = true;
-        world.setRawTypeIdAndData(i, j, k, this.id - 1, l);
+        world.setRawTypeIdAndData(i, j, k, flowingBlockId, l);
         world.b(i, j, k, i, j, k);
-        world.c(i, j, k, this.id - 1, this.c());
+        world.c(i, j, k, flowingBlockId, this.c());
         world.suppressPhysics = false;
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (this.material == Material.LAVA) {
-            int l = random.nextInt(3);
+        if (stationaryFluidStateService.shouldAttemptLavaIgnition(this.material)) {
+            int l = stationaryFluidStateService.resolveIgnitionAttempts(random);
 
             // CraftBukkit start - prevent lava putting something on fire.
             org.bukkit.World bworld = world.getWorld();
@@ -41,13 +44,17 @@ public class BlockStationary extends BlockFluids {
             // CraftBukkit end
 
             for (int i1 = 0; i1 < l; ++i1) {
-                i += random.nextInt(3) - 1;
+                i += stationaryFluidStateService.resolveHorizontalOffset(random);
                 ++j;
-                k += random.nextInt(3) - 1;
+                k += stationaryFluidStateService.resolveHorizontalOffset(random);
                 int j1 = world.getTypeId(i, j, k);
 
-                if (j1 == 0) {
-                    if (this.j(world, i - 1, j, k) || this.j(world, i + 1, j, k) || this.j(world, i, j, k - 1) || this.j(world, i, j, k + 1) || this.j(world, i, j - 1, k) || this.j(world, i, j + 1, k)) {
+                if (stationaryFluidStateService.isAirBlock(j1)) {
+                    if (stationaryFluidStateService.hasBurnableNeighbor(new StationaryFluidStateBehaviour.BurnableQuery() {
+                        public boolean isBurnable(int x, int y, int z) {
+                            return j(world, x, y, z);
+                        }
+                    }, i, j, k)) {
                         // CraftBukkit start - prevent lava putting something on fire.
                         org.bukkit.block.Block block = bworld.getBlockAt(i, j, k);
 
@@ -64,7 +71,7 @@ public class BlockStationary extends BlockFluids {
                         world.setTypeId(i, j, k, Block.FIRE.id);
                         return;
                     }
-                } else if (Block.byId[j1].material.isSolid()) {
+                } else if (stationaryFluidStateService.shouldStopAtSolid(Block.byId[j1].material.isSolid())) {
                     return;
                 }
             }

@@ -1,13 +1,16 @@
 package com.legacyminecraft.poseidon;
 
+import com.legacyminecraft.poseidon.compat.bukkit.ServerDiagnosticsBridgeBehaviour;
+import com.legacyminecraft.poseidon.kernel.PoseidonKernel;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.CraftServer;
 
 import java.util.LinkedList;
 
 public final class Poseidon {
     private static PoseidonServer server;
+    private static final PoseidonKernel kernel = PoseidonKernel.getInstance();
+    private static final ServerDiagnosticsBridgeBehaviour serverDiagnosticsBridge = ServerDiagnosticsBridgeBehaviour.getInstance();
 
     /**
      * Returns a list of the server's TPS (Ticks Per Second) records for performance monitoring.
@@ -16,11 +19,16 @@ public final class Poseidon {
      * @return LinkedList<Double> of TPS records.
      */
     public static LinkedList<Double> getTpsRecords() {
-        return ((CraftServer) Bukkit.getServer()).getServer().getTpsRecords();
+        Server bukkitServer = Bukkit.getServer();
+        return serverDiagnosticsBridge.readTpsRecords(bukkitServer);
     }
 
     public static PoseidonServer getServer() {
         return server;
+    }
+
+    public static PoseidonKernel getKernel() {
+        return kernel;
     }
 
     public static void setServer(PoseidonServer server) {
@@ -29,6 +37,8 @@ public final class Poseidon {
         }
 
         Poseidon.server = server;
+        kernel.registerService(PoseidonServer.class, server);
+        kernel.markBootstrapped();
     }
 
 

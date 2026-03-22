@@ -1,6 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.SwordItemBehaviour;
+import com.legacyminecraft.poseidon.item.ToolItemCombatAndMiningBehaviour;
+
 public class ItemSword extends Item {
+    private static final SwordItemBehaviour SWORD_ITEM_BEHAVIOUR = SwordItemBehaviour.getInstance();
+    private static final ToolItemCombatAndMiningBehaviour TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR = ToolItemCombatAndMiningBehaviour.getInstance();
 
     private int a;
 
@@ -8,28 +13,26 @@ public class ItemSword extends Item {
         super(i);
         this.maxStackSize = 1;
         this.d(enumtoolmaterial.a());
-        this.a = 4 + enumtoolmaterial.c() * 2;
+        this.a = SWORD_ITEM_BEHAVIOUR.resolveAttackDamage(enumtoolmaterial);
     }
 
     public float a(ItemStack itemstack, Block block) {
-        return block.id == Block.WEB.id ? 15.0F : 1.5F;
+        return SWORD_ITEM_BEHAVIOUR.resolveDestroySpeed(block);
     }
 
     public boolean a(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
-        itemstack.damage(1, entityliving1);
-        return true;
+        return TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.damageOnEntityHit(itemstack, entityliving1, 1);
     }
 
     public boolean a(ItemStack itemstack, int i, int j, int k, int l, EntityLiving entityliving) {
-        itemstack.damage(2, entityliving);
-        return true;
+        return TOOL_ITEM_COMBAT_AND_MINING_BEHAVIOUR.damageOnBlockBreak(itemstack, entityliving, 2);
     }
 
     public int a(Entity entity) {
-        return this.a;
+        return SWORD_ITEM_BEHAVIOUR.resolveAttackDamageAgainstEntity(this.a, entity);
     }
 
     public boolean a(Block block) {
-        return block.id == Block.WEB.id;
+        return SWORD_ITEM_BEHAVIOUR.canHarvest(block);
     }
 }

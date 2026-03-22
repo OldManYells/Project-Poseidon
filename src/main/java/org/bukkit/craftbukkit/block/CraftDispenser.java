@@ -1,17 +1,22 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockDispenser;
+import com.legacyminecraft.poseidon.compat.bukkit.DispenserActivationBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.TileEntityBlockStateUpdateBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.TileEntityInventoryBridgeBehaviour;
 import net.minecraft.server.TileEntityDispenser;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.inventory.Inventory;
 
-import java.util.Random;
-
 public class CraftDispenser extends CraftBlockState implements Dispenser {
+    private static final DispenserActivationBehaviour DISPENSER_ACTIVATION_BEHAVIOUR =
+            DispenserActivationBehaviour.getInstance();
+    private static final TileEntityInventoryBridgeBehaviour TILE_ENTITY_INVENTORY_BRIDGE_BEHAVIOUR =
+            TileEntityInventoryBridgeBehaviour.getInstance();
+    private static final TileEntityBlockStateUpdateBehaviour TILE_ENTITY_BLOCK_STATE_UPDATE_BEHAVIOUR =
+            TileEntityBlockStateUpdateBehaviour.getInstance();
+
     private final CraftWorld world;
     private final TileEntityDispenser dispenser;
 
@@ -23,32 +28,15 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
     }
 
     public Inventory getInventory() {
-        return new CraftInventory(dispenser);
+        return TILE_ENTITY_INVENTORY_BRIDGE_BEHAVIOUR.createInventory(dispenser);
     }
 
     public boolean dispense() {
-        Block block = getBlock();
-
-        synchronized (block) {
-            if (block.getType() == Material.DISPENSER) {
-                BlockDispenser dispense = (BlockDispenser) net.minecraft.server.Block.DISPENSER;
-
-                dispense.dispense(world.getHandle(), getX(), getY(), getZ(), new Random());
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return DISPENSER_ACTIVATION_BEHAVIOUR.tryDispense(getBlock(), world.getHandle(), getX(), getY(), getZ());
     }
 
     @Override
     public boolean update(boolean force) {
-        boolean result = super.update(force);
-
-        if (result) {
-            dispenser.update();
-        }
-
-        return result;
+        return TILE_ENTITY_BLOCK_STATE_UPDATE_BEHAVIOUR.finalizeUpdate(super.update(force), dispenser);
     }
 }

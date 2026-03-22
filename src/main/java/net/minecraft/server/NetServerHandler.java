@@ -1,29 +1,65 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonServer;
-import com.legacyminecraft.poseidon.event.PlayerSendPacketEvent;
-import com.projectposeidon.ConnectionType;
+import com.legacyminecraft.poseidon.api.network.ConnectionType;
+import com.legacyminecraft.poseidon.block.BlockInteractionPacketHandler;
+import com.legacyminecraft.poseidon.block.BlockInteractionSessionState;
+import com.legacyminecraft.poseidon.block.SignUpdateProcessor;
+import com.legacyminecraft.poseidon.entity.EntityInteractionSystem;
+import com.legacyminecraft.poseidon.entity.PlayerActionPacketHandler;
+import com.legacyminecraft.poseidon.inventory.HotbarSelectionBehaviour;
+import com.legacyminecraft.poseidon.inventory.WindowTransactionBehaviour;
+import com.legacyminecraft.poseidon.network.ClientDisconnectPacketHandler;
+import com.legacyminecraft.poseidon.network.ConnectionHeartbeatExecutionSystem;
+import com.legacyminecraft.poseidon.network.ConnectionHeartbeatSystem;
+import com.legacyminecraft.poseidon.network.ConnectionLossExecutionSystem;
+import com.legacyminecraft.poseidon.network.ConnectionLossReporter;
+import com.legacyminecraft.poseidon.network.ConnectionSessionMetadata;
+import com.legacyminecraft.poseidon.network.ConnectionTerminationSystem;
+import com.legacyminecraft.poseidon.network.EntityActionPacketExecutionSystem;
+import com.legacyminecraft.poseidon.network.EntityActionResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.GroundMovementDecisionExecutionSystem;
+import com.legacyminecraft.poseidon.network.GroundMovementDecisionLogSystem;
+import com.legacyminecraft.poseidon.network.HotbarSwitchPacketExecutionSystem;
+import com.legacyminecraft.poseidon.network.HotbarSwitchResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.IncomingChatPacketHandler;
+import com.legacyminecraft.poseidon.network.IncomingChatPacketExecutionSystem;
+import com.legacyminecraft.poseidon.network.IncomingChatResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.IncomingPacketEventSystem;
+import com.legacyminecraft.poseidon.network.InvalidPositionResponseSystem;
+import com.legacyminecraft.poseidon.network.MovementCheckReenableExecutionSystem;
+import com.legacyminecraft.poseidon.network.MovementBranchExecutionSystem;
+import com.legacyminecraft.poseidon.network.MovementPacketPolicy;
+import com.legacyminecraft.poseidon.network.PacketSendPipelineSystem;
+import com.legacyminecraft.poseidon.network.PacketSendExecutionSystem;
+import com.legacyminecraft.poseidon.network.PacketSendResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.PlayerChatDispatchSystem;
+import com.legacyminecraft.poseidon.network.PlayerGroundMovementSystem;
+import com.legacyminecraft.poseidon.network.PlayerInputPacketExecutionSystem;
+import com.legacyminecraft.poseidon.network.PlayerMoveEventDispatchSystem;
+import com.legacyminecraft.poseidon.network.PlayerMoveEventExecutionSystem;
+import com.legacyminecraft.poseidon.network.PlayerMoveEventOutcomeSystem;
+import com.legacyminecraft.poseidon.network.PlayerMoveEventStateApplySystem;
+import com.legacyminecraft.poseidon.network.PlayerMoveOutcomeExecutionSystem;
+import com.legacyminecraft.poseidon.network.PlayerTeleportPlanApplySystem;
+import com.legacyminecraft.poseidon.network.PlayerTeleportCoordinator;
+import com.legacyminecraft.poseidon.network.PlayerTeleportExecutionSystem;
+import com.legacyminecraft.poseidon.network.PlayerTeleportRequestExecutionSystem;
+import com.legacyminecraft.poseidon.network.RespawnPacketHandler;
+import com.legacyminecraft.poseidon.network.RespawnPacketExecutionSystem;
+import com.legacyminecraft.poseidon.network.RespawnResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.SignUpdatePacketExecutionSystem;
+import com.legacyminecraft.poseidon.network.SleepingMovementPacketHandler;
+import com.legacyminecraft.poseidon.network.UnexpectedPacketProtocolErrorExecutionSystem;
+import com.legacyminecraft.poseidon.network.VehicleMoveOutcomeExecutionSystem;
+import com.legacyminecraft.poseidon.network.VehicleMovementPacketHandler;
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import com.legacyminecraft.poseidon.runtime.PlayerCommandProcessor;
 import org.bukkit.Location;
-import org.bukkit.command.CommandException;
-import org.bukkit.craftbukkit.ChunkCompressionThread;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.TextWrapper;
-import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.Server;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.StorageMinecart;
-import org.bukkit.event.Event;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.packet.PacketReceivedEvent;
-import org.bukkit.event.player.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -47,20 +83,472 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private double z;
     private boolean checkMovement = true;
     private Map n = new HashMap();
-    private boolean usingReleaseToBeta = false; //Project Poseidon - Create Variable
-    private ConnectionType connectionType = ConnectionType.NORMAL; //Project Poseidon - Create Variable
-    private int rawConnectionType = 0; //Project Poseidon - Create Variable
-    private boolean receivedKeepAlive = false;
+    private final ClientDisconnectPacketHandler clientDisconnectPacketHandler = ClientDisconnectPacketHandler.getInstance();
+    private final ConnectionHeartbeatExecutionSystem connectionHeartbeatExecutionSystem = ConnectionHeartbeatExecutionSystem.getInstance();
+    private final ConnectionHeartbeatSystem connectionHeartbeatSystem = ConnectionHeartbeatSystem.getInstance();
+    private final ConnectionLossExecutionSystem connectionLossExecutionSystem = ConnectionLossExecutionSystem.getInstance();
+    private final ConnectionLossReporter connectionLossReporter = ConnectionLossReporter.getInstance();
+    private final ConnectionSessionMetadata sessionMetadata = new ConnectionSessionMetadata();
+    private final ConnectionTerminationSystem connectionTerminationSystem = ConnectionTerminationSystem.getInstance();
+    private final EntityActionPacketExecutionSystem entityActionPacketExecutionSystem = EntityActionPacketExecutionSystem.getInstance();
+    private final EntityActionResultExecutionSystem entityActionResultExecutionSystem = EntityActionResultExecutionSystem.getInstance();
+    private final GroundMovementDecisionExecutionSystem groundMovementDecisionExecutionSystem = GroundMovementDecisionExecutionSystem.getInstance();
+    private final GroundMovementDecisionLogSystem groundMovementDecisionLogSystem = GroundMovementDecisionLogSystem.getInstance();
+    private final HotbarSwitchPacketExecutionSystem hotbarSwitchPacketExecutionSystem = HotbarSwitchPacketExecutionSystem.getInstance();
+    private final HotbarSwitchResultExecutionSystem hotbarSwitchResultExecutionSystem = HotbarSwitchResultExecutionSystem.getInstance();
+    private final IncomingChatPacketHandler incomingChatPacketHandler = IncomingChatPacketHandler.getInstance();
+    private final IncomingChatPacketExecutionSystem incomingChatPacketExecutionSystem = IncomingChatPacketExecutionSystem.getInstance();
+    private final IncomingChatResultExecutionSystem incomingChatResultExecutionSystem = IncomingChatResultExecutionSystem.getInstance();
+    private final IncomingPacketEventSystem incomingPacketEventSystem = IncomingPacketEventSystem.getInstance();
+    private final InvalidPositionResponseSystem invalidPositionResponseSystem = InvalidPositionResponseSystem.getInstance();
+    private final MovementBranchExecutionSystem movementBranchExecutionSystem = MovementBranchExecutionSystem.getInstance();
+    private final MovementCheckReenableExecutionSystem movementCheckReenableExecutionSystem =
+            MovementCheckReenableExecutionSystem.getInstance();
+    private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
+    private final PacketSendExecutionSystem packetSendExecutionSystem = PacketSendExecutionSystem.getInstance();
+    private final PacketSendPipelineSystem packetSendPipelineSystem = PacketSendPipelineSystem.getInstance();
+    private final PacketSendResultExecutionSystem packetSendResultExecutionSystem = PacketSendResultExecutionSystem.getInstance();
+    private final PlayerChatDispatchSystem playerChatDispatchSystem = PlayerChatDispatchSystem.getInstance();
+    private final PlayerGroundMovementSystem playerGroundMovementSystem = PlayerGroundMovementSystem.getInstance();
+    private final PlayerInputPacketExecutionSystem playerInputPacketExecutionSystem = PlayerInputPacketExecutionSystem.getInstance();
+    private final PlayerMoveEventDispatchSystem playerMoveEventDispatchSystem = PlayerMoveEventDispatchSystem.getInstance();
+    private final PlayerMoveEventExecutionSystem playerMoveEventExecutionSystem = PlayerMoveEventExecutionSystem.getInstance();
+    private final PlayerMoveEventOutcomeSystem playerMoveEventOutcomeSystem = PlayerMoveEventOutcomeSystem.getInstance();
+    private final PlayerMoveEventStateApplySystem playerMoveEventStateApplySystem = PlayerMoveEventStateApplySystem.getInstance();
+    private final PlayerMoveOutcomeExecutionSystem playerMoveOutcomeExecutionSystem = PlayerMoveOutcomeExecutionSystem.getInstance();
+    private final PlayerTeleportPlanApplySystem playerTeleportPlanApplySystem = PlayerTeleportPlanApplySystem.getInstance();
+    private final PlayerTeleportCoordinator playerTeleportCoordinator = PlayerTeleportCoordinator.getInstance();
+    private final PlayerTeleportExecutionSystem playerTeleportExecutionSystem = PlayerTeleportExecutionSystem.getInstance();
+    private final PlayerTeleportRequestExecutionSystem playerTeleportRequestExecutionSystem =
+            PlayerTeleportRequestExecutionSystem.getInstance();
+    private final RespawnPacketHandler respawnPacketHandler = RespawnPacketHandler.getInstance();
+    private final RespawnPacketExecutionSystem respawnPacketExecutionSystem = RespawnPacketExecutionSystem.getInstance();
+    private final RespawnResultExecutionSystem respawnResultExecutionSystem = RespawnResultExecutionSystem.getInstance();
+    private final SignUpdatePacketExecutionSystem signUpdatePacketExecutionSystem = SignUpdatePacketExecutionSystem.getInstance();
+    private final SleepingMovementPacketHandler sleepingMovementPacketHandler = SleepingMovementPacketHandler.getInstance();
+    private final UnexpectedPacketProtocolErrorExecutionSystem unexpectedPacketProtocolErrorExecutionSystem =
+            UnexpectedPacketProtocolErrorExecutionSystem.getInstance();
+    private final VehicleMoveOutcomeExecutionSystem vehicleMoveOutcomeExecutionSystem = VehicleMoveOutcomeExecutionSystem.getInstance();
+    private final VehicleMovementPacketHandler vehicleMovementPacketHandler = VehicleMovementPacketHandler.getInstance();
+    private final WindowTransactionBehaviour windowTransactionBehaviour = WindowTransactionBehaviour.getInstance();
+    private final HotbarSelectionBehaviour hotbarSelectionBehaviour = HotbarSelectionBehaviour.getInstance();
+    private final BlockInteractionPacketHandler blockInteractionPacketHandler = BlockInteractionPacketHandler.getInstance();
+    private final BlockInteractionSessionState blockInteractionState = new BlockInteractionSessionState(MinecraftServer.currentTick, 0, null, -1);
+    private final SignUpdateProcessor signUpdateProcessor = SignUpdateProcessor.getInstance();
+    private final EntityInteractionSystem entityInteractionSystem = EntityInteractionSystem.getInstance();
+    private final PlayerActionPacketHandler playerActionPacketHandler = PlayerActionPacketHandler.getInstance();
+    private final PlayerCommandProcessor playerCommandProcessor = PlayerCommandProcessor.getInstance();
+    private final ConnectionTerminationSystem.PacketSender disconnectPacketSender = new ConnectionTerminationSystem.PacketSender() {
+        @Override
+        public void sendPacket(Packet packet) {
+            NetServerHandler.this.sendPacket(packet);
+        }
+    };
+    private final ConnectionHeartbeatExecutionSystem.HeartbeatActions heartbeatActions =
+            new ConnectionHeartbeatExecutionSystem.HeartbeatActions() {
+                @Override
+                public void pollNetwork() {
+                    NetServerHandler.this.networkManager.b();
+                }
+
+                @Override
+                public void sendPacket(Packet packet) {
+                    NetServerHandler.this.sendPacket(packet);
+                }
+            };
+    private final GroundMovementDecisionLogSystem.ConsoleLogSink groundMovementConsoleLogSink = new GroundMovementDecisionLogSystem.ConsoleLogSink() {
+        @Override
+        public void println(String logLine) {
+            System.out.println(logLine);
+        }
+    };
+    private final GroundMovementDecisionExecutionSystem.DecisionActions groundMovementDecisionActions =
+            new GroundMovementDecisionExecutionSystem.DecisionActions() {
+                @Override
+                public void disconnect(String reason) {
+                    NetServerHandler.this.disconnect(reason);
+                }
+
+                @Override
+                public void teleportToLastGood(float yaw, float pitch) {
+                    NetServerHandler.this.a(NetServerHandler.this.x, NetServerHandler.this.y, NetServerHandler.this.z, yaw, pitch);
+                }
+
+                @Override
+                public void applyMovement(int floatingTicks, boolean onGround, double fallDeltaY) {
+                    NetServerHandler.this.h = floatingTicks;
+                    NetServerHandler.this.player.onGround = onGround;
+                    NetServerHandler.this.minecraftServer.serverConfigurationManager.d(NetServerHandler.this.player);
+                    NetServerHandler.this.player.b(fallDeltaY, onGround);
+                }
+            };
+    private final PlayerMoveOutcomeExecutionSystem.MoveOutcomeActions moveOutcomeActions =
+            new PlayerMoveOutcomeExecutionSystem.MoveOutcomeActions() {
+                @Override
+                public void sendRollbackPacket(Packet13PlayerLookMove rollbackPacket) {
+                    NetServerHandler.this.player.netServerHandler.sendPacket(rollbackPacket);
+                }
+
+                @Override
+                public void teleportPlayer(Location location) {
+                    NetServerHandler.this.player.getBukkitEntity().teleport(location);
+                }
+            };
+    private final VehicleMoveOutcomeExecutionSystem.VehicleMoveActions vehicleMoveActions =
+            new VehicleMoveOutcomeExecutionSystem.VehicleMoveActions() {
+                @Override
+                public void logCrashWarning(String warningMessage) {
+                    a.warning(warningMessage);
+                }
+
+                @Override
+                public void kickPlayer(String kickMessage) {
+                    NetServerHandler.this.getPlayer().kickPlayer(kickMessage);
+                }
+
+                @Override
+                public void updateLastKnownPosition(double x, double y, double z) {
+                    NetServerHandler.this.x = x;
+                    NetServerHandler.this.y = y;
+                    NetServerHandler.this.z = z;
+                }
+            };
+    private final PlayerMoveEventStateApplySystem.MovementStateSink moveEventStateSink =
+            new PlayerMoveEventStateApplySystem.MovementStateSink() {
+                @Override
+                public void apply(double lastPosX, double lastPosY, double lastPosZ, float lastYaw, float lastPitch, boolean justTeleported) {
+                    NetServerHandler.this.lastPosX = lastPosX;
+                    NetServerHandler.this.lastPosY = lastPosY;
+                    NetServerHandler.this.lastPosZ = lastPosZ;
+                    NetServerHandler.this.lastYaw = lastYaw;
+                    NetServerHandler.this.lastPitch = lastPitch;
+                    NetServerHandler.this.justTeleported = justTeleported;
+                }
+            };
+    private final PlayerMoveEventExecutionSystem.MoveEventFlow moveEventFlow =
+            new PlayerMoveEventExecutionSystem.MoveEventFlow() {
+                @Override
+                public PlayerMoveEventDispatchSystem.MovementEventState createMovementEventState() {
+                    return new PlayerMoveEventDispatchSystem.MovementEventState(
+                            NetServerHandler.this.lastPosX,
+                            NetServerHandler.this.lastPosY,
+                            NetServerHandler.this.lastPosZ,
+                            NetServerHandler.this.lastYaw,
+                            NetServerHandler.this.lastPitch,
+                            NetServerHandler.this.justTeleported
+                    );
+                }
+
+                @Override
+                public PlayerMoveEventDispatchSystem.MoveEventResult dispatchMoveEvent(
+                        PlayerMoveEventDispatchSystem.MovementEventState movementEventState
+                ) {
+                    return playerMoveEventDispatchSystem.processMoveEvent(
+                            NetServerHandler.this.bukkitServer,
+                            NetServerHandler.this.player,
+                            requirePendingMoveEventPlayer(),
+                            requirePendingMoveEventPacket(),
+                            movementEventState,
+                            NetServerHandler.this.pendingMoveEventCheckMovement
+                    );
+                }
+
+                @Override
+                public void applyMovementState(PlayerMoveEventDispatchSystem.MovementEventState movementEventState) {
+                    playerMoveEventStateApplySystem.applyState(movementEventState, NetServerHandler.this.moveEventStateSink);
+                }
+
+                @Override
+                public PlayerMoveEventOutcomeSystem.MoveOutcomeDecision resolveMoveOutcome(
+                        PlayerMoveEventDispatchSystem.MoveEventResult moveEventResult
+                ) {
+                    return playerMoveEventOutcomeSystem.resolve(moveEventResult);
+                }
+
+                @Override
+                public boolean executeMoveOutcome(PlayerMoveEventOutcomeSystem.MoveOutcomeDecision moveOutcomeDecision) {
+                    return playerMoveOutcomeExecutionSystem.executeOutcome(moveOutcomeDecision, NetServerHandler.this.moveOutcomeActions);
+                }
+            };
+    private final IncomingChatResultExecutionSystem.ChatActions incomingChatActions =
+            new IncomingChatResultExecutionSystem.ChatActions() {
+                @Override
+                public void disconnect(String message) {
+                    NetServerHandler.this.disconnect(message);
+                }
+
+                @Override
+                public void dispatchNormalizedChat(String normalizedMessage) {
+                    NetServerHandler.this.chat(normalizedMessage);
+                }
+            };
+    private final HotbarSwitchResultExecutionSystem.SwitchActions hotbarSwitchActions =
+            new HotbarSwitchResultExecutionSystem.SwitchActions() {
+                @Override
+                public void disconnect(String message) {
+                    NetServerHandler.this.disconnect(message);
+                }
+            };
+    private final HotbarSwitchPacketExecutionSystem.SwitchResolver hotbarSwitchResolver =
+            new HotbarSwitchPacketExecutionSystem.SwitchResolver() {
+                @Override
+                public HotbarSelectionBehaviour.SwitchResult resolve() {
+                    Packet16BlockItemSwitch packet16blockitemswitch = requirePendingHotbarSwitchPacket();
+                    return hotbarSelectionBehaviour.handleSwitch(
+                            NetServerHandler.this.bukkitServer,
+                            NetServerHandler.this.player,
+                            packet16blockitemswitch
+                    );
+                }
+            };
+    private final RespawnResultExecutionSystem.RespawnActions respawnActions =
+            new RespawnResultExecutionSystem.RespawnActions() {
+                @Override
+                public void applyRespawnedPlayer(EntityPlayer player) {
+                    NetServerHandler.this.player = player;
+                    NetServerHandler.this.getPlayer().setHandle(NetServerHandler.this.player);
+                }
+            };
+    private final RespawnPacketExecutionSystem.RespawnResultResolver respawnResultResolver =
+            new RespawnPacketExecutionSystem.RespawnResultResolver() {
+                @Override
+                public RespawnPacketHandler.RespawnResult resolve() {
+                    return respawnPacketHandler.handleRespawnPacket(
+                            NetServerHandler.this.minecraftServer,
+                            NetServerHandler.this.player
+                    );
+                }
+            };
+    private final EntityActionResultExecutionSystem.EntityActionResultActions entityActionResultActions =
+            new EntityActionResultExecutionSystem.EntityActionResultActions() {
+                @Override
+                public void disableMovementCheck() {
+                    NetServerHandler.this.checkMovement = false;
+                }
+            };
+    private final EntityActionPacketExecutionSystem.EntityActionResultResolver entityActionResultResolver =
+            new EntityActionPacketExecutionSystem.EntityActionResultResolver() {
+                @Override
+                public boolean resolve() {
+                    Packet19EntityAction packet19entityaction = requirePendingEntityActionPacket();
+                    return playerActionPacketHandler.handleEntityActionPacket(
+                            NetServerHandler.this.bukkitServer,
+                            NetServerHandler.this.player,
+                            packet19entityaction
+                    );
+                }
+            };
+    private final PlayerTeleportPlanApplySystem.TeleportPlanActions teleportPlanActions =
+            new PlayerTeleportPlanApplySystem.TeleportPlanActions() {
+                @Override
+                public void applyMovementState(
+                        double x,
+                        double y,
+                        double z,
+                        float yaw,
+                        float pitch,
+                        boolean justTeleported,
+                        boolean movementCheckEnabled
+                ) {
+                    NetServerHandler.this.lastPosX = x;
+                    NetServerHandler.this.lastPosY = y;
+                    NetServerHandler.this.lastPosZ = z;
+                    NetServerHandler.this.lastYaw = yaw;
+                    NetServerHandler.this.lastPitch = pitch;
+                    NetServerHandler.this.justTeleported = justTeleported;
+                    NetServerHandler.this.checkMovement = movementCheckEnabled;
+                    NetServerHandler.this.x = x;
+                    NetServerHandler.this.y = y;
+                    NetServerHandler.this.z = z;
+                }
+
+                @Override
+                public void applyPlayerLocation(double x, double y, double z, float yaw, float pitch) {
+                    NetServerHandler.this.player.setLocation(x, y, z, yaw, pitch);
+                }
+
+                @Override
+                public void sendTeleportPacket(Packet13PlayerLookMove teleportPacket) {
+                    NetServerHandler.this.player.netServerHandler.sendPacket(teleportPacket);
+                }
+            };
+    private final PlayerTeleportRequestExecutionSystem.TeleportActions teleportRequestActions =
+            new PlayerTeleportRequestExecutionSystem.TeleportActions() {
+                @Override
+                public void teleport(Location destination) {
+                    NetServerHandler.this.teleport(destination);
+                }
+            };
+    private final PlayerTeleportRequestExecutionSystem.TeleportDestinationResolver teleportDestinationResolver =
+            new PlayerTeleportRequestExecutionSystem.TeleportDestinationResolver() {
+                @Override
+                public Location resolveDestination() {
+                    return playerTeleportCoordinator.resolveTeleportDestination(
+                            NetServerHandler.this.bukkitServer,
+                            NetServerHandler.this.getPlayer(),
+                            NetServerHandler.this.pendingTeleportX,
+                            NetServerHandler.this.pendingTeleportY,
+                            NetServerHandler.this.pendingTeleportZ,
+                            NetServerHandler.this.pendingTeleportYaw,
+                            NetServerHandler.this.pendingTeleportPitch
+                    );
+                }
+            };
+    private final PacketSendResultExecutionSystem.PacketSendActions packetSendActions =
+            new PacketSendResultExecutionSystem.PacketSendActions() {
+                @Override
+                public void markPacketSent() {
+                    NetServerHandler.this.g = NetServerHandler.this.f;
+                }
+            };
+    private final PacketSendExecutionSystem.PacketSendResultResolver packetSendResultResolver =
+            new PacketSendExecutionSystem.PacketSendResultResolver() {
+                @Override
+                public boolean resolve() {
+                    Packet packet = requirePendingSendPacket();
+                    return packetSendPipelineSystem.sendPacket(
+                            NetServerHandler.this.networkManager,
+                            NetServerHandler.this.player,
+                            NetServerHandler.this.getPlayer(),
+                            packet,
+                            NetServerHandler.this.firePacketEvents
+                    );
+                }
+            };
+    private final SignUpdatePacketExecutionSystem.SignUpdateActions signUpdateActions =
+            new SignUpdatePacketExecutionSystem.SignUpdateActions() {
+                @Override
+                public void process(Packet130UpdateSign packet130updateSign) {
+                    signUpdateProcessor.processSignUpdate(
+                            NetServerHandler.this.minecraftServer,
+                            NetServerHandler.this.bukkitServer,
+                            NetServerHandler.this.player,
+                            packet130updateSign
+                    );
+                }
+            };
+    private final UnexpectedPacketProtocolErrorExecutionSystem.ProtocolErrorActions protocolErrorActions =
+            new UnexpectedPacketProtocolErrorExecutionSystem.ProtocolErrorActions() {
+                @Override
+                public void disconnect(String message) {
+                    NetServerHandler.this.disconnect(message);
+                }
+            };
+    private final PlayerInputPacketExecutionSystem.InputActions playerInputActions =
+            new PlayerInputPacketExecutionSystem.InputActions() {
+                @Override
+                public void applyInput(
+                        float primaryX,
+                        float primaryY,
+                        boolean primaryFlag,
+                        boolean secondaryFlag,
+                        float secondaryX,
+                        float secondaryY
+                ) {
+                    NetServerHandler.this.player.a(primaryX, primaryY, primaryFlag, secondaryFlag, secondaryX, secondaryY);
+                }
+            };
+    private final MovementBranchExecutionSystem.MovementBranches movementBranches =
+            new MovementBranchExecutionSystem.MovementBranches() {
+                @Override
+                public boolean handleVehicleMovement() {
+                    if (NetServerHandler.this.player.vehicle == null) {
+                        return false;
+                    }
+                    WorldServer worldserver = requirePendingMovementWorld();
+                    Packet10Flying packet10flying = requirePendingMovementPacket();
+                    VehicleMovementPacketHandler.VehicleMoveResult vehicleMoveResult =
+                            vehicleMovementPacketHandler.handleVehicleMovement(
+                                    NetServerHandler.this.player,
+                                    worldserver,
+                                    NetServerHandler.this.minecraftServer.serverConfigurationManager,
+                                    packet10flying
+                            );
+                    vehicleMoveOutcomeExecutionSystem.executeOutcome(
+                            vehicleMoveResult,
+                            vehicleMovementPacketHandler,
+                            NetServerHandler.this.player.name,
+                            NetServerHandler.this.player.vehicle,
+                            NetServerHandler.this.vehicleMoveActions
+                    );
+                    return true;
+                }
+
+                @Override
+                public boolean handleSleepingMovement() {
+                    WorldServer worldserver = requirePendingMovementWorld();
+                    return sleepingMovementPacketHandler.handleSleepingMovement(
+                            NetServerHandler.this.player,
+                            worldserver,
+                            NetServerHandler.this.x,
+                            NetServerHandler.this.y,
+                            NetServerHandler.this.z
+                    );
+                }
+
+                @Override
+                public PlayerGroundMovementSystem.GroundMovementDecision resolveGroundMovementDecision() {
+                    WorldServer worldserver = requirePendingMovementWorld();
+                    Packet10Flying packet10flying = requirePendingMovementPacket();
+                    return playerGroundMovementSystem.processGroundMovement(
+                            NetServerHandler.this.player,
+                            worldserver,
+                            packet10flying,
+                            NetServerHandler.this.x,
+                            NetServerHandler.this.y,
+                            NetServerHandler.this.z,
+                            NetServerHandler.this.checkMovement,
+                            NetServerHandler.this.minecraftServer.allowFlight,
+                            NetServerHandler.this.h
+                    );
+                }
+
+                @Override
+                public void logGroundMovementDecision(PlayerGroundMovementSystem.GroundMovementDecision groundMovementDecision) {
+                    NetServerHandler.this.groundMovementDecisionLogSystem.emitLogs(
+                            groundMovementDecision,
+                            a,
+                            NetServerHandler.this.groundMovementConsoleLogSink
+                    );
+                }
+
+                @Override
+                public boolean executeGroundMovementDecision(PlayerGroundMovementSystem.GroundMovementDecision groundMovementDecision) {
+                    return NetServerHandler.this.groundMovementDecisionExecutionSystem.executeDecision(
+                            groundMovementDecision,
+                            NetServerHandler.this.groundMovementDecisionActions
+                    );
+                }
+            };
+    private final PlayerChatDispatchSystem.CommandDispatcher commandDispatcher = new PlayerChatDispatchSystem.CommandDispatcher() {
+        @Override
+        public void dispatch(String message) {
+            handleCommand(message);
+        }
+    };
     private boolean firePacketEvents;
+    private Packet16BlockItemSwitch pendingHotbarSwitchPacket;
+    private Packet19EntityAction pendingEntityActionPacket;
+    private Packet10Flying pendingMovementPacket;
+    private WorldServer pendingMovementWorld;
+    private Packet10Flying pendingMoveEventPacket;
+    private Player pendingMoveEventPlayer;
+    private boolean pendingMoveEventCheckMovement;
+    private Packet pendingSendPacket;
+    private double pendingTeleportX;
+    private double pendingTeleportY;
+    private double pendingTeleportZ;
+    private float pendingTeleportYaw;
+    private float pendingTeleportPitch;
     
     private final String msgPlayerLeave;
 
     public boolean isReceivedKeepAlive() {
-        return receivedKeepAlive;
+        return sessionMetadata.isReceivedKeepAlive();
     }
 
     public void setReceivedKeepAlive(boolean receivedKeepAlive) {
-        this.receivedKeepAlive = receivedKeepAlive;
+        this.sessionMetadata.setReceivedKeepAlive(receivedKeepAlive);
     }
 
     public NetServerHandler(MinecraftServer minecraftserver, NetworkManager networkmanager, EntityPlayer entityplayer) {
@@ -71,43 +559,49 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         entityplayer.netServerHandler = this;
 
         // CraftBukkit start
-        this.server = minecraftserver.server;
+        this.bukkitServer = minecraftserver.server;
         this.firePacketEvents = PoseidonConfig.getInstance().getBoolean("settings.packet-events.enabled", false); //Poseidon
         this.msgPlayerLeave = PoseidonConfig.getInstance().getConfigString("message.player.leave");
     }
 
     //Project Poseidon - Start
     public boolean isUsingReleaseToBeta() {
-        return usingReleaseToBeta;
+        return sessionMetadata.isUsingReleaseToBeta();
     }
 
     public void setUsingReleaseToBeta(boolean usingReleaseToBeta) {
-        this.usingReleaseToBeta = usingReleaseToBeta;
+        this.sessionMetadata.setUsingReleaseToBeta(usingReleaseToBeta);
     }
 
-    public ConnectionType getConnectionType() {
-        return this.connectionType;
+    public com.projectposeidon.ConnectionType getConnectionType() {
+        return com.projectposeidon.ConnectionType.fromCanonical(sessionMetadata.getConnectionType());
+    }
+
+    public ConnectionType getCanonicalConnectionType() {
+        return sessionMetadata.getConnectionType();
     }
 
     public void setConnectionType(ConnectionType connectionType) {
-        this.connectionType = connectionType;
+        this.sessionMetadata.setConnectionType(connectionType);
+    }
+
+    public void setConnectionType(com.projectposeidon.ConnectionType connectionType) {
+        this.sessionMetadata.setConnectionType(connectionType.toCanonical());
     }
 
     public void setRawConnectionType(int rawConnectionType) {
-        this.rawConnectionType = rawConnectionType;
+        this.sessionMetadata.setRawConnectionType(rawConnectionType);
     }
 
     public int getRawConnectionType() {
-        return this.rawConnectionType;
+        return sessionMetadata.getRawConnectionType();
     }
 
 
     //Project Poseidon - End
 
-    private final CraftServer server;
+    private final Server bukkitServer;
     private int lastTick = MinecraftServer.currentTick;
-    private int lastDropTick = MinecraftServer.currentTick;
-    private int dropCount = 0;
     private static final int PLACE_DISTANCE_SQUARED = 6 * 6;
 
     // Get position of last block hit for BlockDamageLevel.STOPPED
@@ -118,768 +612,230 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private float lastYaw = Float.MAX_VALUE;
     private boolean justTeleported = false;
 
-    // For the packet15 hack :(
-    Long lastPacket;
-
-    // Store the last block right clicked and what type it was
-    private int lastMaterial;
-
     public CraftPlayer getPlayer() {
         return (this.player == null) ? null : (CraftPlayer) this.player.getBukkitEntity();
     }
     // CraftBukkit end
 
     public void a() {
-        this.i = false;
-        this.networkManager.b();
-        if (this.f - this.g > 20) {
-            this.sendPacket(new Packet0KeepAlive());
-        }
+        this.i = connectionHeartbeatExecutionSystem.applyHeartbeat(
+                this.f,
+                this.g,
+                20,
+                this.i,
+                this.connectionHeartbeatSystem,
+                this.heartbeatActions
+        );
     }
 
     public void disconnect(String s) {
-        if (disconnected) return; // Poseidon: Kick/Disconnect spam fix
-
-        // CraftBukkit start
-        String leaveMessage = this.msgPlayerLeave.replace("%player%", this.player.name);
-
-        PlayerKickEvent event = new PlayerKickEvent(this.server.getPlayer(this.player), s, leaveMessage);
-        this.server.getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
-            // Do not kick the player
-            return;
-        }
-        // Send the possibly modified leave message
-        s = event.getReason();
-        // CraftBukkit end
-
-        this.player.B();
-        this.sendPacket(new Packet255KickDisconnect(s));
-        this.networkManager.d();
-
-        // CraftBukkit start
-        leaveMessage = event.getLeaveMessage();
-        if (leaveMessage != null) {
-            this.minecraftServer.serverConfigurationManager.sendAll(new Packet3Chat(leaveMessage));
-        }
-        // CraftBukkit end
-
-        this.minecraftServer.serverConfigurationManager.disconnect(this.player);
-        this.disconnected = true;
+        this.disconnected = connectionTerminationSystem.terminate(
+                this.disconnected,
+                this.bukkitServer,
+                this.player,
+                s,
+                this.msgPlayerLeave,
+                this.disconnectPacketSender,
+                this.networkManager,
+                this.minecraftServer
+        );
     }
 
     public void a(Packet27 packet27) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet27);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet27)) {
             return;
+        }
 
-        this.player.a(packet27.c(), packet27.e(), packet27.g(), packet27.h(), packet27.d(), packet27.f());
+        playerInputPacketExecutionSystem.execute(packet27, this.playerInputActions);
     }
 
     public void a(Packet10Flying packet10flying) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet10flying);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet10flying)) {
             return;
+        }
 
         WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
 
         this.i = true;
-        double d0;
 
-        if (!this.checkMovement) {
-            d0 = packet10flying.y - this.y;
-            if (packet10flying.x == this.x && d0 * d0 < 0.01D && packet10flying.z == this.z) {
-                this.checkMovement = true;
-            }
-        }
+        this.checkMovement = movementCheckReenableExecutionSystem.apply(
+                this.checkMovement,
+                packet10flying.x,
+                packet10flying.y,
+                packet10flying.z,
+                this.x,
+                this.y,
+                this.z,
+                movementPacketPolicy
+        );
 
         // CraftBukkit start
         Player player = this.getPlayer();
-        Location from = new Location(player.getWorld(), lastPosX, lastPosY, lastPosZ, lastYaw, lastPitch); // Get the Players previous Event location.
-        Location to = player.getLocation().clone(); // Start off the To location as the Players current location.
-
-        // If the packet contains movement information then we update the To location with the correct XYZ.
-        if (packet10flying.h && !(packet10flying.h && packet10flying.y == -999.0D && packet10flying.stance == -999.0D)) {
-            to.setX(packet10flying.x);
-            to.setY(packet10flying.y);
-            to.setZ(packet10flying.z);
-        }
-
-        // If the packet contains look information then we update the To location with the correct Yaw & Pitch.
-        if (packet10flying.hasLook) {
-            to.setYaw(packet10flying.yaw);
-            to.setPitch(packet10flying.pitch);
-        }
-
-        // Prevent 40 event-calls for less than a single pixel of movement >.>
-        double delta = Math.pow(this.lastPosX - to.getX(), 2) + Math.pow(this.lastPosY - to.getY(), 2) + Math.pow(this.lastPosZ - to.getZ(), 2);
-        float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
-
-        if ((delta > 1f / 256 || deltaAngle > 10f) && (this.checkMovement && !this.player.dead)) {
-            this.lastPosX = to.getX();
-            this.lastPosY = to.getY();
-            this.lastPosZ = to.getZ();
-            this.lastYaw = to.getYaw();
-            this.lastPitch = to.getPitch();
-
-            // Skip the first time we do this
-            if (from.getX() != Double.MAX_VALUE) {
-                PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
-                this.server.getPluginManager().callEvent(event);
-
-                // If the event is cancelled we move the player back to their old location.
-                if (event.isCancelled()) {
-                    this.player.netServerHandler.sendPacket(new Packet13PlayerLookMove(from.getX(), from.getY() + 1.6200000047683716D, from.getY(), from.getZ(), from.getYaw(), from.getPitch(), false));
-                    return;
-                }
-
-                /* If a Plugin has changed the To destination then we teleport the Player
-                   there to avoid any 'Moved wrongly' or 'Moved too quickly' errors.
-                   We only do this if the Event was not cancelled. */
-                if (!to.equals(event.getTo()) && !event.isCancelled()) {
-                    this.player.getBukkitEntity().teleport(event.getTo());
-                    return;
-                }
-
-                /* Check to see if the Players Location has some how changed during the call of the event.
-                   This can happen due to a plugin teleporting the player instead of using .setTo() */
-                if (!from.equals(this.getPlayer().getLocation()) && this.justTeleported) {
-                    this.justTeleported = false;
-                    return;
-                }
+        this.pendingMoveEventPacket = packet10flying;
+        this.pendingMoveEventPlayer = player;
+        this.pendingMoveEventCheckMovement = this.checkMovement;
+        try {
+            if (playerMoveEventExecutionSystem.execute(this.moveEventFlow)) {
+                return;
             }
+        } finally {
+            this.pendingMoveEventPacket = null;
+            this.pendingMoveEventPlayer = null;
+            this.pendingMoveEventCheckMovement = false;
         }
 
-        if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance) && player.isOnline() && !disconnected) {
-            player.teleport(player.getWorld().getSpawnLocation());
-            System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
-            player.kickPlayer("Nope!");
+        if (invalidPositionResponseSystem.handleInvalidPositionIfNeeded(packet10flying, player, disconnected)) {
             return;
         }
 
         if (this.checkMovement && !this.player.dead) {
             // CraftBukkit end
-            double d1;
-            double d2;
-            double d3;
-            double d4;
-
-            if (this.player.vehicle != null) {
-                float f = this.player.yaw;
-                float f1 = this.player.pitch;
-
-                this.player.vehicle.f();
-                d1 = this.player.locX;
-                d2 = this.player.locY;
-                d3 = this.player.locZ;
-                double d5 = 0.0D;
-
-                d4 = 0.0D;
-                if (packet10flying.hasLook) {
-                    f = packet10flying.yaw;
-                    f1 = packet10flying.pitch;
-                }
-
-                if (packet10flying.h && packet10flying.y == -999.0D && packet10flying.stance == -999.0D) {
-                    d5 = packet10flying.x;
-                    d4 = packet10flying.z;
-
-                    // Project Poseidon - Start
-                    // Boat crash fix ported from UberBukkit
-
-                    double d8 = d5 * d5 + d4 * d4;
-                    if (d8 > 100.0D) {
-                        a.warning("[Poseidon]" + this.player.name + " tried crashing server on entity " + this.player.vehicle.toString() + ". They have been kicked.");
-                        player.kickPlayer("Boat crash attempt detected!");
-                        return;
-                    }
-
-                    // Project Poseidon - End
-
-                }
-
-                this.player.onGround = packet10flying.g;
-                this.player.a(true);
-                this.player.move(d5, 0.0D, d4);
-                this.player.setLocation(d1, d2, d3, f, f1);
-                this.player.motX = d5;
-                this.player.motZ = d4;
-                if (this.player.vehicle != null) {
-                    worldserver.vehicleEnteredWorld(this.player.vehicle, true);
-                }
-
-                if (this.player.vehicle != null) {
-                    this.player.vehicle.f();
-                    this.player.vehicle.airBorne = true;
-                }
-
-                this.minecraftServer.serverConfigurationManager.d(this.player);
-                this.x = this.player.locX;
-                this.y = this.player.locY;
-                this.z = this.player.locZ;
-                worldserver.playerJoinedWorld(this.player);
-                return;
-            }
-
-            if (this.player.isSleeping()) {
-                this.player.a(true);
-                this.player.setLocation(this.x, this.y, this.z, this.player.yaw, this.player.pitch);
-                worldserver.playerJoinedWorld(this.player);
-                return;
-            }
-
-            d0 = this.player.locY;
             this.x = this.player.locX;
             this.y = this.player.locY;
             this.z = this.player.locZ;
-            d1 = this.player.locX;
-            d2 = this.player.locY;
-            d3 = this.player.locZ;
-            float f2 = this.player.yaw;
-            float f3 = this.player.pitch;
-
-            if (packet10flying.h && packet10flying.y == -999.0D && packet10flying.stance == -999.0D) {
-                packet10flying.h = false;
-            }
-
-            if (packet10flying.h) {
-                d1 = packet10flying.x;
-                d2 = packet10flying.y;
-                d3 = packet10flying.z;
-                d4 = packet10flying.stance - packet10flying.y;
-                if (!this.player.isSleeping() && (d4 > 1.65D || d4 < 0.1D)) {
-                    this.disconnect("Illegal stance");
-                    a.warning(this.player.name + " had an illegal stance: " + d4);
+            this.pendingMovementWorld = worldserver;
+            this.pendingMovementPacket = packet10flying;
+            try {
+                if (movementBranchExecutionSystem.execute(this.movementBranches)) {
                     return;
                 }
-
-                if (Math.abs(packet10flying.x) > 3.2E7D || Math.abs(packet10flying.z) > 3.2E7D) {
-                    this.disconnect("Illegal position");
-                    return;
-                }
+            } finally {
+                this.pendingMovementWorld = null;
+                this.pendingMovementPacket = null;
             }
-
-            if (packet10flying.hasLook) {
-                f2 = packet10flying.yaw;
-                f3 = packet10flying.pitch;
-            }
-
-            this.player.a(true);
-            this.player.br = 0.0F;
-            this.player.setLocation(this.x, this.y, this.z, f2, f3);
-            if (!this.checkMovement) {
-                return;
-            }
-
-            d4 = d1 - this.player.locX;
-            double d6 = d2 - this.player.locY;
-            double d7 = d3 - this.player.locZ;
-            double d14 = this.player.motX * this.player.motX + this.player.motY * this.player.motY + this.player.motZ * this.player.motZ;
-            double d8 = d4 * d4 + d6 * d6 + d7 * d7;
-
-            if ((boolean) PoseidonConfig.getInstance().getConfigOption("world.settings.speed-hack-check.enabled", true)) {
-                if (d8 - d14 > (double) PoseidonConfig.getInstance().getConfigOption("world.settings.speed-hack-check.distance", 100.0D) && this.checkMovement) { // CraftBukkit - Added this.checkMovement condition to solve this check being triggered by teleports
-                    a.warning(this.player.name + " moved too quickly! " + d4 + "," + d6 + "," + d7 + " (" + d4 + ", " + d6 + ", " + d7 + ")");
-                    if ((boolean) PoseidonConfig.getInstance().getConfigOption("world.settings.speed-hack-check.teleport", true)) {
-                        this.a(this.x, this.y, this.z, this.player.yaw, this.player.pitch);
-                    } else {
-                        this.disconnect("You moved too quickly :( (Hacking?)");
-                    }
-                    return;
-                }
-            }
-
-            float f4 = 0.0625F;
-            boolean flag = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
-
-            this.player.move(d4, d6, d7);
-            d4 = d1 - this.player.locX;
-            d6 = d2 - this.player.locY;
-            if (d6 > -0.5D || d6 < 0.5D) {
-                d6 = 0.0D;
-            }
-
-            d7 = d3 - this.player.locZ;
-            d8 = d4 * d4 + d6 * d6 + d7 * d7;
-            boolean flag1 = false;
-
-            if (d8 > 0.0625D && !this.player.isSleeping()) {
-                flag1 = true;
-                a.warning(this.player.name + " moved wrongly!");
-                System.out.println("Got position " + d1 + ", " + d2 + ", " + d3);
-                System.out.println("Expected " + this.player.locX + ", " + this.player.locY + ", " + this.player.locZ);
-            }
-
-            this.player.setLocation(d1, d2, d3, f2, f3);
-            boolean flag2 = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
-
-            if (flag && (flag1 || !flag2) && !this.player.isSleeping()) {
-                this.a(this.x, this.y, this.z, f2, f3);
-                return;
-            }
-
-            AxisAlignedBB axisalignedbb = this.player.boundingBox.clone().b((double) f4, (double) f4, (double) f4).a(0.0D, -0.55D, 0.0D);
-
-            if (!this.minecraftServer.allowFlight && !worldserver.b(axisalignedbb)) {
-                if (d6 >= -0.03125D) {
-                    ++this.h;
-                    if (this.h > 80) {
-                        a.warning(this.player.name + " was kicked for floating too long!");
-                        this.disconnect("Flying is not enabled on this server");
-                        return;
-                    }
-                }
-            } else {
-                this.h = 0;
-            }
-
-            this.player.onGround = packet10flying.g;
-            this.minecraftServer.serverConfigurationManager.d(this.player);
-            this.player.b(this.player.locY - d0, packet10flying.g);
         }
     }
 
     public void a(double d0, double d1, double d2, float f, float f1) {
-        // CraftBukkit start - Delegate to teleport(Location)
-        Player player = this.getPlayer();
-        Location from = player.getLocation();
-        Location to = new Location(this.getPlayer().getWorld(), d0, d1, d2, f, f1);
-        PlayerTeleportEvent event = new PlayerTeleportEvent(player, from, to);
-        this.server.getPluginManager().callEvent(event);
-
-        from = event.getFrom();
-        to = event.isCancelled() ? from : event.getTo();
-
-        this.teleport(to);
+        this.pendingTeleportX = d0;
+        this.pendingTeleportY = d1;
+        this.pendingTeleportZ = d2;
+        this.pendingTeleportYaw = f;
+        this.pendingTeleportPitch = f1;
+        try {
+            playerTeleportRequestExecutionSystem.execute(this.teleportDestinationResolver, this.teleportRequestActions);
+        } finally {
+            this.pendingTeleportX = 0.0D;
+            this.pendingTeleportY = 0.0D;
+            this.pendingTeleportZ = 0.0D;
+            this.pendingTeleportYaw = 0.0F;
+            this.pendingTeleportPitch = 0.0F;
+        }
     }
 
     public void teleport(Location dest) {
-        double d0, d1, d2;
-        float f, f1;
-
-        d0 = dest.getX();
-        d1 = dest.getY();
-        d2 = dest.getZ();
-        f = dest.getYaw();
-        f1 = dest.getPitch();
-
-        // TODO: make sure this is the best way to address this.
-        if (Float.isNaN(f)) {
-            f = 0;
-        }
-
-        if (Float.isNaN(f1)) {
-            f1 = 0;
-        }
-
-        this.lastPosX = d0;
-        this.lastPosY = d1;
-        this.lastPosZ = d2;
-        this.lastYaw = f;
-        this.lastPitch = f1;
-        this.justTeleported = true;
-        // CraftBukkit end
-
-        this.checkMovement = false;
-        this.x = d0;
-        this.y = d1;
-        this.z = d2;
-        this.player.setLocation(d0, d1, d2, f, f1);
-        this.player.netServerHandler.sendPacket(new Packet13PlayerLookMove(d0, d1 + 1.6200000047683716D, d1, d2, f, f1, false));
+        PlayerTeleportExecutionSystem.TeleportExecutionPlan plan = playerTeleportExecutionSystem.createExecutionPlan(dest);
+        playerTeleportPlanApplySystem.applyPlan(plan, this.teleportPlanActions);
     }
 
     public void a(Packet14BlockDig packet14blockdig) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet14blockdig);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet14blockdig)) {
             return;
-
-        if (this.player.dead) return; // CraftBukkit
-
-        WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
-
-        if (packet14blockdig.e == 4) {
-            // CraftBukkit start
-            // If the ticks aren't the same then the count starts from 0 and we update the lastDropTick.
-            if (this.lastDropTick != MinecraftServer.currentTick) {
-                this.dropCount = 0;
-                this.lastDropTick = MinecraftServer.currentTick;
-            } else {
-                // Else we increment the drop count and check the amount.
-                this.dropCount++;
-                if (this.dropCount >= 20) {
-                    a.warning(this.player.name + " dropped their items too quickly!");
-                    this.disconnect("You dropped your items too quickly (Hacking?)");
-                }
-            }
-            // CraftBukkit end
-            this.player.F();
-        } else {
-            boolean flag = worldserver.weirdIsOpCache = worldserver.dimension != 0 || this.minecraftServer.serverConfigurationManager.isOp(this.player.name); // CraftBukkit
-            boolean flag1 = false;
-
-            if (packet14blockdig.e == 0) {
-                flag1 = true;
-            }
-
-            if (packet14blockdig.e == 2) {
-                flag1 = true;
-            }
-
-            int i = packet14blockdig.a;
-            int j = packet14blockdig.b;
-            int k = packet14blockdig.c;
-
-            if (flag1) {
-                double d0 = this.player.locX - ((double) i + 0.5D);
-                double d1 = this.player.locY - ((double) j + 0.5D);
-                double d2 = this.player.locZ - ((double) k + 0.5D);
-                double d3 = d0 * d0 + d1 * d1 + d2 * d2;
-
-                if (d3 > 36.0D) {
-                    return;
-                }
-            }
-
-            ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
-            int l = (int) MathHelper.abs((float) (i - chunkcoordinates.x));
-            int i1 = (int) MathHelper.abs((float) (k - chunkcoordinates.z));
-
-            if (l > i1) {
-                i1 = l;
-            }
-
-            if (packet14blockdig.e == 0) {
-                // CraftBukkit
-                if (i1 < this.server.getSpawnRadius() && !flag) {
-                    this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-                } else {
-                    // CraftBukkit - add face argument
-                    this.player.itemInWorldManager.dig(i, j, k, packet14blockdig.face);
-                }
-            } else if (packet14blockdig.e == 2) {
-                this.player.itemInWorldManager.a(i, j, k);
-                if (worldserver.getTypeId(i, j, k) != 0) {
-                    this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-                }
-            } else if (packet14blockdig.e == 3) {
-                double d4 = this.player.locX - ((double) i + 0.5D);
-                double d5 = this.player.locY - ((double) j + 0.5D);
-                double d6 = this.player.locZ - ((double) k + 0.5D);
-                double d7 = d4 * d4 + d5 * d5 + d6 * d6;
-
-                if (d7 < 256.0D) {
-                    this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-                }
-            }
-
-            worldserver.weirdIsOpCache = false;
         }
+
+        blockInteractionPacketHandler.handleBlockDig(
+                this.bukkitServer,
+                this.minecraftServer,
+                this.player,
+                packet14blockdig,
+                this.blockInteractionState,
+                a,
+                MinecraftServer.currentTick
+        );
     }
 
     public void a(Packet15Place packet15place) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet15place);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet15place)) {
             return;
-
-        WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
-
-        // CraftBukkit start
-        if (this.player.dead) return;
-
-        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-        // aimed at a block. We shouldn't need to get the second packet if the data is handled
-        // but we cannot know what the client will do, so we might still get it
-        //
-        // If the time between packets is small enough, and the 'signature' similar, we discard the
-        // second one. This sadly has to remain until Mojang makes their packets saner. :(
-        //  -- Grum
-
-        if (packet15place.face == 255) {
-            if (packet15place.itemstack != null && packet15place.itemstack.id == this.lastMaterial && this.lastPacket != null && packet15place.timestamp - this.lastPacket < 100) {
-                this.lastPacket = null;
-                return;
-            }
-        } else {
-            this.lastMaterial = packet15place.itemstack == null ? -1 : packet15place.itemstack.id;
-            this.lastPacket = packet15place.timestamp;
         }
 
-        // CraftBukkit - if rightclick decremented the item, always send the update packet.
-        // this is not here for CraftBukkit's own functionality; rather it is to fix
-        // a notch bug where the item doesn't update correctly.
-        boolean always = false;
-
-        // CraftBukkit end
-
-        ItemStack itemstack = this.player.inventory.getItemInHand();
-        boolean flag = worldserver.weirdIsOpCache = worldserver.dimension != 0 || this.minecraftServer.serverConfigurationManager.isOp(this.player.name); // CraftBukkit
-
-        if (packet15place.face == 255) {
-            if (itemstack == null) {
-                return;
-            }
-
-            // CraftBukkit start
-            int itemstackAmount = itemstack.count;
-            PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(this.player, Action.RIGHT_CLICK_AIR, itemstack);
-            if (event.useItemInHand() != Event.Result.DENY) {
-                this.player.itemInWorldManager.useItem(this.player, this.player.world, itemstack);
-            }
-
-            // CraftBukkit - notch decrements the counter by 1 in the above method with food,
-            // snowballs and so forth, but he does it in a place that doesn't cause the
-            // inventory update packet to get sent
-            always = (itemstack.count != itemstackAmount);
-            // CraftBukkit end
-        } else {
-            int i = packet15place.a;
-            int j = packet15place.b;
-            int k = packet15place.c;
-            int l = packet15place.face;
-            ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
-            int i1 = (int) MathHelper.abs((float) (i - chunkcoordinates.x));
-            int j1 = (int) MathHelper.abs((float) (k - chunkcoordinates.z));
-
-            if (i1 > j1) {
-                j1 = i1;
-            }
-
-            // CraftBukkit start - Check if we can actually do something over this large a distance
-            Location eyeLoc = this.getPlayer().getEyeLocation();
-            if (Math.pow(eyeLoc.getX() - i, 2) + Math.pow(eyeLoc.getY() - j, 2) + Math.pow(eyeLoc.getZ() - k, 2) > PLACE_DISTANCE_SQUARED) {
-                return;
-            }
-            flag = true; // spawn protection moved to ItemBlock!!!
-            // CraftBukkit end
-
-            if (j1 > 16 || flag) {
-                this.player.itemInWorldManager.interact(this.player, worldserver, itemstack, i, j, k, l);
-            }
-
-            this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-            if (l == 0) {
-                --j;
-            }
-
-            if (l == 1) {
-                ++j;
-            }
-
-            if (l == 2) {
-                --k;
-            }
-
-            if (l == 3) {
-                ++k;
-            }
-
-            if (l == 4) {
-                --i;
-            }
-
-            if (l == 5) {
-                ++i;
-            }
-
-            this.player.netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, worldserver));
-        }
-
-        itemstack = this.player.inventory.getItemInHand();
-        if (itemstack != null && itemstack.count == 0) {
-            this.player.inventory.items[this.player.inventory.itemInHandIndex] = null;
-        }
-
-        this.player.h = true;
-        this.player.inventory.items[this.player.inventory.itemInHandIndex] = ItemStack.b(this.player.inventory.items[this.player.inventory.itemInHandIndex]);
-        Slot slot = this.player.activeContainer.a(this.player.inventory, this.player.inventory.itemInHandIndex);
-
-        this.player.activeContainer.a();
-        this.player.h = false;
-        // CraftBukkit
-        if (!ItemStack.equals(this.player.inventory.getItemInHand(), packet15place.itemstack) || always) {
-            this.sendPacket(new Packet103SetSlot(this.player.activeContainer.windowId, slot.a, this.player.inventory.getItemInHand()));
-        }
-
-        worldserver.weirdIsOpCache = false;
+        blockInteractionPacketHandler.handleBlockPlace(
+                this.minecraftServer,
+                this.player,
+                packet15place,
+                this.blockInteractionState,
+                PLACE_DISTANCE_SQUARED
+        );
     }
 
     public void a(String s, Object[] aobject) {
-        if (this.disconnected) return; // CraftBukkit - rarely it would send a disconnect line twice
-
-
-        if (!(boolean) PoseidonConfig.getInstance().getConfigOption("settings.remove-join-leave-debug", true) || !s.equals("disconnect.quitting")) {
-            a.info(this.player.name + " lost connection: " + s);
-        }
-
-        a.info(this.player.name + " has left the game.");
-        // CraftBukkit start - we need to handle custom quit messages
-        String quitMessage = this.minecraftServer.serverConfigurationManager.disconnect(this.player);
-        if (quitMessage != null) {
-            this.minecraftServer.serverConfigurationManager.sendAll(new Packet3Chat(quitMessage));
-        }
-        // CraftBukkit end
-        this.disconnected = true;
+        this.disconnected = connectionLossExecutionSystem.executeConnectionLoss(
+                this.disconnected,
+                this.connectionLossReporter,
+                this.minecraftServer,
+                this.player,
+                s,
+                a
+        );
     }
 
     public void a(Packet packet) {
-        a.warning(this.getClass() + " wasn\'t prepared to deal with a " + packet.getClass());
-        this.disconnect("Protocol error, unexpected packet");
+        unexpectedPacketProtocolErrorExecutionSystem.execute(this.getClass(), packet, a, this.protocolErrorActions);
     }
 
     public void sendPacket(Packet packet) {
-        //Poseidon Start - Send Packet Event
-        if (packet == null) // Why do anything if there's no packet? (fixes Internal server error)
-            return;
-        
-        if (firePacketEvents) {
-            PlayerSendPacketEvent event = new PlayerSendPacketEvent(this.player.name, packet);
-            Bukkit.getPluginManager().callEvent(event);
-            if (event.isCancelled()) {
-                return;
-            }
-            packet = event.getPacket(); //In case a plugin replaces the entire packet
+        this.pendingSendPacket = packet;
+        try {
+            packetSendExecutionSystem.execute(
+                    this.packetSendResultResolver,
+                    packetSendResultExecutionSystem,
+                    this.packetSendActions
+            );
+        } finally {
+            this.pendingSendPacket = null;
         }
-        //Poseidon End
-
-
-        // CraftBukkit start
-        if (packet instanceof Packet6SpawnPosition) {
-            Packet6SpawnPosition packet6 = (Packet6SpawnPosition) packet;
-            this.player.compassTarget = new Location(this.getPlayer().getWorld(), packet6.x, packet6.y, packet6.z);
-        } else if (packet instanceof Packet3Chat) {
-            String message = ((Packet3Chat) packet).message;
-            for (final String line : TextWrapper.wrapText(message)) {
-                this.networkManager.queue(new Packet3Chat(line));
-            }
-            packet = null;
-        } else if (packet.k == true) {
-            // Reroute all low-priority packets through to compression thread.
-            ChunkCompressionThread.sendPacket(this.player, packet);
-            packet = null;
-        }
-        if (packet != null) this.networkManager.queue(packet);
-        // CraftBukkit end
-
-        this.g = this.f;
     }
 
     public void a(Packet16BlockItemSwitch packet16blockitemswitch) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet16blockitemswitch);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet16blockitemswitch)) {
             return;
+        }
 
-        if (this.player.dead) return; // CraftBukkit
-
-        if (packet16blockitemswitch.itemInHandIndex >= 0 && packet16blockitemswitch.itemInHandIndex <= InventoryPlayer.e()) {
-            // CraftBukkit start
-            PlayerItemHeldEvent event = new PlayerItemHeldEvent(this.getPlayer(), this.player.inventory.itemInHandIndex, packet16blockitemswitch.itemInHandIndex);
-            this.server.getPluginManager().callEvent(event);
-            // CraftBukkit end
-
-            this.player.inventory.itemInHandIndex = packet16blockitemswitch.itemInHandIndex;
-        } else {
-            a.warning(this.player.name + " tried to set an invalid carried item");
-            this.disconnect("Invalid hotbar selection (Hacking?)");
+        this.pendingHotbarSwitchPacket = packet16blockitemswitch;
+        try {
+            hotbarSwitchPacketExecutionSystem.execute(
+                    this.hotbarSwitchResolver,
+                    hotbarSwitchResultExecutionSystem,
+                    this.player.name,
+                    a,
+                    this.hotbarSwitchActions
+            );
+        } finally {
+            this.pendingHotbarSwitchPacket = null;
         }
     }
 
     public void a(Packet3Chat packet3chat) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet3chat);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet3chat)) {
             return;
+        }
 
-        String s = packet3chat.message;
-
-        if (s.length() > 100) {
-            this.disconnect("Chat message too long");
-        } else {
-            s = s.trim();
-
-            for (int i = 0; i < s.length(); ++i) {
-                if (FontAllowedCharacters.allowedCharacters.indexOf(s.charAt(i)) < 0) {
-                    this.disconnect("Illegal characters in chat");
-                    return;
-                }
-            }
-
-            // CraftBukkit start
-            this.chat(s);
+        if (!incomingChatPacketExecutionSystem.execute(
+                packet3chat.message,
+                100,
+                FontAllowedCharacters.allowedCharacters,
+                incomingChatPacketHandler,
+                incomingChatResultExecutionSystem,
+                this.incomingChatActions
+        )) {
+            return;
         }
     }
 
     public boolean chat(String s) {
-        if (!this.player.dead) {
-            if (s.startsWith("/")) {
-                this.handleCommand(s);
-                return true;
-            } else {
-                Player player = this.getPlayer();
-                PlayerChatEvent event = new PlayerChatEvent(player, s);
-                this.server.getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
-                    return true;
-                }
-
-                s = String.format(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
-                minecraftServer.console.sendMessage(s);
-                for (Player recipient : event.getRecipients()) {
-                    recipient.sendMessage(s);
-                }
-            }
-        }
-
-        return false;
+        return playerChatDispatchSystem.dispatchValidatedChat(
+                this.bukkitServer,
+                this.minecraftServer,
+                this.getPlayer(),
+                this.player.dead,
+                s,
+                this.commandDispatcher
+        );
         // CraftBukkit end
     }
 
     private void handleCommand(String s) {
-        // CraftBukkit start
-        CraftPlayer player = this.getPlayer();
-
-        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(player, s);
-        this.server.getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
-            return;
-        }
-
-        s = event.getMessage(); //Poseidon: Override command with new command string.
-
-        try {
-            if (this.server.dispatchCommand(player, s.substring(1))) {
-                //Project Poseidon Start
-                //Hide commands from being logged in console
-                String cmdName = s.split(" ")[0].replaceAll("/", "");
-
-                if (Poseidon.getServer().isCommandHidden(cmdName)) {
-                    a.info(player.getName() + " issued server command: COMMAND REDACTED");
-                } else {
-                    a.info(player.getName() + " issued server command: " + s);
-                }
-
-                //Project Poseidon End
-                return;
-            }
-        } catch (CommandException ex) {
-            player.sendMessage(ChatColor.RED + "An internal error occurred while attempting to perform this command");
-            Logger.getLogger(NetServerHandler.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            return;
-        }
-        // CraftBukkit end
+        playerCommandProcessor.handlePlayerCommand(this.bukkitServer, this.getPlayer(), s, a);
 
         /* CraftBukkit start - No longer neaded av we have already handled it server.dispatchCommand above.
         if (s.toLowerCase().startsWith("/me ")) {
@@ -916,91 +872,40 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet18ArmAnimation packet18armanimation) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet18armanimation);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet18armanimation)) {
             return;
-
-        if (this.player.dead) return; // CraftBukkit
-
-        if (packet18armanimation.b == 1) {
-            // CraftBukkit start - raytrace to look for 'rogue armswings'
-            float f = 1.0F;
-            float f1 = this.player.lastPitch + (this.player.pitch - this.player.lastPitch) * f;
-            float f2 = this.player.lastYaw + (this.player.yaw - this.player.lastYaw) * f;
-            double d0 = this.player.lastX + (this.player.locX - this.player.lastX) * (double) f;
-            double d1 = this.player.lastY + (this.player.locY - this.player.lastY) * (double) f + 1.62D - (double) this.player.height;
-            double d2 = this.player.lastZ + (this.player.locZ - this.player.lastZ) * (double) f;
-            Vec3D vec3d = Vec3D.create(d0, d1, d2);
-
-            float f3 = MathHelper.cos(-f2 * 0.017453292F - 3.1415927F);
-            float f4 = MathHelper.sin(-f2 * 0.017453292F - 3.1415927F);
-            float f5 = -MathHelper.cos(-f1 * 0.017453292F);
-            float f6 = MathHelper.sin(-f1 * 0.017453292F);
-            float f7 = f4 * f5;
-            float f8 = f3 * f5;
-            double d3 = 5.0D;
-            Vec3D vec3d1 = vec3d.add((double) f7 * d3, (double) f6 * d3, (double) f8 * d3);
-            MovingObjectPosition movingobjectposition = this.player.world.rayTrace(vec3d, vec3d1, true);
-
-            if (movingobjectposition == null || movingobjectposition.type != EnumMovingObjectType.TILE) {
-                CraftEventFactory.callPlayerInteractEvent(this.player, Action.LEFT_CLICK_AIR, this.player.inventory.getItemInHand());
-            }
-
-            // Arm swing animation
-            PlayerAnimationEvent event = new PlayerAnimationEvent(this.getPlayer());
-            this.server.getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) return;
-            // CraftBukkit end
-
-            this.player.w();
         }
+
+        playerActionPacketHandler.handleArmAnimationPacket(this.bukkitServer, this.player, packet18armanimation);
     }
 
     public void a(Packet19EntityAction packet19entityaction) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet19entityaction);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet19entityaction)) {
             return;
-
-        // CraftBukkit start
-        if (this.player.dead) return;
-
-        if (packet19entityaction.animation == 1 || packet19entityaction.animation == 2) {
-            PlayerToggleSneakEvent event = new PlayerToggleSneakEvent(this.getPlayer(), packet19entityaction.animation == 1);
-            this.server.getPluginManager().callEvent(event);
-
-            if (event.isCancelled()) {
-                return;
-            }
         }
-        // CraftBukkit end
 
-        if (packet19entityaction.animation == 1) {
-            this.player.setSneak(true);
-        } else if (packet19entityaction.animation == 2) {
-            this.player.setSneak(false);
-        } else if (packet19entityaction.animation == 3) {
-            this.player.a(false, true, true);
-            this.checkMovement = false;
+        this.pendingEntityActionPacket = packet19entityaction;
+        try {
+            entityActionPacketExecutionSystem.execute(
+                    this.entityActionResultResolver,
+                    entityActionResultExecutionSystem,
+                    this.entityActionResultActions
+            );
+        } finally {
+            this.pendingEntityActionPacket = null;
         }
     }
 
     public void a(Packet0KeepAlive packet0KeepAlive) {
-        this.receivedKeepAlive = true;
+        this.sessionMetadata.setReceivedKeepAlive(true);
     }
 
     public void a(Packet255KickDisconnect packet255kickdisconnect) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet255kickdisconnect);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet255kickdisconnect)) {
             return;
+        }
 
-        this.networkManager.a("disconnect.quitting", new Object[0]);
+        clientDisconnectPacketHandler.handleClientDisconnect(this.networkManager);
     }
 
     public int b() {
@@ -1016,194 +921,106 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet7UseEntity packet7useentity) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet7useentity);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet7useentity)) {
             return;
-
-        if (this.player.dead) return; // CraftBukkit
-
-        WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
-        Entity entity = worldserver.getEntity(packet7useentity.target);
-        ItemStack itemInHand = this.player.inventory.getItemInHand();
-
-        if (entity != null && this.player.e(entity) && this.player.g(entity) < 36.0D) {
-            if (packet7useentity.c == 0) {
-                Player player = (Player) this.getPlayer();
-                org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
-                // CraftBukkit start
-                //Project Poseidon Start - Fixes a Minecart dupe glitch
-                if (player.isInsideVehicle() && bukkitEntity instanceof StorageMinecart) {
-                    return;
-                }
-                //Project Poseidon End
-                PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, bukkitEntity);
-                this.server.getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
-                    return;
-                }
-                // CraftBukkit end
-                this.player.c(entity);
-                // CraftBukkit start - update the client if the item is an infinite one
-                if (itemInHand != null && itemInHand.count <= -1) {
-                    this.player.updateInventory(this.player.activeContainer);
-                }
-                // CraftBukkit end
-            } else if (packet7useentity.c == 1) {
-                this.player.d(entity);
-                // CraftBukkit start - update the client if the item is an infinite one
-                if (itemInHand != null && itemInHand.count <= -1) {
-                    this.player.updateInventory(this.player.activeContainer);
-                }
-                // CraftBukkit end
-            }
         }
+
+        entityInteractionSystem.handleUseEntityPacket(this.minecraftServer, this.bukkitServer, this.player, packet7useentity);
     }
 
     public void a(Packet9Respawn packet9respawn) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet9respawn);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet9respawn)) {
             return;
-
-        if (this.player.health <= 0) {
-            this.player = this.minecraftServer.serverConfigurationManager.moveToWorld(this.player, 0);
-
-            this.getPlayer().setHandle(this.player); // CraftBukkit
         }
+
+        respawnPacketExecutionSystem.execute(this.respawnResultResolver, respawnResultExecutionSystem, this.respawnActions);
     }
 
     public void a(Packet101CloseWindow packet101closewindow) {
-        if (this.player.dead) return; // CraftBukkit
-
-        this.player.A();
+        windowTransactionBehaviour.handleCloseWindow(this.player);
     }
 
     public void a(Packet102WindowClick packet102windowclick) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet102windowclick);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet102windowclick)) {
             return;
-
-        if (this.player.dead) return; // CraftBukkit
-
-        if (this.player.activeContainer.windowId == packet102windowclick.a && this.player.activeContainer.c(this.player)) {
-            ItemStack itemstack = this.player.activeContainer.a(packet102windowclick.b, packet102windowclick.c, packet102windowclick.f, this.player);
-
-            if (ItemStack.equals(packet102windowclick.e, itemstack)) {
-                this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.a, packet102windowclick.d, true));
-                this.player.h = true;
-                this.player.activeContainer.a();
-                this.player.z();
-                this.player.h = false;
-            } else {
-                this.n.put(Integer.valueOf(this.player.activeContainer.windowId), Short.valueOf(packet102windowclick.d));
-                this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.a, packet102windowclick.d, false));
-                this.player.activeContainer.a(this.player, false);
-                ArrayList arraylist = new ArrayList();
-
-                for (int i = 0; i < this.player.activeContainer.e.size(); ++i) {
-                    arraylist.add(((Slot) this.player.activeContainer.e.get(i)).getItem());
-                }
-
-                this.player.a(this.player.activeContainer, arraylist);
-            }
         }
+
+        windowTransactionBehaviour.handleWindowClick(this.player, packet102windowclick, this.n);
     }
 
     public void a(Packet106Transaction packet106transaction) {
-        // poseidon
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet106transaction);
-        server.getPluginManager().callEvent(event);
-        if (event.isCancelled())
+        if (!allowIncomingPacket(packet106transaction)) {
             return;
-
-        if (this.player.dead) return; // CraftBukkit
-
-        Short oshort = (Short) this.n.get(Integer.valueOf(this.player.activeContainer.windowId));
-
-        if (oshort != null && packet106transaction.b == oshort.shortValue() && this.player.activeContainer.windowId == packet106transaction.a && !this.player.activeContainer.c(this.player)) {
-            this.player.activeContainer.a(this.player, true);
         }
+
+        windowTransactionBehaviour.handleTransactionConfirmation(this.player, packet106transaction, this.n);
     }
 
     public void a(Packet130UpdateSign packet130updatesign) {
-        // poseidon
-        PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet130updatesign);
-        server.getPluginManager().callEvent(pevent);
-        if (pevent.isCancelled())
+        if (!allowIncomingPacket(packet130updatesign)) {
             return;
-
-        if (this.player.dead) return; // CraftBukkit
-
-        WorldServer worldserver = this.minecraftServer.getWorldServer(this.player.dimension);
-
-        if (worldserver.isLoaded(packet130updatesign.x, packet130updatesign.y, packet130updatesign.z)) {
-            TileEntity tileentity = worldserver.getTileEntity(packet130updatesign.x, packet130updatesign.y, packet130updatesign.z);
-
-            if (tileentity instanceof TileEntitySign) {
-                TileEntitySign tileentitysign = (TileEntitySign) tileentity;
-
-                if (!tileentitysign.a()) {
-                    this.minecraftServer.c("Player " + this.player.name + " just tried to change non-editable sign");
-                    // CraftBukkit
-                    this.sendPacket(new Packet130UpdateSign(packet130updatesign.x, packet130updatesign.y, packet130updatesign.z, tileentitysign.lines));
-                    return;
-                }
-            }
-
-            int i;
-            int j;
-
-            for (j = 0; j < 4; ++j) {
-                boolean flag = true;
-
-                if (packet130updatesign.lines[j].length() > 15) {
-                    flag = false;
-                } else {
-                    for (i = 0; i < packet130updatesign.lines[j].length(); ++i) {
-                        if (FontAllowedCharacters.allowedCharacters.indexOf(packet130updatesign.lines[j].charAt(i)) < 0) {
-                            flag = false;
-                        }
-                    }
-                }
-
-                if (!flag) {
-                    packet130updatesign.lines[j] = "!?";
-                }
-            }
-
-            if (tileentity instanceof TileEntitySign) {
-                j = packet130updatesign.x;
-                int k = packet130updatesign.y;
-
-                i = packet130updatesign.z;
-                TileEntitySign tileentitysign1 = (TileEntitySign) tileentity;
-
-                // CraftBukkit start
-                Player player = this.server.getPlayer(this.player);
-                SignChangeEvent event = new SignChangeEvent((CraftBlock) player.getWorld().getBlockAt(j, k, i), this.server.getPlayer(this.player), packet130updatesign.lines);
-                this.server.getPluginManager().callEvent(event);
-
-                if (!event.isCancelled()) {
-                    for (int l = 0; l < 4; ++l) {
-                        tileentitysign1.lines[l] = event.getLine(l);
-                    }
-                    tileentitysign1.a(false);
-                }
-                // CraftBukkit end
-
-                tileentitysign1.update();
-                worldserver.notify(j, k, i);
-            }
         }
+
+        signUpdatePacketExecutionSystem.execute(this.player.dead, packet130updatesign, this.signUpdateActions);
+    }
+
+    private boolean allowIncomingPacket(Packet packet) {
+        if (!this.firePacketEvents) {
+            return true;
+        }
+        return incomingPacketEventSystem.allowIncomingPacket(this.bukkitServer, this.player, packet);
     }
 
     public boolean c() {
         return true;
+    }
+
+    private Packet16BlockItemSwitch requirePendingHotbarSwitchPacket() {
+        if (this.pendingHotbarSwitchPacket == null) {
+            throw new IllegalStateException("Missing pending hotbar switch packet");
+        }
+        return this.pendingHotbarSwitchPacket;
+    }
+
+    private Packet19EntityAction requirePendingEntityActionPacket() {
+        if (this.pendingEntityActionPacket == null) {
+            throw new IllegalStateException("Missing pending entity action packet");
+        }
+        return this.pendingEntityActionPacket;
+    }
+
+    private Packet10Flying requirePendingMoveEventPacket() {
+        if (this.pendingMoveEventPacket == null) {
+            throw new IllegalStateException("Missing pending move-event packet");
+        }
+        return this.pendingMoveEventPacket;
+    }
+
+    private Player requirePendingMoveEventPlayer() {
+        if (this.pendingMoveEventPlayer == null) {
+            throw new IllegalStateException("Missing pending move-event player");
+        }
+        return this.pendingMoveEventPlayer;
+    }
+
+    private Packet10Flying requirePendingMovementPacket() {
+        if (this.pendingMovementPacket == null) {
+            throw new IllegalStateException("Missing pending movement packet");
+        }
+        return this.pendingMovementPacket;
+    }
+
+    private WorldServer requirePendingMovementWorld() {
+        if (this.pendingMovementWorld == null) {
+            throw new IllegalStateException("Missing pending movement world");
+        }
+        return this.pendingMovementWorld;
+    }
+
+    private Packet requirePendingSendPacket() {
+        if (this.pendingSendPacket == null) {
+            throw new IllegalStateException("Missing pending send packet");
+        }
+        return this.pendingSendPacket;
     }
 }

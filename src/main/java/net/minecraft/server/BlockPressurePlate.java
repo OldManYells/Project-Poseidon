@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.PressurePlateStateBehaviour;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
@@ -13,6 +14,7 @@ import java.util.Random;
 public class BlockPressurePlate extends Block {
 
     private EnumMobType a;
+    private final PressurePlateStateBehaviour pressurePlateStateService = PressurePlateStateBehaviour.getInstance();
 
     protected BlockPressurePlate(int i, int j, EnumMobType enummobtype, Material material) {
         super(i, j, material);
@@ -40,19 +42,13 @@ public class BlockPressurePlate extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return world.e(i, j - 1, k);
+        return pressurePlateStateService.hasSupportBelow(this.supportQuery(world), i, j, k);
     }
 
     public void c(World world, int i, int j, int k) {}
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        boolean flag = false;
-
-        if (!world.e(i, j - 1, k)) {
-            flag = true;
-        }
-
-        if (flag) {
+        if (pressurePlateStateService.shouldDropWithoutSupport(this.supportQuery(world), i, j, k)) {
             this.g(world, i, j, k, world.getData(i, j, k));
             world.setTypeId(i, j, k, 0);
         }
@@ -60,7 +56,7 @@ public class BlockPressurePlate extends Block {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (!world.isStatic) {
-            if (world.getData(i, j, k) != 0) {
+            if (pressurePlateStateService.shouldReevaluateFromScheduledTick(world.getData(i, j, k))) {
                 this.g(world, i, j, k);
             }
         }
@@ -68,33 +64,20 @@ public class BlockPressurePlate extends Block {
 
     public void a(World world, int i, int j, int k, Entity entity) {
         if (!world.isStatic) {
-            if (world.getData(i, j, k) != 1) {
+            if (pressurePlateStateService.shouldReevaluateFromEntityTouch(world.getData(i, j, k))) {
                 this.g(world, i, j, k);
             }
         }
     }
 
     private void g(World world, int i, int j, int k) {
-        boolean flag = world.getData(i, j, k) == 1;
-        boolean flag1 = false;
-        float f = 0.125F;
-        List list = null;
-
-        if (this.a == EnumMobType.EVERYTHING) {
-            list = world.b((Entity) null, AxisAlignedBB.b((double) ((float) i + f), (double) j, (double) ((float) k + f), (double) ((float) (i + 1) - f), (double) j + 0.25D, (double) ((float) (k + 1) - f)));
-        }
-
-        if (this.a == EnumMobType.MOBS) {
-            list = world.a(EntityLiving.class, AxisAlignedBB.b((double) ((float) i + f), (double) j, (double) ((float) k + f), (double) ((float) (i + 1) - f), (double) j + 0.25D, (double) ((float) (k + 1) - f)));
-        }
-
-        if (this.a == EnumMobType.PLAYERS) {
-            list = world.a(EntityHuman.class, AxisAlignedBB.b((double) ((float) i + f), (double) j, (double) ((float) k + f), (double) ((float) (i + 1) - f), (double) j + 0.25D, (double) ((float) (k + 1) - f)));
-        }
-
-        if (list.size() > 0) {
-            flag1 = true;
-        }
+        boolean flag = pressurePlateStateService.isPowered(world.getData(i, j, k));
+        List list = pressurePlateStateService.collectEntities(
+                world,
+                this.a,
+                pressurePlateStateService.createDetectionBox(i, j, k, 0.125F)
+        );
+        boolean flag1 = pressurePlateStateService.hasTriggeringEntities(list);
 
         // CraftBukkit start - Interact Pressure Plate
         org.bukkit.World bworld = world.getWorld();
@@ -129,7 +112,7 @@ public class BlockPressurePlate extends Block {
         // CraftBukkit end
 
         if (flag1 && !flag) {
-            world.setData(i, j, k, 1);
+            world.setData(i, j, k, pressurePlateStateService.toLegacyData(true));
             world.applyPhysics(i, j, k, this.id);
             world.applyPhysics(i, j - 1, k, this.id);
             world.b(i, j, k, i, j, k);
@@ -137,7 +120,7 @@ public class BlockPressurePlate extends Block {
         }
 
         if (!flag1 && flag) {
-            world.setData(i, j, k, 0);
+            world.setData(i, j, k, pressurePlateStateService.toLegacyData(false));
             world.applyPhysics(i, j, k, this.id);
             world.applyPhysics(i, j - 1, k, this.id);
             world.b(i, j, k, i, j, k);
@@ -161,22 +144,24 @@ public class BlockPressurePlate extends Block {
     }
 
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
-        boolean flag = iblockaccess.getData(i, j, k) == 1;
-        float f = 0.0625F;
-
-        if (flag) {
-            this.a(f, 0.0F, f, 1.0F - f, 0.03125F, 1.0F - f);
-        } else {
-            this.a(f, 0.0F, f, 1.0F - f, 0.0625F, 1.0F - f);
-        }
+        PressurePlateStateBehaviour.Bounds bounds =
+                pressurePlateStateService.resolveVisualBounds(iblockaccess.getData(i, j, k));
+        this.a(
+                bounds.getMinX(),
+                bounds.getMinY(),
+                bounds.getMinZ(),
+                bounds.getMaxX(),
+                bounds.getMaxY(),
+                bounds.getMaxZ()
+        );
     }
 
     public boolean a(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        return iblockaccess.getData(i, j, k) > 0;
+        return pressurePlateStateService.isPowered(iblockaccess.getData(i, j, k));
     }
 
     public boolean d(World world, int i, int j, int k, int l) {
-        return world.getData(i, j, k) == 0 ? false : l == 1;
+        return pressurePlateStateService.isPoweringSide(world.getData(i, j, k), l);
     }
 
     public boolean isPowerSource() {
@@ -185,5 +170,13 @@ public class BlockPressurePlate extends Block {
 
     public int e() {
         return 1;
+    }
+
+    private PressurePlateStateBehaviour.SupportQuery supportQuery(final World world) {
+        return new PressurePlateStateBehaviour.SupportQuery() {
+            public boolean isBlockSolid(int x, int y, int z) {
+                return world.e(x, y, z);
+            }
+        };
     }
 }

@@ -1,6 +1,17 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.projectposeidon.ConnectionType;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerEyeHeightPolicy;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerIdentityBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerOnlineStatusBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerStatisticDispatchBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerChunkChangePacketBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerLocalEffectPacketBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerMessagingBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerMapPacketBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerModerationListBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerOperatorStateBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PlayerVisibilityBridgeBehaviour;
 import net.minecraft.server.*;
 import org.bukkit.Achievement;
 import org.bukkit.Material;
@@ -15,12 +26,34 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.map.MapView;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class CraftPlayer extends CraftHumanEntity implements Player {
+    private static final PlayerOnlineStatusBridgeBehaviour PLAYER_ONLINE_STATUS_BRIDGE_BEHAVIOUR =
+            PlayerOnlineStatusBridgeBehaviour.getInstance();
+    private static final PlayerEyeHeightPolicy PLAYER_EYE_HEIGHT_POLICY =
+            PlayerEyeHeightPolicy.getInstance();
+    private static final PlayerIdentityBridgeBehaviour PLAYER_IDENTITY_BRIDGE_BEHAVIOUR =
+            PlayerIdentityBridgeBehaviour.getInstance();
+    private static final PlayerStatisticDispatchBehaviour PLAYER_STATISTIC_DISPATCH_BEHAVIOUR =
+            PlayerStatisticDispatchBehaviour.getInstance();
+    private static final PlayerChunkChangePacketBehaviour PLAYER_CHUNK_CHANGE_PACKET_BEHAVIOUR =
+            PlayerChunkChangePacketBehaviour.getInstance();
+    private static final PlayerLocalEffectPacketBehaviour PLAYER_LOCAL_EFFECT_PACKET_BEHAVIOUR =
+            PlayerLocalEffectPacketBehaviour.getInstance();
+    private static final PlayerMessagingBridgeBehaviour PLAYER_MESSAGING_BRIDGE_BEHAVIOUR =
+            PlayerMessagingBridgeBehaviour.getInstance();
+    private static final PlayerModerationListBehaviour PLAYER_MODERATION_LIST_BEHAVIOUR =
+            PlayerModerationListBehaviour.getInstance();
+    private static final PlayerOperatorStateBehaviour PLAYER_OPERATOR_STATE_BEHAVIOUR =
+            PlayerOperatorStateBehaviour.getInstance();
+    private static final PlayerVisibilityBridgeBehaviour PLAYER_VISIBILITY_BRIDGE_BEHAVIOUR =
+            PlayerVisibilityBridgeBehaviour.getInstance();
+    private static final PlayerMapPacketBehaviour PLAYER_MAP_PACKET_BEHAVIOUR =
+            PlayerMapPacketBehaviour.getInstance();
     private Set<UUID> hiddenPlayers = new HashSet<UUID>();
 
     public CraftPlayer(CraftServer server, EntityPlayer entity) {
@@ -29,17 +62,15 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public boolean isOp() {
-        return server.getHandle().isOp(getName());
+        return PLAYER_OPERATOR_STATE_BEHAVIOUR.isOperator(server.getHandle(), getName());
     }
 
     @Override
     public void setOp(boolean value) {
-        if (value == isOp()) return;
-
-        if (value) {
-            server.getHandle().e(getName());
-        } else {
-            server.getHandle().f(getName());
+        boolean changed = PLAYER_OPERATOR_STATE_BEHAVIOUR.updateOperatorState(
+                server.getHandle(), getName(), value, isOp());
+        if (!changed) {
+            return;
         }
 
         perm.recalculatePermissions();
@@ -50,22 +81,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean isOnline() {
-        for (Object obj : server.getHandle().players) {
-            EntityPlayer player = (EntityPlayer) obj;
-            if (player.name.equalsIgnoreCase(getName())) {
-                return true;
-            }
-        }
-        return false;
+        return PLAYER_ONLINE_STATUS_BRIDGE_BEHAVIOUR.isOnline(server.getHandle().players, getName());
     }
 
     public InetSocketAddress getAddress() {
-        SocketAddress addr = getHandle().netServerHandler.networkManager.getSocketAddress();
-        if (addr instanceof InetSocketAddress) {
-            return (InetSocketAddress) addr;
-        } else {
-            return null;
-        }
+        return PLAYER_ONLINE_STATUS_BRIDGE_BEHAVIOUR.resolveAddress(getHandle().netServerHandler);
     }
 
     @Override
@@ -78,15 +98,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public double getEyeHeight(boolean ignoreSneaking) {
-        if (ignoreSneaking) {
-            return 1.62D;
-        } else {
-            if (isSneaking()) {
-                return 1.42D;
-            } else {
-                return 1.62D;
-            }
-        }
+        return PLAYER_EYE_HEIGHT_POLICY.resolveEyeHeight(ignoreSneaking, isSneaking());
     }
 
     public void setHandle(final EntityPlayer entity) {
@@ -95,12 +107,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendRawMessage(String message) {
-        try {
-            getHandle().netServerHandler.sendPacket(new Packet3Chat(message));
-        } catch (NullPointerException exception) {
-            System.out.println("[Poseidon] Exception thrown when attempting to send packet to " + getName() + ". Does this player exist, or are they a phantom?????");
-            exception.printStackTrace();
-        }
+        PLAYER_MESSAGING_BRIDGE_BEHAVIOUR.sendRawMessage(getHandle().netServerHandler, message, getName());
     }
 
     public void sendMessage(String message) {
@@ -122,34 +129,21 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final CraftPlayer other = (CraftPlayer) obj;
-        if ((this.getName() == null) ? (other.getName() != null) : !this.getName().equals(other.getName())) {
-            return false;
-        }
-        return true;
+        return PLAYER_IDENTITY_BRIDGE_BEHAVIOUR.equalsByName(this, obj);
     }
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 97 * hash + (this.getName() != null ? this.getName().hashCode() : 0);
-        return hash;
+        return PLAYER_IDENTITY_BRIDGE_BEHAVIOUR.hashByName(getName());
     }
 
     public void kickPlayer(String message) {
-        if (this.isOnline() && !getHandle().netServerHandler.disconnected) // Poseidon: Kick/Disconnect spam fix
-            getHandle().netServerHandler.disconnect(message == null ? "" : message);
+        PLAYER_MESSAGING_BRIDGE_BEHAVIOUR.kickIfOnline(isOnline(), getHandle().netServerHandler, message);
     }
 
     public void setCompassTarget(Location loc) {
         // Do not directly assign here, from the packethandler we'll assign it.
-        getHandle().netServerHandler.sendPacket(new Packet6SpawnPosition(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        getHandle().netServerHandler.sendPacket(PLAYER_MAP_PACKET_BEHAVIOUR.createCompassPacket(loc));
     }
 
     //Project Poseidon Start
@@ -176,17 +170,18 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void playNote(Location loc, byte instrument, byte note) {
-        getHandle().netServerHandler.sendPacket(new Packet54PlayNoteBlock(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), instrument, note));
+        getHandle().netServerHandler.sendPacket(
+                PLAYER_LOCAL_EFFECT_PACKET_BEHAVIOUR.createPlayNotePacket(loc, instrument, note));
     }
 
     public void playNote(Location loc, Instrument instrument, Note note) {
-        getHandle().netServerHandler.sendPacket(new Packet54PlayNoteBlock(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), instrument.getType(), note.getId()));
+        getHandle().netServerHandler.sendPacket(
+                PLAYER_LOCAL_EFFECT_PACKET_BEHAVIOUR.createPlayNotePacket(loc, instrument.getType(), note.getId()));
     }
 
     public void playEffect(Location loc, Effect effect, int data) {
-        int packetData = effect.getId();
-        Packet61 packet = new Packet61(packetData, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), data);
-        getHandle().netServerHandler.sendPacket(packet);
+        getHandle().netServerHandler.sendPacket(
+                PLAYER_LOCAL_EFFECT_PACKET_BEHAVIOUR.createEffectPacket(loc, effect, data));
     }
 
     public void sendBlockChange(Location loc, Material material, byte data) {
@@ -194,34 +189,15 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendBlockChange(Location loc, int material, byte data) {
-        Packet53BlockChange packet = new Packet53BlockChange(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), ((CraftWorld) loc.getWorld()).getHandle());
-
-        packet.material = material;
-        packet.data = data;
+        Packet53BlockChange packet = PLAYER_LOCAL_EFFECT_PACKET_BEHAVIOUR.createBlockChangePacket(loc, material, data);
         getHandle().netServerHandler.sendPacket(packet);
     }
 
     public boolean sendChunkChange(Location loc, int sx, int sy, int sz, byte[] data) {
-        int x = loc.getBlockX();
-        int y = loc.getBlockY();
-        int z = loc.getBlockZ();
-
-        int cx = x >> 4;
-        int cz = z >> 4;
-
-        if (sx <= 0 || sy <= 0 || sz <= 0) {
+        Packet51MapChunk packet = PLAYER_CHUNK_CHANGE_PACKET_BEHAVIOUR.createChunkChangePacket(loc, sx, sy, sz, data);
+        if (packet == null) {
             return false;
         }
-
-        if ((x + sx - 1) >> 4 != cx || (z + sz - 1) >> 4 != cz || y < 0 || y + sy > 128) {
-            return false;
-        }
-
-        if (data.length != (sx * sy * sz * 5) / 2) {
-            return false;
-        }
-
-        Packet51MapChunk packet = new Packet51MapChunk(x, y, z, sx, sy, sz, data);
 
         getHandle().netServerHandler.sendPacket(packet);
 
@@ -229,14 +205,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendMap(MapView map) {
-        RenderData data = ((CraftMapView) map).render(this);
-        for (int x = 0; x < 128; ++x) {
-            byte[] bytes = new byte[131];
-            bytes[1] = (byte) x;
-            for (int y = 0; y < 128; ++y) {
-                bytes[y + 3] = data.buffer[y * 128 + x];
-            }
-            Packet131 packet = new Packet131((short) Material.MAP.getId(), map.getId(), bytes);
+        RenderData renderData = ((CraftMapView) map).render(this);
+        List<Packet131> packets = PLAYER_MAP_PACKET_BEHAVIOUR.createMapPackets(map.getId(), renderData);
+        for (Packet131 packet : packets) {
             getHandle().netServerHandler.sendPacket(packet);
         }
     }
@@ -319,29 +290,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void incrementStatistic(Statistic statistic, Material material, int amount) {
-        if (!statistic.isSubstatistic()) {
-            throw new IllegalArgumentException("Given statistic is not a substatistic");
-        }
-        if (statistic.isBlock() != material.isBlock()) {
-            throw new IllegalArgumentException("Given material is not valid for this substatistic");
-        }
-
-        int mat = material.getId();
-
-        if (!material.isBlock()) {
-            mat -= 255;
-        }
-
-        sendStatistic(statistic.getId() + mat, amount);
+        PLAYER_STATISTIC_DISPATCH_BEHAVIOUR.validateSubStatisticRequest(statistic, material);
+        int statisticId = PLAYER_STATISTIC_DISPATCH_BEHAVIOUR.resolveStatisticId(statistic, material);
+        sendStatistic(statisticId, amount);
     }
 
     private void sendStatistic(int id, int amount) {
-        while (amount > Byte.MAX_VALUE) {
-            sendStatistic(id, Byte.MAX_VALUE);
-            amount -= Byte.MAX_VALUE;
-        }
-
-        getHandle().netServerHandler.sendPacket(new Packet200Statistic(id, amount));
+        PLAYER_STATISTIC_DISPATCH_BEHAVIOUR.sendStatistic(getHandle().netServerHandler, id, amount);
     }
 
     public void setPlayerTime(long time, boolean relative) {
@@ -365,6 +320,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return getHandle().netServerHandler.getConnectionType();
     }
 
+    @Override
+    public com.legacyminecraft.poseidon.api.network.ConnectionType getCanonicalConnectionType() {
+        return getHandle().netServerHandler.getCanonicalConnectionType();
+    }
+
     public boolean hasReceivedPacket0() {
         return getHandle().netServerHandler.isReceivedKeepAlive();
     }
@@ -378,63 +338,34 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean isBanned() {
-        return server.getHandle().banByName.contains(getName().toLowerCase());
+        return PLAYER_MODERATION_LIST_BEHAVIOUR.isBanned(server.getHandle(), getName());
     }
 
     public void setBanned(boolean value) {
-        if (value) {
-            server.getHandle().a(getName().toLowerCase());
-        } else {
-            server.getHandle().b(getName().toLowerCase());
-        }
+        PLAYER_MODERATION_LIST_BEHAVIOUR.setBanned(server.getHandle(), getName(), value);
     }
 
     public boolean isWhitelisted() {
-        return server.getHandle().e().contains(getName().toLowerCase());
+        return PLAYER_MODERATION_LIST_BEHAVIOUR.isWhitelisted(server.getHandle(), getName());
     }
 
     public void setWhitelisted(boolean value) {
-        if (value) {
-            server.getHandle().k(getName().toLowerCase());
-        } else {
-            server.getHandle().l(getName().toLowerCase());
-        }
+        PLAYER_MODERATION_LIST_BEHAVIOUR.setWhitelisted(server.getHandle(), getName(), value);
     }
 
     public void hidePlayer(Player player) {
-
-        hiddenPlayers.add(player.getUniqueId());
-
-        //remove this player from the hidden player's EntityTrackerEntry
-        EntityTracker tracker = ((WorldServer) entity.world).tracker;
-        EntityPlayer other = ((CraftPlayer) player).getHandle();
-        EntityTrackerEntry entry = (EntityTrackerEntry) tracker.b.a(other.id);
-        if (entry != null) {
-            entry.c(getHandle());
-        }
-
+        PLAYER_VISIBILITY_BRIDGE_BEHAVIOUR.hidePlayer(hiddenPlayers, entity, getHandle(), player);
     }
 
     public void showPlayer(Player player) {
-        hiddenPlayers.remove(player.getUniqueId());
-
-        EntityTracker tracker = ((WorldServer) entity.world).tracker;
-        EntityPlayer other = ((CraftPlayer) player).getHandle();
-        EntityTrackerEntry entry = (EntityTrackerEntry) tracker.b.a(other.id);
-        if (entry != null && !entry.trackedPlayers.contains(getHandle())) {
-            entry.b(getHandle());
-        }
-
+        PLAYER_VISIBILITY_BRIDGE_BEHAVIOUR.showPlayer(hiddenPlayers, entity, getHandle(), player);
     }
 
     public boolean canSee(Player player) {
-        return !hiddenPlayers.contains(player.getUniqueId());
+        return PLAYER_VISIBILITY_BRIDGE_BEHAVIOUR.canSee(hiddenPlayers, player);
     }
 
     public void sendPacket(final Player player, final Packet packet) {
-        if(player.isOnline()) {
-            NetServerHandler nsh = getHandle().netServerHandler;
-            nsh.sendPacket(packet);
-        }
+        PLAYER_MESSAGING_BRIDGE_BEHAVIOUR.sendPacketIfOnline(player, getHandle().netServerHandler, packet);
     }
 }

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.item.ItemPlacementMathBehaviour;
+import com.legacyminecraft.poseidon.item.RedstoneItemPlacementBehaviour;
 // CraftBukkit start
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
@@ -7,6 +9,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 // CraftBukkit end
 
 public class ItemRedstone extends Item {
+    private static final ItemPlacementMathBehaviour ITEM_PLACEMENT_MATH_BEHAVIOUR = ItemPlacementMathBehaviour.getInstance();
+    private static final RedstoneItemPlacementBehaviour REDSTONE_ITEM_PLACEMENT_BEHAVIOUR = RedstoneItemPlacementBehaviour.getInstance();
 
     public ItemRedstone(int i) {
         super(i);
@@ -14,32 +18,13 @@ public class ItemRedstone extends Item {
 
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
         int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
+        int clickedTypeId = world.getTypeId(i, j, k);
+        ItemPlacementMathBehaviour.Position target = REDSTONE_ITEM_PLACEMENT_BEHAVIOUR.resolveTarget(i, j, k, l, clickedTypeId, Block.SNOW.id, ITEM_PLACEMENT_MATH_BEHAVIOUR);
+        i = target.x;
+        j = target.y;
+        k = target.z;
 
-        if (world.getTypeId(i, j, k) != Block.SNOW.id) {
-            if (l == 0) {
-                --j;
-            }
-
-            if (l == 1) {
-                ++j;
-            }
-
-            if (l == 2) {
-                --k;
-            }
-
-            if (l == 3) {
-                ++k;
-            }
-
-            if (l == 4) {
-                --i;
-            }
-
-            if (l == 5) {
-                ++i;
-            }
-
+        if (REDSTONE_ITEM_PLACEMENT_BEHAVIOUR.requiresEmptyTarget(clickedTypeId, Block.SNOW.id, ITEM_PLACEMENT_MATH_BEHAVIOUR)) {
             if (!world.isEmpty(i, j, k)) {
                 return false;
             }

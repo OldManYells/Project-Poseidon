@@ -1,7 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.craftbukkit.TrigMath;
+import com.legacyminecraft.poseidon.runtime.math.TrigAtanBehaviour;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -20,6 +20,7 @@ import java.util.List;
 // CraftBukkit end
 
 public abstract class EntityHuman extends EntityLiving {
+    private static final TrigAtanBehaviour TRIG_ATAN_BEHAVIOUR = TrigAtanBehaviour.getInstance();
 
     public InventoryPlayer inventory = new InventoryPlayer(this);
     public Container defaultContainer;
@@ -189,7 +190,7 @@ public abstract class EntityHuman extends EntityLiving {
         super.v();
         float f = MathHelper.a(this.motX * this.motX + this.motZ * this.motZ);
         // CraftBukkit - Math -> TrigMath
-        float f1 = (float) TrigMath.atan(-this.motY * 0.20000000298023224D) * 15.0F;
+        float f1 = (float) TRIG_ATAN_BEHAVIOUR.atan(-this.motY * 0.20000000298023224D) * 15.0F;
 
         if (f > 0.1F) {
             f = 0.1F;

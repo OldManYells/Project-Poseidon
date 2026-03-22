@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 public class Packet4UpdateTime extends Packet {
 
     public long a;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet4UpdateTime() {}
 
@@ -15,11 +18,11 @@ public class Packet4UpdateTime extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readLong();
+        this.a = packetDataCodec.readPacket4(datainputstream).getWorldTime();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeLong(this.a);
+        packetDataCodec.writePacket4(new PacketDataCodec.Packet4Data(this.a), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -27,6 +30,6 @@ public class Packet4UpdateTime extends Packet {
     }
 
     public int a() {
-        return 8;
+        return packetDataCodec.packet4Length();
     }
 }

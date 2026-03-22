@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.DispenserSlotSelectionBehaviour;
+
 import java.util.Random;
 
 public class TileEntityDispenser extends TileEntity implements IInventory {
+    private static final DispenserSlotSelectionBehaviour DISPENSER_SLOT_SELECTION_BEHAVIOUR = DispenserSlotSelectionBehaviour.getInstance();
 
     private ItemStack[] items = new ItemStack[9];
     private Random b = new Random();
@@ -48,18 +51,7 @@ public class TileEntityDispenser extends TileEntity implements IInventory {
 
     // CraftBukkit - change signature
     public int findDispenseSlot() {
-        int i = -1;
-        int j = 1;
-
-        for (int k = 0; k < this.items.length; ++k) {
-            if (this.items[k] != null && this.b.nextInt(j++) == 0) {
-                if (this.items[k].count == 0) continue; // CraftBukkit
-                i = k;
-            }
-        }
-
-        // CraftBukkit start
-        return i;
+        return DISPENSER_SLOT_SELECTION_BEHAVIOUR.findDispenseSlot(this.items, this.b);
     }
 
     public ItemStack b() {

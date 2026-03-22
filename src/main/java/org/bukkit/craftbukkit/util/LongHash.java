@@ -5,21 +5,25 @@
 
 package org.bukkit.craftbukkit.util;
 
+import com.legacyminecraft.poseidon.compat.bukkit.LongHashKeyBehaviour;
+
 /**
  *
  * @author Nathan
  */
 public abstract class LongHash {
+    private static final LongHashKeyBehaviour LONG_HASH_KEY_BEHAVIOUR = LongHashKeyBehaviour.getInstance();
+
     static long toLong(int msw, int lsw) {
-        return ((long) msw << 32) + lsw - Integer.MIN_VALUE;
+        return LONG_HASH_KEY_BEHAVIOUR.toLong(msw, lsw);
     }
 
     static int msw(long l) {
-        return (int) (l >> 32);
+        return LONG_HASH_KEY_BEHAVIOUR.mostSignificantWord(l);
     }
 
     static int lsw(long l) {
-        return (int) (l & 0xFFFFFFFF) + Integer.MIN_VALUE;
+        return LONG_HASH_KEY_BEHAVIOUR.leastSignificantWord(l);
     }
 
     public boolean containsKey(int msw, int lsw) {

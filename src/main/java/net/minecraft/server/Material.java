@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.MaterialPropertyBehaviour;
+
 public class Material {
+    private static final MaterialPropertyBehaviour MATERIAL_PROPERTY_BEHAVIOUR = MaterialPropertyBehaviour.getInstance();
 
     public static final Material AIR = new MaterialTransparent(MaterialMapColor.b);
     public static final Material GRASS = new Material(MaterialMapColor.c);
@@ -42,19 +45,19 @@ public class Material {
     }
 
     public boolean isLiquid() {
-        return false;
+        return MATERIAL_PROPERTY_BEHAVIOUR.isLiquidByDefault();
     }
 
     public boolean isBuildable() {
-        return true;
+        return MATERIAL_PROPERTY_BEHAVIOUR.isBuildableByDefault();
     }
 
     public boolean blocksLight() {
-        return true;
+        return MATERIAL_PROPERTY_BEHAVIOUR.blocksLightByDefault();
     }
 
     public boolean isSolid() {
-        return true;
+        return MATERIAL_PROPERTY_BEHAVIOUR.isSolidByDefault();
     }
 
     private Material m() {
@@ -73,7 +76,7 @@ public class Material {
     }
 
     public boolean isBurnable() {
-        return this.canBurn;
+        return MATERIAL_PROPERTY_BEHAVIOUR.isBurnable(this.canBurn);
     }
 
     public Material f() {
@@ -82,19 +85,19 @@ public class Material {
     }
 
     public boolean isReplacable() {
-        return this.E;
+        return MATERIAL_PROPERTY_BEHAVIOUR.isReplaceable(this.E);
     }
 
     public boolean h() {
-        return this.F ? false : this.isSolid();
+        return MATERIAL_PROPERTY_BEHAVIOUR.blocksMovement(this.F, this.isSolid());
     }
 
     public boolean i() {
-        return this.G;
+        return MATERIAL_PROPERTY_BEHAVIOUR.isOpaqueToLight(this.G);
     }
 
     public int j() {
-        return this.H;
+        return MATERIAL_PROPERTY_BEHAVIOUR.getPushReaction(this.H);
     }
 
     protected Material k() {

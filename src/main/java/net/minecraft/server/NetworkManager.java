@@ -1,11 +1,19 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.event.PlayerReceivePacketEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import com.legacyminecraft.poseidon.network.InboundQueueReadSystem;
+import com.legacyminecraft.poseidon.network.NetworkCloseMonitorStartSystem;
+import com.legacyminecraft.poseidon.network.NetworkDisconnectLifecycleSystem;
+import com.legacyminecraft.poseidon.network.NetworkManagerTickSystem;
+import com.legacyminecraft.poseidon.network.NetworkSocketSystem;
+import com.legacyminecraft.poseidon.network.NetworkTickFinalizationSystem;
+import com.legacyminecraft.poseidon.network.InboundQueueReadExecutionSystem;
+import com.legacyminecraft.poseidon.network.OutboundQueueDrainExecutionSystem;
+import com.legacyminecraft.poseidon.network.OutboundQueueEnqueueExecutionSystem;
+import com.legacyminecraft.poseidon.network.OutboundQueueSystem;
+import com.legacyminecraft.poseidon.network.NetworkExceptionDisconnectSystem;
+import com.legacyminecraft.poseidon.network.NetworkThreadInterruptSystem;
 
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.*;
@@ -45,6 +53,124 @@ public class NetworkManager {
     private final boolean spamDetection;
 
     private final int threshold;
+    private final NetworkManagerTickSystem networkManagerTickSystem = NetworkManagerTickSystem.getInstance();
+    private final InboundQueueReadSystem inboundQueueReadSystem = InboundQueueReadSystem.getInstance();
+    private final InboundQueueReadExecutionSystem inboundQueueReadExecutionSystem = InboundQueueReadExecutionSystem.getInstance();
+    private final OutboundQueueSystem outboundQueueSystem = OutboundQueueSystem.getInstance();
+    private final OutboundQueueEnqueueExecutionSystem outboundQueueEnqueueExecutionSystem =
+            OutboundQueueEnqueueExecutionSystem.getInstance();
+    private final OutboundQueueDrainExecutionSystem outboundQueueDrainExecutionSystem =
+            OutboundQueueDrainExecutionSystem.getInstance();
+    private final NetworkThreadInterruptSystem networkThreadInterruptSystem = NetworkThreadInterruptSystem.getInstance();
+    private final NetworkExceptionDisconnectSystem networkExceptionDisconnectSystem =
+            NetworkExceptionDisconnectSystem.getInstance();
+    private final NetworkDisconnectLifecycleSystem networkDisconnectLifecycleSystem = NetworkDisconnectLifecycleSystem.getInstance();
+    private final NetworkCloseMonitorStartSystem networkCloseMonitorStartSystem = NetworkCloseMonitorStartSystem.getInstance();
+    private final NetworkSocketSystem networkSocketSystem = NetworkSocketSystem.getInstance();
+    private final NetworkTickFinalizationSystem networkTickFinalizationSystem = NetworkTickFinalizationSystem.getInstance();
+    private final NetworkDisconnectLifecycleSystem.DisconnectActions disconnectActions =
+            new NetworkDisconnectLifecycleSystem.DisconnectActions() {
+                @Override
+                public void startMasterThread() {
+                    (new NetworkMasterThread(NetworkManager.this)).start();
+                }
+
+                @Override
+                public void closeResources() {
+                    networkSocketSystem.closeQuietly(NetworkManager.this.input, NetworkManager.this.output, NetworkManager.this.socket);
+                    NetworkManager.this.input = null;
+                    NetworkManager.this.output = null;
+                    NetworkManager.this.socket = null;
+                }
+            };
+    private final NetworkManagerTickSystem.TickActions tickActions = new NetworkManagerTickSystem.TickActions() {
+        @Override
+        public void disconnect(String key) {
+            NetworkManager.this.a(key, new Object[0]);
+        }
+
+        @Override
+        public void kickPlayer(String reason) {
+            NetServerHandler playerHandler = resolvePlayerHandler();
+            if (playerHandler != null) {
+                playerHandler.disconnect(reason);
+            }
+        }
+
+        @Override
+        public void log(String message) {
+            System.out.println(message);
+        }
+    };
+    private final NetworkTickFinalizationSystem.TickFinalizationActions tickFinalizationActions =
+            new NetworkTickFinalizationSystem.TickFinalizationActions() {
+                @Override
+                public void interruptNetworkThreads() {
+                    NetworkManager.this.a();
+                }
+
+                @Override
+                public void notifyDisconnect(String key, Object[] args) {
+                    NetworkManager.this.p.a(key, args);
+                }
+            };
+    private final InboundQueueReadExecutionSystem.InboundReadActions inboundReadActions =
+            new InboundQueueReadExecutionSystem.InboundReadActions() {
+                @Override
+                public void disconnectEndOfStream() {
+                    NetworkManager.this.a("disconnect.endOfStream", new Object[0]);
+                }
+
+                @Override
+                public void handleException(Exception exception) {
+                    if (!NetworkManager.this.t) {
+                        NetworkManager.this.a(exception);
+                    }
+                }
+            };
+    private final OutboundQueueDrainExecutionSystem.OutboundDrainActions outboundDrainActions =
+            new OutboundQueueDrainExecutionSystem.OutboundDrainActions() {
+                @Override
+                public void handleException(Exception exception) {
+                    if (!NetworkManager.this.t) {
+                        NetworkManager.this.a(exception);
+                    }
+                }
+            };
+    private final NetworkCloseMonitorStartSystem.CloseMonitorActions closeMonitorActions =
+            new NetworkCloseMonitorStartSystem.CloseMonitorActions() {
+                @Override
+                public void interruptNetworkThreads() {
+                    NetworkManager.this.a();
+                }
+
+                @Override
+                public void markShuttingDown() {
+                    NetworkManager.this.q = true;
+                }
+
+                @Override
+                public void interruptReaderThread() {
+                    NetworkManager.this.s.interrupt();
+                }
+
+                @Override
+                public void startCloseMonitorThread() {
+                    (new ThreadMonitorConnection(NetworkManager.this)).start();
+                }
+            };
+    private final NetworkExceptionDisconnectSystem.ExceptionActions exceptionActions =
+            new NetworkExceptionDisconnectSystem.ExceptionActions() {
+                @Override
+                public void printStackTrace(Exception exception) {
+                    exception.printStackTrace();
+                }
+
+                @Override
+                public void disconnectWithGenericReason(String reason) {
+                    NetworkManager.this.a("disconnect.genericReason", new Object[]{reason});
+                }
+            };
 
     public NetworkManager(Socket socket, String s, NetHandler nethandler) {
         this.socket = socket;
@@ -61,28 +187,16 @@ public class NetworkManager {
 
         // CraftBukkit start - IPv6 stack in Java on BSD/OSX doesn't support setTrafficClass
         try {
-            socket.setTrafficClass(24);
-        } catch (SocketException e) {
-        }
-        // CraftBukkit end
-
-        try {
-            // CraftBukkit start - cant compile these outside the try
-            socket.setSoTimeout(30000);
-            if (PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)) {
-                socket.setTcpNoDelay(true);
-            }
-            this.input = new DataInputStream(socket.getInputStream());
-            this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
+            NetworkSocketSystem.StreamPair streamPair = networkSocketSystem.openConfiguredStreams(
+                    socket,
+                    PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)
+            );
+            this.input = streamPair.getInput();
+            this.output = streamPair.getOutput();
         } catch (java.io.IOException socketexception) {
             // CraftBukkit end
             System.err.println(socketexception.getMessage());
         }
-
-        /* CraftBukkit start - moved up
-        this.input = new DataInputStream(socket.getInputStream());
-        this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
-        // CraftBukkit end */
         this.s = new NetworkReaderThread(this, s + " read thread");
         this.r = new NetworkWriterThread(this, s + " write thread");
         this.s.start();
@@ -105,200 +219,103 @@ public class NetworkManager {
     }
 
     public void queue(Packet packet) {
-        if (!this.q) {
-            Object object = this.g;
-
-            synchronized (this.g) {
-                this.x += packet.a() + 1;
-                if (packet.k) {
-                    this.lowPriorityQueue.add(packet);
-                } else {
-                    this.highPriorityQueue.add(packet);
-                }
-            }
-        }
+        OutboundQueueEnqueueExecutionSystem.EnqueueStepResult enqueueStepResult =
+                outboundQueueEnqueueExecutionSystem.execute(
+                        this.q,
+                        this.g,
+                        this.highPriorityQueue,
+                        this.lowPriorityQueue,
+                        packet,
+                        this.x,
+                        outboundQueueSystem
+                );
+        this.x = enqueueStepResult.getQueuedBytes();
     }
 
     private boolean f() {
-        boolean flag = false;
-
-        try {
-            Object object;
-            Packet packet;
-            int i;
-            int[] aint;
-
-            if (!this.highPriorityQueue.isEmpty() && (this.f == 0 || System.currentTimeMillis() - ((Packet) this.highPriorityQueue.get(0)).timestamp >= (long) this.f)) {
-                object = this.g;
-                synchronized (this.g) {
-                    packet = (Packet) this.highPriorityQueue.remove(0);
-                    this.x -= packet.a() + 1;
-                }
-
-                Packet.a(packet, this.output);
-                aint = e;
-                i = packet.b();
-                aint[i] += packet.a() + 1;
-                flag = true;
-            }
-
-            // CraftBukkit - don't allow low priority packet to be sent unless it was placed in the queue before the first packet on the high priority queue
-            if ((flag || this.lowPriorityQueueDelay-- <= 0) && !this.lowPriorityQueue.isEmpty() && (this.highPriorityQueue.isEmpty() || ((Packet) this.highPriorityQueue.get(0)).timestamp > ((Packet) this.lowPriorityQueue.get(0)).timestamp)) {
-                object = this.g;
-                synchronized (this.g) {
-                    packet = (Packet) this.lowPriorityQueue.remove(0);
-                    this.x -= packet.a() + 1;
-                }
-
-                Packet.a(packet, this.output);
-                aint = e;
-                i = packet.b();
-                aint[i] += packet.a() + 1;
-                this.lowPriorityQueueDelay = 0;
-                flag = true;
-            }
-
-            return flag;
-        } catch (Exception exception) {
-            if (!this.t) {
-                this.a(exception);
-            }
-
-            return false;
-        }
+        OutboundQueueDrainExecutionSystem.DrainStepResult drainStepResult = outboundQueueDrainExecutionSystem.execute(
+                this.g,
+                this.highPriorityQueue,
+                this.lowPriorityQueue,
+                this.x,
+                this.lowPriorityQueueDelay,
+                this.f,
+                System.currentTimeMillis(),
+                this.output,
+                e,
+                outboundQueueSystem,
+                this.outboundDrainActions
+        );
+        this.x = drainStepResult.getQueuedBytes();
+        this.lowPriorityQueueDelay = drainStepResult.getLowPriorityQueueDelay();
+        return drainStepResult.wrotePacket();
     }
 
     public void a() {
-        this.s.interrupt();
-        this.r.interrupt();
+        networkThreadInterruptSystem.interrupt(this.s, this.r);
     }
 
     private boolean g() {
-        boolean flag = false;
-
-        try {
-            Packet packet = Packet.a(this.input, this.p.c());
-
-            if (packet != null) {
-                int[] aint = d;
-                int i = packet.b();
-
-                aint[i] += packet.a() + 1;
-                this.m.add(packet);
-                flag = true;
-            } else {
-                this.a("disconnect.endOfStream", new Object[0]);
-            }
-
-            return flag;
-        } catch (Exception exception) {
-            if (!this.t) {
-                this.a(exception);
-            }
-
-            return false;
-        }
+        InboundQueueReadExecutionSystem.ReadStepResult readStepResult = inboundQueueReadExecutionSystem.execute(
+                this.input,
+                this.p,
+                d,
+                this.m,
+                inboundQueueReadSystem,
+                this.inboundReadActions
+        );
+        return readStepResult.isPacketQueued();
     }
 
     private void a(Exception exception) {
-        exception.printStackTrace();
-        this.a("disconnect.genericReason", new Object[]{"Internal exception: " + exception.toString()});
+        networkExceptionDisconnectSystem.execute(exception, this.exceptionActions);
     }
 
     public void a(String s, Object... aobject) {
-        if (this.l) {
-            this.t = true;
-            this.u = s;
-            this.v = aobject;
-            (new NetworkMasterThread(this)).start();
-            this.l = false;
+        NetworkDisconnectLifecycleSystem.DisconnectState disconnectState = networkDisconnectLifecycleSystem.disconnectIfOpen(
+                this.l,
+                s,
+                aobject,
+                this.disconnectActions
+        );
 
-            try {
-                this.input.close();
-                this.input = null;
-            } catch (Throwable throwable) {
-                ;
-            }
-
-            try {
-                this.output.close();
-                this.output = null;
-            } catch (Throwable throwable1) {
-                ;
-            }
-
-            try {
-                this.socket.close();
-                this.socket = null;
-            } catch (Throwable throwable2) {
-                ;
-            }
+        if (disconnectState.isChanged()) {
+            this.t = disconnectState.isTerminating();
+            this.u = disconnectState.getDisconnectKey();
+            this.v = disconnectState.getDisconnectArgs();
+            this.l = disconnectState.isOpen();
         }
     }
 
     public void b() {
-        boolean fast = PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true);
-        if (this.x > (fast ? 2097152 : 1048576)) {
-            this.a("disconnect.overflow", new Object[0]);
-        }
+        boolean fastPacketsEnabled = PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true);
+        String playerUsername = resolvePlayerUsername();
 
-        if (this.m.isEmpty()) {
-            if (this.w++ == 1200) {
-                this.a("disconnect.timeout", new Object[0]);
-            }
-        } else {
-            this.w = 0;
-        }
-
-        int i = (fast ? 1000 : 100);
-
-        //Poseidon - Packet spam detection
-        if (spamDetection) {
-            if (this.m.size() > threshold) {
-                String playerUsername = "Unknown";
-                if (this.p instanceof NetServerHandler) {
-                    playerUsername = ((NetServerHandler) this.p).player.name;
-                    ((NetServerHandler) this.p).disconnect(ChatColor.RED + "[Poseidon] You have been kicked for packet spamming.");
-                } else {
-                    this.a("disconnect.spam", new Object[0]);
-                }
-                System.out.println("[Poseidon] Player " + playerUsername + " has been kicked for packet spamming. The queue size was " + this.m.size() + " and the threshold was " + threshold + ".");
-            }
-        }
-
-//        if(this.m.size() > 1000) {
-//            String playerUsername = "Unknown";
-//            if (this.p instanceof NetServerHandler) {
-//                System.out.println("The packet queue size is " + this.m.size() + " for player " + ((NetServerHandler) this.p).player.name + ".");
-//            }
-//        }
-
-
-        while (!this.m.isEmpty() && i-- >= 0) {
-            Packet packet = (Packet) this.m.remove(0);
-
-            //Poseidon Start - Packet Receive Event
-            if (firePacketEvents && this.p instanceof NetServerHandler) {
-                PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(((NetServerHandler) this.p).player.name, packet);
-                Bukkit.getPluginManager().callEvent(event);
-                packet = event.getPacket();
-                if (!event.isCancelled()) {
-                    packet.a(this.p);
-                }
-
-            } else {
-                packet.a(this.p);
-            }
-
-            //Poseidon End
-
-//            packet.a(this.p);
-        }
-
-        this.a();
-        if (this.t && this.m.isEmpty()) {
-            this.p.a(this.u, this.v);
-        }
+        NetworkManagerTickSystem.TickState tickState = networkManagerTickSystem.tick(
+                new NetworkManagerTickSystem.TickRequest(
+                        fastPacketsEnabled,
+                        this.x,
+                        this.m.isEmpty(),
+                        this.w,
+                        spamDetection,
+                        this.m.size(),
+                        threshold,
+                        playerUsername,
+                        hasPlayerHandler(),
+                        this.m,
+                        this.p,
+                        firePacketEvents
+                ),
+                this.tickActions
+        );
+        this.w = tickState.getNextIdleTicks();
+        networkTickFinalizationSystem.finalizeTick(
+                this.t,
+                this.m.isEmpty(),
+                this.u,
+                this.v,
+                this.tickFinalizationActions
+        );
     }
 
     public SocketAddress getSocketAddress() {
@@ -306,14 +323,30 @@ public class NetworkManager {
     }
 
     public void d() {
-        this.a();
-        this.q = true;
-        this.s.interrupt();
-        (new ThreadMonitorConnection(this)).start();
+        networkCloseMonitorStartSystem.start(this.closeMonitorActions);
     }
 
     public int e() {
         return this.lowPriorityQueue.size();
+    }
+
+    private String resolvePlayerUsername() {
+        NetServerHandler playerHandler = resolvePlayerHandler();
+        if (playerHandler != null) {
+            return playerHandler.player.name;
+        }
+        return "Unknown";
+    }
+
+    private NetServerHandler resolvePlayerHandler() {
+        if (this.p instanceof NetServerHandler) {
+            return (NetServerHandler) this.p;
+        }
+        return null;
+    }
+
+    private boolean hasPlayerHandler() {
+        return resolvePlayerHandler() != null;
     }
 
     static boolean a(NetworkManager networkmanager) {

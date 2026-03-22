@@ -1,15 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.LightningStormLifecycleBehaviour;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-
-import java.util.List;
 
 // CraftBukkit start
 // CraftBukkit end
 
 public class EntityWeatherStorm extends EntityWeather {
+    private static final LightningStormLifecycleBehaviour LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR = LightningStormLifecycleBehaviour.getInstance();
 
     private int lifeTicks;
     public long a = 0L;
@@ -33,98 +31,53 @@ public class EntityWeatherStorm extends EntityWeather {
         this.cworld = world.getWorld();
         // CraftBukkit end
 
-        this.setPositionRotation(d0, d1, d2, 0.0F, 0.0F);
-        this.lifeTicks = 2;
-        this.a = this.random.nextLong();
-        this.c = this.random.nextInt(3) + 1;
-        // CraftBukkit
-        if (!isEffect && world.spawnMonsters >= 2 && world.areChunksLoaded(MathHelper.floor(d0), MathHelper.floor(d1), MathHelper.floor(d2), 10)) {
-            int i = MathHelper.floor(d0);
-            int j = MathHelper.floor(d1);
-            int k = MathHelper.floor(d2);
-
-            if (world.getTypeId(i, j, k) == 0 && Block.FIRE.canPlace(world, i, j, k)) {
-                // CraftBukkit start
-                BlockIgniteEvent event = new BlockIgniteEvent(this.cworld.getBlockAt(i, j, k), IgniteCause.LIGHTNING, null);
-                world.getServer().getPluginManager().callEvent(event);
-
-                if (!event.isCancelled()) {
-                    world.setTypeId(i, j, k, Block.FIRE.id);
-                }
-                // CraftBukkit end
-            }
-
-            for (i = 0; i < 4; ++i) {
-                j = MathHelper.floor(d0) + this.random.nextInt(3) - 1;
-                k = MathHelper.floor(d1) + this.random.nextInt(3) - 1;
-                int l = MathHelper.floor(d2) + this.random.nextInt(3) - 1;
-
-                if (world.getTypeId(j, k, l) == 0 && Block.FIRE.canPlace(world, j, k, l)) {
-                    // CraftBukkit start
-                    BlockIgniteEvent event = new BlockIgniteEvent(this.cworld.getBlockAt(j, k, l), IgniteCause.LIGHTNING, null);
-                    world.getServer().getPluginManager().callEvent(event);
-
-                    if (!event.isCancelled()) {
-                        world.setTypeId(j, k, l, Block.FIRE.id);
-                    }
-                    // CraftBukkit end
-                }
-            }
-        }
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.initialize(this, world, d0, d1, d2, isEffect, this.cworld);
     }
 
     public void m_() {
         super.m_();
-        if (this.lifeTicks == 2) {
-            this.world.makeSound(this.locX, this.locY, this.locZ, "ambient.weather.thunder", 10000.0F, 0.8F + this.random.nextFloat() * 0.2F);
-            this.world.makeSound(this.locX, this.locY, this.locZ, "random.explode", 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
-        }
-
-        --this.lifeTicks;
-        if (this.lifeTicks < 0) {
-            if (this.c == 0) {
-                this.die();
-            } else if (this.lifeTicks < -this.random.nextInt(10)) {
-                --this.c;
-                this.lifeTicks = 1;
-                this.a = this.random.nextLong();
-                // CraftBukkit
-                if (!this.isEffect && this.world.areChunksLoaded(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ), 10)) {
-                    int i = MathHelper.floor(this.locX);
-                    int j = MathHelper.floor(this.locY);
-                    int k = MathHelper.floor(this.locZ);
-
-                    if (this.world.getTypeId(i, j, k) == 0 && Block.FIRE.canPlace(this.world, i, j, k)) {
-                        // CraftBukkit start
-                        BlockIgniteEvent event = new BlockIgniteEvent(this.cworld.getBlockAt(i, j, k), IgniteCause.LIGHTNING, null);
-                        this.world.getServer().getPluginManager().callEvent(event);
-
-                        if (!event.isCancelled()) {
-                            this.world.setTypeId(i, j, k, Block.FIRE.id);
-                        }
-                        // CraftBukkit end
-                    }
-                }
-            }
-        }
-
-        if (this.lifeTicks >= 0 && !this.isEffect) { // CraftBukkit
-            double d0 = 3.0D;
-            List list = this.world.b((Entity) this, AxisAlignedBB.b(this.locX - d0, this.locY - d0, this.locZ - d0, this.locX + d0, this.locY + 6.0D + d0, this.locZ + d0));
-
-            for (int l = 0; l < list.size(); ++l) {
-                Entity entity = (Entity) list.get(l);
-
-                entity.a(this);
-            }
-
-            this.world.n = 2;
-        }
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.tick(this);
     }
 
     protected void b() {}
 
-    protected void a(NBTTagCompound nbttagcompound) {}
+    protected void a(NBTTagCompound nbttagcompound) {
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.readFromNbt(this, nbttagcompound);
+    }
 
-    protected void b(NBTTagCompound nbttagcompound) {}
+    protected void b(NBTTagCompound nbttagcompound) {
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.writeToNbt(this, nbttagcompound);
+    }
+
+    public int poseidonGetLifeTicks() {
+        return this.lifeTicks;
+    }
+
+    public void poseidonSetLifeTicks(int lifeTicks) {
+        this.lifeTicks = lifeTicks;
+    }
+
+    public int poseidonGetFlashCount() {
+        return this.c;
+    }
+
+    public void poseidonSetFlashCount(int flashCount) {
+        this.c = flashCount;
+    }
+
+    public CraftWorld poseidonGetCraftWorld() {
+        return this.cworld;
+    }
+
+    public long poseidonNextRandomLong() {
+        return this.random.nextLong();
+    }
+
+    public int poseidonNextRandomInt(int bound) {
+        return this.random.nextInt(bound);
+    }
+
+    public float poseidonNextRandomFloat() {
+        return this.random.nextFloat();
+    }
 }

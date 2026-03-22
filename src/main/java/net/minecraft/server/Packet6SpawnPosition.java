@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +11,7 @@ public class Packet6SpawnPosition extends Packet {
     public int x;
     public int y;
     public int z;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet6SpawnPosition() {}
 
@@ -19,15 +22,14 @@ public class Packet6SpawnPosition extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.x = datainputstream.readInt();
-        this.y = datainputstream.readInt();
-        this.z = datainputstream.readInt();
+        PacketDataCodec.Packet6Data packetData = packetDataCodec.readPacket6(datainputstream);
+        this.x = packetData.getX();
+        this.y = packetData.getY();
+        this.z = packetData.getZ();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.x);
-        dataoutputstream.writeInt(this.y);
-        dataoutputstream.writeInt(this.z);
+        packetDataCodec.writePacket6(new PacketDataCodec.Packet6Data(this.x, this.y, this.z), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -35,6 +37,6 @@ public class Packet6SpawnPosition extends Packet {
     }
 
     public int a() {
-        return 12;
+        return packetDataCodec.packet6Length();
     }
 }

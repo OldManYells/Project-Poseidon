@@ -1,12 +1,25 @@
 package net.minecraft.server;
 
-// CraftBukkit start
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.event.inventory.FurnaceBurnEvent;
-import org.bukkit.event.inventory.FurnaceSmeltEvent;
-// CraftBukkit end
+import com.legacyminecraft.poseidon.compat.bukkit.FurnaceEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceBurnEligibilityBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceFuelConsumptionBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceFuelBurnTimeBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceLitStateBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceNbtCodecBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceRefuelFlowBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceSmeltOutputBehaviour;
+import com.legacyminecraft.poseidon.inventory.FurnaceTickProgressionBehaviour;
 
 public class TileEntityFurnace extends TileEntity implements IInventory {
+    private static final FurnaceEventBridgeBehaviour FURNACE_EVENT_BRIDGE_BEHAVIOUR = FurnaceEventBridgeBehaviour.getInstance();
+    private static final FurnaceBurnEligibilityBehaviour FURNACE_BURN_ELIGIBILITY_BEHAVIOUR = FurnaceBurnEligibilityBehaviour.getInstance();
+    private static final FurnaceFuelConsumptionBehaviour FURNACE_FUEL_CONSUMPTION_BEHAVIOUR = FurnaceFuelConsumptionBehaviour.getInstance();
+    private static final FurnaceFuelBurnTimeBehaviour FURNACE_FUEL_BURN_TIME_BEHAVIOUR = FurnaceFuelBurnTimeBehaviour.getInstance();
+    private static final FurnaceLitStateBehaviour FURNACE_LIT_STATE_BEHAVIOUR = FurnaceLitStateBehaviour.getInstance();
+    private static final FurnaceNbtCodecBehaviour FURNACE_NBT_CODEC_BEHAVIOUR = FurnaceNbtCodecBehaviour.getInstance();
+    private static final FurnaceRefuelFlowBehaviour FURNACE_REFUEL_FLOW_BEHAVIOUR = FurnaceRefuelFlowBehaviour.getInstance();
+    private static final FurnaceSmeltOutputBehaviour FURNACE_SMELT_OUTPUT_BEHAVIOUR = FurnaceSmeltOutputBehaviour.getInstance();
+    private static final FurnaceTickProgressionBehaviour FURNACE_TICK_PROGRESSION_BEHAVIOUR = FurnaceTickProgressionBehaviour.getInstance();
 
     private ItemStack[] items = new ItemStack[3];
     public int burnTime = 0;
@@ -64,41 +77,16 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        NBTTagList nbttaglist = nbttagcompound.l("Items");
-
-        this.items = new ItemStack[this.getSize()];
-
-        for (int i = 0; i < nbttaglist.c(); ++i) {
-            NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.a(i);
-            byte b0 = nbttagcompound1.c("Slot");
-
-            if (b0 >= 0 && b0 < this.items.length) {
-                this.items[b0] = new ItemStack(nbttagcompound1);
-            }
-        }
-
-        this.burnTime = nbttagcompound.d("BurnTime");
-        this.cookTime = nbttagcompound.d("CookTime");
+        FurnaceNbtCodecBehaviour.FurnaceNbtState state = FURNACE_NBT_CODEC_BEHAVIOUR.readState(nbttagcompound, this.getSize());
+        this.items = state.getItems();
+        this.burnTime = state.getBurnTime();
+        this.cookTime = state.getCookTime();
         this.ticksForCurrentFuel = this.fuelTime(this.items[1]);
     }
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        nbttagcompound.a("BurnTime", (short) this.burnTime);
-        nbttagcompound.a("CookTime", (short) this.cookTime);
-        NBTTagList nbttaglist = new NBTTagList();
-
-        for (int i = 0; i < this.items.length; ++i) {
-            if (this.items[i] != null) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-
-                nbttagcompound1.a("Slot", (byte) i);
-                this.items[i].a(nbttagcompound1);
-                nbttaglist.a((NBTBase) nbttagcompound1);
-            }
-        }
-
-        nbttagcompound.a("Items", (NBTBase) nbttaglist);
+        FURNACE_NBT_CODEC_BEHAVIOUR.writeState(nbttagcompound, this.items, this.burnTime, this.cookTime);
     }
 
     public int getMaxStackSize() {
@@ -106,7 +94,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
     }
 
     public boolean isBurning() {
-        return this.burnTime > 0;
+        return FURNACE_LIT_STATE_BEHAVIOUR.isBurning(this.burnTime);
     }
 
     public void g_() {
@@ -114,50 +102,45 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
         boolean flag1 = false;
 
         // CraftBukkit start
-        int currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
-        int elapsedTicks = currentTick - this.lastTick;
-        this.lastTick = currentTick;
+        int currentTick = FURNACE_TICK_PROGRESSION_BEHAVIOUR.getCurrentTick();
+        FurnaceTickProgressionBehaviour.TickDelta tickDelta = FURNACE_TICK_PROGRESSION_BEHAVIOUR.computeTickDelta(this.lastTick, currentTick);
+        int elapsedTicks = tickDelta.getElapsedTicks();
+        this.lastTick = tickDelta.getUpdatedLastTick();
 
         // CraftBukkit - moved from below
-        if (this.isBurning() && this.canBurn()) {
-            this.cookTime += elapsedTicks;
-            if (this.cookTime >= 200) {
-                this.cookTime %= 200;
-                this.burn();
-                flag1 = true;
-            }
-        } else {
-            this.cookTime = 0;
+        FurnaceTickProgressionBehaviour.CookProgress cookProgress = FURNACE_TICK_PROGRESSION_BEHAVIOUR
+                .advanceCookProgress(this.isBurning(), this.canBurn(), this.cookTime, elapsedTicks, 200);
+        this.cookTime = cookProgress.getCookTime();
+        if (cookProgress.shouldBurnOutput()) {
+            this.burn();
+            flag1 = true;
         }
         // CraftBukkit end
 
-        if (this.burnTime > 0) {
-            this.burnTime -= elapsedTicks; // CraftBukkit
-        }
+        this.burnTime = FURNACE_TICK_PROGRESSION_BEHAVIOUR.decreaseBurnTime(this.burnTime, elapsedTicks);
 
         if (!this.world.isStatic) {
             // CraftBukkit start - handle multiple elapsed ticks
-            if (this.burnTime <= 0 && this.canBurn() && this.items[1] != null) { // CraftBukkit - == to <=
-                CraftItemStack fuel = new CraftItemStack(this.items[1]);
+            if (FURNACE_REFUEL_FLOW_BEHAVIOUR.shouldAttemptRefuel(this.burnTime, this.canBurn(), this.items[1])) {
+                FurnaceEventBridgeBehaviour.BurnDecision burnDecision = FURNACE_EVENT_BRIDGE_BEHAVIOUR.fireBurnEvent(
+                        this.world,
+                        this.x,
+                        this.y,
+                        this.z,
+                        this.items[1],
+                        this.fuelTime(this.items[1])
+                );
 
-                FurnaceBurnEvent furnaceBurnEvent = new FurnaceBurnEvent(this.world.getWorld().getBlockAt(this.x, this.y, this.z), fuel, this.fuelTime(this.items[1]));
-                this.world.getServer().getPluginManager().callEvent(furnaceBurnEvent);
-
-                if (furnaceBurnEvent.isCancelled()) {
+                if (burnDecision.isCancelled()) {
                     return;
                 }
 
-                this.ticksForCurrentFuel = furnaceBurnEvent.getBurnTime();
-                this.burnTime += this.ticksForCurrentFuel;
-                if (this.burnTime > 0 && furnaceBurnEvent.isBurning()) {
+                this.ticksForCurrentFuel = burnDecision.getBurnTime();
+                this.burnTime = FURNACE_REFUEL_FLOW_BEHAVIOUR.applyFuelTicks(this.burnTime, this.ticksForCurrentFuel);
+                if (FURNACE_REFUEL_FLOW_BEHAVIOUR.shouldConsumeFuel(this.burnTime, burnDecision.isBurning())) {
                     // CraftBukkit end
                     flag1 = true;
-                    if (this.items[1] != null) {
-                        --this.items[1].count;
-                        if (this.items[1].count == 0) {
-                            this.items[1] = null;
-                        }
-                    }
+                    FURNACE_FUEL_CONSUMPTION_BEHAVIOUR.consumeFuel(this.items, 1);
                 }
             }
 
@@ -174,9 +157,12 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
             }
             // CraftBukkit end */
 
-            if (flag != this.burnTime > 0) {
+            if (FURNACE_LIT_STATE_BEHAVIOUR.applyBurningStateTransition(flag, this.burnTime, new FurnaceLitStateBehaviour.BurningStateApplier() {
+                public void apply(boolean burning) {
+                    BlockFurnace.a(burning, TileEntityFurnace.this.world, TileEntityFurnace.this.x, TileEntityFurnace.this.y, TileEntityFurnace.this.z);
+                }
+            })) {
                 flag1 = true;
-                BlockFurnace.a(this.burnTime > 0, this.world, this.x, this.y, this.z);
             }
         }
 
@@ -186,14 +172,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
     }
 
     private boolean canBurn() {
-        if (this.items[0] == null) {
-            return false;
-        } else {
-            ItemStack itemstack = FurnaceRecipes.getInstance().a(this.items[0].getItem().id);
-
-            // CraftBukkit - consider resultant count instead of current count
-            return itemstack == null ? false : (this.items[2] == null ? true : (!this.items[2].doMaterialsMatch(itemstack) ? false : (this.items[2].count + itemstack.count <= this.getMaxStackSize() && this.items[2].count < this.items[2].getMaxStackSize() ? true : this.items[2].count + itemstack.count <= itemstack.getMaxStackSize())));
-        }
+        return FURNACE_BURN_ELIGIBILITY_BEHAVIOUR.canBurn(this.items[0], this.items[2], this.getMaxStackSize());
     }
 
     public void burn() {
@@ -201,45 +180,28 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
             ItemStack itemstack = FurnaceRecipes.getInstance().a(this.items[0].getItem().id);
 
             // CraftBukkit start
-            CraftItemStack source = new CraftItemStack(this.items[0]);
-            CraftItemStack result = new CraftItemStack(itemstack.cloneItemStack());
+            FurnaceEventBridgeBehaviour.SmeltDecision smeltDecision = FURNACE_EVENT_BRIDGE_BEHAVIOUR.fireSmeltEvent(
+                    this.world,
+                    this.x,
+                    this.y,
+                    this.z,
+                    this.items[0],
+                    itemstack
+            );
 
-            FurnaceSmeltEvent furnaceSmeltEvent = new FurnaceSmeltEvent(this.world.getWorld().getBlockAt(this.x, this.y, this.z), source, result);
-            this.world.getServer().getPluginManager().callEvent(furnaceSmeltEvent);
-
-            if (furnaceSmeltEvent.isCancelled()) {
+            if (smeltDecision.isCancelled()) {
                 return;
             }
 
-            org.bukkit.inventory.ItemStack oldResult = furnaceSmeltEvent.getResult();
-            ItemStack newResult = new ItemStack(oldResult.getTypeId(), oldResult.getAmount(), oldResult.getDurability());
-            itemstack = newResult;
+            itemstack = smeltDecision.getResult();
 
-            if (this.items[2] == null) {
-                this.items[2] = itemstack.cloneItemStack();
-            } else if (this.items[2].id == itemstack.id) {
-                // CraftBukkit - compare damage too
-                if (this.items[2].damage == itemstack.damage) {
-                    this.items[2].count += itemstack.count;
-                }
-                // CraftBukkit end
-            }
-
-            --this.items[0].count;
-            if (this.items[0].count <= 0) {
-                this.items[0] = null;
-            }
+            FURNACE_SMELT_OUTPUT_BEHAVIOUR.applySmeltResult(this.items, 2, itemstack);
+            FURNACE_SMELT_OUTPUT_BEHAVIOUR.consumeInput(this.items, 0);
         }
     }
 
     private int fuelTime(ItemStack itemstack) {
-        if (itemstack == null) {
-            return 0;
-        } else {
-            int i = itemstack.getItem().id;
-
-            return i < 256 && Block.byId[i].material == Material.WOOD ? 300 : (i == Item.STICK.id ? 100 : (i == Item.COAL.id ? 1600 : (i == Item.LAVA_BUCKET.id ? 20000 : (i == Block.SAPLING.id ? 100 : 0))));
-        }
+        return FURNACE_FUEL_BURN_TIME_BEHAVIOUR.getBurnTime(itemstack);
     }
 
     public boolean a_(EntityHuman entityhuman) {

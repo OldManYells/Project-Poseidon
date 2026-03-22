@@ -1,6 +1,11 @@
 package net.minecraft.server;
 
-final class TimeCounter implements Counter {
+import com.legacyminecraft.poseidon.world.stats.CounterVariantBehaviour;
 
-    TimeCounter() {}
+final class TimeCounter implements Counter {
+    private static final CounterVariantBehaviour COUNTER_VARIANT_BEHAVIOUR = CounterVariantBehaviour.getInstance();
+
+    TimeCounter() {
+        COUNTER_VARIANT_BEHAVIOUR.initializeTimeCounter();
+    }
 }

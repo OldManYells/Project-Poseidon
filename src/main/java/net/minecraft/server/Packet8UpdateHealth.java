@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.io.IOException;
 public class Packet8UpdateHealth extends Packet {
 
     public int a;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet8UpdateHealth() {}
 
@@ -15,11 +18,11 @@ public class Packet8UpdateHealth extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readShort();
+        this.a = packetDataCodec.readPacket8(datainputstream).getHealth();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeShort(this.a);
+        packetDataCodec.writePacket8(new PacketDataCodec.Packet8Data(this.a), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -27,6 +30,6 @@ public class Packet8UpdateHealth extends Packet {
     }
 
     public int a() {
-        return 2;
+        return packetDataCodec.packet8Length();
     }
 }

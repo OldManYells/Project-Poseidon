@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,26 +26,24 @@ public class Packet13PlayerLookMove extends Packet10Flying {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.x = datainputstream.readDouble();
-        this.y = datainputstream.readDouble();
-        this.stance = datainputstream.readDouble();
-        this.z = datainputstream.readDouble();
-        this.yaw = datainputstream.readFloat();
-        this.pitch = datainputstream.readFloat();
-        super.a(datainputstream);
+        PacketDataCodec.Packet13Data packetData = PacketDataCodec.getInstance().readPacket13(datainputstream);
+        this.x = packetData.getX();
+        this.y = packetData.getY();
+        this.stance = packetData.getStance();
+        this.z = packetData.getZ();
+        this.yaw = packetData.getYaw();
+        this.pitch = packetData.getPitch();
+        this.g = packetData.isOnGround();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeDouble(this.x);
-        dataoutputstream.writeDouble(this.y);
-        dataoutputstream.writeDouble(this.stance);
-        dataoutputstream.writeDouble(this.z);
-        dataoutputstream.writeFloat(this.yaw);
-        dataoutputstream.writeFloat(this.pitch);
-        super.a(dataoutputstream);
+        PacketDataCodec.getInstance().writePacket13(
+                new PacketDataCodec.Packet13Data(this.x, this.y, this.stance, this.z, this.yaw, this.pitch, this.g),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 41;
+        return packetDataCodec.packet13Length();
     }
 }

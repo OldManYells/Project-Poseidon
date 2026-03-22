@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.EntityIntMapBehaviour;
+
 public class EntityList {
+    private static final EntityIntMapBehaviour ENTITY_INT_MAP_BEHAVIOUR = EntityIntMapBehaviour.getInstance();
 
     private transient EntityListEntry[] a = new EntityListEntry[16];
     private transient int b;
@@ -8,153 +11,90 @@ public class EntityList {
     private final float d = 0.75F;
     private transient volatile int e;
 
-    public EntityList() {}
+    public EntityList() {
+    }
 
     private static int g(int i) {
-        i ^= i >>> 20 ^ i >>> 12;
-        return i ^ i >>> 7 ^ i >>> 4;
+        return ENTITY_INT_MAP_BEHAVIOUR.hashKey(i);
     }
 
     private static int a(int i, int j) {
-        return i & j - 1;
+        return ENTITY_INT_MAP_BEHAVIOUR.bucketIndex(i, j);
     }
 
     public Object a(int i) {
-        int j = g(i);
-
-        for (EntityListEntry entitylistentry = this.a[a(j, this.a.length)]; entitylistentry != null; entitylistentry = entitylistentry.c) {
-            if (entitylistentry.a == i) {
-                return entitylistentry.b;
-            }
-        }
-
-        return null;
+        return ENTITY_INT_MAP_BEHAVIOUR.get(this, i);
     }
 
     public boolean b(int i) {
-        return this.c(i) != null;
+        return ENTITY_INT_MAP_BEHAVIOUR.containsKey(this, i);
     }
 
     final EntityListEntry c(int i) {
-        int j = g(i);
-
-        for (EntityListEntry entitylistentry = this.a[a(j, this.a.length)]; entitylistentry != null; entitylistentry = entitylistentry.c) {
-            if (entitylistentry.a == i) {
-                return entitylistentry;
-            }
-        }
-
-        return null;
+        return ENTITY_INT_MAP_BEHAVIOUR.findEntry(this, i);
     }
 
     public void a(int i, Object object) {
-        int j = g(i);
-        int k = a(j, this.a.length);
-
-        for (EntityListEntry entitylistentry = this.a[k]; entitylistentry != null; entitylistentry = entitylistentry.c) {
-            if (entitylistentry.a == i) {
-                entitylistentry.b = object;
-            }
-        }
-
-        ++this.e;
-        this.a(j, i, object, k);
-    }
-
-    private void h(int i) {
-        EntityListEntry[] aentitylistentry = this.a;
-        int j = aentitylistentry.length;
-
-        if (j == 1073741824) {
-            this.c = Integer.MAX_VALUE;
-        } else {
-            EntityListEntry[] aentitylistentry1 = new EntityListEntry[i];
-
-            this.a(aentitylistentry1);
-            this.a = aentitylistentry1;
-            this.c = (int) ((float) i * this.d);
-        }
-    }
-
-    private void a(EntityListEntry[] aentitylistentry) {
-        EntityListEntry[] aentitylistentry1 = this.a;
-        int i = aentitylistentry.length;
-
-        for (int j = 0; j < aentitylistentry1.length; ++j) {
-            EntityListEntry entitylistentry = aentitylistentry1[j];
-
-            if (entitylistentry != null) {
-                aentitylistentry1[j] = null;
-
-                EntityListEntry entitylistentry1;
-
-                do {
-                    entitylistentry1 = entitylistentry.c;
-                    int k = a(entitylistentry.d, i);
-
-                    entitylistentry.c = aentitylistentry[k];
-                    aentitylistentry[k] = entitylistentry;
-                    entitylistentry = entitylistentry1;
-                } while (entitylistentry1 != null);
-            }
-        }
+        ENTITY_INT_MAP_BEHAVIOUR.put(this, i, object);
     }
 
     public Object d(int i) {
-        EntityListEntry entitylistentry = this.e(i);
-
-        return entitylistentry == null ? null : entitylistentry.b;
+        return ENTITY_INT_MAP_BEHAVIOUR.remove(this, i);
     }
 
     final EntityListEntry e(int i) {
-        int j = g(i);
-        int k = a(j, this.a.length);
-        EntityListEntry entitylistentry = this.a[k];
-
-        EntityListEntry entitylistentry1;
-        EntityListEntry entitylistentry2;
-
-        for (entitylistentry1 = entitylistentry; entitylistentry1 != null; entitylistentry1 = entitylistentry2) {
-            entitylistentry2 = entitylistentry1.c;
-            if (entitylistentry1.a == i) {
-                ++this.e;
-                --this.b;
-                if (entitylistentry == entitylistentry1) {
-                    this.a[k] = entitylistentry2;
-                } else {
-                    entitylistentry.c = entitylistentry2;
-                }
-
-                return entitylistentry1;
-            }
-
-            entitylistentry = entitylistentry1;
-        }
-
-        return entitylistentry1;
+        return ENTITY_INT_MAP_BEHAVIOUR.removeEntry(this, i);
     }
 
     public void a() {
-        ++this.e;
-        EntityListEntry[] aentitylistentry = this.a;
-
-        for (int i = 0; i < aentitylistentry.length; ++i) {
-            aentitylistentry[i] = null;
-        }
-
-        this.b = 0;
+        ENTITY_INT_MAP_BEHAVIOUR.clear(this);
     }
 
-    private void a(int i, int j, Object object, int k) {
-        EntityListEntry entitylistentry = this.a[k];
-
-        this.a[k] = new EntityListEntry(i, j, object, entitylistentry);
-        if (this.b++ >= this.c) {
-            this.h(2 * this.a.length);
-        }
+    public static int poseidonHash(int i) {
+        return f(i);
     }
 
     static int f(int i) {
         return g(i);
+    }
+
+    public EntityListEntry[] poseidonGetBuckets() {
+        return this.a;
+    }
+
+    public void poseidonSetBuckets(EntityListEntry[] buckets) {
+        this.a = buckets;
+    }
+
+    public int poseidonGetSize() {
+        return this.b;
+    }
+
+    public void poseidonSetSize(int size) {
+        this.b = size;
+    }
+
+    public int poseidonGetThreshold() {
+        return this.c;
+    }
+
+    public void poseidonSetThreshold(int threshold) {
+        this.c = threshold;
+    }
+
+    public float poseidonGetLoadFactor() {
+        return this.d;
+    }
+
+    public int poseidonGetModCount() {
+        return this.e;
+    }
+
+    public void poseidonSetModCount(int modCount) {
+        this.e = modCount;
+    }
+
+    public EntityListEntry poseidonCreateEntry(int hash, int slot, Object value, EntityListEntry next) {
+        return new EntityListEntry(hash, slot, value, next);
     }
 }

@@ -1,0 +1,117 @@
+package com.legacyminecraft.poseidon.migration;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class LegacyEntityWrapperThinnessTest {
+    private static final Path ENTITY_PATH = Paths.get("src/main/java/net/minecraft/server/Entity.java");
+
+    @Test
+    public void entityDelegatesSpatialMathToCanonicalBehaviour() throws IOException {
+        String text = new String(Files.readAllBytes(ENTITY_PATH), StandardCharsets.UTF_8);
+
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityWorldBindingBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityRotationValidationBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityLightningStrikeBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityFireDamageBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityLavaDamageBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityBoundingBoxBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityCollisionPushBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityCollisionQueryBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityFallDistanceBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityFlagStateBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityFluidContactBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityInputMovementBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityLightLevelBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityMotionClampBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityNbtListBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityPassengerBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntitySpatialBehaviour;"));
+        Assert.assertTrue(text.contains("ENTITY_BOUNDING_BOX_BEHAVIOUR.updateBoundingBox(this.boundingBox, d0, d1, d2, this.length, this.width, this.height, this.br)"));
+        Assert.assertTrue(text.contains("ENTITY_ROTATION_VALIDATION_BEHAVIOUR.sanitizeRotation(this, f, f1)"));
+        Assert.assertTrue(text.contains("ENTITY_COLLISION_PUSH_BEHAVIOUR.computeHorizontalPush(this.locX, this.locZ, entity.locX, entity.locZ, this.bu)"));
+        Assert.assertTrue(text.contains("ENTITY_COLLISION_QUERY_BEHAVIOUR.canMove(this.world, this, this.boundingBox, d0, d1, d2)"));
+        Assert.assertTrue(text.contains("ENTITY_FLAG_STATE_BEHAVIOUR.isFlagSet(this.datawatcher.a(0), i)"));
+        Assert.assertTrue(text.contains("ENTITY_FLAG_STATE_BEHAVIOUR.setFlag(b0, i, flag)"));
+        Assert.assertTrue(text.contains("ENTITY_FLAG_STATE_BEHAVIOUR.isSneaking(this.datawatcher.a(0))"));
+        Assert.assertTrue(text.contains("ENTITY_FLAG_STATE_BEHAVIOUR.withSneaking(flags, flag)"));
+        Assert.assertTrue(text.contains("ENTITY_FLUID_CONTACT_BEHAVIOUR.isInWater(this.world, this.boundingBox, this)"));
+        Assert.assertTrue(text.contains("ENTITY_FLUID_CONTACT_BEHAVIOUR.isSubmergedInMaterial("));
+        Assert.assertTrue(text.contains("ENTITY_FLUID_CONTACT_BEHAVIOUR.isWet(this.world, this.locX, this.locY, this.locZ, this.bA)"));
+        Assert.assertTrue(text.contains("ENTITY_FLUID_CONTACT_BEHAVIOUR.isInLava(this.world, this.boundingBox)"));
+        Assert.assertTrue(text.contains("ENTITY_INPUT_MOVEMENT_BEHAVIOUR.computeMotionDelta(f, f1, f2, this.yaw)"));
+        Assert.assertTrue(text.contains("ENTITY_LIGHT_LEVEL_BEHAVIOUR.sampleAmbientBrightness("));
+        Assert.assertTrue(text.contains("ENTITY_MOTION_CLAMP_BEHAVIOUR.shouldClamp(this.getBukkitEntity() instanceof Vehicle)"));
+        Assert.assertTrue(text.contains("ENTITY_MOTION_CLAMP_BEHAVIOUR.clampMotionComponent(this.motX, 10.0D)"));
+        Assert.assertTrue(text.contains("ENTITY_MOTION_CLAMP_BEHAVIOUR.clampMotionComponent(this.motY, 10.0D)"));
+        Assert.assertTrue(text.contains("ENTITY_MOTION_CLAMP_BEHAVIOUR.clampMotionComponent(this.motZ, 10.0D)"));
+        Assert.assertTrue(text.contains("ENTITY_NBT_LIST_BEHAVIOUR.buildDoubleList(adouble)"));
+        Assert.assertTrue(text.contains("ENTITY_NBT_LIST_BEHAVIOUR.buildFloatList(afloat)"));
+        Assert.assertTrue(text.contains("ENTITY_PASSENGER_BEHAVIOUR.shouldPropagateFallDistance(this.passenger)"));
+        Assert.assertTrue(text.contains("ENTITY_LIGHTNING_STRIKE_BRIDGE_BEHAVIOUR.handleStrike(this, entityweatherstorm, this.fireTicks, 300)"));
+        Assert.assertTrue(text.contains("ENTITY_FIRE_DAMAGE_BRIDGE_BEHAVIOUR.resolveFireDamage(this, i)"));
+        Assert.assertTrue(text.contains("ENTITY_FALL_DISTANCE_BEHAVIOUR.update(d0, flag, this.fallDistance)"));
+        Assert.assertTrue(text.contains("fallDistanceUpdate.shouldApplyLandingEffect"));
+        Assert.assertTrue(text.contains("this.fallDistance = fallDistanceUpdate.updatedFallDistance;"));
+        Assert.assertTrue(text.contains("ENTITY_LAVA_DAMAGE_BRIDGE_BEHAVIOUR.resolveLavaContact(this, this.fireTicks)"));
+        Assert.assertTrue(text.contains("ENTITY_WORLD_BINDING_BEHAVIOUR.shouldUseFallbackWorld(world)"));
+        Assert.assertTrue(text.contains("ENTITY_WORLD_BINDING_BEHAVIOUR.resolveFallbackWorld()"));
+        Assert.assertTrue(text.contains("ENTITY_WORLD_BINDING_BEHAVIOUR.resolveWorld(world)"));
+        Assert.assertTrue(text.contains("ENTITY_WORLD_BINDING_BEHAVIOUR.resolvePlayerWorld(server, nbttagcompound, (EntityPlayer) this)"));
+        Assert.assertTrue(text.contains("ENTITY_SPATIAL_BEHAVIOUR.wrapPreviousYaw(this.lastYaw, f)"));
+        Assert.assertTrue(text.contains("ENTITY_SPATIAL_BEHAVIOUR.elevatedY(d1, this.height)"));
+        Assert.assertTrue(text.contains("ENTITY_SPATIAL_BEHAVIOUR.distanceToEntity(this.locX, this.locY, this.locZ, entity.locX, entity.locY, entity.locZ)"));
+        Assert.assertTrue(text.contains("ENTITY_SPATIAL_BEHAVIOUR.distanceSquared(this.locX, this.locY, this.locZ, d0, d1, d2)"));
+        Assert.assertTrue(text.contains("ENTITY_SPATIAL_BEHAVIOUR.distance(this.locX, this.locY, this.locZ, d0, d1, d2)"));
+        Assert.assertTrue(text.contains("ENTITY_SPATIAL_BEHAVIOUR.distanceSquared(this.locX, this.locY, this.locZ, entity.locX, entity.locY, entity.locZ)"));
+        Assert.assertTrue(text.contains("if (!pushVector.isZero())"));
+        Assert.assertTrue(text.contains("if (!motionDelta.isZero())"));
+        Assert.assertFalse(text.contains("if (Float.isNaN(f))"));
+        Assert.assertFalse(text.contains("if ((f == Float.POSITIVE_INFINITY) || (f == Float.NEGATIVE_INFINITY))"));
+        Assert.assertFalse(text.contains("if (Float.isNaN(f1))"));
+        Assert.assertFalse(text.contains("if ((f1 == Float.POSITIVE_INFINITY) || (f1 == Float.NEGATIVE_INFINITY))"));
+        Assert.assertFalse(text.contains("was caught trying to crash the server with an invalid yaw"));
+        Assert.assertFalse(text.contains("was caught trying to crash the server with an invalid pitch"));
+        Assert.assertFalse(text.contains("EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(entityweatherstorm.getBukkitEntity(), this.getBukkitEntity(), EntityDamageEvent.DamageCause.LIGHTNING, 5);"));
+        Assert.assertFalse(text.contains("Bukkit.getServer().getPluginManager().callEvent(event);"));
+        Assert.assertFalse(text.contains("this.burn(event.getDamage());"));
+        Assert.assertFalse(text.contains("EntityDamageEvent event = new EntityDamageEvent(this.getBukkitEntity(), EntityDamageEvent.DamageCause.FIRE, i);"));
+        Assert.assertFalse(text.contains("EntityDamageByBlockEvent event = new EntityDamageByBlockEvent(damager, damagee, EntityDamageEvent.DamageCause.LAVA, 4);"));
+        Assert.assertFalse(text.contains("AxisAlignedBB axisalignedbb = this.boundingBox.c(d0, d1, d2);"));
+        Assert.assertFalse(text.contains("return list.size() > 0 ? false : !this.world.c(axisalignedbb);"));
+        Assert.assertFalse(text.contains("return this.d(1);"));
+        Assert.assertFalse(text.contains("this.a(1, flag);"));
+        Assert.assertFalse(text.contains("if (this.fallDistance > 0.0F)"));
+        Assert.assertFalse(text.contains("this.fallDistance = (float) ((double) this.fallDistance - d0);"));
+        Assert.assertFalse(text.contains("return (this.datawatcher.a(0) & 1 << i) != 0;"));
+        Assert.assertFalse(text.contains("this.datawatcher.watch(0, Byte.valueOf((byte) (b0 | 1 << i)));"));
+        Assert.assertFalse(text.contains("this.datawatcher.watch(0, Byte.valueOf((byte) (b0 & ~(1 << i))));"));
+        Assert.assertFalse(text.contains("double d3 = (double) (this.lastYaw - f);"));
+        Assert.assertFalse(text.contains("this.bp = this.lastY = this.locY = d1 + (double) this.height;"));
+        Assert.assertFalse(text.contains("return MathHelper.c(f * f + f1 * f1 + f2 * f2);"));
+        Assert.assertFalse(text.contains("double d2 = MathHelper.a(d0, d1);"));
+        Assert.assertFalse(text.contains("d0 *= 0.05000000074505806D;"));
+        Assert.assertFalse(text.contains("if (!(this.getBukkitEntity() instanceof Vehicle))"));
+        Assert.assertFalse(text.contains("this.world = ((org.bukkit.craftbukkit.CraftWorld) Bukkit.getServer().getWorlds().get(0)).getHandle();"));
+        Assert.assertFalse(text.contains("String worldName = nbttagcompound.getString(\"World\");"));
+        Assert.assertFalse(text.contains("bworld = server.getWorld(uid);"));
+        Assert.assertFalse(text.contains("this.world.a(this.boundingBox.b(0.0D, -0.4000000059604645D, 0.0D).shrink(0.0010D, 0.0010D, 0.0010D), Material.WATER, this)"));
+        Assert.assertFalse(text.contains("this.world.a(this.boundingBox.b(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA)"));
+        Assert.assertFalse(text.contains("return this.bA || this.world.s(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ));"));
+        Assert.assertFalse(text.contains("double d0 = this.locY + (double) this.t();"));
+        Assert.assertFalse(text.contains("int l = this.world.getTypeId(i, j, k);"));
+        Assert.assertFalse(text.contains("BlockFluids.c(this.world.getData(i, j, k)) - 0.11111111F"));
+        Assert.assertFalse(text.contains("this.boundingBox.c(d0 - (double) f, d1 - (double) this.height + (double) this.br, d2 - (double) f, d0 + (double) f, d1 - (double) this.height + (double) this.br + (double) f1, d2 + (double) f);"));
+        Assert.assertFalse(text.contains("float f3 = MathHelper.c(f * f + f1 * f1);"));
+        Assert.assertFalse(text.contains("double d0 = (this.boundingBox.e - this.boundingBox.b) * 0.66D;"));
+        Assert.assertFalse(text.contains("float f1 = this.world.n(i, j, k);"));
+        Assert.assertFalse(text.contains("double[] adouble1 = adouble;"));
+        Assert.assertFalse(text.contains("float[] afloat1 = afloat;"));
+    }
+}

@@ -1,9 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.runtime.gui.PlayerListBoxBehaviour;
+
 import javax.swing.*;
-import java.util.Vector;
 
 public class PlayerListBox extends JList implements IUpdatePlayerListBox {
+    private static final PlayerListBoxBehaviour PLAYER_LIST_BOX_BEHAVIOUR = PlayerListBoxBehaviour.getInstance();
 
     private MinecraftServer a;
     private int b = 0;
@@ -14,14 +16,6 @@ public class PlayerListBox extends JList implements IUpdatePlayerListBox {
     }
 
     public void a() {
-        if (this.b++ % 20 == 0) {
-            Vector vector = new Vector();
-
-            for (int i = 0; i < this.a.serverConfigurationManager.players.size(); ++i) {
-                vector.add(((EntityPlayer) this.a.serverConfigurationManager.players.get(i)).name);
-            }
-
-            this.setListData(vector);
-        }
+        this.b = PLAYER_LIST_BOX_BEHAVIOUR.updateIfDue(this.a, this.b, this);
     }
 }

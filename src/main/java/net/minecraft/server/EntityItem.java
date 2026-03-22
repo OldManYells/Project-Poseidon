@@ -1,12 +1,13 @@
 package net.minecraft.server;
 
-import org.bukkit.Bukkit;
+import com.legacyminecraft.poseidon.entity.ItemEntityLifecycleBehaviour;
+import com.legacyminecraft.poseidon.entity.ItemEntityStateBehaviour;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
-import java.util.logging.Level;
-
 public class EntityItem extends Entity {
+    private static final ItemEntityStateBehaviour ITEM_ENTITY_STATE_BEHAVIOUR = ItemEntityStateBehaviour.getInstance();
+    private static final ItemEntityLifecycleBehaviour ITEM_ENTITY_LIFECYCLE_BEHAVIOUR = ItemEntityLifecycleBehaviour.getInstance();
 
     public ItemStack itemStack;
     private int e;
@@ -18,27 +19,22 @@ public class EntityItem extends Entity {
 
     public EntityItem(World world, double d0, double d1, double d2, ItemStack itemstack) {
         super(world);
-        this.b(0.25F, 0.25F);
-        this.height = this.width / 2.0F;
+        ITEM_ENTITY_STATE_BEHAVIOUR.initializeDefaultBounds(this);
         this.setPosition(d0, d1, d2);
-        this.itemStack = itemstack;
+        this.itemStack = ITEM_ENTITY_STATE_BEHAVIOUR.sanitizeInitialItemStack(itemstack);
         // CraftBukkit start - infinite item fix
-        if (this.itemStack.count <= -1) {
-            this.itemStack.count = 1;
-        }
+        this.itemStack = ITEM_ENTITY_STATE_BEHAVIOUR.sanitizeInitialItemStack(this.itemStack);
         // CraftBukkit end
-        // Project Poseidon start - kill ourselves if the item is null
-        if (this.itemStack.id < 0 ||  this.itemStack.id >= Item.byId.length || Item.byId[this.itemStack.id] == null) {
+        ItemEntityStateBehaviour.InitializationState initializationState = ITEM_ENTITY_STATE_BEHAVIOUR.initializeFromItemStack(this.itemStack, Item.byId.length);
+        this.itemStack = initializationState.itemStack;
+        if (initializationState.shouldDie) {
             this.die();
-            MinecraftException e = new MinecraftException("Unknown item id " + this.itemStack.id);
-            Bukkit.getLogger().log(Level.WARNING, "Created the EntityItem object with an unknown item: " + this.itemStack, e);
-            this.itemStack = new ItemStack(Block.STONE); // Workaround for the EntityTracker
         }
-        // Project Poseidon end
-        this.yaw = (float) (Math.random() * 360.0D);
-        this.motX = (double) ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D));
-        this.motY = 0.20000000298023224D;
-        this.motZ = (double) ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D));
+        ItemEntityStateBehaviour.MotionState motionState = ITEM_ENTITY_STATE_BEHAVIOUR.createInitialMotion(Math.random(), Math.random(), Math.random());
+        this.yaw = motionState.yaw;
+        this.motX = motionState.motX;
+        this.motY = motionState.motY;
+        this.motZ = motionState.motZ;
     }
 
     protected boolean n() {
@@ -47,8 +43,7 @@ public class EntityItem extends Entity {
 
     public EntityItem(World world) {
         super(world);
-        this.b(0.25F, 0.25F);
-        this.height = this.width / 2.0F;
+        ITEM_ENTITY_STATE_BEHAVIOUR.initializeDefaultBounds(this);
     }
 
     protected void b() {}
@@ -57,39 +52,27 @@ public class EntityItem extends Entity {
         super.m_();
         // CraftBukkit start
         int currentTick = (int) (System.currentTimeMillis() / 50);
-        this.pickupDelay -= (currentTick - this.lastTick);
-        this.lastTick = currentTick;
+        ItemEntityLifecycleBehaviour.TickClockState tickClockState = ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.updatePickupDelayClock(this.pickupDelay, currentTick, this.lastTick);
+        this.pickupDelay = tickClockState.pickupDelay;
+        this.lastTick = tickClockState.lastTick;
         // CraftBukkit end
-        // Project Poseidon start - kill ourselves if the item is null
-        if (this.itemStack.id < 0 || this.itemStack.id >= Item.byId.length || Item.byId[this.itemStack.id] == null) {
-            this.b = 6000_174; //TODO: Configurable lifetime of the EntityItem
+        if (ITEM_ENTITY_STATE_BEHAVIOUR.isInvalidItemStack(this.itemStack, Item.byId.length)) {
+            this.b = ITEM_ENTITY_STATE_BEHAVIOUR.invalidItemSentinelAge(); //TODO: Configurable lifetime of the EntityItem
             this.die();
         }
-        // Project Poseidon end
 
         this.lastX = this.locX;
         this.lastY = this.locY;
         this.lastZ = this.locZ;
         this.motY -= 0.03999999910593033D;
         if (this.world.getMaterial(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ)) == Material.LAVA) {
-            this.motY = 0.20000000298023224D;
-            this.motX = (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
-            this.motZ = (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
-            this.world.makeSound(this, "random.fizz", 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
+            ITEM_ENTITY_STATE_BEHAVIOUR.applyLavaBounce(this, this.random.nextFloat(), this.random.nextFloat(), this.random.nextFloat());
         }
 
         this.g(this.locX, (this.boundingBox.b + this.boundingBox.e) / 2.0D, this.locZ);
         this.move(this.motX, this.motY, this.motZ);
-        float f = 0.98F;
-
-        if (this.onGround) {
-            f = 0.58800006F;
-            int i = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
-
-            if (i > 0) {
-                f = Block.byId[i].frictionFactor * 0.98F;
-            }
-        }
+        int i = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
+        float f = ITEM_ENTITY_STATE_BEHAVIOUR.resolveGroundFriction(this.onGround, i);
 
         this.motX *= (double) f;
         this.motY *= 0.9800000190734863D;
@@ -100,7 +83,7 @@ public class EntityItem extends Entity {
 
         ++this.e;
         ++this.b;
-        if (this.b >= 6000) {
+        if (ITEM_ENTITY_STATE_BEHAVIOUR.shouldAttemptDespawn(this.b)) {
             //Project Poseidon Start
             if (CraftEventFactory.callItemDespawnEvent(this).isCancelled()) {
                 this.b = 0;
@@ -121,8 +104,8 @@ public class EntityItem extends Entity {
 
     public boolean damageEntity(Entity entity, int i) {
         this.af();
-        this.f -= i;
-        if (this.f <= 0) {
+        this.f = ITEM_ENTITY_STATE_BEHAVIOUR.applyDamageAndGetRemainingHealth(this.f, i);
+        if (ITEM_ENTITY_STATE_BEHAVIOUR.shouldDieFromHealth(this.f)) {
             this.die();
         }
 
@@ -130,17 +113,14 @@ public class EntityItem extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Health", (short) ((byte) this.f));
-        nbttagcompound.a("Age", (short) this.b);
-        nbttagcompound.a("Item", this.itemStack.a(new NBTTagCompound()));
+        ITEM_ENTITY_STATE_BEHAVIOUR.writeNbt(nbttagcompound, this.f, this.b, this.itemStack);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.f = nbttagcompound.d("Health") & 255;
-        this.b = nbttagcompound.d("Age");
-        NBTTagCompound nbttagcompound1 = nbttagcompound.k("Item");
-
-        this.itemStack = new ItemStack(nbttagcompound1);
+        ItemEntityStateBehaviour.LoadedNbtState loadedNbtState = ITEM_ENTITY_STATE_BEHAVIOUR.readNbt(nbttagcompound);
+        this.f = loadedNbtState.health;
+        this.b = loadedNbtState.age;
+        this.itemStack = loadedNbtState.itemStack;
     }
 
     public void b(EntityHuman entityhuman) {
@@ -149,37 +129,35 @@ public class EntityItem extends Entity {
 
             // CraftBukkit start
             int canHold = entityhuman.inventory.canHold(this.itemStack);
-            int remaining = this.itemStack.count - canHold;
-            if (this.pickupDelay <= 0 && canHold > 0) {
-                this.itemStack.count = canHold;
-                PlayerPickupItemEvent event = new PlayerPickupItemEvent((org.bukkit.entity.Player) entityhuman.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), remaining);
+            ItemEntityLifecycleBehaviour.PickupWindow pickupWindow = ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.computePickupWindow(this.pickupDelay, this.itemStack.count, canHold);
+            if (pickupWindow.shouldCallPickupEvent) {
+                this.itemStack.count = pickupWindow.canHold;
+                PlayerPickupItemEvent event = new PlayerPickupItemEvent((org.bukkit.entity.Player) entityhuman.getBukkitEntity(), (org.bukkit.entity.Item) this.getBukkitEntity(), pickupWindow.remaining);
                 this.world.getServer().getPluginManager().callEvent(event);
-                this.itemStack.count = canHold + remaining;
+                this.itemStack.count = ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.restoreStackCountAfterPickupProbe(pickupWindow);
 
                 if (event.isCancelled()) {
                     return;
                 }
 
                 // Possibly < 0; fix here so we do not have to modify code below
-                this.pickupDelay = 0;
+                this.pickupDelay = ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.normalizePickupDelayAfterEvent(event.isCancelled(), this.pickupDelay);
             }
             // CraftBukkit end
 
-            if (this.pickupDelay == 0 && entityhuman.inventory.pickup(this.itemStack)) {
-                if (this.itemStack.id == Block.LOG.id) {
-                    entityhuman.a((Statistic) AchievementList.g);
-                }
-
-                if (this.itemStack.id == Item.LEATHER.id) {
-                    entityhuman.a((Statistic) AchievementList.t);
-                }
-
-                this.world.makeSound(this, "random.pop", 0.2F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            if (ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.shouldTryInventoryPickup(this.pickupDelay) && entityhuman.inventory.pickup(this.itemStack)) {
+                ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.grantPickupAchievements(entityhuman, this.itemStack.id);
+                this.world.makeSound(this, "random.pop", 0.2F, ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.pickupSoundPitch(this.random.nextFloat(), this.random.nextFloat()));
                 entityhuman.receive(this, i);
-                if (this.itemStack.count <= 0) {
+                if (ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.shouldDieAfterPickup(this.itemStack)) {
                     this.die();
                 }
             }
         }
+    }
+
+    public void poseidonInitializeBounds() {
+        this.b(0.25F, 0.25F);
+        this.height = this.width / 2.0F;
     }
 }

@@ -1,27 +1,31 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.TntStateBehaviour;
+
 import java.util.Random;
 
 public class BlockTNT extends Block {
+    private final TntStateBehaviour tntStateService = TntStateBehaviour.getInstance();
 
     public BlockTNT(int i, int j) {
         super(i, j, Material.TNT);
     }
 
     public int a(int i) {
-        return i == 0 ? this.textureId + 2 : (i == 1 ? this.textureId + 1 : this.textureId);
+        return tntStateService.resolveTextureBySide(i, this.textureId);
     }
 
     public void c(World world, int i, int j, int k) {
         super.c(world, i, j, k);
-        if (world.isBlockIndirectlyPowered(i, j, k)) {
+        if (tntStateService.shouldPrimeOnPlacement(world.isBlockIndirectlyPowered(i, j, k))) {
             this.postBreak(world, i, j, k, 1);
             world.setTypeId(i, j, k, 0);
         }
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        if (l > 0 && Block.byId[l].isPowerSource() && world.isBlockIndirectlyPowered(i, j, k)) {
+        boolean neighborIsPowerSource = l > 0 && Block.byId[l].isPowerSource();
+        if (tntStateService.shouldPrimeOnPhysics(l, neighborIsPowerSource, world.isBlockIndirectlyPowered(i, j, k))) {
             this.postBreak(world, i, j, k, 1);
             world.setTypeId(i, j, k, 0);
         }
@@ -32,18 +36,28 @@ public class BlockTNT extends Block {
     }
 
     public void d(World world, int i, int j, int k) {
-        EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F));
+        EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(
+                world,
+                tntStateService.resolveCenteredSpawnCoordinate(i),
+                tntStateService.resolveCenteredSpawnCoordinate(j),
+                tntStateService.resolveCenteredSpawnCoordinate(k)
+        );
 
-        entitytntprimed.fuseTicks = world.random.nextInt(entitytntprimed.fuseTicks / 4) + entitytntprimed.fuseTicks / 8;
+        entitytntprimed.fuseTicks = tntStateService.resolveDispensedFuseTicks(world.random, entitytntprimed.fuseTicks);
         world.addEntity(entitytntprimed);
     }
 
     public void postBreak(World world, int i, int j, int k, int l) {
         if (!world.isStatic) {
-            if ((l & 1) == 0) {
+            if (tntStateService.shouldDropAsItem(l)) {
                 this.a(world, i, j, k, new ItemStack(Block.TNT.id, 1, 0));
             } else {
-                EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F));
+                EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(
+                        world,
+                        tntStateService.resolveCenteredSpawnCoordinate(i),
+                        tntStateService.resolveCenteredSpawnCoordinate(j),
+                        tntStateService.resolveCenteredSpawnCoordinate(k)
+                );
 
                 world.addEntity(entitytntprimed);
                 world.makeSound(entitytntprimed, "random.fuse", 1.0F, 1.0F);
@@ -52,7 +66,7 @@ public class BlockTNT extends Block {
     }
 
     public void b(World world, int i, int j, int k, EntityHuman entityhuman) {
-        if (entityhuman.G() != null && entityhuman.G().id == Item.FLINT_AND_STEEL.id) {
+        if (entityhuman.G() != null && tntStateService.shouldMarkIgnitedFromHeldItem(entityhuman.G().id, Item.FLINT_AND_STEEL.id)) {
             world.setRawData(i, j, k, 1);
         }
 

@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.path.PathEntityTraversalBehaviour;
+
 public class PathEntity {
+    private static final PathEntityTraversalBehaviour PATH_ENTITY_TRAVERSAL_BEHAVIOUR = PathEntityTraversalBehaviour.getInstance();
 
     private final PathPoint[] b;
     public final int a;
@@ -12,22 +15,18 @@ public class PathEntity {
     }
 
     public void a() {
-        ++this.c;
+        this.c = PATH_ENTITY_TRAVERSAL_BEHAVIOUR.advance(this.c);
     }
 
     public boolean b() {
-        return this.c >= this.b.length;
+        return PATH_ENTITY_TRAVERSAL_BEHAVIOUR.isFinished(this.c, this.b);
     }
 
     public PathPoint c() {
-        return this.a > 0 ? this.b[this.a - 1] : null;
+        return PATH_ENTITY_TRAVERSAL_BEHAVIOUR.getLastPoint(this.b, this.a);
     }
 
     public Vec3D a(Entity entity) {
-        double d0 = (double) this.b[this.c].a + (double) ((int) (entity.length + 1.0F)) * 0.5D;
-        double d1 = (double) this.b[this.c].b;
-        double d2 = (double) this.b[this.c].c + (double) ((int) (entity.length + 1.0F)) * 0.5D;
-
-        return Vec3D.create(d0, d1, d2);
+        return PATH_ENTITY_TRAVERSAL_BEHAVIOUR.getCurrentPosition(this.b, this.c, entity);
     }
 }

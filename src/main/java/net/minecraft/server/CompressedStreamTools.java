@@ -1,48 +1,27 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.nbt.NbtCompressionCodecService;
+
 import java.io.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public class CompressedStreamTools {
+    private static final NbtCompressionCodecService NBT_COMPRESSION_CODEC_SERVICE = NbtCompressionCodecService.getInstance();
 
     public CompressedStreamTools() {}
 
     public static NBTTagCompound a(InputStream inputstream) throws IOException {
-        DataInputStream datainputstream = new DataInputStream(new GZIPInputStream(inputstream));
-
-        NBTTagCompound nbttagcompound;
-
-        try {
-            nbttagcompound = a((DataInput) datainputstream);
-        } finally {
-            datainputstream.close();
-        }
-
-        return nbttagcompound;
+        return NBT_COMPRESSION_CODEC_SERVICE.readCompressed(inputstream);
     }
 
     public static void a(NBTTagCompound nbttagcompound, OutputStream outputstream) throws IOException {
-        DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(outputstream));
-
-        try {
-            a(nbttagcompound, (DataOutput) dataoutputstream);
-        } finally {
-            dataoutputstream.close();
-        }
+        NBT_COMPRESSION_CODEC_SERVICE.writeCompressed(nbttagcompound, outputstream);
     }
 
     public static NBTTagCompound a(DataInput datainput) throws IOException {
-        NBTBase nbtbase = NBTBase.b(datainput);
-
-        if (nbtbase instanceof NBTTagCompound) {
-            return (NBTTagCompound) nbtbase;
-        } else {
-            throw new IOException("Root tag must be a named compound tag");
-        }
+        return NBT_COMPRESSION_CODEC_SERVICE.readRootCompound(datainput);
     }
 
     public static void a(NBTTagCompound nbttagcompound, DataOutput dataoutput) throws IOException {
-        NBTBase.a(nbttagcompound, dataoutput);
+        NBT_COMPRESSION_CODEC_SERVICE.writeRootCompound(nbttagcompound, dataoutput);
     }
 }

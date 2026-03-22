@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +11,7 @@ public class Packet50PreChunk extends Packet {
     public int a;
     public int b;
     public boolean c;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet50PreChunk() {
         this.k = false;
@@ -22,15 +25,14 @@ public class Packet50PreChunk extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readInt();
-        this.c = datainputstream.read() != 0;
+        PacketDataCodec.Packet50Data packetData = packetDataCodec.readPacket50(datainputstream);
+        this.a = packetData.getChunkX();
+        this.b = packetData.getChunkZ();
+        this.c = packetData.isMode();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeInt(this.b);
-        dataoutputstream.write(this.c ? 1 : 0);
+        packetDataCodec.writePacket50(new PacketDataCodec.Packet50Data(this.a, this.b, this.c), dataoutputstream);
     }
 
     public void a(NetHandler nethandler) {
@@ -38,6 +40,6 @@ public class Packet50PreChunk extends Packet {
     }
 
     public int a() {
-        return 9;
+        return packetDataCodec.packet50Length();
     }
 }

@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.scheduler;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SchedulerTaskIdentityBehaviour;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -12,8 +13,8 @@ public class CraftTask implements Comparable<Object>, BukkitTask {
     private final Plugin owner;
     private final int idNumber;
 
-    private static Integer idCounter = 1;
-    private static Object idCounterSync = new Object();
+    private static final SchedulerTaskIdentityBehaviour schedulerTaskIdentityBehaviour =
+            SchedulerTaskIdentityBehaviour.getInstance();
 
     CraftTask(Plugin owner, Runnable task, boolean syncTask) {
         this(owner, task, syncTask, -1, -1);
@@ -33,10 +34,7 @@ public class CraftTask implements Comparable<Object>, BukkitTask {
     }
 
     static int getNextId() {
-        synchronized (idCounterSync) {
-            idCounter++;
-            return idCounter;
-        }
+        return schedulerTaskIdentityBehaviour.nextTaskId();
     }
 
     Runnable getTask() {
@@ -74,18 +72,15 @@ public class CraftTask implements Comparable<Object>, BukkitTask {
     public int compareTo(Object other) {
         if (!(other instanceof CraftTask)) {
             return 0;
-        } else {
-            CraftTask o = (CraftTask) other;
-            long timeDiff = executionTick - o.getExecutionTick();
-            if (timeDiff > 0) {
-                return 1;
-            } else if (timeDiff < 0) {
-                return -1;
-            } else {
-                CraftTask otherCraftTask = (CraftTask) other;
-                return getIdNumber() - otherCraftTask.getIdNumber();
-            }
         }
+
+        CraftTask otherTask = (CraftTask) other;
+        return schedulerTaskIdentityBehaviour.compareByExecutionThenId(
+                executionTick,
+                getIdNumber(),
+                otherTask.getExecutionTick(),
+                otherTask.getIdNumber()
+        );
     }
 
     @Override
@@ -100,11 +95,11 @@ public class CraftTask implements Comparable<Object>, BukkitTask {
         }
 
         CraftTask otherCraftTask = (CraftTask) other;
-        return otherCraftTask.getIdNumber() == getIdNumber();
+        return schedulerTaskIdentityBehaviour.sameTaskId(getIdNumber(), otherCraftTask.getIdNumber());
     }
 
     @Override
     public int hashCode() {
-        return getIdNumber();
+        return schedulerTaskIdentityBehaviour.hashCodeForTaskId(getIdNumber());
     }
 }

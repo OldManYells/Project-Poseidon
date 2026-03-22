@@ -1,10 +1,14 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.FrozenBlockMeltBehaviour;
+import com.legacyminecraft.poseidon.block.SnowLayerStateBehaviour;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 
 import java.util.Random;
 
 public class BlockSnow extends Block {
+    private final SnowLayerStateBehaviour snowLayerStateService = SnowLayerStateBehaviour.getInstance();
+    private final FrozenBlockMeltBehaviour frozenBlockMeltService = FrozenBlockMeltBehaviour.getInstance();
 
     protected BlockSnow(int i, int j) {
         super(i, j, Material.SNOW_LAYER);
@@ -13,9 +17,17 @@ public class BlockSnow extends Block {
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
-        int l = world.getData(i, j, k) & 7;
-
-        return l >= 3 ? AxisAlignedBB.b((double) i + this.minX, (double) j + this.minY, (double) k + this.minZ, (double) i + this.maxX, (double) ((float) j + 0.5F), (double) k + this.maxZ) : null;
+        return snowLayerStateService.resolveCollisionBox(
+                i,
+                j,
+                k,
+                world.getData(i, j, k),
+                this.minX,
+                this.minY,
+                this.minZ,
+                this.maxX,
+                this.maxZ
+        );
     }
 
     public boolean a() {
@@ -27,16 +39,14 @@ public class BlockSnow extends Block {
     }
 
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
-        int l = iblockaccess.getData(i, j, k) & 7;
-        float f = (float) (2 * (1 + l)) / 16.0F;
-
-        this.a(0.0F, 0.0F, 0.0F, 1.0F, f, 1.0F);
+        this.a(0.0F, 0.0F, 0.0F, 1.0F, snowLayerStateService.resolveSelectionHeight(iblockaccess.getData(i, j, k)), 1.0F);
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
         int l = world.getTypeId(i, j - 1, k);
+        Block block = l >= 0 && l < Block.byId.length ? Block.byId[l] : null;
 
-        return l != 0 && Block.byId[l].a() ? world.getMaterial(i, j - 1, k).isSolid() : false;
+        return snowLayerStateService.canPlace(l, block != null && block.a(), world.getMaterial(i, j - 1, k).isSolid());
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
@@ -54,11 +64,11 @@ public class BlockSnow extends Block {
     }
 
     public void a(World world, EntityHuman entityhuman, int i, int j, int k, int l) {
-        int i1 = Item.SNOW_BALL.id;
         float f = 0.7F;
-        double d0 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-        double d1 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-        double d2 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+        int i1 = snowLayerStateService.resolveDropItemId(Item.SNOW_BALL.id);
+        double d0 = snowLayerStateService.resolveDropOffset(world.random, f);
+        double d1 = snowLayerStateService.resolveDropOffset(world.random, f);
+        double d2 = snowLayerStateService.resolveDropOffset(world.random, f);
         EntityItem entityitem = new EntityItem(world, (double) i + d0, (double) j + d1, (double) k + d2, new ItemStack(i1, 1, 0));
 
         entityitem.pickupDelay = 10;
@@ -68,7 +78,7 @@ public class BlockSnow extends Block {
     }
 
     public int a(int i, Random random) {
-        return Item.SNOW_BALL.id;
+        return snowLayerStateService.resolveDropItemId(Item.SNOW_BALL.id);
     }
 
     public int a(Random random) {
@@ -76,7 +86,7 @@ public class BlockSnow extends Block {
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        if (world.a(EnumSkyBlock.BLOCK, i, j, k) > 11) {
+        if (frozenBlockMeltService.shouldMelt(world.a(EnumSkyBlock.BLOCK, i, j, k), frozenBlockMeltService.snowMeltThreshold())) {
             // CraftBukkit start
             if (CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(i, j, k), 0).isCancelled()) {
                 return;

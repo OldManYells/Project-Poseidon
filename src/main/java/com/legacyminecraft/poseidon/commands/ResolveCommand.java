@@ -6,7 +6,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
@@ -124,12 +123,13 @@ public class ResolveCommand extends Command {
     @SuppressWarnings("CatchMayIgnoreException")
     private SimpleCommandMap getCommandMap() {
         try {
-            if (Bukkit.getServer() instanceof CraftServer) {
-                CraftServer craftServer = (CraftServer) Bukkit.getServer();
-                Field commandMapField = CraftServer.class.getDeclaredField("commandMap");
-                commandMapField.setAccessible(true);
-                return (SimpleCommandMap) commandMapField.get(craftServer);
+            Object bukkitServer = Bukkit.getServer();
+            if (bukkitServer == null) {
+                return null;
             }
+            Field commandMapField = bukkitServer.getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            return (SimpleCommandMap) commandMapField.get(bukkitServer);
         } catch (Exception e) {
         }
         return null;

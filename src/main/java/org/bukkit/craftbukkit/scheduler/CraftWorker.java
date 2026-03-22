@@ -1,12 +1,16 @@
 package org.bukkit.craftbukkit.scheduler;
 
+import com.legacyminecraft.poseidon.compat.bukkit.SchedulerWorkerIdentityBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.SchedulerWorkerLifecycleBehaviour;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitWorker;
 
 public class CraftWorker implements Runnable, BukkitWorker {
 
-    private static int hashIdCounter = 1;
-    private static Object hashIdCounterSync = new Object();
+    private static final SchedulerWorkerIdentityBehaviour schedulerWorkerIdentityBehaviour =
+            SchedulerWorkerIdentityBehaviour.getInstance();
+    private static final SchedulerWorkerLifecycleBehaviour schedulerWorkerLifecycleBehaviour =
+            SchedulerWorkerLifecycleBehaviour.getInstance();
 
     private final int hashId;
 
@@ -24,22 +28,15 @@ public class CraftWorker implements Runnable, BukkitWorker {
         this.task = task;
         this.owner = owner;
         this.hashId = CraftWorker.getNextHashId();
-        t = new Thread(this);
-        t.start();
+        t = schedulerWorkerLifecycleBehaviour.startWorkerThread(this);
     }
 
     public void run() {
-
-        try {
-            task.run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        synchronized (parent.workers) {
-            parent.workers.remove(this);
-        }
-
+        schedulerWorkerLifecycleBehaviour.executeWithCleanup(task, new Runnable() {
+            public void run() {
+                parent.removeWorker(CraftWorker.this);
+            }
+        });
     }
 
     public int getTaskId() {
@@ -55,22 +52,20 @@ public class CraftWorker implements Runnable, BukkitWorker {
     }
 
     public void interrupt() {
-        t.interrupt();
+        schedulerWorkerLifecycleBehaviour.interrupt(t);
     }
 
     public boolean isAlive() {
-        return t.isAlive();
+        return schedulerWorkerLifecycleBehaviour.isAlive(t);
     }
 
     private static int getNextHashId() {
-        synchronized (hashIdCounterSync) {
-            return hashIdCounter++;
-        }
+        return schedulerWorkerIdentityBehaviour.nextWorkerHashId();
     }
 
     @Override
     public int hashCode() {
-        return hashId;
+        return schedulerWorkerIdentityBehaviour.hashCodeForHashId(hashId);
     }
 
     @Override
@@ -84,7 +79,7 @@ public class CraftWorker implements Runnable, BukkitWorker {
         }
 
         CraftWorker otherCraftWorker = (CraftWorker) other;
-        return otherCraftWorker.hashCode() == hashId;
+        return schedulerWorkerIdentityBehaviour.sameHashId(hashId, otherCraftWorker.hashCode());
     }
 
 }

@@ -1,6 +1,8 @@
 
 package org.bukkit.craftbukkit;
 
+import com.legacyminecraft.poseidon.compat.bukkit.LoggerOutputFlushBehaviour;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -10,6 +12,7 @@ public class LoggerOutputStream extends ByteArrayOutputStream {
     private final String separator = System.getProperty("line.separator");
     private final Logger logger;
     private final Level level;
+    private final LoggerOutputFlushBehaviour loggerOutputFlushBehaviour = LoggerOutputFlushBehaviour.getInstance();
 
     public LoggerOutputStream(Logger logger, Level level) {
         super();
@@ -19,14 +22,6 @@ public class LoggerOutputStream extends ByteArrayOutputStream {
 
     @Override
     public void flush() throws IOException {
-        synchronized (this) {
-            super.flush();
-            String record = this.toString();
-            super.reset();
-
-            if ((record.length() > 0) && (!record.equals(separator))) {
-                logger.logp(level, "", "", record);
-            }
-        }
+        loggerOutputFlushBehaviour.flush(this, this.separator, this.logger, this.level);
     }
 }

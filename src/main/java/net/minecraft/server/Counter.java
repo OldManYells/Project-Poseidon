@@ -1,3 +1,6 @@
 package net.minecraft.server;
 
-public interface Counter {}
+import com.legacyminecraft.poseidon.world.stats.CounterContract;
+
+public interface Counter extends CounterContract {
+}

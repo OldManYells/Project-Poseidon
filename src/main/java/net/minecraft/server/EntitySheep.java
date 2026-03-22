@@ -1,10 +1,13 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.entity.SheepLifecycleBehaviour;
+
 import java.util.Random;
 
 public class EntitySheep extends EntityAnimal {
+    private static final SheepLifecycleBehaviour SHEEP_LIFECYCLE_BEHAVIOUR = SheepLifecycleBehaviour.getInstance();
 
-    public static final float[][] a = new float[][] { { 1.0F, 1.0F, 1.0F}, { 0.95F, 0.7F, 0.2F}, { 0.9F, 0.5F, 0.85F}, { 0.6F, 0.7F, 0.95F}, { 0.9F, 0.9F, 0.2F}, { 0.5F, 0.8F, 0.1F}, { 0.95F, 0.7F, 0.8F}, { 0.3F, 0.3F, 0.3F}, { 0.6F, 0.6F, 0.6F}, { 0.3F, 0.6F, 0.7F}, { 0.7F, 0.4F, 0.9F}, { 0.2F, 0.4F, 0.8F}, { 0.5F, 0.4F, 0.3F}, { 0.4F, 0.5F, 0.2F}, { 0.8F, 0.3F, 0.3F}, { 0.1F, 0.1F, 0.1F}};
+    public static final float[][] a = SheepLifecycleBehaviour.WOOL_COLORS;
 
     public EntitySheep(World world) {
         super(world);
@@ -14,7 +17,7 @@ public class EntitySheep extends EntityAnimal {
 
     protected void b() {
         super.b();
-        this.datawatcher.a(16, new Byte((byte) 0));
+        this.datawatcher.a(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(SHEEP_LIFECYCLE_BEHAVIOUR.createInitialFlags()));
     }
 
     public boolean damageEntity(Entity entity, int i) {
@@ -22,50 +25,15 @@ public class EntitySheep extends EntityAnimal {
     }
 
     protected void q() {
-        // CraftBukkit start - whole method
-        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
-
-        if (!this.isSheared()) {
-            loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.WOOL, 1, (short) 0, (byte) this.getColor()));
-        }
-
-        org.bukkit.World bworld = this.world.getWorld();
-        org.bukkit.entity.Entity entity = this.getBukkitEntity();
-
-        org.bukkit.event.entity.EntityDeathEvent event = new org.bukkit.event.entity.EntityDeathEvent(entity, loot);
-        this.world.getServer().getPluginManager().callEvent(event);
-
-        for (org.bukkit.inventory.ItemStack stack: event.getDrops()) {
-            bworld.dropItemNaturally(entity.getLocation(), stack);
-        }
-        // CraftBukkit end
+        SHEEP_LIFECYCLE_BEHAVIOUR.dropDeathLoot(this);
     }
 
     protected int j() {
-        return Block.WOOL.id;
+        return SHEEP_LIFECYCLE_BEHAVIOUR.getDropBlockId();
     }
 
     public boolean a(EntityHuman entityhuman) {
-        ItemStack itemstack = entityhuman.inventory.getItemInHand();
-
-        if (itemstack != null && itemstack.id == Item.SHEARS.id && !this.isSheared()) {
-            if (!this.world.isStatic) {
-                this.setSheared(true);
-                int i = 2 + this.random.nextInt(3);
-
-                for (int j = 0; j < i; ++j) {
-                    EntityItem entityitem = this.a(new ItemStack(Block.WOOL.id, 1, this.getColor()), 1.0F);
-
-                    entityitem.motY += (double) (this.random.nextFloat() * 0.05F);
-                    entityitem.motX += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
-                    entityitem.motZ += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
-                }
-            }
-
-            itemstack.damage(1, entityhuman);
-        }
-
-        return false;
+        return SHEEP_LIFECYCLE_BEHAVIOUR.tryShear(this, entityhuman, entityhuman.inventory.getItemInHand(), this.random);
     }
 
     public void b(NBTTagCompound nbttagcompound) {
@@ -81,44 +49,36 @@ public class EntitySheep extends EntityAnimal {
     }
 
     protected String g() {
-        return "mob.sheep";
+        return SHEEP_LIFECYCLE_BEHAVIOUR.getAmbientSound();
     }
 
     protected String h() {
-        return "mob.sheep";
+        return SHEEP_LIFECYCLE_BEHAVIOUR.getHurtSound();
     }
 
     protected String i() {
-        return "mob.sheep";
+        return SHEEP_LIFECYCLE_BEHAVIOUR.getDeathSound();
     }
 
     public int getColor() {
-        return this.datawatcher.a(16) & 15;
+        return SHEEP_LIFECYCLE_BEHAVIOUR.getColor(this.datawatcher.a(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex()));
     }
 
     public void setColor(int i) {
-        byte b0 = this.datawatcher.a(16);
-
-        this.datawatcher.watch(16, Byte.valueOf((byte) (b0 & 240 | i & 15)));
+        byte flags = this.datawatcher.a(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex());
+        this.datawatcher.watch(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(SHEEP_LIFECYCLE_BEHAVIOUR.withColor(flags, i)));
     }
 
     public boolean isSheared() {
-        return (this.datawatcher.a(16) & 16) != 0;
+        return SHEEP_LIFECYCLE_BEHAVIOUR.isSheared(this.datawatcher.a(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex()));
     }
 
     public void setSheared(boolean flag) {
-        byte b0 = this.datawatcher.a(16);
-
-        if (flag) {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 | 16)));
-        } else {
-            this.datawatcher.watch(16, Byte.valueOf((byte) (b0 & -17)));
-        }
+        byte flags = this.datawatcher.a(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex());
+        this.datawatcher.watch(SHEEP_LIFECYCLE_BEHAVIOUR.getFlagsWatcherIndex(), Byte.valueOf(SHEEP_LIFECYCLE_BEHAVIOUR.withSheared(flags, flag)));
     }
 
     public static int a(Random random) {
-        int i = random.nextInt(100);
-
-        return i < 5 ? 15 : (i < 10 ? 7 : (i < 15 ? 8 : (i < 18 ? 12 : (random.nextInt(500) == 0 ? 6 : 0))));
+        return SHEEP_LIFECYCLE_BEHAVIOUR.chooseSpawnColor(random);
     }
 }

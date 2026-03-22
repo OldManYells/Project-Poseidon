@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public interface IBlockAccess {
+import com.legacyminecraft.poseidon.world.BlockAccessContract;
+
+public interface IBlockAccess extends BlockAccessContract {
 
     int getTypeId(int i, int j, int k);
 
@@ -11,4 +13,8 @@ public interface IBlockAccess {
     Material getMaterial(int i, int j, int k);
 
     boolean e(int i, int j, int k);
+
+    default boolean isOpaqueCube(int x, int y, int z) {
+        return this.e(x, y, z);
+    }
 }

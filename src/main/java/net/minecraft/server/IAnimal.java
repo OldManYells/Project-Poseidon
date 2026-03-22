@@ -1,3 +1,6 @@
 package net.minecraft.server;
 
-public interface IAnimal {}
+import com.legacyminecraft.poseidon.entity.AnimalMarkerContract;
+
+public interface IAnimal extends AnimalMarkerContract {
+}

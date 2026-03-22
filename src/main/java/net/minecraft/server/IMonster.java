@@ -1,3 +1,6 @@
 package net.minecraft.server;
 
-public interface IMonster extends IAnimal {}
+import com.legacyminecraft.poseidon.entity.MonsterMarkerContract;
+
+public interface IMonster extends IAnimal, MonsterMarkerContract {
+}

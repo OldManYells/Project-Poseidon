@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.world.gen.MapGenerationSeedingBehaviour;
+
 import java.util.Random;
 
 public class MapGenBase {
+    private static final MapGenerationSeedingBehaviour MAP_GENERATION_SEEDING_BEHAVIOUR = MapGenerationSeedingBehaviour.getInstance();
 
     protected int a = 8;
     protected Random b = new Random();
@@ -10,18 +13,11 @@ public class MapGenBase {
     public MapGenBase() {}
 
     public void a(IChunkProvider ichunkprovider, World world, int i, int j, byte[] abyte) {
-        int k = this.a;
-
-        this.b.setSeed(world.getSeed());
-        long l = this.b.nextLong() / 2L * 2L + 1L;
-        long i1 = this.b.nextLong() / 2L * 2L + 1L;
-
-        for (int j1 = i - k; j1 <= i + k; ++j1) {
-            for (int k1 = j - k; k1 <= j + k; ++k1) {
-                this.b.setSeed((long) j1 * l + (long) k1 * i1 ^ world.getSeed());
-                this.a(world, j1, k1, i, j, abyte);
+        MAP_GENERATION_SEEDING_BEHAVIOUR.run(this.a, this.b, world, i, j, abyte, new MapGenerationSeedingBehaviour.GenerationCallback() {
+            public void generate(World callbackWorld, int chunkX, int chunkZ, int originX, int originZ, byte[] blockData) {
+                MapGenBase.this.a(callbackWorld, chunkX, chunkZ, originX, originZ, blockData);
             }
-        }
+        });
     }
 
     protected void a(World world, int i, int j, int k, int l, byte[] abyte) {}

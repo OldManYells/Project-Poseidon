@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +12,7 @@ public class Packet1Login extends Packet {
     public String name;
     public long c;
     public byte d;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet1Login() {}
 
@@ -21,17 +24,18 @@ public class Packet1Login extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.name = a(datainputstream, 16);
-        this.c = datainputstream.readLong();
-        this.d = datainputstream.readByte();
+        PacketDataCodec.Packet1Data packetData = packetDataCodec.readPacket1(datainputstream);
+        this.a = packetData.getProtocolVersion();
+        this.name = packetData.getUsername();
+        this.c = packetData.getMapSeed();
+        this.d = packetData.getDimension();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        a(this.name, dataoutputstream);
-        dataoutputstream.writeLong(this.c);
-        dataoutputstream.writeByte(this.d);
+        packetDataCodec.writePacket1(
+                new PacketDataCodec.Packet1Data(this.a, this.name, this.c, this.d),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -39,6 +43,6 @@ public class Packet1Login extends Packet {
     }
 
     public int a() {
-        return 4 + this.name.length() + 4 + 5;
+        return packetDataCodec.packet1Length(this.name);
     }
 }

@@ -1,18 +1,17 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.inventory.LargeChestInventoryBehaviour;
+
 public class InventoryLargeChest implements IInventory {
 
     private String a;
     private IInventory b;
     private IInventory c;
+    private final LargeChestInventoryBehaviour largeChestInventoryService = LargeChestInventoryBehaviour.getInstance();
 
     // CraftBukkit start
     public ItemStack[] getContents() {
-        ItemStack[] result = new ItemStack[this.getSize()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = this.getItem(i);
-        }
-        return result;
+        return largeChestInventoryService.getContents(this.b, this.c);
     }
     // CraftBukkit end
 
@@ -23,7 +22,7 @@ public class InventoryLargeChest implements IInventory {
     }
 
     public int getSize() {
-        return this.b.getSize() + this.c.getSize();
+        return largeChestInventoryService.getSize(this.b, this.c);
     }
 
     public String getName() {
@@ -31,19 +30,15 @@ public class InventoryLargeChest implements IInventory {
     }
 
     public ItemStack getItem(int i) {
-        return i >= this.b.getSize() ? this.c.getItem(i - this.b.getSize()) : this.b.getItem(i);
+        return largeChestInventoryService.getItem(this.b, this.c, i);
     }
 
     public ItemStack splitStack(int i, int j) {
-        return i >= this.b.getSize() ? this.c.splitStack(i - this.b.getSize(), j) : this.b.splitStack(i, j);
+        return largeChestInventoryService.splitStack(this.b, this.c, i, j);
     }
 
     public void setItem(int i, ItemStack itemstack) {
-        if (i >= this.b.getSize()) {
-            this.c.setItem(i - this.b.getSize(), itemstack);
-        } else {
-            this.b.setItem(i, itemstack);
-        }
+        largeChestInventoryService.setItem(this.b, this.c, i, itemstack);
     }
 
     public int getMaxStackSize() {
@@ -51,11 +46,10 @@ public class InventoryLargeChest implements IInventory {
     }
 
     public void update() {
-        this.b.update();
-        this.c.update();
+        largeChestInventoryService.update(this.b, this.c);
     }
 
     public boolean a_(EntityHuman entityhuman) {
-        return this.b.a_(entityhuman) && this.c.a_(entityhuman);
+        return largeChestInventoryService.canUse(this.b, this.c, entityhuman);
     }
 }

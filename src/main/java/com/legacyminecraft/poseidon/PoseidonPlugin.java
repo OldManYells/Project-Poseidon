@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon;
 
 import com.avaje.ebean.EbeanServer;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -8,16 +9,27 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
 import java.io.File;
 
-public class PoseidonPlugin implements Plugin {
+/**
+ * Internal virtual plugin used as an owner for scheduler tasks during migration.
+ */
+public final class PoseidonPlugin implements Plugin {
+    private static final PoseidonPlugin INSTANCE = new PoseidonPlugin();
+    private static final PluginDescriptionFile DESCRIPTION =
+            new PluginDescriptionFile("PoseidonInternal", "1.0.0", "com.legacyminecraft.poseidon.PoseidonPlugin");
 
+    private final File dataFolder = new File("plugins/PoseidonInternal");
+    private volatile boolean naggable = false;
 
+    private PoseidonPlugin() {
+    }
 
-
+    public static PoseidonPlugin getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -26,12 +38,15 @@ public class PoseidonPlugin implements Plugin {
 
     @Override
     public File getDataFolder() {
-        return null;
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
+        }
+        return dataFolder;
     }
 
     @Override
     public PluginDescriptionFile getDescription() {
-        return null;
+        return DESCRIPTION;
     }
 
     @Override
@@ -46,37 +61,34 @@ public class PoseidonPlugin implements Plugin {
 
     @Override
     public Server getServer() {
-        return null;
+        return Bukkit.getServer();
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 
     @Override
     public void onDisable() {
-
     }
 
     @Override
     public void onLoad() {
-
     }
 
     @Override
     public void onEnable() {
-
     }
 
     @Override
     public boolean isNaggable() {
-        return false;
+        return naggable;
     }
 
     @Override
     public void setNaggable(boolean canNag) {
-
+        this.naggable = canNag;
     }
 
     @Override

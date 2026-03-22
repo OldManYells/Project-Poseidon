@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.runtime.SleepForeverSystem;
+
 public class ThreadSleepForever extends Thread {
 
     final MinecraftServer a;
+    private final SleepForeverSystem sleepForeverSystem = SleepForeverSystem.getInstance();
 
     public ThreadSleepForever(MinecraftServer minecraftserver) {
         this.a = minecraftserver;
@@ -11,14 +14,6 @@ public class ThreadSleepForever extends Thread {
     }
 
     public void run() {
-        while (true) {
-            try {
-                while (true) {
-                    Thread.sleep(2147483647L);
-                }
-            } catch (InterruptedException interruptedexception) {
-                ;
-            }
-        }
+        sleepForeverSystem.sleepForever();
     }
 }

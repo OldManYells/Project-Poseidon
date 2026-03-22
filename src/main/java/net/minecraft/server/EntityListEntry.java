@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
-class EntityListEntry {
+import com.legacyminecraft.poseidon.entity.EntityListEntryBehaviour;
+
+public class EntityListEntry {
+    private static final EntityListEntryBehaviour ENTITY_LIST_ENTRY_BEHAVIOUR = EntityListEntryBehaviour.getInstance();
 
     final int a;
     Object b;
@@ -23,31 +26,38 @@ class EntityListEntry {
     }
 
     public final boolean equals(Object object) {
-        if (!(object instanceof EntityListEntry)) {
-            return false;
-        } else {
-            EntityListEntry entitylistentry = (EntityListEntry) object;
-            Integer integer = Integer.valueOf(this.a());
-            Integer integer1 = Integer.valueOf(entitylistentry.a());
-
-            if (integer == integer1 || integer != null && integer.equals(integer1)) {
-                Object object1 = this.b();
-                Object object2 = entitylistentry.b();
-
-                if (object1 == object2 || object1 != null && object1.equals(object2)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        return ENTITY_LIST_ENTRY_BEHAVIOUR.equalsEntry(this, object);
     }
 
     public final int hashCode() {
-        return EntityList.f(this.a);
+        return ENTITY_LIST_ENTRY_BEHAVIOUR.hashCode(this);
     }
 
     public final String toString() {
-        return this.a() + "=" + this.b();
+        return ENTITY_LIST_ENTRY_BEHAVIOUR.stringify(this);
+    }
+
+    public final int poseidonGetSlot() {
+        return this.a;
+    }
+
+    public final Object poseidonGetValue() {
+        return this.b;
+    }
+
+    public final void poseidonSetValue(Object value) {
+        this.b = value;
+    }
+
+    public final EntityListEntry poseidonGetNext() {
+        return this.c;
+    }
+
+    public final void poseidonSetNext(EntityListEntry next) {
+        this.c = next;
+    }
+
+    public final int poseidonGetHash() {
+        return this.d;
     }
 }

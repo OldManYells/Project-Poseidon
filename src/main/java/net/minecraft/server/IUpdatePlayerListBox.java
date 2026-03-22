@@ -1,6 +1,12 @@
 package net.minecraft.server;
 
-public interface IUpdatePlayerListBox {
+import com.legacyminecraft.poseidon.runtime.PlayerListTickContract;
+
+public interface IUpdatePlayerListBox extends PlayerListTickContract {
 
     void a();
+
+    default void tick() {
+        this.a();
+    }
 }

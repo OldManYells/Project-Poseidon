@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.nbt.NbtCollectionCodecService;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -10,36 +12,19 @@ public class NBTTagList extends NBTBase {
 
     private List a = new ArrayList();
     private byte b;
+    private final NbtCollectionCodecService nbtCollectionCodec = NbtCollectionCodecService.getInstance();
 
     public NBTTagList() {}
 
     void a(DataOutput dataoutput) throws IOException {
-        if (this.a.size() > 0) {
-            this.b = ((NBTBase) this.a.get(0)).a();
-        } else {
-            this.b = 1;
-        }
-
-        dataoutput.writeByte(this.b);
-        dataoutput.writeInt(this.a.size());
-
-        for (int i = 0; i < this.a.size(); ++i) {
-            ((NBTBase) this.a.get(i)).a(dataoutput);
-        }
+        NbtCollectionCodecService.ListWriteResult writeResult = nbtCollectionCodec.writeList(this.a, dataoutput);
+        this.b = writeResult.getListType();
     }
 
     void a(DataInput datainput) throws IOException {
-        this.b = datainput.readByte();
-        int i = datainput.readInt();
-
-        this.a = new ArrayList();
-
-        for (int j = 0; j < i; ++j) {
-            NBTBase nbtbase = NBTBase.a(this.b);
-
-            nbtbase.a(datainput);
-            this.a.add(nbtbase);
-        }
+        NbtCollectionCodecService.ListReadResult readResult = nbtCollectionCodec.readList(datainput);
+        this.b = readResult.getListType();
+        this.a = readResult.getEntries();
     }
 
     public byte a() {

@@ -1,11 +1,16 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.PistonExtensionGeometryBehaviour;
+import com.legacyminecraft.poseidon.block.PistonExtensionLifecycleBehaviour;
+
 import java.util.ArrayList;
 import java.util.Random;
 
 public class BlockPistonExtension extends Block {
 
     private int a = -1;
+    private final PistonExtensionGeometryBehaviour pistonExtensionGeometryService = PistonExtensionGeometryBehaviour.getInstance();
+    private final PistonExtensionLifecycleBehaviour pistonExtensionLifecycleService = PistonExtensionLifecycleBehaviour.getInstance();
 
     public BlockPistonExtension(int i, int j) {
         super(i, j, Material.PISTON);
@@ -15,28 +20,11 @@ public class BlockPistonExtension extends Block {
 
     public void remove(World world, int i, int j, int k) {
         super.remove(world, i, j, k);
-        int l = world.getData(i, j, k);
-        if (l < 0 || l == 6 || l == 7 || l > 13) return; // CraftBukkit - fixed a piston AIOOBE issue.
-        int i1 = PistonBlockTextures.a[b(l)];
-
-        i += PistonBlockTextures.b[i1];
-        j += PistonBlockTextures.c[i1];
-        k += PistonBlockTextures.d[i1];
-        int j1 = world.getTypeId(i, j, k);
-
-        if (j1 == Block.PISTON.id || j1 == Block.PISTON_STICKY.id) {
-            l = world.getData(i, j, k);
-            if (BlockPiston.d(l)) {
-                Block.byId[j1].g(world, i, j, k, l);
-                world.setTypeId(i, j, k, 0);
-            }
-        }
+        pistonExtensionLifecycleService.removeAttachedPistonBaseIfNecessary(world, i, j, k, world.getData(i, j, k));
     }
 
     public int a(int i, int j) {
-        int k = b(j);
-
-        return i == k ? (this.a >= 0 ? this.a : ((j & 8) != 0 ? this.textureId - 1 : this.textureId)) : (i == PistonBlockTextures.a[k] ? 107 : 108);
+        return pistonExtensionGeometryService.resolveTextureIndex(i, j, this.a, this.textureId);
     }
 
     public boolean a() {
@@ -60,48 +48,12 @@ public class BlockPistonExtension extends Block {
     }
 
     public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, ArrayList arraylist) {
-        int l = world.getData(i, j, k);
-
-        switch (b(l)) {
-        case 0:
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 0.25F, 1.0F);
+        PistonExtensionGeometryBehaviour.CollisionShapePair shapes =
+                pistonExtensionGeometryService.resolveCollisionShapes(world.getData(i, j, k));
+        if (shapes != null) {
+            this.applyBounds(shapes.getPrimary());
             super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.375F, 0.25F, 0.375F, 0.625F, 1.0F, 0.625F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            break;
-
-        case 1:
-            this.a(0.0F, 0.75F, 0.0F, 1.0F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.375F, 0.0F, 0.375F, 0.625F, 0.75F, 0.625F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            break;
-
-        case 2:
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.25F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.25F, 0.375F, 0.25F, 0.75F, 0.625F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            break;
-
-        case 3:
-            this.a(0.0F, 0.0F, 0.75F, 1.0F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.25F, 0.375F, 0.0F, 0.75F, 0.625F, 0.75F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            break;
-
-        case 4:
-            this.a(0.0F, 0.0F, 0.0F, 0.25F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.375F, 0.25F, 0.25F, 0.625F, 0.75F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            break;
-
-        case 5:
-            this.a(0.75F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-            super.a(world, i, j, k, axisalignedbb, arraylist);
-            this.a(0.0F, 0.375F, 0.25F, 0.75F, 0.625F, 0.75F);
+            this.applyBounds(shapes.getSecondary());
             super.a(world, i, j, k, axisalignedbb, arraylist);
         }
 
@@ -109,47 +61,29 @@ public class BlockPistonExtension extends Block {
     }
 
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
-        int l = iblockaccess.getData(i, j, k);
-
-        switch (b(l)) {
-        case 0:
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 0.25F, 1.0F);
-            break;
-
-        case 1:
-            this.a(0.0F, 0.75F, 0.0F, 1.0F, 1.0F, 1.0F);
-            break;
-
-        case 2:
-            this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.25F);
-            break;
-
-        case 3:
-            this.a(0.0F, 0.0F, 0.75F, 1.0F, 1.0F, 1.0F);
-            break;
-
-        case 4:
-            this.a(0.0F, 0.0F, 0.0F, 0.25F, 1.0F, 1.0F);
-            break;
-
-        case 5:
-            this.a(0.75F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+        PistonExtensionGeometryBehaviour.Bounds bounds =
+                pistonExtensionGeometryService.resolveOutlineShape(iblockaccess.getData(i, j, k));
+        if (bounds != null) {
+            this.applyBounds(bounds);
         }
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
-        int i1 = b(world.getData(i, j, k));
-        if (i1 > 5 || i1 < 0) return; // CraftBukkit - fixed a piston AIOOBE issue.
-        int j1 = world.getTypeId(i - PistonBlockTextures.b[i1], j - PistonBlockTextures.c[i1], k - PistonBlockTextures.d[i1]);
-
-        if (j1 != Block.PISTON.id && j1 != Block.PISTON_STICKY.id) {
-            world.setTypeId(i, j, k, 0);
-        } else {
-            Block.byId[j1].doPhysics(world, i - PistonBlockTextures.b[i1], j - PistonBlockTextures.c[i1], k - PistonBlockTextures.d[i1], l);
-        }
+        pistonExtensionLifecycleService.validateOrBreakExtension(world, i, j, k, l, world.getData(i, j, k));
     }
 
     public static int b(int i) {
-        return i & 7;
+        return PistonExtensionGeometryBehaviour.getInstance().extractFacing(i);
+    }
+
+    private void applyBounds(PistonExtensionGeometryBehaviour.Bounds bounds) {
+        this.a(
+                bounds.getMinX(),
+                bounds.getMinY(),
+                bounds.getMinZ(),
+                bounds.getMaxX(),
+                bounds.getMaxY(),
+                bounds.getMaxZ()
+        );
     }
 }

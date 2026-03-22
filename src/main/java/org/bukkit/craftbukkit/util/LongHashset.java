@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit.util;
 
+import com.legacyminecraft.poseidon.compat.bukkit.LongHashBucketIndexBehaviour;
+
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -7,6 +9,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import static org.bukkit.craftbukkit.util.Java15Compat.Arrays_copyOf;
 
 public class LongHashset extends LongHash {
+    private static final LongHashBucketIndexBehaviour LONG_HASH_BUCKET_INDEX_BEHAVIOUR =
+            LongHashBucketIndexBehaviour.getInstance();
     long[][][] values = new long[256][][];
     int count = 0;
     ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
@@ -29,11 +33,11 @@ public class LongHashset extends LongHash {
     public void add(long key) {
         wl.lock();
         try {
-            int mainIdx = (int) (key & 255);
+            int mainIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key);
             long outer[][] = this.values[mainIdx];
             if (outer == null) this.values[mainIdx] = outer = new long[256][];
 
-            int outerIdx = (int) ((key >> 32) & 255);
+            int outerIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
             long inner[] = outer[outerIdx];
 
             if (inner == null) {
@@ -62,10 +66,10 @@ public class LongHashset extends LongHash {
     public boolean containsKey(long key) {
         rl.lock();
         try {
-            long[][] outer = this.values[(int) (key & 255)];
+            long[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
             if (outer == null) return false;
 
-            long[] inner = outer[(int) ((key >> 32) & 255)];
+            long[] inner = outer[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key)];
             if (inner == null) return false;
 
             for (long entry: inner) {
@@ -80,10 +84,11 @@ public class LongHashset extends LongHash {
     public void remove(long key) {
         wl.lock();
         try {
-            long[][] outer = this.values[(int) (key & 255)];
+            int outerIndex = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
+            long[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
             if (outer == null) return;
 
-            long[] inner = outer[(int) ((key >> 32) & 255)];
+            long[] inner = outer[outerIndex];
             if (inner == null) return;
 
             int max = inner.length - 1;
@@ -94,7 +99,7 @@ public class LongHashset extends LongHash {
                         inner[i] = inner[max];
                     }
 
-                    outer[(int) ((key >> 32) & 255)] = (max == 0 ? null : Arrays_copyOf(inner, max));
+                    outer[outerIndex] = (max == 0 ? null : Arrays_copyOf(inner, max));
                     return;
                 }
             }

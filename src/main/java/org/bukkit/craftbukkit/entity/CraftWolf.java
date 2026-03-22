@@ -1,13 +1,14 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.poseidon.compat.bukkit.WolfStateBehaviour;
 import net.minecraft.server.EntityWolf;
-import net.minecraft.server.PathEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 
 public class CraftWolf extends CraftAnimals implements Wolf {
+    private static final WolfStateBehaviour WOLF_STATE_BEHAVIOUR = WolfStateBehaviour.getInstance();
+
     private AnimalTamer owner;
 
     public CraftWolf(CraftServer server, EntityWolf wolf) {
@@ -15,57 +16,36 @@ public class CraftWolf extends CraftAnimals implements Wolf {
     }
 
     public boolean isAngry() {
-        return getHandle().isAngry();
+        return WOLF_STATE_BEHAVIOUR.isAngry(getHandle());
     }
 
     public void setAngry(boolean angry) {
-        getHandle().setAngry(angry);
+        WOLF_STATE_BEHAVIOUR.setAngry(getHandle(), angry);
     }
 
     public boolean isSitting() {
-        return getHandle().isSitting();
+        return WOLF_STATE_BEHAVIOUR.isSitting(getHandle());
     }
 
     public void setSitting(boolean sitting) {
-        getHandle().setSitting(sitting);
-        // TODO determine what the following would do - it is affected every time a player makes their wolf sit or stand
-        // getHandle().ay = false;
-        setPath((PathEntity) null);
+        WOLF_STATE_BEHAVIOUR.setSitting(getHandle(), sitting);
     }
 
     public boolean isTamed() {
-        return getHandle().isTamed();
+        return WOLF_STATE_BEHAVIOUR.isTamed(getHandle());
     }
 
     public void setTamed(boolean tame) {
-        getHandle().setTamed(tame);
+        WOLF_STATE_BEHAVIOUR.setTamed(getHandle(), tame);
     }
 
     public AnimalTamer getOwner() {
-        // If the wolf has a previously set owner use that, otherwise try and find the player who owns it
-        if (owner == null) {
-            // TODO try and recover owner from persistence store before defaulting to playername
-            owner = getServer().getPlayer(getOwnerName());
-        }
+        owner = WOLF_STATE_BEHAVIOUR.resolveOwner(owner, getServer(), getOwnerName());
         return owner;
     }
 
     public void setOwner(AnimalTamer tamer) {
-        owner = tamer;
-        if (owner != null) {
-            setTamed(true); /* Make him tame */
-            setPath((PathEntity) null); /* Clear path */
-            /* Set owner */
-            // TODO persist owner to the persistence store
-            if (owner instanceof Player) {
-                setOwnerName(((Player) owner).getName());
-            } else {
-                setOwnerName("");
-            }
-        } else {
-            setTamed(false); /* Make him not tame */
-            setOwnerName(""); /* Clear owner */
-        }
+        owner = WOLF_STATE_BEHAVIOUR.applyOwner(getHandle(), tamer);
     }
 
     /**
@@ -74,20 +54,11 @@ public class CraftWolf extends CraftAnimals implements Wolf {
      * @return the owner's name, if they are a player; otherwise, the empty string or null.
      */
     String getOwnerName() {
-        return getHandle().getOwnerName();
+        return WOLF_STATE_BEHAVIOUR.getOwnerName(getHandle());
     }
 
     void setOwnerName(String ownerName) {
-        getHandle().setOwnerName(ownerName);
-    }
-
-    /**
-     * Only used internally at the moment, and there to set the path to null (that is stop the thing from running around)
-     * TODO use this later to extend the API, when we have Path classes in Bukkit
-     * @param pathentity currently the MC defined PathEntity class. Should be replaced with an API interface at some point.
-     */
-    private void setPath(PathEntity pathentity) {
-        getHandle().setPathEntity(pathentity);
+        WOLF_STATE_BEHAVIOUR.setOwnerName(getHandle(), ownerName);
     }
 
     /*

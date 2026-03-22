@@ -1,8 +1,13 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
+import com.legacyminecraft.poseidon.block.PistonMovementChainBehaviour;
+import com.legacyminecraft.poseidon.block.PistonPowerQueryBehaviour;
+import com.legacyminecraft.poseidon.block.PistonPowerTransitionBehaviour;
+import com.legacyminecraft.poseidon.block.PistonPushabilityBehaviour;
+import com.legacyminecraft.poseidon.block.PistonStateBehaviour;
+import com.legacyminecraft.poseidon.block.PistonStickyRetractionBehaviour;
+import com.legacyminecraft.poseidon.compat.bukkit.PistonEventBridgeBehaviour;
 
 import java.util.ArrayList;
 
@@ -13,6 +18,37 @@ public class BlockPiston extends Block {
 
     private boolean a;
     private boolean b;
+    private static final PistonStateBehaviour PISTON_STATE_BEHAVIOUR = PistonStateBehaviour.getInstance();
+    private static final PistonPowerQueryBehaviour PISTON_POWER_QUERY_BEHAVIOUR = PistonPowerQueryBehaviour.getInstance();
+    private static final PistonPushabilityBehaviour PISTON_PUSHABILITY_BEHAVIOUR = PistonPushabilityBehaviour.getInstance();
+    private static final PistonMovementChainBehaviour PISTON_MOVEMENT_CHAIN_BEHAVIOUR = PistonMovementChainBehaviour.getInstance();
+    private static final PistonPowerTransitionBehaviour PISTON_POWER_TRANSITION_BEHAVIOUR = PistonPowerTransitionBehaviour.getInstance();
+    private static final PistonStickyRetractionBehaviour PISTON_STICKY_RETRACTION_BEHAVIOUR = PistonStickyRetractionBehaviour.getInstance();
+    private static final PistonEventBridgeBehaviour PISTON_EVENT_BRIDGE_BEHAVIOUR = PistonEventBridgeBehaviour.getInstance();
+    private static final PistonMovementChainBehaviour.PushabilityQuery MOVEMENT_CHAIN_PUSHABILITY_QUERY =
+            new PistonMovementChainBehaviour.PushabilityQuery() {
+                public boolean canPush(int blockId, World queryWorld, int x, int y, int z, boolean allowDestroy) {
+                    return a(blockId, queryWorld, x, y, z, allowDestroy);
+                }
+            };
+    private static final PistonStickyRetractionBehaviour.PushabilityQuery STICKY_RETRACTION_PUSHABILITY_QUERY =
+            new PistonStickyRetractionBehaviour.PushabilityQuery() {
+                public boolean canPush(int blockId, World queryWorld, int x, int y, int z, boolean allowDestroy) {
+                    return a(blockId, queryWorld, x, y, z, allowDestroy);
+                }
+            };
+    private static final PistonMovementChainBehaviour.BlockClearAction RAW_AIR_CLEAR_ACTION =
+            new PistonMovementChainBehaviour.BlockClearAction() {
+                public void clear(World clearWorld, int x, int y, int z) {
+                    clearWorld.setRawTypeId(x, y, z, 0);
+                }
+            };
+    private static final PistonMovementChainBehaviour.BlockClearAction TYPE_AIR_CLEAR_ACTION =
+            new PistonMovementChainBehaviour.BlockClearAction() {
+                public void clear(World clearWorld, int x, int y, int z) {
+                    clearWorld.setTypeId(x, y, z, 0);
+                }
+            };
 
     public BlockPiston(int i, int j, boolean flag) {
         super(i, j, Material.PISTON);
@@ -22,9 +58,13 @@ public class BlockPiston extends Block {
     }
 
     public int a(int i, int j) {
-        int k = c(j);
-
-        return k > 5 ? this.textureId : (i == k ? (!d(j) && this.minX <= 0.0D && this.minY <= 0.0D && this.minZ <= 0.0D && this.maxX >= 1.0D && this.maxY >= 1.0D && this.maxZ >= 1.0D ? this.textureId : 110) : (i == PistonBlockTextures.a[k] ? 109 : 108));
+        return PISTON_STATE_BEHAVIOUR.resolveTextureIndex(
+                i,
+                j,
+                this.textureId,
+                this.minX <= 0.0D && this.minY <= 0.0D && this.minZ <= 0.0D
+                        && this.maxX >= 1.0D && this.maxY >= 1.0D && this.maxZ >= 1.0D
+        );
     }
 
     public boolean a() {
@@ -60,9 +100,10 @@ public class BlockPiston extends Block {
         int l = world.getData(i, j, k);
         int i1 = c(l);
         boolean flag = this.f(world, i, j, k, i1);
+        PistonPowerTransitionBehaviour.Transition transition =
+                PISTON_POWER_TRANSITION_BEHAVIOUR.resolveTransition(l, flag, d(l));
 
-        if (l != 7) {
-            if (flag && !d(l)) {
+        if (transition == PistonPowerTransitionBehaviour.Transition.EXTEND) {
                 // CraftBukkit start
                 int length;
                 try {
@@ -72,39 +113,38 @@ public class BlockPiston extends Block {
                     return;
                 }
                 if (length >= 0) {
-                    org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
-
-                    BlockPistonExtendEvent event = new BlockPistonExtendEvent(block, length);
-                    world.getServer().getPluginManager().callEvent(event);
-
-                    if (event.isCancelled()) {
+                    if (!PISTON_EVENT_BRIDGE_BEHAVIOUR.isExtendAllowed(world, i, j, k, length)) {
                         return;
                     }
                     // CraftBukkit end
 
-                    world.setRawData(i, j, k, i1 | 8);
+                    world.setRawData(i, j, k, PISTON_POWER_TRANSITION_BEHAVIOUR.composeExtendedData(i1));
                     world.playNote(i, j, k, 0, i1);
                 }
-            } else if (!flag && d(l)) {
+        } else if (transition == PistonPowerTransitionBehaviour.Transition.RETRACT) {
                 // CraftBukkit start
-                org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
-
-                BlockPistonRetractEvent event = new BlockPistonRetractEvent(block);
-                world.getServer().getPluginManager().callEvent(event);
-
-                if (event.isCancelled()) {
+                if (!PISTON_EVENT_BRIDGE_BEHAVIOUR.isRetractAllowed(world, i, j, k)) {
                     return;
                 }
                 // CraftBukkit end
 
-                world.setRawData(i, j, k, i1);
+                world.setRawData(i, j, k, PISTON_POWER_TRANSITION_BEHAVIOUR.composeRetractedData(i1));
                 world.playNote(i, j, k, 1, i1);
-            }
         }
     }
 
     private boolean f(World world, int i, int j, int k, int l) {
-        return l != 0 && world.isBlockFaceIndirectlyPowered(i, j - 1, k, 0) ? true : (l != 1 && world.isBlockFaceIndirectlyPowered(i, j + 1, k, 1) ? true : (l != 2 && world.isBlockFaceIndirectlyPowered(i, j, k - 1, 2) ? true : (l != 3 && world.isBlockFaceIndirectlyPowered(i, j, k + 1, 3) ? true : (l != 5 && world.isBlockFaceIndirectlyPowered(i + 1, j, k, 5) ? true : (l != 4 && world.isBlockFaceIndirectlyPowered(i - 1, j, k, 4) ? true : (world.isBlockFaceIndirectlyPowered(i, j, k, 0) ? true : (world.isBlockFaceIndirectlyPowered(i, j + 2, k, 1) ? true : (world.isBlockFaceIndirectlyPowered(i, j + 1, k - 1, 2) ? true : (world.isBlockFaceIndirectlyPowered(i, j + 1, k + 1, 3) ? true : (world.isBlockFaceIndirectlyPowered(i - 1, j + 1, k, 4) ? true : world.isBlockFaceIndirectlyPowered(i + 1, j + 1, k, 5)))))))))));
+        return PISTON_POWER_QUERY_BEHAVIOUR.isIndirectlyPoweredExceptFacing(
+                new PistonPowerQueryBehaviour.IndirectPowerQuery() {
+                    public boolean isBlockFaceIndirectlyPowered(int x, int y, int z, int face) {
+                        return world.isBlockFaceIndirectlyPowered(x, y, z, face);
+                    }
+                },
+                i,
+                j,
+                k,
+                l
+        );
     }
 
     public void a(World world, int i, int j, int k, int l, int i1) {
@@ -124,40 +164,41 @@ public class BlockPiston extends Block {
             world.setRawTypeIdAndData(i, j, k, Block.PISTON_MOVING.id, i1);
             world.setTileEntity(i, j, k, BlockPistonMoving.a(this.id, i1, i1, false, true));
             if (this.a) {
-                int j1 = i + PistonBlockTextures.b[i1] * 2;
-                int k1 = j + PistonBlockTextures.c[i1] * 2;
-                int l1 = k + PistonBlockTextures.d[i1] * 2;
-                int i2 = world.getTypeId(j1, k1, l1);
-                int j2 = world.getData(j1, k1, l1);
-                boolean flag = false;
+                PistonStickyRetractionBehaviour.RetractionPositions retractionPositions =
+                        PISTON_STICKY_RETRACTION_BEHAVIOUR.resolveRetractionPositions(i, j, k, i1);
+                PistonStickyRetractionBehaviour.PulledBlockState pulledBlockState =
+                        PISTON_STICKY_RETRACTION_BEHAVIOUR.resolvePulledBlockState(
+                                world,
+                                retractionPositions.getPullX(),
+                                retractionPositions.getPullY(),
+                                retractionPositions.getPullZ(),
+                                i1
+                        );
 
-                if (i2 == Block.PISTON_MOVING.id) {
-                    TileEntity tileentity1 = world.getTileEntity(j1, k1, l1);
-
-                    if (tileentity1 != null && tileentity1 instanceof TileEntityPiston) {
-                        TileEntityPiston tileentitypiston = (TileEntityPiston) tileentity1;
-
-                        if (tileentitypiston.d() == i1 && tileentitypiston.c()) {
-                            tileentitypiston.k();
-                            i2 = tileentitypiston.a();
-                            j2 = tileentitypiston.e();
-                            flag = true;
-                        }
-                    }
-                }
-
-                if (!flag && i2 > 0 && a(i2, world, j1, k1, l1, false) && (Block.byId[i2].e() == 0 || i2 == Block.PISTON.id || i2 == Block.PISTON_STICKY.id)) {
+                if (PISTON_STICKY_RETRACTION_BEHAVIOUR.shouldPullBlock(
+                        pulledBlockState,
+                        world,
+                        retractionPositions.getPullX(),
+                        retractionPositions.getPullY(),
+                        retractionPositions.getPullZ(),
+                        STICKY_RETRACTION_PUSHABILITY_QUERY
+                )) {
                     this.b = false;
-                    world.setTypeId(j1, k1, l1, 0);
+                    world.setTypeId(retractionPositions.getPullX(), retractionPositions.getPullY(), retractionPositions.getPullZ(), 0);
                     this.b = true;
                     i += PistonBlockTextures.b[i1];
                     j += PistonBlockTextures.c[i1];
                     k += PistonBlockTextures.d[i1];
-                    world.setRawTypeIdAndData(i, j, k, Block.PISTON_MOVING.id, j2);
-                    world.setTileEntity(i, j, k, BlockPistonMoving.a(i2, j2, i1, false, false));
-                } else if (!flag) {
+                    world.setRawTypeIdAndData(i, j, k, Block.PISTON_MOVING.id, pulledBlockState.getBlockData());
+                    world.setTileEntity(i, j, k, BlockPistonMoving.a(pulledBlockState.getBlockId(), pulledBlockState.getBlockData(), i1, false, false));
+                } else if (PISTON_STICKY_RETRACTION_BEHAVIOUR.shouldClearAdjacentBlock(pulledBlockState)) {
                     this.b = false;
-                    world.setTypeId(i + PistonBlockTextures.b[i1], j + PistonBlockTextures.c[i1], k + PistonBlockTextures.d[i1], 0);
+                    world.setTypeId(
+                            retractionPositions.getAdjacentX(),
+                            retractionPositions.getAdjacentY(),
+                            retractionPositions.getAdjacentZ(),
+                            0
+                    );
                     this.b = true;
                 }
             } else {
@@ -175,34 +216,20 @@ public class BlockPiston extends Block {
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
         int l = iblockaccess.getData(i, j, k);
 
-        if (d(l)) {
-            switch (c(l)) {
-                case 0:
-                    this.a(0.0F, 0.25F, 0.0F, 1.0F, 1.0F, 1.0F);
-                    break;
-
-                case 1:
-                    this.a(0.0F, 0.0F, 0.0F, 1.0F, 0.75F, 1.0F);
-                    break;
-
-                case 2:
-                    this.a(0.0F, 0.0F, 0.25F, 1.0F, 1.0F, 1.0F);
-                    break;
-
-                case 3:
-                    this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.75F);
-                    break;
-
-                case 4:
-                    this.a(0.25F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-                    break;
-
-                case 5:
-                    this.a(0.0F, 0.0F, 0.0F, 0.75F, 1.0F, 1.0F);
-            }
-        } else {
+        PistonStateBehaviour.Bounds extendedBounds = PISTON_STATE_BEHAVIOUR.resolveExtendedBounds(l);
+        if (extendedBounds == null) {
             this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+            return;
         }
+
+        this.a(
+                extendedBounds.getMinX(),
+                extendedBounds.getMinY(),
+                extendedBounds.getMinZ(),
+                extendedBounds.getMaxX(),
+                extendedBounds.getMaxY(),
+                extendedBounds.getMaxZ()
+        );
     }
 
     public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, ArrayList arraylist) {
@@ -215,160 +242,42 @@ public class BlockPiston extends Block {
     }
 
     public static int c(int i) {
-        return i & 7;
+        return PISTON_STATE_BEHAVIOUR.extractFacing(i);
     }
 
     public static boolean d(int i) {
-        return (i & 8) != 0;
+        return PISTON_STATE_BEHAVIOUR.isExtended(i);
     }
 
     private static int c(World world, int i, int j, int k, EntityHuman entityhuman) {
-        if (MathHelper.abs((float) entityhuman.locX - (float) i) < 2.0F && MathHelper.abs((float) entityhuman.locZ - (float) k) < 2.0F) {
-            double d0 = entityhuman.locY + 1.82D - (double) entityhuman.height;
-
-            if (d0 - (double) j > 2.0D) {
-                return 1;
-            }
-
-            if ((double) j - d0 > 0.0D) {
-                return 0;
-            }
-        }
-
-        int l = MathHelper.floor((double) (entityhuman.yaw * 4.0F / 360.0F) + 0.5D) & 3;
-
-        return l == 0 ? 2 : (l == 1 ? 5 : (l == 2 ? 3 : (l == 3 ? 4 : 0)));
+        return PISTON_STATE_BEHAVIOUR.resolvePlacedFacing(entityhuman, i, j, k);
     }
 
     private static boolean a(int i, World world, int j, int k, int l, boolean flag) {
-        if (i == Block.OBSIDIAN.id) {
-            return false;
-        } else if ((i == Block.FURNACE.id || i == Block.BURNING_FURNACE.id) && PoseidonConfig.getInstance().getBoolean("world.settings.block-pistons-pushing-furnaces.enabled", true)) {
-//            System.out.println("Blocking a piston from being pushed.");
-            return false;
-        } else {
-            if (i != Block.PISTON.id && i != Block.PISTON_STICKY.id) {
-                if (Block.byId[i].j() == -1.0F) {
-                    return false;
-                }
-
-                if (Block.byId[i].e() == 2) {
-                    return false;
-                }
-
-                if (!flag && Block.byId[i].e() == 1) {
-                    return false;
-                }
-            } else if (d(world.getData(j, k, l))) {
-                return false;
-            }
-
-            TileEntity tileentity = world.getTileEntity(j, k, l);
-
-            return tileentity == null;
-        }
+        return PISTON_PUSHABILITY_BEHAVIOUR.canPushBlock(i, world, j, k, l, flag);
     }
 
     // CraftBukkkit boolean -> int
     private static int h(World world, int i, int j, int k, int l) {
-        int i1 = i + PistonBlockTextures.b[l];
-        int j1 = j + PistonBlockTextures.c[l];
-        int k1 = k + PistonBlockTextures.d[l];
-        int l1 = 0;
-
-        while (true) {
-            if (l1 < 13) {
-                if (j1 <= 0 || j1 >= 127) {
-                    return -1; // CraftBukkit
-                }
-
-                int i2 = world.getTypeId(i1, j1, k1);
-
-                if (i2 != 0) {
-                    if (!a(i2, world, i1, j1, k1, true)) {
-                        return -1; // CraftBukkit
-                    }
-
-                    if (Block.byId[i2].e() != 1) {
-                        if (l1 == 12) {
-                            return -1; // CraftBukkit
-                        }
-
-                        i1 += PistonBlockTextures.b[l];
-                        j1 += PistonBlockTextures.c[l];
-                        k1 += PistonBlockTextures.d[l];
-                        ++l1;
-                        continue;
-                    }
-                }
-            }
-
-            return l1; // CraftBukkit
-        }
+        return PISTON_MOVEMENT_CHAIN_BEHAVIOUR.calculateExtensionLength(world, i, j, k, l,
+                MOVEMENT_CHAIN_PUSHABILITY_QUERY);
     }
 
     private boolean i(World world, int i, int j, int k, int l) {
-        int i1 = i + PistonBlockTextures.b[l];
-        int j1 = j + PistonBlockTextures.c[l];
-        int k1 = k + PistonBlockTextures.d[l];
-        int l1 = 0;
-
-        while (true) {
-            int i2;
-
-            if (l1 < 13) {
-                if (j1 <= 0 || j1 >= 127) {
-                    return false;
-                }
-
-                i2 = world.getTypeId(i1, j1, k1);
-                if (i2 != 0) {
-                    if (!a(i2, world, i1, j1, k1, true)) {
-                        return false;
-                    }
-
-                    if (Block.byId[i2].e() != 1) {
-                        if (l1 == 12) {
-                            return false;
-                        }
-
-                        i1 += PistonBlockTextures.b[l];
-                        j1 += PistonBlockTextures.c[l];
-                        k1 += PistonBlockTextures.d[l];
-                        ++l1;
-                        continue;
-                    }
-
-                    Block.byId[i2].g(world, i1, j1, k1, world.getData(i1, j1, k1));
-                    if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true)) {
-                        world.setRawTypeId(i1, j1, k1, 0);
-                    } else {
-                        world.setTypeId(i1, j1, k1, 0);
-                    }
-                }
-            }
-
-            while (i1 != i || j1 != j || k1 != k) {
-                l1 = i1 - PistonBlockTextures.b[l];
-                i2 = j1 - PistonBlockTextures.c[l];
-                int j2 = k1 - PistonBlockTextures.d[l];
-                int k2 = world.getTypeId(l1, i2, j2);
-                int l2 = world.getData(l1, i2, j2);
-
-                if (k2 == this.id && l1 == i && i2 == j && j2 == k) {
-                    world.setRawTypeIdAndData(i1, j1, k1, Block.PISTON_MOVING.id, l | (this.a ? 8 : 0));
-                    world.setTileEntity(i1, j1, k1, BlockPistonMoving.a(Block.PISTON_EXTENSION.id, l | (this.a ? 8 : 0), l, true, false));
-                } else {
-                    world.setRawTypeIdAndData(i1, j1, k1, Block.PISTON_MOVING.id, l2);
-                    world.setTileEntity(i1, j1, k1, BlockPistonMoving.a(k2, l2, l, true, false));
-                }
-
-                i1 = l1;
-                j1 = i2;
-                k1 = j2;
-            }
-
-            return true;
-        }
+        final boolean useRawAirClear = PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true);
+        PistonMovementChainBehaviour.BlockClearAction blockClearAction = useRawAirClear
+                ? RAW_AIR_CLEAR_ACTION
+                : TYPE_AIR_CLEAR_ACTION;
+        return PISTON_MOVEMENT_CHAIN_BEHAVIOUR.extendWithMovingBlocks(
+                world,
+                i,
+                j,
+                k,
+                l,
+                this.id,
+                this.a,
+                MOVEMENT_CHAIN_PUSHABILITY_QUERY,
+                blockClearAction
+        );
     }
 }

@@ -1,5 +1,6 @@
 package org.bukkit.event.player;
 
+import com.legacyminecraft.poseidon.auth.login.LoginPauseController;
 import com.projectposeidon.johnymuffin.ConnectionPause;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
 import org.bukkit.event.Event;
@@ -15,11 +16,21 @@ public class PlayerPreLoginEvent extends Event {
     private String message;
     private String name;
     private InetAddress ipAddress;
-    private LoginProcessHandler loginProcessHandler; // Project Poseidon
+    private LoginPauseController loginProcessHandler; // Project Poseidon
+    private Object legacyLoginProcessHandler;
 
     public PlayerPreLoginEvent(String name, InetAddress ipAddress, LoginProcessHandler loginProcessHandler) {
+        this(name, ipAddress, (LoginPauseController) loginProcessHandler, loginProcessHandler);
+    }
+
+    public PlayerPreLoginEvent(String name, InetAddress ipAddress, LoginPauseController loginProcessHandler) {
+        this(name, ipAddress, loginProcessHandler, null);
+    }
+
+    public PlayerPreLoginEvent(String name, InetAddress ipAddress, LoginPauseController loginProcessHandler, Object legacyLoginProcessHandler) {
         super(Type.PLAYER_PRELOGIN);
         this.loginProcessHandler = loginProcessHandler;
+        this.legacyLoginProcessHandler = legacyLoginProcessHandler;
         this.result = Result.ALLOWED;
         this.message = "";
         this.name = name;
@@ -36,14 +47,18 @@ public class PlayerPreLoginEvent extends Event {
      * @return ConnectionPause Object, used to remove a connection pause
      */
     public ConnectionPause addConnectionPause(Plugin plugin, String connectionPauseName) {
-        return loginProcessHandler.addConnectionInterrupt(plugin, connectionPauseName);
+        com.legacyminecraft.poseidon.auth.login.ConnectionPause pause = loginProcessHandler.createConnectionPause(plugin, connectionPauseName);
+        return ConnectionPause.fromCanonical(pause, loginProcessHandler, getLoginProcessHandler());
     }
 
     /**
      * Remove a pause for your plugin by the returned ConnectionPause object
      */
     public void removeConnectionPause(ConnectionPause connectionPause) {
-        loginProcessHandler.removeConnectionPause(connectionPause);
+        if (connectionPause == null) {
+            return;
+        }
+        loginProcessHandler.clearConnectionPause(connectionPause.getCanonicalConnectionPause());
     }
 
     /**
@@ -57,7 +72,7 @@ public class PlayerPreLoginEvent extends Event {
      * See if the players connection currently paused
      */
     public boolean isPlayerConnectionPaused() {
-        return loginProcessHandler.isPlayerConnectionPaused();
+        return loginProcessHandler.hasActiveConnectionPause();
     }
 
     /**
@@ -67,7 +82,10 @@ public class PlayerPreLoginEvent extends Event {
      */
     @Deprecated
     public LoginProcessHandler getLoginProcessHandler() {
-        return loginProcessHandler;
+        if (legacyLoginProcessHandler instanceof LoginProcessHandler) {
+            return (LoginProcessHandler) legacyLoginProcessHandler;
+        }
+        return null;
     }
 
     //Project Poseidon End

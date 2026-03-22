@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +11,7 @@ public class Packet103SetSlot extends Packet {
     public int a;
     public int b;
     public ItemStack c;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet103SetSlot() {}
 
@@ -23,33 +26,28 @@ public class Packet103SetSlot extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readByte();
-        this.b = datainputstream.readShort();
-        short short1 = datainputstream.readShort();
-
-        if (short1 >= 0) {
-            byte b0 = datainputstream.readByte();
-            short short2 = datainputstream.readShort();
-
-            this.c = new ItemStack(short1, b0, short2);
-        } else {
+        PacketDataCodec.Packet103Data packetData = packetDataCodec.readPacket103(datainputstream);
+        this.a = packetData.getWindowId();
+        this.b = packetData.getSlot();
+        PacketDataCodec.ItemSlotData itemSlot = packetData.getItemSlot();
+        if (itemSlot == null) {
             this.c = null;
+        } else {
+            this.c = new ItemStack(itemSlot.getItemId(), itemSlot.getCount(), itemSlot.getData());
         }
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeByte(this.a);
-        dataoutputstream.writeShort(this.b);
-        if (this.c == null) {
-            dataoutputstream.writeShort(-1);
-        } else {
-            dataoutputstream.writeShort(this.c.id);
-            dataoutputstream.writeByte(this.c.count);
-            dataoutputstream.writeShort(this.c.getData());
-        }
+        PacketDataCodec.ItemSlotData itemSlot = this.c == null
+                ? null
+                : new PacketDataCodec.ItemSlotData((short) this.c.id, this.c.count, (short) this.c.getData());
+        packetDataCodec.writePacket103(
+                new PacketDataCodec.Packet103Data(this.a, this.b, itemSlot),
+                dataoutputstream
+        );
     }
 
     public int a() {
-        return 8;
+        return packetDataCodec.packet103Length();
     }
 }

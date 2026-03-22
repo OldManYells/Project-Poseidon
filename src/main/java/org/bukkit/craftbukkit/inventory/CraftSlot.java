@@ -1,10 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
 
+import com.legacyminecraft.poseidon.compat.bukkit.InventorySlotBridgeBehaviour;
 import net.minecraft.server.Slot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftSlot implements org.bukkit.inventory.Slot {
+    private static final InventorySlotBridgeBehaviour INVENTORY_SLOT_BRIDGE_BEHAVIOUR =
+            InventorySlotBridgeBehaviour.getInstance();
     private final Slot slot;
 
     public CraftSlot(Slot slot) {
@@ -12,7 +15,7 @@ public class CraftSlot implements org.bukkit.inventory.Slot {
     }
 
     public Inventory getInventory() {
-        return new CraftInventory(slot.inventory);
+        return INVENTORY_SLOT_BRIDGE_BEHAVIOUR.getInventory(slot);
     }
 
     public int getIndex() {
@@ -20,6 +23,6 @@ public class CraftSlot implements org.bukkit.inventory.Slot {
     }
 
     public ItemStack getItem() {
-        return new CraftItemStack(slot.getItem());
+        return INVENTORY_SLOT_BRIDGE_BEHAVIOUR.getItem(slot);
     }
 }

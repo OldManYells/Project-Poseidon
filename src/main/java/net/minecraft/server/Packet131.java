@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.packet.PacketDataCodec;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +11,7 @@ public class Packet131 extends Packet {
     public short a;
     public short b;
     public byte[] c;
+    private final PacketDataCodec packetDataCodec = PacketDataCodec.getInstance();
 
     public Packet131() {
         this.k = true;
@@ -22,17 +25,17 @@ public class Packet131 extends Packet {
     }
 
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readShort();
-        this.b = datainputstream.readShort();
-        this.c = new byte[datainputstream.readByte() & 255];
-        datainputstream.readFully(this.c);
+        PacketDataCodec.Packet131Data data = packetDataCodec.readPacket131(datainputstream);
+        this.a = data.getItemId();
+        this.b = data.getDamage();
+        this.c = data.getPayload();
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeShort(this.a);
-        dataoutputstream.writeShort(this.b);
-        dataoutputstream.writeByte(this.c.length);
-        dataoutputstream.write(this.c);
+        packetDataCodec.writePacket131(
+                new PacketDataCodec.Packet131Data(this.a, this.b, this.c),
+                dataoutputstream
+        );
     }
 
     public void a(NetHandler nethandler) {
@@ -40,6 +43,6 @@ public class Packet131 extends Packet {
     }
 
     public int a() {
-        return 4 + this.c.length;
+        return packetDataCodec.packet131Length(this.c);
     }
 }

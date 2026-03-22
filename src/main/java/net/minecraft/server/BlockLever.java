@@ -1,8 +1,10 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.LeverPlacementAndPowerBehaviour;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockLever extends Block {
+    private final LeverPlacementAndPowerBehaviour leverPlacementAndPowerService = LeverPlacementAndPowerBehaviour.getInstance();
 
     protected BlockLever(int i, int j) {
         super(i, j, Material.ORIENTABLE);
@@ -21,77 +23,40 @@ public class BlockLever extends Block {
     }
 
     public boolean canPlace(World world, int i, int j, int k, int l) {
-        return l == 1 && world.e(i, j - 1, k) ? true : (l == 2 && world.e(i, j, k + 1) ? true : (l == 3 && world.e(i, j, k - 1) ? true : (l == 4 && world.e(i + 1, j, k) ? true : l == 5 && world.e(i - 1, j, k))));
+        return leverPlacementAndPowerService.canPlaceOnSide(this.supportQuery(world), i, j, k, l);
     }
 
     public boolean canPlace(World world, int i, int j, int k) {
-        return world.e(i - 1, j, k) ? true : (world.e(i + 1, j, k) ? true : (world.e(i, j, k - 1) ? true : (world.e(i, j, k + 1) ? true : world.e(i, j - 1, k))));
+        return leverPlacementAndPowerService.canPlace(this.supportQuery(world), i, j, k);
     }
 
     public void postPlace(World world, int i, int j, int k, int l) {
-        int i1 = world.getData(i, j, k);
-        int j1 = i1 & 8;
-
-        i1 &= 7;
-        i1 = -1;
-        if (l == 1 && world.e(i, j - 1, k)) {
-            i1 = 5 + world.random.nextInt(2);
-        }
-
-        if (l == 2 && world.e(i, j, k + 1)) {
-            i1 = 4;
-        }
-
-        if (l == 3 && world.e(i, j, k - 1)) {
-            i1 = 3;
-        }
-
-        if (l == 4 && world.e(i + 1, j, k)) {
-            i1 = 2;
-        }
-
-        if (l == 5 && world.e(i - 1, j, k)) {
-            i1 = 1;
-        }
-
-        if (i1 == -1) {
+        int resolvedData = leverPlacementAndPowerService.resolvePostPlaceData(
+                this.supportQuery(world),
+                this.randomSource(world),
+                i,
+                j,
+                k,
+                l,
+                world.getData(i, j, k)
+        );
+        if (resolvedData == -1) {
             this.g(world, i, j, k, world.getData(i, j, k));
             world.setTypeId(i, j, k, 0);
         } else {
-            world.setData(i, j, k, i1 + j1);
+            world.setData(i, j, k, resolvedData);
         }
     }
 
     public void doPhysics(World world, int i, int j, int k, int l) {
         if (this.g(world, i, j, k)) {
-            int i1 = world.getData(i, j, k) & 7;
-            boolean flag = false;
-
-            if (!world.e(i - 1, j, k) && i1 == 1) {
-                flag = true;
-            }
-
-            if (!world.e(i + 1, j, k) && i1 == 2) {
-                flag = true;
-            }
-
-            if (!world.e(i, j, k - 1) && i1 == 3) {
-                flag = true;
-            }
-
-            if (!world.e(i, j, k + 1) && i1 == 4) {
-                flag = true;
-            }
-
-            if (!world.e(i, j - 1, k) && i1 == 5) {
-                flag = true;
-            }
-
-            if (!world.e(i, j - 1, k) && i1 == 6) {
-                flag = true;
-            }
-
-            if (flag) {
+            if (leverPlacementAndPowerService.isAttachedSupportMissing(
+                    this.supportQuery(world),
+                    i,
+                    j,
+                    k,
+                    world.getData(i, j, k)
+            )) {
                 this.g(world, i, j, k, world.getData(i, j, k));
                 world.setTypeId(i, j, k, 0);
             }
@@ -109,21 +74,16 @@ public class BlockLever extends Block {
     }
 
     public void a(IBlockAccess iblockaccess, int i, int j, int k) {
-        int l = iblockaccess.getData(i, j, k) & 7;
-        float f = 0.1875F;
-
-        if (l == 1) {
-            this.a(0.0F, 0.2F, 0.5F - f, f * 2.0F, 0.8F, 0.5F + f);
-        } else if (l == 2) {
-            this.a(1.0F - f * 2.0F, 0.2F, 0.5F - f, 1.0F, 0.8F, 0.5F + f);
-        } else if (l == 3) {
-            this.a(0.5F - f, 0.2F, 0.0F, 0.5F + f, 0.8F, f * 2.0F);
-        } else if (l == 4) {
-            this.a(0.5F - f, 0.2F, 1.0F - f * 2.0F, 0.5F + f, 0.8F, 1.0F);
-        } else {
-            f = 0.25F;
-            this.a(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, 0.6F, 0.5F + f);
-        }
+        LeverPlacementAndPowerBehaviour.Bounds bounds =
+                leverPlacementAndPowerService.resolveBounds(iblockaccess.getData(i, j, k));
+        this.a(
+                bounds.getMinX(),
+                bounds.getMinY(),
+                bounds.getMinZ(),
+                bounds.getMaxX(),
+                bounds.getMaxY(),
+                bounds.getMaxZ()
+        );
     }
 
     public void b(World world, int i, int j, int k, EntityHuman entityhuman) {
@@ -135,8 +95,8 @@ public class BlockLever extends Block {
             return true;
         } else {
             int l = world.getData(i, j, k);
-            int i1 = l & 7;
-            int j1 = 8 - (l & 8);
+            int i1 = leverPlacementAndPowerService.extractOrientation(l);
+            int j1 = leverPlacementAndPowerService.calculateTogglePowerBit(l);
 
             // CraftBukkit start - Interact Lever
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
@@ -151,21 +111,11 @@ public class BlockLever extends Block {
             }
             // CraftBukkit end
 
-            world.setData(i, j, k, i1 + j1);
+            world.setData(i, j, k, leverPlacementAndPowerService.composeData(i1, j1));
             world.b(i, j, k, i, j, k);
             world.makeSound((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D, "random.click", 0.3F, j1 > 0 ? 0.6F : 0.5F);
             world.applyPhysics(i, j, k, this.id);
-            if (i1 == 1) {
-                world.applyPhysics(i - 1, j, k, this.id);
-            } else if (i1 == 2) {
-                world.applyPhysics(i + 1, j, k, this.id);
-            } else if (i1 == 3) {
-                world.applyPhysics(i, j, k - 1, this.id);
-            } else if (i1 == 4) {
-                world.applyPhysics(i, j, k + 1, this.id);
-            } else {
-                world.applyPhysics(i, j - 1, k, this.id);
-            }
+            this.applyPhysicsToAttachedBlock(world, i, j, k, i1);
 
             return true;
         }
@@ -174,43 +124,50 @@ public class BlockLever extends Block {
     public void remove(World world, int i, int j, int k) {
         int l = world.getData(i, j, k);
 
-        if ((l & 8) > 0) {
+        if (leverPlacementAndPowerService.isPowered(l)) {
             world.applyPhysics(i, j, k, this.id);
-            int i1 = l & 7;
-
-            if (i1 == 1) {
-                world.applyPhysics(i - 1, j, k, this.id);
-            } else if (i1 == 2) {
-                world.applyPhysics(i + 1, j, k, this.id);
-            } else if (i1 == 3) {
-                world.applyPhysics(i, j, k - 1, this.id);
-            } else if (i1 == 4) {
-                world.applyPhysics(i, j, k + 1, this.id);
-            } else {
-                world.applyPhysics(i, j - 1, k, this.id);
-            }
+            this.applyPhysicsToAttachedBlock(world, i, j, k, leverPlacementAndPowerService.extractOrientation(l));
         }
 
         super.remove(world, i, j, k);
     }
 
     public boolean a(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        return (iblockaccess.getData(i, j, k) & 8) > 0;
+        return leverPlacementAndPowerService.isPowered(iblockaccess.getData(i, j, k));
     }
 
     public boolean d(World world, int i, int j, int k, int l) {
-        int i1 = world.getData(i, j, k);
-
-        if ((i1 & 8) == 0) {
-            return false;
-        } else {
-            int j1 = i1 & 7;
-
-            return j1 == 6 && l == 1 ? true : (j1 == 5 && l == 1 ? true : (j1 == 4 && l == 2 ? true : (j1 == 3 && l == 3 ? true : (j1 == 2 && l == 4 ? true : j1 == 1 && l == 5))));
-        }
+        return leverPlacementAndPowerService.isPoweringSide(world.getData(i, j, k), l);
     }
 
     public boolean isPowerSource() {
         return true;
+    }
+
+    private void applyPhysicsToAttachedBlock(World world, int x, int y, int z, int orientation) {
+        LeverPlacementAndPowerBehaviour.NeighborOffset neighborOffset =
+                leverPlacementAndPowerService.resolveAttachmentOffset(orientation);
+        world.applyPhysics(
+                x + neighborOffset.getX(),
+                y + neighborOffset.getY(),
+                z + neighborOffset.getZ(),
+                this.id
+        );
+    }
+
+    private LeverPlacementAndPowerBehaviour.SupportQuery supportQuery(final World world) {
+        return new LeverPlacementAndPowerBehaviour.SupportQuery() {
+            public boolean isBlockSolid(int x, int y, int z) {
+                return world.e(x, y, z);
+            }
+        };
+    }
+
+    private LeverPlacementAndPowerBehaviour.RandomSource randomSource(final World world) {
+        return new LeverPlacementAndPowerBehaviour.RandomSource() {
+            public int nextInt(int bound) {
+                return world.random.nextInt(bound);
+            }
+        };
     }
 }

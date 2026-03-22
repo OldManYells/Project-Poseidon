@@ -1,10 +1,11 @@
 package net.minecraft.server;
 
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerItemDamageEvent;
+import com.legacyminecraft.poseidon.item.ItemStackInteractionBehaviour;
+import com.legacyminecraft.poseidon.item.ItemStackStateBehaviour;
 
 public final class ItemStack {
+    private static final ItemStackInteractionBehaviour ITEM_STACK_INTERACTION_BEHAVIOUR = ItemStackInteractionBehaviour.getInstance();
+    private static final ItemStackStateBehaviour ITEM_STACK_STATE_BEHAVIOUR = ItemStackStateBehaviour.getInstance();
 
     public int count;
     public int b;
@@ -48,8 +49,7 @@ public final class ItemStack {
     }
 
     public ItemStack a(int i) {
-        this.count -= i;
-        return new ItemStack(this.id, i, this.damage);
+        return ITEM_STACK_STATE_BEHAVIOUR.splitStack(this, i);
     }
 
     public Item getItem() {
@@ -57,13 +57,7 @@ public final class ItemStack {
     }
 
     public boolean placeItem(EntityHuman entityhuman, World world, int i, int j, int k, int l) {
-        boolean flag = this.getItem().a(this, entityhuman, world, i, j, k, l);
-
-        if (flag) {
-            entityhuman.a(StatisticList.E[this.id], 1);
-        }
-
-        return flag;
+        return ITEM_STACK_INTERACTION_BEHAVIOUR.placeItem(this, entityhuman, world, i, j, k, l);
     }
 
     public float a(Block block) {
@@ -71,20 +65,15 @@ public final class ItemStack {
     }
 
     public ItemStack a(World world, EntityHuman entityhuman) {
-        return this.getItem().a(this, world, entityhuman);
+        return ITEM_STACK_INTERACTION_BEHAVIOUR.useItem(this, world, entityhuman);
     }
 
     public NBTTagCompound a(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("id", (short) this.id);
-        nbttagcompound.a("Count", (byte) this.count);
-        nbttagcompound.a("Damage", (short) this.damage);
-        return nbttagcompound;
+        return ITEM_STACK_STATE_BEHAVIOUR.writeToNbt(this, nbttagcompound);
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        this.id = nbttagcompound.d("id");
-        this.count = nbttagcompound.c("Count");
-        this.damage = nbttagcompound.d("Damage");
+        ITEM_STACK_STATE_BEHAVIOUR.readFromNbt(this, nbttagcompound);
     }
 
     public int getMaxStackSize() {
@@ -92,7 +81,7 @@ public final class ItemStack {
     }
 
     public boolean isStackable() {
-        return this.getMaxStackSize() > 1 && (!this.d() || !this.f());
+        return ITEM_STACK_STATE_BEHAVIOUR.isStackable(this);
     }
 
     public boolean d() {
@@ -104,7 +93,7 @@ public final class ItemStack {
     }
 
     public boolean f() {
-        return this.d() && this.damage > 0;
+        return ITEM_STACK_STATE_BEHAVIOUR.isDamaged(this);
     }
 
     public int g() {
@@ -120,105 +109,73 @@ public final class ItemStack {
     }
 
     public int i() {
-        return Item.byId[this.id].e();
+        return ITEM_STACK_STATE_BEHAVIOUR.maxDurability(this);
     }
 
     @SuppressWarnings("deprecation")
     public void damage(int i, Entity entity) {
-        if (this.d()) {
-            if (entity instanceof EntityPlayer) {
-                PlayerItemDamageEvent event = new PlayerItemDamageEvent((Player)entity.getBukkitEntity(), new CraftItemStack(this), i);
-                event.getPlayer().getServer().getPluginManager().callEvent(event);
-                if (i != event.getDamage() || event.isCancelled())
-                    event.getPlayer().updateInventory(); 
-                if (event.isCancelled())
-                    return; 
-                i = event.getDamage();
-            }
-            this.damage += i;
-            if (this.damage > this.i()) {
-                if (entity instanceof EntityHuman) {
-                    ((EntityHuman) entity).a(StatisticList.F[this.id], 1);
-                }
-
-                --this.count;
-                if (this.count < 0) {
-                    this.count = 0;
-                }
-
-                this.damage = 0;
-            }
-        }
+        ITEM_STACK_INTERACTION_BEHAVIOUR.damage(this, i, entity);
     }
 
     public void a(EntityLiving entityliving, EntityHuman entityhuman) {
-        boolean flag = Item.byId[this.id].a(this, entityliving, (EntityLiving) entityhuman);
-
-        if (flag) {
-            entityhuman.a(StatisticList.E[this.id], 1);
-        }
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onHitEntity(this, entityliving, entityhuman);
     }
 
     public void a(int i, int j, int k, int l, EntityHuman entityhuman) {
-        boolean flag = Item.byId[this.id].a(this, i, j, k, l, entityhuman);
-
-        if (flag) {
-            entityhuman.a(StatisticList.E[this.id], 1);
-        }
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onDestroyBlock(this, i, j, k, l, entityhuman);
     }
 
     public int a(Entity entity) {
-        return Item.byId[this.id].a(entity);
+        return ITEM_STACK_INTERACTION_BEHAVIOUR.attackDamage(this, entity);
     }
 
     public boolean b(Block block) {
-        return Item.byId[this.id].a(block);
+        return ITEM_STACK_INTERACTION_BEHAVIOUR.canHarvest(this, block);
     }
 
     public void a(EntityHuman entityhuman) {}
 
     public void a(EntityLiving entityliving) {
-        Item.byId[this.id].a(this, entityliving);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.useOnLiving(this, entityliving);
     }
 
     public ItemStack cloneItemStack() {
-        return new ItemStack(this.id, this.count, this.damage);
+        return ITEM_STACK_STATE_BEHAVIOUR.cloneStack(this);
     }
 
     public static boolean equals(ItemStack itemstack, ItemStack itemstack1) {
-        return itemstack == null && itemstack1 == null ? true : (itemstack != null && itemstack1 != null ? itemstack.d(itemstack1) : false);
+        return ITEM_STACK_STATE_BEHAVIOUR.stackEqualsNullable(itemstack, itemstack1);
     }
 
     private boolean d(ItemStack itemstack) {
-        return this.count != itemstack.count ? false : (this.id != itemstack.id ? false : this.damage == itemstack.damage);
+        return ITEM_STACK_STATE_BEHAVIOUR.countIdDamageEquals(this, itemstack);
+    }
+
+    public boolean countIdDamageEquals(ItemStack itemstack) {
+        return ITEM_STACK_STATE_BEHAVIOUR.countIdDamageEquals(this, itemstack);
     }
 
     public boolean doMaterialsMatch(ItemStack itemstack) {
-        return this.id == itemstack.id && this.damage == itemstack.damage;
+        return ITEM_STACK_STATE_BEHAVIOUR.materialsMatch(this, itemstack);
     }
 
     public static ItemStack b(ItemStack itemstack) {
-        return itemstack == null ? null : itemstack.cloneItemStack();
+        return ITEM_STACK_STATE_BEHAVIOUR.cloneOrNull(itemstack);
     }
 
     public String toString() {
-        return this.count + "x" + (this.id < 0 ||  this.id >= Item.byId.length ? "missingno" : Item.byId[this.id].a()) + "@" + this.damage; // Project Poseidon: Fixes ArrayIndexOutOfBoundsException
+        return ITEM_STACK_STATE_BEHAVIOUR.stringify(this); // Project Poseidon: Fixes ArrayIndexOutOfBoundsException
     }
 
     public void a(World world, Entity entity, int i, boolean flag) {
-        if (this.b > 0) {
-            --this.b;
-        }
-
-        Item.byId[this.id].a(this, world, entity, i, flag);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onInventoryTick(this, world, entity, i, flag);
     }
 
     public void b(World world, EntityHuman entityhuman) {
-        entityhuman.a(StatisticList.D[this.id], this.count);
-        Item.byId[this.id].c(this, world, entityhuman);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onCrafted(this, world, entityhuman);
     }
 
     public boolean c(ItemStack itemstack) {
-        return this.id == itemstack.id && this.count == itemstack.count && this.damage == itemstack.damage;
+        return ITEM_STACK_STATE_BEHAVIOUR.strictEquals(this, itemstack);
     }
 }

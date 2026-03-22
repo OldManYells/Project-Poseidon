@@ -1,10 +1,13 @@
 package net.minecraft.server;
 
-public class BedBlockTextures {
+import com.legacyminecraft.poseidon.block.BedTextureOrientationBehaviour;
 
-    public static final int[] a = new int[] { 3, 4, 2, 5};
-    public static final int[] b = new int[] { 2, 3, 0, 1};
-    public static final int[][] c = new int[][] { { 1, 0, 3, 2, 5, 4}, { 1, 0, 5, 4, 2, 3}, { 1, 0, 2, 3, 4, 5}, { 1, 0, 4, 5, 3, 2}};
+public class BedBlockTextures {
+    private static final BedTextureOrientationBehaviour BED_TEXTURE_ORIENTATION_BEHAVIOUR = BedTextureOrientationBehaviour.getInstance();
+
+    public static final int[] a = BED_TEXTURE_ORIENTATION_BEHAVIOUR.getHeadAndFootFaces();
+    public static final int[] b = BED_TEXTURE_ORIENTATION_BEHAVIOUR.getSideFaces();
+    public static final int[][] c = BED_TEXTURE_ORIENTATION_BEHAVIOUR.getRotationTextureMap();
 
     public BedBlockTextures() {}
 }

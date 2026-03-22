@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.block.GrassSpreadBehaviour;
+
 import java.util.Random;
 
 // CraftBukkit start
@@ -8,6 +10,7 @@ import org.bukkit.event.block.BlockFadeEvent;
 //CraftBukkit end
 
 public class BlockGrass extends Block {
+    private final GrassSpreadBehaviour grassSpreadService = GrassSpreadBehaviour.getInstance();
 
     protected BlockGrass(int i) {
         super(i, Material.GRASS);
@@ -17,8 +20,10 @@ public class BlockGrass extends Block {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (!world.isStatic) {
-            if (world.getLightLevel(i, j + 1, k) < 4 && Block.q[world.getTypeId(i, j + 1, k)] > 2) {
-                if (random.nextInt(4) != 0) {
+            int lightAbove = world.getLightLevel(i, j + 1, k);
+            int aboveTypeId = world.getTypeId(i, j + 1, k);
+            if (grassSpreadService.shouldAttemptFade(lightAbove, Block.q[aboveTypeId])) {
+                if (!grassSpreadService.shouldPassFadeRandomGate(random)) {
                     return;
                 }
 
@@ -34,13 +39,20 @@ public class BlockGrass extends Block {
                     blockState.update(true);
                 }
                 // CraftBukkit end
-            } else if (world.getLightLevel(i, j + 1, k) >= 9) {
-                int l = i + random.nextInt(3) - 1;
-                int i1 = j + random.nextInt(5) - 3;
-                int j1 = k + random.nextInt(3) - 1;
+            } else if (grassSpreadService.shouldAttemptSpread(lightAbove)) {
+                int l = grassSpreadService.resolveSpreadTargetX(i, random);
+                int i1 = grassSpreadService.resolveSpreadTargetY(j, random);
+                int j1 = grassSpreadService.resolveSpreadTargetZ(k, random);
                 int k1 = world.getTypeId(l, i1 + 1, j1);
 
-                if (world.getTypeId(l, i1, j1) == Block.DIRT.id && world.getLightLevel(l, i1 + 1, j1) >= 4 && Block.q[k1] <= 2) {
+                if (grassSpreadService.canSpreadTo(
+                        world.getTypeId(l, i1, j1),
+                        Block.DIRT.id,
+                        world.getLightLevel(l, i1 + 1, j1),
+                        4,
+                        Block.q[k1],
+                        2
+                )) {
                     // CraftBukkit start
                     org.bukkit.World bworld = world.getWorld();
                     org.bukkit.block.BlockState blockState = bworld.getBlockAt(l, i1, j1).getState();

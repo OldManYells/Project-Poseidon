@@ -1,8 +1,11 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.runtime.ServerRunInvocationSystem;
+
 public final class ThreadServerApplication extends Thread {
 
     final MinecraftServer a;
+    private final ServerRunInvocationSystem serverRunInvocationSystem = ServerRunInvocationSystem.getInstance();
 
     public ThreadServerApplication(String s, MinecraftServer minecraftserver) {
         super(s);
@@ -10,6 +13,6 @@ public final class ThreadServerApplication extends Thread {
     }
 
     public void run() {
-        this.a.run();
+        serverRunInvocationSystem.runServer(this.a);
     }
 }

@@ -1,14 +1,16 @@
 package org.bukkit.craftbukkit.block;
 
+import com.legacyminecraft.poseidon.compat.bukkit.NoteBlockPlaybackBehaviour;
 import net.minecraft.server.TileEntityNote;
 import org.bukkit.Instrument;
-import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.block.NoteBlock;
 import org.bukkit.craftbukkit.CraftWorld;
 
 public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
+    private static final NoteBlockPlaybackBehaviour NOTE_BLOCK_PLAYBACK_BEHAVIOUR =
+            NoteBlockPlaybackBehaviour.getInstance();
     private final CraftWorld world;
     private final TileEntityNote note;
 
@@ -20,57 +22,30 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
     }
 
     public Note getNote() {
-        return new Note(note.note);
+        return NOTE_BLOCK_PLAYBACK_BEHAVIOUR.getNote(note);
     }
 
     public byte getRawNote() {
-        return note.note;
+        return NOTE_BLOCK_PLAYBACK_BEHAVIOUR.getRawNote(note);
     }
 
     public void setNote(Note n) {
-        note.note = n.getId();
+        NOTE_BLOCK_PLAYBACK_BEHAVIOUR.setNote(note, n);
     }
 
     public void setRawNote(byte n) {
-        note.note = n;
+        NOTE_BLOCK_PLAYBACK_BEHAVIOUR.setRawNote(note, n);
     }
 
     public boolean play() {
-        Block block = getBlock();
-
-        synchronized (block) {
-            if (block.getType() == Material.NOTE_BLOCK) {
-                note.play(world.getHandle(), getX(), getY(), getZ());
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return NOTE_BLOCK_PLAYBACK_BEHAVIOUR.playStoredNote(getBlock(), note, world.getHandle(), getX(), getY(), getZ());
     }
 
     public boolean play(byte instrument, byte note) {
-        Block block = getBlock();
-
-        synchronized (block) {
-            if (block.getType() == Material.NOTE_BLOCK) {
-                world.getHandle().playNote(getX(), getY(), getZ(), instrument, note);
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return NOTE_BLOCK_PLAYBACK_BEHAVIOUR.playRawNote(getBlock(), world.getHandle(), getX(), getY(), getZ(), instrument, note);
     }
 
     public boolean play(Instrument instrument, Note note) {
-        Block block = getBlock();
-
-        synchronized (block) {
-            if (block.getType() == Material.NOTE_BLOCK) {
-                world.getHandle().playNote(getX(), getY(), getZ(), instrument.getType(), note.getId());
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return NOTE_BLOCK_PLAYBACK_BEHAVIOUR.playNote(getBlock(), world.getHandle(), getX(), getY(), getZ(), instrument, note);
     }
 }

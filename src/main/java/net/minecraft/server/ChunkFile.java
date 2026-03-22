@@ -1,9 +1,11 @@
 package net.minecraft.server;
 
-import java.io.File;
-import java.util.regex.Matcher;
+import com.legacyminecraft.poseidon.world.ChunkFileNamingBehaviour;
 
-class ChunkFile implements Comparable {
+import java.io.File;
+
+public class ChunkFile implements Comparable {
+    private static final ChunkFileNamingBehaviour CHUNK_FILE_NAMING_BEHAVIOUR = ChunkFileNamingBehaviour.getInstance();
 
     private final File a;
     private final int b;
@@ -11,30 +13,13 @@ class ChunkFile implements Comparable {
 
     public ChunkFile(File file1) {
         this.a = file1;
-        Matcher matcher = ChunkFilenameFilter.a.matcher(file1.getName());
-
-        if (matcher.matches()) {
-            this.b = Integer.parseInt(matcher.group(1), 36);
-            this.c = Integer.parseInt(matcher.group(2), 36);
-        } else {
-            this.b = 0;
-            this.c = 0;
-        }
+        ChunkFileNamingBehaviour.ChunkCoordinates coordinates = CHUNK_FILE_NAMING_BEHAVIOUR.parseChunkFileCoordinates(ChunkFilenameFilter.a, file1.getName());
+        this.b = coordinates.x;
+        this.c = coordinates.z;
     }
 
     public int compareTo(Object o) {
-        ChunkFile chunkfile = (ChunkFile) o;
-        int i = this.b >> 5;
-        int j = chunkfile.b >> 5;
-
-        if (i == j) {
-            int k = this.c >> 5;
-            int l = chunkfile.c >> 5;
-
-            return k - l;
-        } else {
-            return i - j;
-        }
+        return CHUNK_FILE_NAMING_BEHAVIOUR.compare(this, (ChunkFile) o);
     }
 
     public File a() {

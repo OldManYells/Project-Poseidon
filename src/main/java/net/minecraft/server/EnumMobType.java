@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-public enum EnumMobType {
+import com.legacyminecraft.poseidon.world.types.MobSelectionTypeContract;
+
+public enum EnumMobType implements MobSelectionTypeContract {
 
     EVERYTHING("everything", 0), MOBS("mobs", 1), PLAYERS("players", 2);
 

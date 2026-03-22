@@ -1,7 +1,8 @@
 package com.legacyminecraft.poseidon;
 
+import com.legacyminecraft.poseidon.compat.bukkit.ServerDiagnosticsBridgeBehaviour;
 import net.minecraft.server.MinecraftServer;
-import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.Server;
 import org.json.simple.JSONObject;
 
 import java.io.InputStreamReader;
@@ -21,8 +22,9 @@ public class PoseidonStatisticsAgent {
     private final String branch;
     private final Long startTime;
     private Object syncLock = new Object();
+    private final ServerDiagnosticsBridgeBehaviour serverDiagnosticsBridge = ServerDiagnosticsBridgeBehaviour.getInstance();
 
-    public PoseidonStatisticsAgent(MinecraftServer server, CraftServer craftServer) {
+    public PoseidonStatisticsAgent(MinecraftServer server, Server bukkitServer) {
         //This really shouldn't be needed, but it runs once, whats the harm?
         synchronized (syncLock) {
             this.startTime = (System.currentTimeMillis() / 1000L);
@@ -30,8 +32,8 @@ public class PoseidonStatisticsAgent {
             //Create temp value
             Random rnd = new Random();
             this.sessionID = String.valueOf(100000 + rnd.nextInt(900000));
-            this.version = craftServer.getPoseidonVersion();
-            this.branch = craftServer.getPoseidonReleaseType();
+            this.version = serverDiagnosticsBridge.readPoseidonVersion(bukkitServer, "Unknown");
+            this.branch = serverDiagnosticsBridge.readPoseidonReleaseType(bukkitServer, "Unknown");
         }
 
         PoseidonStatisticsSender poseidonStatisticsSender = new PoseidonStatisticsSender();
