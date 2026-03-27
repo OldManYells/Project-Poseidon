@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
 
 import java.util.List;
 

@@ -1,16 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
 
 public final class MinecartLifecycleBehaviour {
     private static final MinecartLifecycleBehaviour INSTANCE = new MinecartLifecycleBehaviour();
@@ -28,7 +17,7 @@ public final class MinecartLifecycleBehaviour {
         }
 
         Vehicle vehicle = (Vehicle) minecart.getBukkitEntity();
-        org.bukkit.entity.Entity bukkitAttacker = attacker == null ? null : attacker.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.entity.Entity bukkitAttacker = attacker == null ? null : attacker.getBukkitEntity();
         VehicleDamageEvent event = new VehicleDamageEvent(vehicle, bukkitAttacker, damageAmount);
         minecart.world.getServer().getPluginManager().callEvent(event);
         if (event.isCancelled()) {

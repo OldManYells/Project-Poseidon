@@ -1,8 +1,8 @@
 package com.legacyminecraft.poseidon;
 
-import com.legacyminecraft.poseidon.compat.bukkit.ServerDiagnosticsBridgeBehaviour;
-import net.minecraft.server.MinecraftServer;
-import org.bukkit.Server;
+import com.legacyminecraft.compat.bukkit.ServerDiagnosticsBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.Server;
+import com.legacyminecraft.poseidon.runtime.MinecraftServer;
 import org.json.simple.JSONObject;
 
 import java.io.InputStreamReader;

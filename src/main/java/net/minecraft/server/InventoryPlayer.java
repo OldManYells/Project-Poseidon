@@ -31,7 +31,7 @@ public class InventoryPlayer implements IInventory {
     }
 
     public ItemStack getItemInHand() {
-        return playerInventoryStorageService.getItemInHand(this.items, this.itemInHandIndex);
+        return (ItemStack) playerInventoryStorageService.getItemInHand(this.items, this.itemInHandIndex);
     }
 
     public static int e() {
@@ -61,7 +61,7 @@ public class InventoryPlayer implements IInventory {
     }
 
     public ItemStack splitStack(int i, int j) {
-        return playerInventoryStorageService.splitCombined(this.items, this.armor, i, j);
+        return (ItemStack) playerInventoryStorageService.splitCombined(this.items, this.armor, i, j);
     }
 
     public void setItem(int i, ItemStack itemstack) {
@@ -79,14 +79,14 @@ public class InventoryPlayer implements IInventory {
     }
 
     public NBTTagList a(NBTTagList nbttaglist) {
-        return playerInventoryNbtCodecService.writeInventory(nbttaglist, this.items, this.armor);
+        return (NBTTagList) playerInventoryNbtCodecService.writeInventory(nbttaglist, this.items, this.armor);
     }
 
     public void b(NBTTagList nbttaglist) {
         PlayerInventoryNbtCodecBehaviour.InventoryState inventoryState =
                 playerInventoryNbtCodecService.readInventory(nbttaglist, 36, 4);
-        this.items = inventoryState.getItems();
-        this.armor = inventoryState.getArmor();
+        this.items = (ItemStack[]) inventoryState.getItems();
+        this.armor = (ItemStack[]) inventoryState.getArmor();
     }
 
     public int getSize() {
@@ -94,7 +94,7 @@ public class InventoryPlayer implements IInventory {
     }
 
     public ItemStack getItem(int i) {
-        return playerInventoryStorageService.getCombined(this.items, this.armor, i);
+        return (ItemStack) playerInventoryStorageService.getCombined(this.items, this.armor, i);
     }
 
     public String getName() {
@@ -126,23 +126,27 @@ public class InventoryPlayer implements IInventory {
                 this.armor,
                 new PlayerInventoryEquipmentBehaviour.ArmorStatsResolver() {
                     @Override
-                    public boolean isArmor(ItemStack stack) {
-                        return stack.getItem() instanceof ItemArmor;
+                    public boolean isArmor(Object stack) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        return itemStack.getItem() instanceof ItemArmor;
                     }
 
                     @Override
-                    public int getMaxDurability(ItemStack stack) {
-                        return stack.i();
+                    public int getMaxDurability(Object stack) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        return itemStack.i();
                     }
 
                     @Override
-                    public int getCurrentDamage(ItemStack stack) {
-                        return stack.g();
+                    public int getCurrentDamage(Object stack) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        return itemStack.g();
                     }
 
                     @Override
-                    public int getArmorReduction(ItemStack stack) {
-                        return ((ItemArmor) stack.getItem()).bl;
+                    public int getArmorReduction(Object stack) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        return ((ItemArmor) itemStack.getItem()).bl;
                     }
                 }
         );
@@ -154,18 +158,21 @@ public class InventoryPlayer implements IInventory {
                 i,
                 new PlayerInventoryEquipmentBehaviour.ArmorDamageCallbacks() {
                     @Override
-                    public boolean isArmor(ItemStack stack) {
-                        return stack.getItem() instanceof ItemArmor;
+                    public boolean isArmor(Object stack) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        return itemStack.getItem() instanceof ItemArmor;
                     }
 
                     @Override
-                    public void damage(ItemStack stack, int amount) {
-                        stack.damage(amount, InventoryPlayer.this.d);
+                    public void damage(Object stack, int amount) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        itemStack.damage(amount, InventoryPlayer.this.d);
                     }
 
                     @Override
-                    public void onBroken(ItemStack stack) {
-                        stack.a(InventoryPlayer.this.d);
+                    public void onBroken(Object stack) {
+                        ItemStack itemStack = (ItemStack) stack;
+                        itemStack.a(InventoryPlayer.this.d);
                     }
                 }
         );
@@ -177,8 +184,8 @@ public class InventoryPlayer implements IInventory {
                 this.armor,
                 new PlayerInventoryEquipmentBehaviour.DropSink() {
                     @Override
-                    public void drop(ItemStack stack) {
-                        InventoryPlayer.this.d.a(stack, true);
+                    public void drop(Object stack) {
+                        InventoryPlayer.this.d.a((ItemStack) stack, true);
                     }
                 }
         );

@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.migration;
 
-import com.legacyminecraft.poseidon.compat.bukkit.LoggerOutputFlushBehaviour;
+import com.legacyminecraft.compat.bukkit.LoggerOutputFlushBehaviour;
 import org.junit.Assert;
 import org.junit.Test;
 

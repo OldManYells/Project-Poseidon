@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.CraftingManager;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
 
 public final class FoodRecipeRegistrationBehaviour {
     private static final FoodRecipeRegistrationBehaviour INSTANCE = new FoodRecipeRegistrationBehaviour();

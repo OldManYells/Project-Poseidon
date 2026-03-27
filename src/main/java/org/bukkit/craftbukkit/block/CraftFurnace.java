@@ -1,22 +1,22 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.FurnaceBlockStateBehaviour;
+import com.legacyminecraft.compat.bukkit.FurnaceBlockStateBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityLookupBehaviour;
 import net.minecraft.server.TileEntityFurnace;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.inventory.Inventory;
 
 public class CraftFurnace extends CraftBlockState implements Furnace {
     private static final FurnaceBlockStateBehaviour FURNACE_BLOCK_STATE_BEHAVIOUR =
             FurnaceBlockStateBehaviour.getInstance();
+    private static final TileEntityLookupBehaviour TILE_ENTITY_LOOKUP_BEHAVIOUR =
+            TileEntityLookupBehaviour.getInstance();
     private final TileEntityFurnace furnace;
 
     public CraftFurnace(final Block block) {
         super(block);
-
-        CraftWorld world = (CraftWorld) block.getWorld();
-        furnace = (TileEntityFurnace) world.getTileEntityAt(getX(), getY(), getZ());
+        furnace = TILE_ENTITY_LOOKUP_BEHAVIOUR.resolveFurnace(block, getX(), getY(), getZ());
     }
 
     public Inventory getInventory() {

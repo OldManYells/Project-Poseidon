@@ -1,8 +1,12 @@
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.LongHashBucketIndexBehaviour;
-import net.minecraft.server.Chunk;
-import net.minecraft.server.MinecraftServer;
+import com.legacyminecraft.compat.bukkit.LongHashBucketIndexBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashtableChunkKeyValidationBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashtableContainsKeyBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashtableGetBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashtablePutBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashtableRemovalBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashtableValueProjectionBehaviour;
 
 import java.util.ArrayList;
 
@@ -11,128 +15,135 @@ import static org.bukkit.craftbukkit.util.Java15Compat.Arrays_copyOf;
 public class LongHashtable<V> extends LongHash {
     private static final LongHashBucketIndexBehaviour LONG_HASH_BUCKET_INDEX_BEHAVIOUR =
             LongHashBucketIndexBehaviour.getInstance();
+    private static final LongHashtableChunkKeyValidationBehaviour LONG_HASHTABLE_CHUNK_KEY_VALIDATION_BEHAVIOUR =
+            LongHashtableChunkKeyValidationBehaviour.getInstance();
+    private static final LongHashtableContainsKeyBehaviour LONG_HASHTABLE_CONTAINS_KEY_BEHAVIOUR =
+            LongHashtableContainsKeyBehaviour.getInstance();
+    private static final LongHashtableGetBehaviour LONG_HASHTABLE_GET_BEHAVIOUR =
+            LongHashtableGetBehaviour.getInstance();
+    private static final LongHashtablePutBehaviour LONG_HASHTABLE_PUT_BEHAVIOUR =
+            LongHashtablePutBehaviour.getInstance();
+    private static final LongHashtableRemovalBehaviour LONG_HASHTABLE_REMOVAL_BEHAVIOUR =
+            LongHashtableRemovalBehaviour.getInstance();
+    private static final LongHashtableValueProjectionBehaviour LONG_HASHTABLE_VALUE_PROJECTION_BEHAVIOUR =
+            LongHashtableValueProjectionBehaviour.getInstance();
     Object[][][] values = new Object[256][][];
     Entry cache = null;
 
     public void put(int msw, int lsw, V value) {
         put(toLong(msw, lsw), value);
-        if (value instanceof Chunk) {
-            Chunk c = (Chunk) value;
-            if (msw != c.x || lsw != c.z) {
-                MinecraftServer.log.info("Chunk (" + c.x + ", " + c.z + ") stored at  (" + msw + ", " + lsw + ")");
-                Throwable x = new Throwable();
-                x.fillInStackTrace();
-                x.printStackTrace();
-            }
-        }
+        LONG_HASHTABLE_CHUNK_KEY_VALIDATION_BEHAVIOUR.validateChunkCoordinates(msw, lsw, value);
     }
 
     public V get(int msw, int lsw) {
         V value = get(toLong(msw, lsw));
-        if (value instanceof Chunk) {
-            Chunk c = (Chunk) value;
-            if (msw != c.x || lsw != c.z) {
-                MinecraftServer.log.info("Chunk (" + c.x + ", " + c.z + ") stored at  (" + msw + ", " + lsw + ")");
-                Throwable x = new Throwable();
-                x.fillInStackTrace();
-                x.printStackTrace();
-            }
-        }
+        LONG_HASHTABLE_CHUNK_KEY_VALIDATION_BEHAVIOUR.validateChunkCoordinates(msw, lsw, value);
         return value;
     }
 
     public synchronized void put(long key, V value) {
-        int mainIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key);
-        Object[][] outer = this.values[mainIdx];
-        if (outer == null) this.values[mainIdx] = outer = new Object[256][];
+        LongHashtablePutBehaviour.PutResult result = LONG_HASHTABLE_PUT_BEHAVIOUR.put(
+                key,
+                value,
+                this.values,
+                LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key),
+                LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key),
+                new LongHashtablePutBehaviour.PutCallbacks() {
+                    @Override
+                    public Object[][] createOuterBuckets() {
+                        return new Object[256][];
+                    }
 
-        int outerIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
-        Object[] inner = outer[outerIdx];
+                    @Override
+                    public Object[] createInnerBucket() {
+                        return new Object[5];
+                    }
 
-        if (inner == null) {
-            outer[outerIdx] = inner = new Object[5];
-            inner[0] = this.cache = new Entry(key, value);
-        } else {
-            int i;
-            for (i = 0; i < inner.length; i++) {
-                if (inner[i] == null || ((Entry) inner[i]).key == key) {
-                    inner[i] = this.cache = new Entry(key, value);
-                    return;
+                    @Override
+                    public Object[] copyOf(Object[] source, int newLength) {
+                        return Arrays_copyOf(source, newLength);
+                    }
+
+                    @Override
+                    public Object createEntry(long entryKey, Object entryValue) {
+                        return new Entry(entryKey, entryValue);
+                    }
+
+                    @Override
+                    public long entryKey(Object entry) {
+                        return ((Entry) entry).key;
+                    }
                 }
-            }
-
-            outer[outerIdx] = inner = Arrays_copyOf(inner, i + i);
-            inner[i] = new Entry(key, value);
-        }
+        );
+        this.cache = (Entry) result.cacheEntry();
     }
 
     public synchronized V get(long key) {
-        return containsKey(key) ? (V) cache.value : null;
+        return (V) LONG_HASHTABLE_GET_BEHAVIOUR.get(
+                containsKey(key),
+                this.cache,
+                new LongHashtableGetBehaviour.ValueExtractor() {
+                    @Override
+                    public Object extract(Object entry) {
+                        return ((Entry) entry).value;
+                    }
+                }
+        );
     }
 
     public synchronized boolean containsKey(long key) {
-        if (this.cache != null && cache.key == key) return true;
+        LongHashtableContainsKeyBehaviour.ContainsKeyResult result = LONG_HASHTABLE_CONTAINS_KEY_BEHAVIOUR.containsKey(
+                key,
+                this.cache,
+                this.values,
+                LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key),
+                LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key),
+                new LongHashtableContainsKeyBehaviour.ContainsKeyCallbacks() {
+                    @Override
+                    public boolean isMatchingCache(Object cacheEntry, long lookupKey) {
+                        return ((Entry) cacheEntry).key == lookupKey;
+                    }
 
-        int outerIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
-        Object[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
-        if (outer == null) return false;
-
-        Object[] inner = outer[outerIdx];
-        if (inner == null) return false;
-
-        for (int i = 0; i < inner.length; i++) {
-            Entry e = (Entry) inner[i];
-            if (e == null) {
-                return false;
-            } else if (e.key == key) {
-                this.cache = e;
-                return true;
-            }
+                    @Override
+                    public long entryKey(Object entry) {
+                        return ((Entry) entry).key;
+                    }
+                }
+        );
+        if (result.containsKey()) {
+            this.cache = (Entry) result.cacheEntry();
         }
-        return false;
+        return result.containsKey();
     }
 
     public synchronized void remove(long key) {
-        int outerIndex = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
-        Object[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
-        if (outer == null) return;
-
-        Object[] inner = outer[outerIndex];
-        if (inner == null) return;
-
-        for (int i = 0; i < inner.length; i++) {
-            if (inner[i] == null) continue;
-
-            if (((Entry) inner[i]).key == key) {
-                for (i++; i < inner.length; i++) {
-                    if (inner[i] == null) break;
-                    inner[i-1] = inner[i];
+        LongHashtableRemovalBehaviour.RemovalResult result = LONG_HASHTABLE_REMOVAL_BEHAVIOUR.remove(
+                key,
+                this.values,
+                LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key),
+                LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key),
+                new LongHashtableRemovalBehaviour.RemovalCallbacks() {
+                    @Override
+                    public long entryKey(Object entry) {
+                        return ((Entry) entry).key;
+                    }
                 }
-
-                inner[i-1] = null;
-                this.cache = null;
-                return;
-            }
+        );
+        if (result.clearCache()) {
+            this.cache = null;
         }
     }
 
     public synchronized ArrayList<V> values() {
-        ArrayList<V> ret = new ArrayList<V>();
-
-        for (Object[][] outer: this.values) {
-            if (outer == null) continue;
-
-            for (Object[] inner: outer) {
-                if (inner == null) continue;
-
-                for (Object entry: inner) {
-                    if (entry == null) break;
-
-                    ret.add((V) ((Entry) entry).value);
+        return LONG_HASHTABLE_VALUE_PROJECTION_BEHAVIOUR.values(
+                this.values,
+                new LongHashtableValueProjectionBehaviour.ValueExtractor<V>() {
+                    @Override
+                    public V extract(Object entry) {
+                        return (V) ((Entry) entry).value;
+                    }
                 }
-            }
-        }
-        return ret;
+        );
     }
 
     private class Entry {

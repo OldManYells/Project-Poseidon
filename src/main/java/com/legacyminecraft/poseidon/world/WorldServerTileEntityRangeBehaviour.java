@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.TileEntity;
 
 import java.util.ArrayList;
 import java.util.List;

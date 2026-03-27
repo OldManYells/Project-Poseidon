@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.Packet1Login;
 
 /**
  * Canonical per-tick decision logic for login handlers.
@@ -16,7 +15,7 @@ public final class LoginTickService {
         return INSTANCE;
     }
 
-    public TickDecision evaluateTick(Packet1Login deferredLoginPacket, int timeoutCounter, int timeoutTicks) {
+    public TickDecision evaluateTick(Object deferredLoginPacket, int timeoutCounter, int timeoutTicks) {
         int nextTimeoutCounter = timeoutCounter + 1;
         boolean shouldDisconnectForTimeout = loginTimeoutPolicy.shouldDisconnectForTimeout(timeoutCounter, timeoutTicks);
         String timeoutKickMessage = shouldDisconnectForTimeout ? loginTimeoutPolicy.getTimeoutKickMessage() : null;

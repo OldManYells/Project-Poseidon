@@ -19,13 +19,12 @@ public class Packet34EntityTeleport extends Packet {
     public Packet34EntityTeleport() {}
 
     public Packet34EntityTeleport(Entity entity) {
-        PacketDataCodec.Packet34Data packetData = packetDataCodec.packet34FromEntity(entity);
-        this.a = packetData.getEntityId();
-        this.b = packetData.getX();
-        this.c = packetData.getY();
-        this.d = packetData.getZ();
-        this.e = packetData.getYaw();
-        this.f = packetData.getPitch();
+        this.a = entity.id;
+        this.b = MathHelper.floor(entity.locX * 32.0D);
+        this.c = MathHelper.floor(entity.locY * 32.0D);
+        this.d = MathHelper.floor(entity.locZ * 32.0D);
+        this.e = (byte) ((int) (entity.yaw * 256.0F / 360.0F));
+        this.f = (byte) ((int) (entity.pitch * 256.0F / 360.0F));
     }
 
     public Packet34EntityTeleport(int i, int j, int k, int l, byte b0, byte b1) {

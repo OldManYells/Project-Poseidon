@@ -1,7 +1,8 @@
 package com.legacyminecraft.poseidon.world.chunk;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.ChunkCoordIntPair;
+
+import com.legacyminecraft.poseidon.world.Chunk;
+import com.legacyminecraft.poseidon.world.player.ChunkCoordIntPair;
 
 import java.util.List;
 import java.util.Map;

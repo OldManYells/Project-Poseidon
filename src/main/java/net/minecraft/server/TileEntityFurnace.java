@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.compat.bukkit.FurnaceEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.FurnaceEventBridgeBehaviour;
 import com.legacyminecraft.poseidon.inventory.FurnaceBurnEligibilityBehaviour;
 import com.legacyminecraft.poseidon.inventory.FurnaceFuelConsumptionBehaviour;
 import com.legacyminecraft.poseidon.inventory.FurnaceFuelBurnTimeBehaviour;
@@ -78,7 +78,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
         FurnaceNbtCodecBehaviour.FurnaceNbtState state = FURNACE_NBT_CODEC_BEHAVIOUR.readState(nbttagcompound, this.getSize());
-        this.items = state.getItems();
+        this.items = (ItemStack[]) (Object) state.getItems();
         this.burnTime = state.getBurnTime();
         this.cookTime = state.getCookTime();
         this.ticksForCurrentFuel = this.fuelTime(this.items[1]);
@@ -193,7 +193,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
                 return;
             }
 
-            itemstack = smeltDecision.getResult();
+            itemstack = (ItemStack) (Object) smeltDecision.getResult();
 
             FURNACE_SMELT_OUTPUT_BEHAVIOUR.applySmeltResult(this.items, 2, itemstack);
             FURNACE_SMELT_OUTPUT_BEHAVIOUR.consumeInput(this.items, 0);

@@ -18,8 +18,8 @@ public abstract class BlockContainer extends Block {
     public void c(World world, int i, int j, int k) {
         super.c(world, i, j, k);
         CONTAINER_BLOCK_LIFECYCLE_SERVICE.placeTileEntity(new ContainerBlockLifecycleBehaviour.WorldTileEntityAccess() {
-            public void setTileEntity(int x, int y, int z, TileEntity tileEntity) {
-                world.setTileEntity(x, y, z, tileEntity);
+            public void setTileEntity(int x, int y, int z, Object tileEntity) {
+                world.setTileEntity(x, y, z, (TileEntity) tileEntity);
             }
 
             public void removeTileEntity(int x, int y, int z) {
@@ -31,8 +31,8 @@ public abstract class BlockContainer extends Block {
     public void remove(World world, int i, int j, int k) {
         super.remove(world, i, j, k);
         CONTAINER_BLOCK_LIFECYCLE_SERVICE.removeTileEntity(new ContainerBlockLifecycleBehaviour.WorldTileEntityAccess() {
-            public void setTileEntity(int x, int y, int z, TileEntity tileEntity) {
-                world.setTileEntity(x, y, z, tileEntity);
+            public void setTileEntity(int x, int y, int z, Object tileEntity) {
+                world.setTileEntity(x, y, z, (TileEntity) tileEntity);
             }
 
             public void removeTileEntity(int x, int y, int z) {

@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.runtime.command;
 
-import net.minecraft.server.ICommandListener;
-
 /**
  * Canonical behaviour for legacy server command envelope state.
  */
@@ -15,15 +13,15 @@ public final class ServerCommandEnvelopeBehaviour {
         return INSTANCE;
     }
 
-    public ServerCommandState createState(String commandText, ICommandListener commandListener) {
-        return new ServerCommandState(commandText, commandListener);
+    public ServerCommandState createState(String commandText, Object commandListener) {
+        return new ServerCommandState(commandText == null ? "" : commandText, commandListener);
     }
 
     public static final class ServerCommandState {
         private final String commandText;
-        private final ICommandListener commandListener;
+        private final Object commandListener;
 
-        public ServerCommandState(String commandText, ICommandListener commandListener) {
+        public ServerCommandState(String commandText, Object commandListener) {
             this.commandText = commandText;
             this.commandListener = commandListener;
         }
@@ -32,8 +30,10 @@ public final class ServerCommandEnvelopeBehaviour {
             return commandText;
         }
 
-        public ICommandListener getCommandListener() {
-            return commandListener;
+        public <T> T getCommandListener() {
+            @SuppressWarnings("unchecked")
+            T listener = (T) commandListener;
+            return listener;
         }
     }
 }

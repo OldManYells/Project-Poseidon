@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Container;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Slot;
 
 import java.util.List;
 

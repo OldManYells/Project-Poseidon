@@ -3,7 +3,6 @@ package com.legacyminecraft.poseidon.auth.login;
 import com.legacyminecraft.poseidon.network.LoginProxyAssignmentSystem;
 import com.legacyminecraft.poseidon.network.LoginProxySessionApplySystem;
 import com.legacyminecraft.poseidon.network.LoginSessionStateSystem;
-import net.minecraft.server.Packet1Login;
 
 /**
  * Canonical orchestration flow for processing login packets from gatekeeping through proxy/session setup.
@@ -19,7 +18,7 @@ public final class LoginPacketExecutionSystem {
     }
 
     public boolean execute(
-            Packet1Login loginPacket,
+            Object loginPacket,
             boolean receivedLoginPacket,
             LoginPacketGatekeepingPolicy loginPacketGatekeepingPolicy,
             LoginGatekeepingExecutionSystem loginGatekeepingExecutionSystem,
@@ -50,10 +49,10 @@ public final class LoginPacketExecutionSystem {
     }
 
     public interface ProxyAssignmentResolver {
-        LoginProxyAssignmentSystem.ProxyAssignment resolveProxy(Packet1Login loginPacket);
+        LoginProxyAssignmentSystem.ProxyAssignment resolveProxy(Object loginPacket);
     }
 
     public interface LoginStartActions {
-        void finishLogin(Packet1Login loginPacket);
+        void finishLogin(Object loginPacket);
     }
 }

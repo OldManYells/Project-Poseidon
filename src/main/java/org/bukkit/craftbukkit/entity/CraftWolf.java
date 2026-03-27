@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.WolfStateBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityWrapperDescriptionBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityTypedHandleCastBehaviour;
+import com.legacyminecraft.compat.bukkit.WolfStateBehaviour;
 import net.minecraft.server.EntityWolf;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;
@@ -8,6 +10,10 @@ import org.bukkit.entity.Wolf;
 
 public class CraftWolf extends CraftAnimals implements Wolf {
     private static final WolfStateBehaviour WOLF_STATE_BEHAVIOUR = WolfStateBehaviour.getInstance();
+    private static final EntityTypedHandleCastBehaviour ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR =
+            EntityTypedHandleCastBehaviour.getInstance();
+    private static final EntityWrapperDescriptionBehaviour ENTITY_WRAPPER_DESCRIPTION_BEHAVIOUR =
+            EntityWrapperDescriptionBehaviour.getInstance();
 
     private AnimalTamer owner;
 
@@ -40,8 +46,8 @@ public class CraftWolf extends CraftAnimals implements Wolf {
     }
 
     public AnimalTamer getOwner() {
-        owner = WOLF_STATE_BEHAVIOUR.resolveOwner(owner, getServer(), getOwnerName());
-        return owner;
+        owner = WOLF_STATE_BEHAVIOUR.refreshOwnerCache(owner, getServer(), getOwnerName());
+        return WOLF_STATE_BEHAVIOUR.getOwnerForView(owner);
     }
 
     public void setOwner(AnimalTamer tamer) {
@@ -73,11 +79,11 @@ public class CraftWolf extends CraftAnimals implements Wolf {
     public EntityWolf getHandle() {
         // It's somewhat easier to override this here, as many internal methods rely on EntityWolf specific methods.
         // Doing this has no impact on anything outside this class.
-        return (EntityWolf) entity;
+        return ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR.castHandle(entity, EntityWolf.class);
     }
 
     @Override
     public String toString() {
-        return "CraftWolf[anger=" + isAngry() + ",owner=" + getOwner() + ",tame=" + isTamed() + ",sitting=" + isSitting() + "]";
+        return ENTITY_WRAPPER_DESCRIPTION_BEHAVIOUR.craftWolfToString(isAngry(), getOwner(), isTamed(), isSitting());
     }
 }

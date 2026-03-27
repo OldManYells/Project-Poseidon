@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
+import com.legacyminecraft.poseidon.entity.Entity;
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
 
 /**
  * Canonical collision and movement slowdown policy for legacy slow-sand wrappers.

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Block;
 
 /**
  * Canonical block-id remapping and bootstrap lookup policy for legacy BlockRegister wrappers.

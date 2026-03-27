@@ -2,11 +2,13 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.block.TorchPlacementAndBoundsBehaviour;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 
 import java.util.Random;
 
 public class BlockTorch extends Block {
     private final TorchPlacementAndBoundsBehaviour torchPlacementAndBoundsService = TorchPlacementAndBoundsBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     protected BlockTorch(int i, int j) {
         super(i, j, Material.ORIENTABLE);
@@ -34,7 +36,10 @@ public class BlockTorch extends Block {
     }
 
     public void postPlace(World world, int i, int j, int k, int l) {
-        if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.transmutation-fix.enabled", true) && world.getTypeId(i, j, k) != this.id) return;
+        if (PoseidonConfig.getInstance().getConfigBoolean(
+                WORLD_FEATURE_CONFIG_POLICY.pistonTransmutationFixEnabledKey(),
+                WORLD_FEATURE_CONFIG_POLICY.pistonTransmutationFixEnabledDefault()
+        ) && world.getTypeId(i, j, k) != this.id) return;
         world.setData(i, j, k, torchPlacementAndBoundsService.resolvePostPlaceData(
                 this.supportQuery(world),
                 world.getData(i, j, k),
@@ -71,7 +76,10 @@ public class BlockTorch extends Block {
     private boolean h(World world, int i, int j, int k) {
         if (torchPlacementAndBoundsService.shouldDropForInvalidPlacement(
                 this.canPlace(world, i, j, k),
-                PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled"),
+                PoseidonConfig.getInstance().getConfigBoolean(
+                        WORLD_FEATURE_CONFIG_POLICY.pistonOtherFixesEnabledKey(),
+                        WORLD_FEATURE_CONFIG_POLICY.pistonOtherFixesEnabledDefault()
+                ),
                 world.getTypeId(i, j, k) == this.id
         )) {
             this.g(world, i, j, k, world.getData(i, j, k));

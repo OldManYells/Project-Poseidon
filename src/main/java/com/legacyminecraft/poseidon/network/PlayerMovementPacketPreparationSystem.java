@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet10Flying;
 
 /**
  * Canonical translator/validator for converting movement packets into concrete movement targets.
@@ -9,6 +7,7 @@ import net.minecraft.server.Packet10Flying;
 public final class PlayerMovementPacketPreparationSystem {
     private static final PlayerMovementPacketPreparationSystem INSTANCE = new PlayerMovementPacketPreparationSystem();
     private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
+    private final MovementPacketSentinelPolicy movementPacketSentinelPolicy = MovementPacketSentinelPolicy.getInstance();
 
     private PlayerMovementPacketPreparationSystem() {
     }
@@ -58,7 +57,7 @@ public final class PlayerMovementPacketPreparationSystem {
         float targetYaw = currentYaw;
         float targetPitch = currentPitch;
 
-        boolean hasConcretePosition = packetHasPosition && !(packetY == -999.0D && packetStance == -999.0D);
+        boolean hasConcretePosition = packetHasPosition && !movementPacketSentinelPolicy.isMotionOnlySentinel(packetY, packetStance);
         if (hasConcretePosition) {
             targetX = packetX;
             targetY = packetY;

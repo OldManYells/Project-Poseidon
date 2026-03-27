@@ -5,7 +5,7 @@
 
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.LongHashKeyBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashKeyBehaviour;
 
 /**
  *

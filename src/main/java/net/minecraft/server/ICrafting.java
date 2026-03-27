@@ -23,4 +23,21 @@ public interface ICrafting extends ContainerCraftingListenerContract {
     default void onContainerProgressChanged(Container container, int propertyIndex, int propertyValue) {
         this.a(container, propertyIndex, propertyValue);
     }
+
+    @Override
+    default void onContainerInitialized(com.legacyminecraft.poseidon.inventory.Container container, List items) {
+        this.a((Container) (Object) container, items);
+    }
+
+    @Override
+    default void onContainerSlotChanged(com.legacyminecraft.poseidon.inventory.Container container, int slotIndex,
+                                        com.legacyminecraft.poseidon.inventory.ItemStack stack) {
+        this.a((Container) (Object) container, slotIndex, (ItemStack) (Object) stack);
+    }
+
+    @Override
+    default void onContainerProgressChanged(com.legacyminecraft.poseidon.inventory.Container container, int propertyIndex,
+                                            int propertyValue) {
+        this.a((Container) (Object) container, propertyIndex, propertyValue);
+    }
 }

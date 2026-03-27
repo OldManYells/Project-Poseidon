@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WorldServer;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -42,7 +36,7 @@ public final class PlayerWorldMoveSystem {
         PlayerWorldTransferSupport.RespawnResolution respawnResolution =
                 playerWorldTransferSupport.resolveRespawnLocation(server, bukkitServer, entityPlayer, targetDimension, targetLocation);
         EntityPlayer respawnedPlayer = respawnResolution.getEntityPlayer();
-        org.bukkit.World sourceWorld = respawnResolution.getSourceWorld();
+        com.legacyminecraft.compat.bukkit.World sourceWorld = respawnResolution.getSourceWorld();
         Location resolvedLocation = respawnResolution.getRespawnLocation();
         WorldServer destinationWorld = respawnResolution.getDestinationWorld();
 
@@ -73,8 +67,8 @@ public final class PlayerWorldMoveSystem {
         playerSessionSystem.refreshClient(respawnedPlayer);
         respawnedPlayer.x();
         if (sourceWorld != resolvedLocation.getWorld()) {
-            org.bukkit.event.player.PlayerChangedWorldEvent event =
-                    new org.bukkit.event.player.PlayerChangedWorldEvent((Player) respawnedPlayer.getBukkitEntity(), sourceWorld);
+            com.legacyminecraft.compat.bukkit.event.player.PlayerChangedWorldEvent event =
+                    new com.legacyminecraft.compat.bukkit.event.player.PlayerChangedWorldEvent((Player) respawnedPlayer.getBukkitEntity(), sourceWorld);
             bukkitServer.getPluginManager().callEvent(event);
         }
 

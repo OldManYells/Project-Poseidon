@@ -1,12 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
 
 import java.util.Random;
 

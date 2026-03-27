@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityBoat;
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.MathHelper;
 
 /**
  * Canonical policy for encoding and comparing tracked entity movement updates.

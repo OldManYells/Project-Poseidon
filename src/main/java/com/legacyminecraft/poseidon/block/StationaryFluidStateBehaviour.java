@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Material;
 
 import java.util.Random;
 

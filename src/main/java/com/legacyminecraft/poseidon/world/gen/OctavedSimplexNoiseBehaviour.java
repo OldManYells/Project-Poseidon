@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.NoiseGenerator2;
 
 import java.util.Random;
 

@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.world.ChunkLoadFailureLogBehaviour;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.util.LongHashset;
 import org.bukkit.craftbukkit.util.LongHashtable;
@@ -17,6 +19,8 @@ import java.util.Random;
 // CraftBukkit end
 
 public class ChunkProviderServer implements IChunkProvider {
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
+    private static final ChunkLoadFailureLogBehaviour CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR = ChunkLoadFailureLogBehaviour.getInstance();
 
     // CraftBukkit start
     public LongHashset unloadQueue = new LongHashset();
@@ -117,24 +121,28 @@ public class ChunkProviderServer implements IChunkProvider {
             chunk = chunk == null ? (!this.world.isLoading && !this.forceChunkLoad ? this.emptyChunk : this.getChunkAt(i, j)) : chunk;
         } catch (Exception e) {
             //Poseidon chunk regenerate
-            if (PoseidonConfig.getInstance().getConfigBoolean("emergency.debug.regenerate-corrupt-chunks.enable")) {
-                System.out.println("Poseidon ran into a critical error when attempting to load a chunk (" + i + "," + j + "+. Regenerating chunk...");
+            if (PoseidonConfig.getInstance().getConfigBoolean(
+                    WORLD_FEATURE_CONFIG_POLICY.regenerateCorruptChunksEnabledKey(),
+                    WORLD_FEATURE_CONFIG_POLICY.regenerateCorruptChunksEnabledDefault()
+            )) {
+                CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR.logCorruptChunkRegeneration(MinecraftServer.log, i, j, e);
                 chunk = this.emptyChunk;
             } else  {
-                System.out.println("Poseidon ran into a critical error when attempting to load a chunk (" + i + "," + j + "+. The server will now likely hang. Enabling \"emergency.debug.regenerate-corrupt-chunks.enable\" in the Poseidon.yml may help.");
-                e.printStackTrace();
+                CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR.logCorruptChunkFailure(MinecraftServer.log, i, j, e);
             }
-            e.printStackTrace();
         }
 
 
         if (chunk == this.emptyChunk) return chunk;
         if (i != chunk.x || j != chunk.z) {
-            MinecraftServer.log.info("Chunk (" + chunk.x + ", " + chunk.z + ") stored at  (" + i + ", " + j + ")");
-            MinecraftServer.log.info(chunk.getClass().getName());
-            Throwable ex = new Throwable();
-            ex.fillInStackTrace();
-            ex.printStackTrace();
+            CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR.logChunkCoordinateMismatch(
+                    MinecraftServer.log,
+                    i,
+                    j,
+                    chunk.x,
+                    chunk.z,
+                    chunk.getClass().getName()
+            );
         }
         return chunk;
         // CraftBukkit end
@@ -153,7 +161,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
                 return chunk;
             } catch (Exception exception) {
-                exception.printStackTrace();
+                CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR.logChunkIoFailure(MinecraftServer.log, "load", exception);
                 return null;
             }
         }
@@ -164,7 +172,7 @@ public class ChunkProviderServer implements IChunkProvider {
             try {
                 this.e.b(this.world, chunk);
             } catch (Exception exception) {
-                exception.printStackTrace();
+                CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR.logChunkIoFailure(MinecraftServer.log, "save-nop", exception);
             }
         }
     }
@@ -175,7 +183,7 @@ public class ChunkProviderServer implements IChunkProvider {
                 chunk.r = this.world.getTime();
                 this.e.a(this.world, chunk);
             } catch (Exception ioexception) { // CraftBukkit - IOException -> Exception
-                ioexception.printStackTrace();
+                CHUNK_LOAD_FAILURE_LOG_BEHAVIOUR.logChunkIoFailure(MinecraftServer.log, "save", ioexception);
             }
         }
     }

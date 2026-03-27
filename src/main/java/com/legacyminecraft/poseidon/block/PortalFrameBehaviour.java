@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Entity;
-
 /**
  * Canonical frame-validation, stability, and geometry policy for legacy portal wrappers.
  */
@@ -104,8 +102,8 @@ public final class PortalFrameBehaviour {
         return 0;
     }
 
-    public boolean shouldTriggerEntityPortal(Entity entity) {
-        return entity.vehicle == null && entity.passenger == null;
+    public boolean shouldTriggerEntityPortal(Object entity) {
+        return Reflection.getField(entity, "vehicle") == null && Reflection.getField(entity, "passenger") == null;
     }
 
     public void forEachPortalFrameCoordinate(int originX, int originY, int originZ, int axisX, int axisZ, CoordinateConsumer consumer) {
@@ -165,6 +163,27 @@ public final class PortalFrameBehaviour {
             this.maxX = maxX;
             this.maxY = maxY;
             this.maxZ = maxZ;
+        }
+    }
+
+    private static final class Reflection {
+        private Reflection() {
+        }
+
+        static Object getField(Object target, String name) {
+            Class<?> type = target.getClass();
+            while (type != null) {
+                try {
+                    java.lang.reflect.Field field = type.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return field.get(target);
+                } catch (NoSuchFieldException ignored) {
+                    type = type.getSuperclass();
+                } catch (Exception exception) {
+                    throw new IllegalStateException("Unable to read field: " + name, exception);
+                }
+            }
+            throw new IllegalStateException("Field not found: " + name);
         }
     }
 }

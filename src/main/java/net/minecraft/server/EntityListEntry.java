@@ -1,9 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.entity.EntityListEntryBehaviour;
-
 public class EntityListEntry {
-    private static final EntityListEntryBehaviour ENTITY_LIST_ENTRY_BEHAVIOUR = EntityListEntryBehaviour.getInstance();
 
     final int a;
     Object b;
@@ -26,15 +23,24 @@ public class EntityListEntry {
     }
 
     public final boolean equals(Object object) {
-        return ENTITY_LIST_ENTRY_BEHAVIOUR.equalsEntry(this, object);
+        if (!(object instanceof EntityListEntry)) {
+            return false;
+        }
+
+        EntityListEntry entitylistentry = (EntityListEntry)object;
+        if (this.a != entitylistentry.a) {
+            return false;
+        }
+
+        return this.b == entitylistentry.b || this.b != null && this.b.equals(entitylistentry.b);
     }
 
     public final int hashCode() {
-        return ENTITY_LIST_ENTRY_BEHAVIOUR.hashCode(this);
+        return EntityList.poseidonHash(this.a);
     }
 
     public final String toString() {
-        return ENTITY_LIST_ENTRY_BEHAVIOUR.stringify(this);
+        return this.a + "=" + this.b;
     }
 
     public final int poseidonGetSlot() {

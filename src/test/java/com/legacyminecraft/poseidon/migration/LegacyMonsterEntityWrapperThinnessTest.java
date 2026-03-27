@@ -73,9 +73,12 @@ public class LegacyMonsterEntityWrapperThinnessTest {
         Assert.assertTrue(text.contains("SkeletonLifecycleBehaviour"));
         Assert.assertTrue(text.contains("SKELETON_LIFECYCLE_BEHAVIOUR.tickSunlightCombustion"));
         Assert.assertTrue(text.contains("SKELETON_LIFECYCLE_BEHAVIOUR.attackRanged"));
+        Assert.assertTrue(text.contains("CombatFixConfigPolicy"));
+        Assert.assertTrue(text.contains("COMBAT_FIX_CONFIG_POLICY"));
         Assert.assertTrue(text.contains("SKELETON_LIFECYCLE_BEHAVIOUR.getDropItemId"));
         Assert.assertTrue(text.contains("SKELETON_LIFECYCLE_BEHAVIOUR.dropDeathLoot"));
         Assert.assertTrue(text.contains("poseidonSetHasActiveAttackGoal"));
+        Assert.assertFalse(text.contains("\"world.settings.skeleton-shooting-sound-fix.enabled\""));
         Assert.assertFalse(text.contains("new EntityCombustEvent"));
         Assert.assertFalse(text.contains("new EntityArrow(this.world, this)"));
         Assert.assertFalse(text.contains("new EntityDeathEvent(entity, loot)"));

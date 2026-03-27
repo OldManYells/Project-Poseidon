@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.NoiseGenerator;
 
 /**
  * Canonical base hook for legacy noise-generator wrappers.

@@ -2,23 +2,15 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.auth.login.AccessListAdmissionPolicyBehaviour;
-import com.legacyminecraft.poseidon.auth.login.AccessListMutationBehaviour;
-import com.legacyminecraft.poseidon.auth.login.AccessListPersistence;
-import com.legacyminecraft.poseidon.auth.login.PlayerLoginAdmissionSystem;
-import com.legacyminecraft.poseidon.compat.bukkit.LegacyServerBootstrapBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.OperatorPermissionRefreshBridgeBehaviour;
-import com.legacyminecraft.poseidon.world.player.PlayerLifecycleCoordinator;
-import com.legacyminecraft.poseidon.world.player.PlayerFileDataBindingBehaviour;
-import com.legacyminecraft.poseidon.world.player.ServerPlayerViewDistanceBehaviour;
-import com.legacyminecraft.poseidon.world.player.PlayerSessionSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerWorldMoveSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerWorldTransferSupport;
-import com.legacyminecraft.poseidon.world.player.RespawnPacketPairSystem;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Server;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.command.ColouredConsoleSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.*;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -42,76 +34,15 @@ public class ServerConfigurationManager {
     private File m;
     public PlayerFileData playerFileData; // CraftBukkit - private - >public
     public boolean o; // Craftbukkit - private -> public
-    private final AccessListAdmissionPolicyBehaviour accessListAdmissionPolicyBehaviour = AccessListAdmissionPolicyBehaviour.getInstance();
-    private final AccessListMutationBehaviour accessListMutationBehaviour = AccessListMutationBehaviour.getInstance();
-    private final AccessListPersistence accessListPersistence = AccessListPersistence.getInstance();
-    private final OperatorPermissionRefreshBridgeBehaviour operatorPermissionRefreshBridgeBehaviour = OperatorPermissionRefreshBridgeBehaviour.getInstance();
-    private final PlayerLoginAdmissionSystem playerLoginAdmissionSystem = PlayerLoginAdmissionSystem.getInstance();
-    private final PlayerLifecycleCoordinator playerLifecycleCoordinator = PlayerLifecycleCoordinator.getInstance();
-    private final PlayerFileDataBindingBehaviour playerFileDataBindingBehaviour = PlayerFileDataBindingBehaviour.getInstance();
-    private final ServerPlayerViewDistanceBehaviour serverPlayerViewDistanceBehaviour = ServerPlayerViewDistanceBehaviour.getInstance();
-    private final PlayerSessionSystem playerSessionSystem = PlayerSessionSystem.getInstance();
-    private final PlayerWorldMoveSystem playerWorldMoveSystem = PlayerWorldMoveSystem.getInstance();
-    private final PlayerWorldTransferSupport playerWorldTransferSupport = PlayerWorldTransferSupport.getInstance();
-    private final RespawnPacketPairSystem respawnPacketPairSystem = RespawnPacketPairSystem.getInstance();
-    private final LegacyServerBootstrapBridgeBehaviour legacyServerBootstrapBridgeBehaviour =
-            LegacyServerBootstrapBridgeBehaviour.getInstance();
-    private String pendingOperatorMutationName;
-    private final AccessListMutationBehaviour.MutationHooks playerBanMutationHooks =
-            new AccessListMutationBehaviour.MutationHooks() {
-                @Override
-                public void persist() {
-                    ServerConfigurationManager.this.h();
-                }
-
-                @Override
-                public void afterMutation() {
-                }
-            };
-    private final AccessListMutationBehaviour.MutationHooks ipBanMutationHooks =
-            new AccessListMutationBehaviour.MutationHooks() {
-                @Override
-                public void persist() {
-                    ServerConfigurationManager.this.j();
-                }
-
-                @Override
-                public void afterMutation() {
-                }
-            };
-    private final AccessListMutationBehaviour.MutationHooks operatorMutationHooks =
-            new AccessListMutationBehaviour.MutationHooks() {
-                @Override
-                public void persist() {
-                    ServerConfigurationManager.this.l();
-                }
-
-                @Override
-                    public void afterMutation() {
-                    operatorPermissionRefreshBridgeBehaviour.refreshPermissionsIfOnline(
-                            ServerConfigurationManager.this.bukkitServer,
-                            ServerConfigurationManager.this.pendingOperatorMutationName
-                    );
-                }
-            };
-    private final AccessListMutationBehaviour.MutationHooks whitelistMutationHooks =
-            new AccessListMutationBehaviour.MutationHooks() {
-                @Override
-                public void persist() {
-                    ServerConfigurationManager.this.n();
-                }
-
-                @Override
-                public void afterMutation() {
-                }
-            };
 
     // CraftBukkit start
-    private Server bukkitServer;
+    private CraftServer cserver;
     private final String msgKickBanned, msgKickIPBanned, msgKickWhitelist, msgKickServerFull, msgPlayerJoin, msgPlayerLeave;
 
     public ServerConfigurationManager(MinecraftServer minecraftserver) {
-        this.bukkitServer = legacyServerBootstrapBridgeBehaviour.bootstrap(minecraftserver, this);
+        minecraftserver.server = new CraftServer(minecraftserver, this);
+        minecraftserver.console = new ColouredConsoleSender(minecraftserver.server);
+        this.cserver = minecraftserver.server;
         // CraftBukkit end
         this.msgKickBanned = PoseidonConfig.getInstance().getConfigString("message.kick.banned");
         this.msgKickIPBanned = PoseidonConfig.getInstance().getConfigString("message.kick.ip-banned");
@@ -141,23 +72,35 @@ public class ServerConfigurationManager {
     }
 
     public void setPlayerFileData(WorldServer[] aworldserver) {
-        this.playerFileData = playerFileDataBindingBehaviour.bindIfAbsent(
-                this.playerFileData,
-                new PlayerFileDataBindingBehaviour.PlayerFileDataSupplier() {
-                    @Override
-                    public PlayerFileData resolve() {
-                        return aworldserver[0].p().d();
-                    }
-                }
-        );
+        if (this.playerFileData != null) return; // CraftBukkit
+        this.playerFileData = aworldserver[0].p().d();
     }
 
     public void a(EntityPlayer entityplayer) {
-        playerLifecycleCoordinator.registerPlayerInWorldManagers(this.server, entityplayer);
+        // CraftBukkit - removed playermanagers
+        for (WorldServer world : this.server.worlds) {
+            if (world.manager.managedPlayers.contains(entityplayer)) {
+                world.manager.removePlayer(entityplayer);
+                break;
+            }
+        }
+        this.getPlayerManager(entityplayer.dimension).addPlayer(entityplayer);
+        WorldServer worldserver = this.server.getWorldServer(entityplayer.dimension);
+
+        worldserver.chunkProviderServer.getChunkAt((int) entityplayer.locX >> 4, (int) entityplayer.locZ >> 4);
     }
 
     public int a() {
-        return serverPlayerViewDistanceBehaviour.resolveFurthestViewableBlock(this.server);
+        // CraftBukkit start
+        if (this.server.worlds.size() == 0) {
+            return this.server.propertyManager.getInt("view-distance", 10) * 16 - 16;
+        }
+        return this.server.worlds.get(0).manager.getFurthestViewableBlock();
+        // CraftBukkit end
+    }
+
+    private PlayerManager getPlayerManager(int i) {
+        return this.server.getWorldServer(i).manager; // CraftBukkit
     }
 
     public void b(EntityPlayer entityplayer) {
@@ -165,41 +108,131 @@ public class ServerConfigurationManager {
     }
 
     public void c(EntityPlayer entityplayer) {
-        playerLifecycleCoordinator.onPlayerJoin(this.server, this.bukkitServer, this.players, entityplayer, this.msgPlayerJoin);
+        this.players.add(entityplayer);
+        //PlayerTracker.getInstance().addPlayer(entityplayer.name);
+        WorldServer worldserver = this.server.getWorldServer(entityplayer.dimension);
+
+        worldserver.chunkProviderServer.getChunkAt((int) entityplayer.locX >> 4, (int) entityplayer.locZ >> 4);
+
+        if((boolean) PoseidonConfig.getInstance().getConfigOption("world-settings.teleport-to-highest-safe-block")) {
+            while (worldserver.getEntities(entityplayer, entityplayer.boundingBox).size() != 0) {
+                entityplayer.setPosition(entityplayer.locX, entityplayer.locY + 1.0D, entityplayer.locZ);
+            }
+        }
+
+        // CraftBukkit start
+        Player player = this.cserver.getPlayer(entityplayer);
+        PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(player, msgPlayerJoin.replace("%player%", entityplayer.name));
+        this.cserver.getPluginManager().callEvent(playerJoinEvent);
+
+        String joinMessage = playerJoinEvent.getJoinMessage();
+
+        if (joinMessage != null) {
+            this.server.serverConfigurationManager.sendAll(new Packet3Chat(joinMessage));
+        }
+        // CraftBukkit end
+
+        // Poseidon Start
+        // Notify staff of Poseidon update if they are op or have poseidon.update permission
+        if(PoseidonConfig.getInstance().getConfigBoolean("settings.update-checker.notify-staff.enabled", true) && Poseidon.getServer().isUpdateAvailable()) {
+            if (player.isOp() || player.hasPermission("poseidon.update")) {
+                String updateMessage = PoseidonConfig.getInstance().getConfigString("message.update.available");
+                updateMessage = updateMessage.replace("%newversion%", Poseidon.getServer().getNewestVersion());
+                updateMessage = updateMessage.replace("%currentversion%", Poseidon.getServer().getReleaseVersion());
+                player.sendMessage(updateMessage);
+            }
+        }
+        // Poseidon End
+
+        worldserver.addEntity(entityplayer);
+        this.getPlayerManager(entityplayer.dimension).addPlayer(entityplayer);
     }
 
     public void d(EntityPlayer entityplayer) {
-        playerLifecycleCoordinator.onPlayerMoved(this.server, entityplayer);
+        this.getPlayerManager(entityplayer.dimension).movePlayer(entityplayer);
     }
 
     public String disconnect(EntityPlayer entityplayer) { // CraftBukkit - changed return type
-        return playerLifecycleCoordinator.onPlayerDisconnect(
-                this.server,
-                this.bukkitServer,
-                this.playerFileData,
-                this.players,
-                entityplayer,
-                this.msgPlayerLeave
-        );
+        //if(entityplayer.netServerHandler.disconnected) return null; // CraftBukkit - exploits fix https://github.com/OvercastNetwork/CraftBukkit/commit/6f79ca5c54d30d04803143975757713a01bf4e35
+
+
+        // CraftBukkit start
+        // Quitting must be before we do final save of data, in case plugins need to modify it
+        this.getPlayerManager(entityplayer.dimension).removePlayer(entityplayer);
+        PlayerQuitEvent playerQuitEvent = new PlayerQuitEvent(this.cserver.getPlayer(entityplayer), this.msgPlayerLeave.replace("%player%", entityplayer.name));
+        this.cserver.getPluginManager().callEvent(playerQuitEvent);
+        // CraftBukkit end
+
+        //Project POSEIDON Start
+//        boolean found = false;
+//        for (int i = 0; i < this.players.size(); ++i) {
+//            EntityPlayer ep = (EntityPlayer) this.players.get(i);
+//            if (entityplayer.name.equalsIgnoreCase(ep.name)) {
+//                found = true;
+//                break;
+//            }
+//        }
+//        if (!found) {
+//            //return null; - This caused a bug which could block future connections if a quit event occurs before a join event, i think
+//            playerQuitEvent.setQuitMessage(null);
+//        }
+//        PlayerTracker.getInstance().removePlayer(entityplayer.name);
+        //Project POSEIDON End
+
+        this.playerFileData.a(entityplayer);
+        this.server.getWorldServer(entityplayer.dimension).kill(entityplayer);
+        this.players.remove(entityplayer);
+        this.getPlayerManager(entityplayer.dimension).removePlayer(entityplayer);
+
+        return playerQuitEvent.getQuitMessage(); // CraftBukkit
     }
 
     public EntityPlayer a(NetLoginHandler netloginhandler, String s) {
-        return playerLoginAdmissionSystem.admitAndCreatePlayer(
-                this.server,
-                this.bukkitServer,
-                netloginhandler,
-                s,
-                this.banByName,
-                this.banByIP,
-                this.isWhitelisted(s),
-                this.players.size(),
-                this.maxPlayers,
-                this.msgKickBanned,
-                this.msgKickIPBanned,
-                this.msgKickWhitelist,
-                this.msgKickServerFull,
-                this.players
-        );
+        // CraftBukkit start - note: this entire method needs to be changed
+        // Instead of kicking then returning, we need to store the kick reason
+        // in the event, check with plugins to see if it's ok, and THEN kick
+        // depending on the outcome. Also change any reference to this.e.c to entity.world
+        EntityPlayer entity = new EntityPlayer(this.server, this.server.getWorldServer(0), s, new ItemInWorldManager(this.server.getWorldServer(0)));
+        Player player = (entity == null) ? null : (Player) entity.getBukkitEntity();
+        PlayerLoginEvent event = new PlayerLoginEvent(player, netloginhandler); //Project Poseidon - pass player IP through
+
+        String s1 = netloginhandler.networkManager.getSocketAddress().toString();
+
+        s1 = s1.substring(s1.indexOf("/") + 1);
+        s1 = s1.substring(0, s1.indexOf(":"));
+
+        PlayerLoginEvent.Result result =
+                this.banByName.contains(s.trim().toLowerCase()) ? PlayerLoginEvent.Result.KICK_BANNED :
+                this.banByIP.contains(s1) ? PlayerLoginEvent.Result.KICK_BANNED_IP :
+                !this.isWhitelisted(s) ? PlayerLoginEvent.Result.KICK_WHITELIST :
+                this.players.size() >= this.maxPlayers ? PlayerLoginEvent.Result.KICK_FULL :
+                PlayerLoginEvent.Result.ALLOWED;
+
+        String kickMessage =
+                result.equals(PlayerLoginEvent.Result.KICK_BANNED) ? this.msgKickBanned :
+                result.equals(PlayerLoginEvent.Result.KICK_BANNED_IP) ? this.msgKickIPBanned :
+                result.equals(PlayerLoginEvent.Result.KICK_WHITELIST) ? this.msgKickWhitelist :
+                result.equals(PlayerLoginEvent.Result.KICK_FULL) ? msgKickServerFull :
+                s1;
+
+        event.disallow(result, kickMessage);
+
+        this.cserver.getPluginManager().callEvent(event);
+        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            netloginhandler.disconnect(event.getKickMessage());
+            return null;
+        }
+
+        for (int i = 0; i < this.players.size(); ++i) {
+            EntityPlayer entityplayer = (EntityPlayer) this.players.get(i);
+
+            if (entityplayer.name.equalsIgnoreCase(s)) {
+                entityplayer.netServerHandler.disconnect("You logged in from another location");
+            }
+        }
+
+        return entity;
+        // CraftBukkit end
     }
 
     // CraftBukkit start
@@ -208,135 +241,367 @@ public class ServerConfigurationManager {
     }
 
     public EntityPlayer moveToWorld(EntityPlayer entityplayer, int i, Location location) {
-        return playerWorldMoveSystem.moveToWorld(
-                this.server,
-                this.bukkitServer,
-                this.players,
-                entityplayer,
-                i,
-                location,
-                playerLifecycleCoordinator,
-                playerSessionSystem,
-                playerWorldTransferSupport,
-                respawnPacketPairSystem
-        );
+        this.server.getTracker(entityplayer.dimension).untrackPlayer(entityplayer);
+        // this.server.getTracker(entityplayer.dimension).untrackEntity(entityplayer); // CraftBukkit
+        this.getPlayerManager(entityplayer.dimension).removePlayer(entityplayer);
+        this.players.remove(entityplayer);
+        //PlayerTracker.getInstance().removePlayer(entityplayer.name); //Project POSEIDON
+        this.server.getWorldServer(entityplayer.dimension).removeEntity(entityplayer);
+        ChunkCoordinates chunkcoordinates = entityplayer.getBed();
+
+        // CraftBukkit start
+        EntityPlayer entityplayer1 = entityplayer;
+        org.bukkit.World fromWorld = entityplayer1.getBukkitEntity().getWorld();
+
+        if (location == null) {
+            boolean isBedSpawn = false;
+            CraftWorld cworld = (CraftWorld) this.server.server.getWorld(entityplayer.spawnWorld);
+            if (cworld != null && chunkcoordinates != null) {
+                ChunkCoordinates chunkcoordinates1 = EntityHuman.getBed(cworld.getHandle(), chunkcoordinates);
+                if (chunkcoordinates1 != null) {
+                    isBedSpawn = true;
+                    location = new Location(cworld, chunkcoordinates1.x + 0.5, chunkcoordinates1.y, chunkcoordinates1.z + 0.5);
+                } else {
+                    entityplayer1.netServerHandler.sendPacket(new Packet70Bed(0));
+                }
+            }
+
+            if (location == null) {
+                cworld = (CraftWorld) this.server.server.getWorlds().get(0);
+                chunkcoordinates = cworld.getHandle().getSpawn();
+                float yaw = cworld.getHandle().worldData.getYaw(); // Poseidon
+                float pitch = cworld.getHandle().worldData.getPitch(); // Poseidon
+                location = new Location(cworld, chunkcoordinates.x + 0.5, chunkcoordinates.y, chunkcoordinates.z + 0.5, yaw, pitch);
+            }
+
+            Player respawnPlayer = this.cserver.getPlayer(entityplayer);
+            PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(respawnPlayer, location, isBedSpawn);
+            this.cserver.getPluginManager().callEvent(respawnEvent);
+
+            location = respawnEvent.getRespawnLocation();
+            entityplayer.health = 20;
+            entityplayer.fireTicks = 0;
+            entityplayer.fallDistance = 0;
+        } else {
+            location.setWorld(this.server.getWorldServer(i).getWorld());
+        }
+        WorldServer worldserver = ((CraftWorld) location.getWorld()).getHandle();
+        entityplayer1.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        // CraftBukkit end
+
+        worldserver.chunkProviderServer.getChunkAt((int) entityplayer1.locX >> 4, (int) entityplayer1.locZ >> 4);
+
+        while (worldserver.getEntities(entityplayer1, entityplayer1.boundingBox).size() != 0) {
+            entityplayer1.setPosition(entityplayer1.locX, entityplayer1.locY + 1.0D, entityplayer1.locZ);
+        }
+
+        // CraftBukkit start
+        byte actualDimension = (byte) (worldserver.getWorld().getEnvironment().getId());
+        entityplayer1.netServerHandler.sendPacket(new Packet9Respawn((byte) (actualDimension >= 0 ? -1 : 0)));
+        entityplayer1.netServerHandler.sendPacket(new Packet9Respawn(actualDimension));
+        entityplayer1.spawnIn(worldserver);
+        entityplayer1.dead = false;
+        entityplayer1.netServerHandler.teleport(new Location(worldserver.getWorld(), entityplayer1.locX, entityplayer1.locY, entityplayer1.locZ, entityplayer1.yaw, entityplayer1.pitch));
+        // CraftBukkit end
+        this.a(entityplayer1, worldserver);
+        this.getPlayerManager(entityplayer1.dimension).addPlayer(entityplayer1);
+        worldserver.addEntity(entityplayer1);
+        this.players.add(entityplayer1);
+        //PlayerTracker.getInstance().addPlayer(entityplayer1.name); //Project POSEIDON
+        this.updateClient(entityplayer1); // CraftBukkit
+        entityplayer1.x();
+        // CraftBukkit start - don't fire on respawn
+        if (fromWorld != location.getWorld()) {
+            org.bukkit.event.player.PlayerChangedWorldEvent event = new org.bukkit.event.player.PlayerChangedWorldEvent((Player) entityplayer1.getBukkitEntity(), fromWorld);
+            Bukkit.getServer().getPluginManager().callEvent(event);
+        }
+        // CraftBukkit end
+        return entityplayer1;
     }
 
     public void f(EntityPlayer entityplayer) {
-        PlayerWorldTransferSupport.PortalResolution portalResolution =
-                playerWorldTransferSupport.resolvePortalDestination(this.server, entityplayer);
-        if (portalResolution == null) {
+        // CraftBukkit start -- Replaced the standard handling of portals with a more customised method.
+        int dimension = entityplayer.dimension;
+        WorldServer fromWorld = this.server.getWorldServer(dimension);
+        WorldServer toWorld = null;
+        if (dimension < 10) {
+            int toDimension = dimension == -1 ? 0 : -1;
+            for (WorldServer world : this.server.worlds) {
+                if (world.dimension == toDimension) {
+                    toWorld = world;
+                }
+            }
+        }
+        double blockRatio = dimension == -1 ? 8 : 0.125;
+
+        Location fromLocation = new Location(fromWorld.getWorld(), entityplayer.locX, entityplayer.locY, entityplayer.locZ, entityplayer.yaw, entityplayer.pitch);
+        Location toLocation = toWorld == null ? null : new Location(toWorld.getWorld(), (entityplayer.locX * blockRatio), entityplayer.locY, (entityplayer.locZ * blockRatio), entityplayer.yaw, entityplayer.pitch);
+
+        org.bukkit.craftbukkit.PortalTravelAgent pta = new org.bukkit.craftbukkit.PortalTravelAgent();
+        PlayerPortalEvent event = new PlayerPortalEvent((Player) entityplayer.getBukkitEntity(), fromLocation, toLocation, pta);
+        Bukkit.getServer().getPluginManager().callEvent(event);
+        if (event.isCancelled() || event.getTo() == null) {
             return;
         }
-        this.moveToWorld(entityplayer, portalResolution.getDestinationDimension(), portalResolution.getLocation());
+
+        Location finalLocation = event.getTo();
+        if (event.useTravelAgent()) {
+            finalLocation = event.getPortalTravelAgent().findOrCreate(finalLocation);
+        }
+        toWorld = ((CraftWorld) finalLocation.getWorld()).getHandle();
+        this.moveToWorld(entityplayer, toWorld.dimension, finalLocation);
+        // CraftBukkit end
     }
 
     public void b() {
-        playerLifecycleCoordinator.flushPlayerManagers(this.server);
+        // CraftBukkit start
+        for (int i = 0; i < this.server.worlds.size(); ++i) {
+            this.server.worlds.get(i).manager.flush();
+        }
+        // CraftBukkit end
     }
 
     public void flagDirty(int i, int j, int k, int l) {
-        playerLifecycleCoordinator.flagDirtyBlock(this.server, i, j, k, l);
+        this.getPlayerManager(l).flagDirty(i, j, k);
     }
 
     public void sendAll(Packet packet) {
-        playerSessionSystem.sendPacketToAll(this.players, packet);
+        for (int i = 0; i < this.players.size(); ++i) {
+            EntityPlayer entityplayer = (EntityPlayer) this.players.get(i);
+
+            entityplayer.netServerHandler.sendPacket(packet);
+        }
     }
 
     public void a(Packet packet, int i) {
-        playerSessionSystem.sendPacketToDimension(this.players, i, packet);
+        for (int j = 0; j < this.players.size(); ++j) {
+            EntityPlayer entityplayer = (EntityPlayer) this.players.get(j);
+
+            if (entityplayer.dimension == i) {
+                entityplayer.netServerHandler.sendPacket(packet);
+            }
+        }
     }
 
     public String c() {
-        return playerSessionSystem.buildPlayerNameList(this.players);
+        String s = "";
+
+        for (int i = 0; i < this.players.size(); ++i) {
+            if (i > 0) {
+                s = s + ", ";
+            }
+
+            s = s + ((EntityPlayer) this.players.get(i)).name;
+        }
+
+        return s;
     }
 
     public void a(String s) {
-        accessListMutationBehaviour.addAndPersist(this.banByName, s, this.accessListPersistence, this.playerBanMutationHooks);
+        this.banByName.add(s.toLowerCase());
+        this.h();
     }
 
     public void b(String s) {
-        accessListMutationBehaviour.removeAndPersist(this.banByName, s, this.accessListPersistence, this.playerBanMutationHooks);
+        this.banByName.remove(s.toLowerCase());
+        this.h();
     }
 
     private void g() {
-        accessListPersistence.loadNormalizedSet(this.banByName, this.j, a, "Failed to load ban list: ");
+        try {
+            this.banByName.clear();
+            BufferedReader bufferedreader = new BufferedReader(new FileReader(this.j));
+            String s = "";
+
+            while ((s = bufferedreader.readLine()) != null) {
+                this.banByName.add(s.trim().toLowerCase());
+            }
+
+            bufferedreader.close();
+        } catch (Exception exception) {
+            a.warning("Failed to load ban list: " + exception);
+        }
     }
 
     private void h() {
-        accessListPersistence.saveSet(this.banByName, this.j, a, "Failed to save ban list: ");
+        try {
+            PrintWriter printwriter = new PrintWriter(new FileWriter(this.j, false));
+            Iterator iterator = this.banByName.iterator();
+
+            while (iterator.hasNext()) {
+                String s = (String) iterator.next();
+
+                printwriter.println(s);
+            }
+
+            printwriter.close();
+        } catch (Exception exception) {
+            a.warning("Failed to save ban list: " + exception);
+        }
     }
 
     public void c(String s) {
-        accessListMutationBehaviour.addAndPersist(this.banByIP, s, this.accessListPersistence, this.ipBanMutationHooks);
+        this.banByIP.add(s.toLowerCase());
+        this.j();
     }
 
     public void d(String s) {
-        accessListMutationBehaviour.removeAndPersist(this.banByIP, s, this.accessListPersistence, this.ipBanMutationHooks);
+        this.banByIP.remove(s.toLowerCase());
+        this.j();
     }
 
     private void i() {
-        accessListPersistence.loadNormalizedSet(this.banByIP, this.k, a, "Failed to load ip ban list: ");
+        try {
+            this.banByIP.clear();
+            BufferedReader bufferedreader = new BufferedReader(new FileReader(this.k));
+            String s = "";
+
+            while ((s = bufferedreader.readLine()) != null) {
+                this.banByIP.add(s.trim().toLowerCase());
+            }
+
+            bufferedreader.close();
+        } catch (Exception exception) {
+            a.warning("Failed to load ip ban list: " + exception);
+        }
     }
 
     private void j() {
-        accessListPersistence.saveSet(this.banByIP, this.k, a, "Failed to save ip ban list: ");
+        try {
+            PrintWriter printwriter = new PrintWriter(new FileWriter(this.k, false));
+            Iterator iterator = this.banByIP.iterator();
+
+            while (iterator.hasNext()) {
+                String s = (String) iterator.next();
+
+                printwriter.println(s);
+            }
+
+            printwriter.close();
+        } catch (Exception exception) {
+            a.warning("Failed to save ip ban list: " + exception);
+        }
     }
 
     public void e(String s) {
-        this.pendingOperatorMutationName = s;
-        try {
-            accessListMutationBehaviour.addAndPersist(this.h, s, this.accessListPersistence, this.operatorMutationHooks);
-        } finally {
-            this.pendingOperatorMutationName = null;
+        this.h.add(s.toLowerCase());
+        this.l();
+
+        // Craftbukkit start
+        Player player = server.server.getPlayer(s);
+        if (player != null) {
+            player.recalculatePermissions();
         }
+        // Craftbukkit end
     }
 
     public void f(String s) {
-        this.pendingOperatorMutationName = s;
-        try {
-            accessListMutationBehaviour.removeAndPersist(this.h, s, this.accessListPersistence, this.operatorMutationHooks);
-        } finally {
-            this.pendingOperatorMutationName = null;
+        this.h.remove(s.toLowerCase());
+        this.l();
+
+        // Craftbukkit start
+        Player player = server.server.getPlayer(s);
+        if (player != null) {
+            player.recalculatePermissions();
         }
+        // Craftbukkit end
     }
 
     private void k() {
-        accessListPersistence.loadNormalizedSet(this.h, this.l, a, "Failed to load ops: ");
+        try {
+            this.h.clear();
+            BufferedReader bufferedreader = new BufferedReader(new FileReader(this.l));
+            String s = "";
+
+            while ((s = bufferedreader.readLine()) != null) {
+                this.h.add(s.trim().toLowerCase());
+            }
+
+            bufferedreader.close();
+        } catch (Exception exception) {
+            // CraftBukkit - corrected text
+            a.warning("Failed to load ops: " + exception);
+        }
     }
 
     private void l() {
-        accessListPersistence.saveSet(this.h, this.l, a, "Failed to save ops: ");
+        try {
+            PrintWriter printwriter = new PrintWriter(new FileWriter(this.l, false));
+            Iterator iterator = this.h.iterator();
+
+            while (iterator.hasNext()) {
+                String s = (String) iterator.next();
+
+                printwriter.println(s);
+            }
+
+            printwriter.close();
+        } catch (Exception exception) {
+            // CraftBukkit - corrected text
+            a.warning("Failed to save ops: " + exception);
+        }
     }
 
     private void m() {
-        accessListPersistence.loadNormalizedSet(this.i, this.m, a, "Failed to load white-list: ");
+        try {
+            this.i.clear();
+            BufferedReader bufferedreader = new BufferedReader(new FileReader(this.m));
+            String s = "";
+
+            while ((s = bufferedreader.readLine()) != null) {
+                this.i.add(s.trim().toLowerCase());
+            }
+
+            bufferedreader.close();
+        } catch (Exception exception) {
+            a.warning("Failed to load white-list: " + exception);
+        }
     }
 
     private void n() {
-        accessListPersistence.saveSet(this.i, this.m, a, "Failed to save white-list: ");
+        try {
+            PrintWriter printwriter = new PrintWriter(new FileWriter(this.m, false));
+            Iterator iterator = this.i.iterator();
+
+            while (iterator.hasNext()) {
+                String s = (String) iterator.next();
+
+                printwriter.println(s);
+            }
+
+            printwriter.close();
+        } catch (Exception exception) {
+            a.warning("Failed to save white-list: " + exception);
+        }
     }
 
     public boolean isWhitelisted(String s) {
-        return accessListAdmissionPolicyBehaviour.isWhitelisted(
-                s,
-                this.o,
-                this.h,
-                this.i,
-                this.accessListPersistence
-        );
+        s = s.trim().toLowerCase();
+        return !this.o || this.h.contains(s) || this.i.contains(s);
     }
 
     public boolean isOp(String s) {
-        return accessListAdmissionPolicyBehaviour.isOperator(s, this.h, this.accessListPersistence);
+        return this.h.contains(s.trim().toLowerCase());
     }
 
     public EntityPlayer i(String s) {
-        return playerSessionSystem.findPlayer(this.players, s);
+        for (int i = 0; i < this.players.size(); ++i) {
+            EntityPlayer entityplayer = (EntityPlayer) this.players.get(i);
+
+            if (entityplayer.name.equalsIgnoreCase(s)) {
+                return entityplayer;
+            }
+        }
+
+        return null;
     }
 
     public void a(String s, String s1) {
-        playerSessionSystem.sendChatToPlayer(this.players, s, s1);
+        EntityPlayer entityplayer = this.i(s);
+
+        if (entityplayer != null) {
+            entityplayer.netServerHandler.sendPacket(new Packet3Chat(s1));
+        }
     }
 
     public void sendPacketNearby(double d0, double d1, double d2, double d3, int i, Packet packet) {
@@ -344,30 +609,61 @@ public class ServerConfigurationManager {
     }
 
     public void sendPacketNearby(EntityHuman entityhuman, double d0, double d1, double d2, double d3, int i, Packet packet) {
-        playerSessionSystem.sendPacketNearby(this.players, entityhuman, d0, d1, d2, d3, i, packet);
+        for (int j = 0; j < this.players.size(); ++j) {
+            EntityPlayer entityplayer = (EntityPlayer) this.players.get(j);
+
+            if (entityplayer != entityhuman && entityplayer.dimension == i) {
+                double d4 = d0 - entityplayer.locX;
+                double d5 = d1 - entityplayer.locY;
+                double d6 = d2 - entityplayer.locZ;
+
+                if (d4 * d4 + d5 * d5 + d6 * d6 < d3 * d3) {
+                    entityplayer.netServerHandler.sendPacket(packet);
+                }
+            }
+        }
     }
 
     public void j(String s) {
-        playerSessionSystem.sendPacketToOperators(this.players, this.h, s);
+        Packet3Chat packet3chat = new Packet3Chat(s);
+
+        for (int i = 0; i < this.players.size(); ++i) {
+            EntityPlayer entityplayer = (EntityPlayer) this.players.get(i);
+
+            if (this.isOp(entityplayer.name)) {
+                entityplayer.netServerHandler.sendPacket(packet3chat);
+            }
+        }
     }
 
     public boolean a(String s, Packet packet) {
-        return playerSessionSystem.sendPacketToPlayer(this.players, s, packet);
+        EntityPlayer entityplayer = this.i(s);
+
+        if (entityplayer != null) {
+            entityplayer.netServerHandler.sendPacket(packet);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void savePlayers() {
-        playerSessionSystem.savePlayers(this.playerFileData, this.players);
+        for (int i = 0; i < this.players.size(); ++i) {
+            this.playerFileData.a((EntityHuman) this.players.get(i));
+        }
     }
 
     public void a(int i, int j, int k, TileEntity tileentity) {
     }
 
     public void k(String s) {
-        accessListMutationBehaviour.addAndPersist(this.i, s, this.accessListPersistence, this.whitelistMutationHooks);
+        this.i.add(s);
+        this.n();
     }
 
     public void l(String s) {
-        accessListMutationBehaviour.removeAndPersist(this.i, s, this.accessListPersistence, this.whitelistMutationHooks);
+        this.i.remove(s);
+        this.n();
     }
 
     public Set e() {
@@ -379,10 +675,14 @@ public class ServerConfigurationManager {
     }
 
     public void a(EntityPlayer entityplayer, WorldServer worldserver) {
-        playerSessionSystem.sendWorldState(entityplayer, worldserver);
+        entityplayer.netServerHandler.sendPacket(new Packet4UpdateTime(worldserver.getTime()));
+        if (worldserver.v()) {
+            entityplayer.netServerHandler.sendPacket(new Packet70Bed(1));
+        }
     }
 
     public void updateClient(EntityPlayer entityplayer) {
-        playerSessionSystem.refreshClient(entityplayer);
+        entityplayer.updateInventory(entityplayer.defaultContainer);
+        entityplayer.C();
     }
 }

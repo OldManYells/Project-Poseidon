@@ -1,16 +1,23 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.network.ConnectionAcceptLoopSystem;
+import com.legacyminecraft.poseidon.network.ConnectionAcceptExceptionPolicy;
+import com.legacyminecraft.poseidon.network.NetworkConnectionLabelPolicy;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class NetworkAcceptThread extends Thread {
+    private static final Logger LOGGER = Logger.getLogger(NetworkAcceptThread.class.getName());
 
     final MinecraftServer a;
 
     final NetworkListenThread b;
     private final ConnectionAcceptLoopSystem connectionAcceptLoopSystem = ConnectionAcceptLoopSystem.getInstance();
+    private final ConnectionAcceptExceptionPolicy connectionAcceptExceptionPolicy = ConnectionAcceptExceptionPolicy.getInstance();
+    private final NetworkConnectionLabelPolicy networkConnectionLabelPolicy = NetworkConnectionLabelPolicy.getInstance();
     private final ConnectionAcceptLoopSystem.AcceptLoopOperations acceptLoopOperations =
             new ConnectionAcceptLoopSystem.AcceptLoopOperations() {
                 @Override
@@ -33,14 +40,23 @@ class NetworkAcceptThread extends Thread {
                     NetLoginHandler netloginhandler = new NetLoginHandler(
                             NetworkAcceptThread.this.a,
                             socket,
-                            "Connection #" + NetworkListenThread.b(NetworkAcceptThread.this.b)
+                            networkConnectionLabelPolicy.buildConnectionLabel(
+                                    NetworkListenThread.b(NetworkAcceptThread.this.b)
+                            )
                     );
                     NetworkListenThread.a(NetworkAcceptThread.this.b, netloginhandler);
                 }
 
                 @Override
-                public void onAcceptError(IOException ioexception) {
-                    ioexception.printStackTrace();
+                public void onAcceptError(Exception exception) {
+                    if (!(exception instanceof IOException)) {
+                        LOGGER.log(Level.WARNING, "Network accept loop failed", exception);
+                        return;
+                    }
+                    IOException ioexception = (IOException) exception;
+                    if (!connectionAcceptExceptionPolicy.isExpectedShutdownException(ioexception)) {
+                        LOGGER.log(Level.WARNING, "Network accept loop failed", ioexception);
+                    }
                 }
             };
 

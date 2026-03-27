@@ -1,14 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AchievementList;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPig;
-import net.minecraft.server.EntityPigZombie;
-import net.minecraft.server.EntityWeatherStorm;
-import net.minecraft.server.Item;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.PigZapEvent;
 
 public final class PigLifecycleBehaviour {
     private static final PigLifecycleBehaviour INSTANCE = new PigLifecycleBehaviour();

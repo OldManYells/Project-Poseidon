@@ -1,15 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Block;
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityWeatherStorm;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 
 import java.util.List;
 /**
@@ -25,7 +15,7 @@ public final class LightningStormLifecycleBehaviour {
         return INSTANCE;
     }
 
-    public void initialize(EntityWeatherStorm storm, World world, double x, double y, double z, boolean isEffect, org.bukkit.World bukkitWorld) {
+    public void initialize(EntityWeatherStorm storm, World world, double x, double y, double z, boolean isEffect, com.legacyminecraft.compat.bukkit.World bukkitWorld) {
         storm.setPositionRotation(x, y, z, 0.0F, 0.0F);
         storm.poseidonSetLifeTicks(2);
         storm.a = storm.poseidonNextRandomLong();
@@ -86,9 +76,14 @@ public final class LightningStormLifecycleBehaviour {
         // Vanilla lightning carries no extra serialized payload.
     }
 
-    private void igniteIfPossible(World world, org.bukkit.World bukkitWorld, int x, int y, int z) {
+    private void igniteIfPossible(World world, com.legacyminecraft.compat.bukkit.World bukkitWorld, int x, int y, int z) {
         if (world.getTypeId(x, y, z) == 0 && Block.FIRE.canPlace(world, x, y, z)) {
-            BlockIgniteEvent event = new BlockIgniteEvent(bukkitWorld.getBlockAt(x, y, z), IgniteCause.LIGHTNING, null);
+            com.legacyminecraft.compat.bukkit.BlockIgniteEvent event =
+                    new com.legacyminecraft.compat.bukkit.BlockIgniteEvent(
+                            bukkitWorld.getBlockAt(x, y, z),
+                            com.legacyminecraft.compat.bukkit.BlockIgniteEvent.IgniteCause.LIGHTNING,
+                            null
+                    );
             world.getServer().getPluginManager().callEvent(event);
 
             if (!event.isCancelled()) {

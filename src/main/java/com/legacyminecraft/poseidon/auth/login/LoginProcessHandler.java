@@ -3,17 +3,8 @@ package com.legacyminecraft.poseidon.auth.login;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.auth.uuid.UUIDManager;
+import com.legacyminecraft.compat.bukkit.Plugin;
 import com.legacyminecraft.poseidon.uuid.ThreadUUIDFetcher;
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.Packet1Login;
-import net.minecraft.server.ThreadLoginVerifier;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerConnectionInitializationEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
-import org.bukkit.plugin.Plugin;
 
 import java.net.InetSocketAddress;
 import java.util.HashSet;

@@ -1,11 +1,11 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EnumMobType;
-import net.minecraft.server.World;
+
+import com.legacyminecraft.poseidon.entity.Entity;
+import com.legacyminecraft.poseidon.entity.EntityHuman;
+import com.legacyminecraft.poseidon.entity.EntityLiving;
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
+import com.legacyminecraft.poseidon.world.World;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public final class PressurePlateStateBehaviour {
             return world.a(EntityHuman.class, detectionBox);
         }
 
-        return java.util.Collections.EMPTY_LIST;
+        return java.util.Collections.emptyList();
     }
 
     public boolean hasTriggeringEntities(List entities) {

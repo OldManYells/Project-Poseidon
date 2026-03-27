@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet200Statistic;
-import net.minecraft.server.Statistic;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.NBTTagCompound;
+import com.legacyminecraft.poseidon.nbt.NBTTagCompound;
 
 public final class ItemStackStateBehaviour {
     private static final ItemStackStateBehaviour INSTANCE = new ItemStackStateBehaviour();

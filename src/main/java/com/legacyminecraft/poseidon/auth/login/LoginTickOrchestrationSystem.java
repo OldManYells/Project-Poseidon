@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.Packet1Login;
 
 /**
  * Canonical orchestration for login tick evaluation and tick-action execution.
@@ -16,7 +15,7 @@ public final class LoginTickOrchestrationSystem {
     }
 
     public int execute(
-            Packet1Login deferredLoginPacket,
+            Object deferredLoginPacket,
             int timeoutCounter,
             int loginTimeoutTicks,
             LoginTickPolicy loginTickPolicy,

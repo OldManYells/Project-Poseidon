@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
 
 /**
  * Canonical behaviour for entity passenger-propagation rules.

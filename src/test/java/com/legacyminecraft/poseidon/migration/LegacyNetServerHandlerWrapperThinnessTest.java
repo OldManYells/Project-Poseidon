@@ -18,6 +18,10 @@ public class LegacyNetServerHandlerWrapperThinnessTest {
 
         Assert.assertTrue(text.contains("ConnectionHeartbeatExecutionSystem"));
         Assert.assertTrue(text.contains("connectionHeartbeatSystem"));
+        Assert.assertTrue(text.contains("ConnectionHeartbeatThresholdPolicy"));
+        Assert.assertTrue(text.contains("connectionHeartbeatThresholdPolicy"));
+        Assert.assertTrue(text.contains("PlayerMoveInitializationPolicy"));
+        Assert.assertTrue(text.contains("playerMoveInitializationPolicy"));
         Assert.assertTrue(text.contains("heartbeatActions"));
         Assert.assertTrue(text.contains("connectionHeartbeatExecutionSystem.applyHeartbeat("));
         Assert.assertTrue(text.contains("connectionLossExecutionSystem"));
@@ -26,6 +30,16 @@ public class LegacyNetServerHandlerWrapperThinnessTest {
         Assert.assertTrue(text.contains("incomingChatPacketHandler"));
         Assert.assertTrue(text.contains("incomingChatPacketExecutionSystem"));
         Assert.assertTrue(text.contains("incomingChatResultExecutionSystem"));
+        Assert.assertTrue(text.contains("IncomingChatLimitPolicy"));
+        Assert.assertTrue(text.contains("ChatAllowedCharacterPolicy"));
+        Assert.assertTrue(text.contains("BlockInteractionDistancePolicy"));
+        Assert.assertTrue(text.contains("PacketEventConfigPolicy"));
+        Assert.assertTrue(text.contains("PlayerLeaveMessageConfigPolicy"));
+        Assert.assertTrue(text.contains("incomingChatLimitPolicy"));
+        Assert.assertTrue(text.contains("chatAllowedCharacterPolicy"));
+        Assert.assertTrue(text.contains("blockInteractionDistancePolicy"));
+        Assert.assertTrue(text.contains("packetEventConfigPolicy"));
+        Assert.assertTrue(text.contains("playerLeaveMessageConfigPolicy"));
         Assert.assertTrue(text.contains("incomingChatActions"));
         Assert.assertTrue(text.contains("incomingChatPacketExecutionSystem.execute("));
         Assert.assertTrue(text.contains("entityActionPacketExecutionSystem"));
@@ -87,6 +101,7 @@ public class LegacyNetServerHandlerWrapperThinnessTest {
         Assert.assertTrue(text.contains("groundMovementDecisionExecutionSystem"));
         Assert.assertTrue(text.contains("groundMovementDecisionExecutionSystem.executeDecision("));
         Assert.assertTrue(text.contains("groundMovementDecisionLogSystem"));
+        Assert.assertTrue(text.contains("groundMovementConsoleLogBehaviour"));
         Assert.assertTrue(text.contains("groundMovementDecisionLogSystem.emitLogs("));
         Assert.assertTrue(text.contains("windowTransactionBehaviour"));
         Assert.assertTrue(text.contains("hotbarSelectionBehaviour"));
@@ -127,8 +142,15 @@ public class LegacyNetServerHandlerWrapperThinnessTest {
         Assert.assertFalse(text.contains("groundMovementDecision.getAction() == PlayerGroundMovementSystem.GroundMovementDecision.Action.TELEPORT_LAST_GOOD"));
         Assert.assertFalse(text.contains("groundMovementDecision.getAction() == PlayerGroundMovementSystem.GroundMovementDecision.Action.ABORT"));
         Assert.assertFalse(text.contains("private void logGroundMovementDecision("));
+        Assert.assertFalse(text.contains("System.out.println(logLine);"));
+        Assert.assertFalse(text.contains("\"settings.packet-events.enabled\""));
+        Assert.assertFalse(text.contains("\"message.player.leave\""));
+        Assert.assertFalse(text.contains("private static final int PLACE_DISTANCE_SQUARED = 6 * 6;"));
         Assert.assertFalse(text.contains("ConnectionHeartbeatSystem.HeartbeatDecision heartbeatDecision ="));
         Assert.assertFalse(text.contains("this.sendPacket(connectionHeartbeatSystem.createKeepAlivePacket());"));
+        Assert.assertFalse(text.contains(",\n                20,\n"));
+        Assert.assertFalse(text.contains("Double.MAX_VALUE"));
+        Assert.assertFalse(text.contains("Float.MAX_VALUE"));
         Assert.assertFalse(text.contains("if (this.player.dead) return; // CraftBukkit"));
         Assert.assertFalse(text.contains("this.lastPosX = plan.getX();"));
         Assert.assertFalse(text.contains("this.player.setLocation(plan.getX(), plan.getY(), plan.getZ(), plan.getYaw(), plan.getPitch());"));

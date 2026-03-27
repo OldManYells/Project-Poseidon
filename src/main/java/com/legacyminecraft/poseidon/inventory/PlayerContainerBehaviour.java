@@ -1,16 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Container;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.InventoryCrafting;
-import net.minecraft.server.InventoryCraftResult;
-import net.minecraft.server.InventoryPlayer;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Packet103SetSlot;
-import net.minecraft.server.Slot;
-import net.minecraft.server.SlotResult;
 
 import java.util.List;
 
@@ -61,7 +50,7 @@ public final class PlayerContainerBehaviour {
     }
 
     public void updateCraftResult(InventoryCrafting craftInventory, IInventory resultInventory, List listeners) {
-        ItemStack craftResult = net.minecraft.server.CraftingManager.getInstance().craft(craftInventory);
+        ItemStack craftResult = com.legacyminecraft.compat.bukkit.CraftingManager.getInstance().craft(craftInventory);
         resultInventory.setItem(0, craftResult);
         if (listeners.size() < 1) {
             return;

@@ -1,7 +1,13 @@
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.compat.bukkit.BiomeConversionBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.ChunkSnapshotDataAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.BiomeConversionBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotBlockLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotDataAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotBiomeLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotClimateLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkSnapshotFactoryBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotPackedBufferLayoutBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotMetadataAccessBehaviour;
 import net.minecraft.server.BiomeBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
@@ -14,12 +20,18 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
             BiomeConversionBehaviour.getInstance();
     private static final ChunkSnapshotDataAccessBehaviour CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR =
             ChunkSnapshotDataAccessBehaviour.getInstance();
-    private static final ChunkSnapshotDataAccessBehaviour.BiomeResolver BIOME_RESOLVER =
-            new ChunkSnapshotDataAccessBehaviour.BiomeResolver() {
-                public Biome resolve(BiomeBase biomeBase) {
-                    return BIOME_CONVERSION_BEHAVIOUR.biomeBaseToBiome(biomeBase);
-                }
-            };
+    private static final ChunkSnapshotBlockLookupBehaviour CHUNK_SNAPSHOT_BLOCK_LOOKUP_BEHAVIOUR =
+            ChunkSnapshotBlockLookupBehaviour.getInstance();
+    private static final ChunkSnapshotBiomeLookupBehaviour CHUNK_SNAPSHOT_BIOME_LOOKUP_BEHAVIOUR =
+            ChunkSnapshotBiomeLookupBehaviour.getInstance();
+    private static final ChunkSnapshotClimateLookupBehaviour CHUNK_SNAPSHOT_CLIMATE_LOOKUP_BEHAVIOUR =
+            ChunkSnapshotClimateLookupBehaviour.getInstance();
+    private static final ChunkSnapshotPackedBufferLayoutBehaviour CHUNK_SNAPSHOT_PACKED_BUFFER_LAYOUT_BEHAVIOUR =
+            ChunkSnapshotPackedBufferLayoutBehaviour.getInstance();
+    private static final ChunkSnapshotMetadataAccessBehaviour CHUNK_SNAPSHOT_METADATA_ACCESS_BEHAVIOUR =
+            ChunkSnapshotMetadataAccessBehaviour.getInstance();
+    private static final CraftChunkSnapshotFactoryBehaviour CRAFT_CHUNK_SNAPSHOT_FACTORY_BEHAVIOUR =
+            CraftChunkSnapshotFactoryBehaviour.getInstance();
 
     private final int x, z;
     private final String worldname;
@@ -30,14 +42,10 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
     private final double[] biomeTemp;
     private final double[] biomeRain;
 
-    private static final int BLOCKDATA_OFF = 32768;
-    private static final int BLOCKLIGHT_OFF = BLOCKDATA_OFF + 16384;
-    private static final int SKYLIGHT_OFF = BLOCKLIGHT_OFF + 16384;
-
     /**
      * Constructor
      */
-    CraftChunkSnapshot(int x, int z, String wname, long wtime, byte[] buf, byte[] hmap, BiomeBase[] biome, double[] biomeTemp, double[] biomeRain) {
+    public CraftChunkSnapshot(int x, int z, String wname, long wtime, byte[] buf, byte[] hmap, BiomeBase[] biome, double[] biomeTemp, double[] biomeRain) {
         this.x = x;
         this.z = z;
         this.worldname = wname;
@@ -49,13 +57,37 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
         this.biomeRain = biomeRain;
     }
 
+    public static CraftChunkSnapshot create(
+            int x,
+            int z,
+            String worldName,
+            long worldTime,
+            byte[] chunkBuffer,
+            byte[] heightMap,
+            BiomeBase[] biomeData,
+            double[] biomeTemperature,
+            double[] biomeRainfall
+    ) {
+        return CRAFT_CHUNK_SNAPSHOT_FACTORY_BEHAVIOUR.createSnapshot(
+                x,
+                z,
+                worldName,
+                worldTime,
+                chunkBuffer,
+                heightMap,
+                biomeData,
+                biomeTemperature,
+                biomeRainfall
+        );
+    }
+
     /**
      * Gets the X-coordinate of this chunk
      *
      * @return X-coordinate
      */
     public int getX() {
-        return x;
+        return CHUNK_SNAPSHOT_METADATA_ACCESS_BEHAVIOUR.getX(x);
     }
 
     /**
@@ -64,7 +96,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return Z-coordinate
      */
     public int getZ() {
-        return z;
+        return CHUNK_SNAPSHOT_METADATA_ACCESS_BEHAVIOUR.getZ(z);
     }
 
     /**
@@ -73,7 +105,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return Parent World Name
      */
     public String getWorldName() {
-        return worldname;
+        return CHUNK_SNAPSHOT_METADATA_ACCESS_BEHAVIOUR.getWorldName(worldname);
     }
 
     /**
@@ -85,7 +117,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-255
      */
     public int getBlockTypeId(int x, int y, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readBlockTypeId(buf, x, y, z);
+        return CHUNK_SNAPSHOT_BLOCK_LOOKUP_BEHAVIOUR.getBlockTypeId(CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR, buf, x, y, z);
     }
 
     /**
@@ -97,7 +129,14 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-15
      */
     public int getBlockData(int x, int y, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readBlockData(buf, BLOCKDATA_OFF, x, y, z);
+        return CHUNK_SNAPSHOT_BLOCK_LOOKUP_BEHAVIOUR.getBlockData(
+                CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR,
+                buf,
+                CHUNK_SNAPSHOT_PACKED_BUFFER_LAYOUT_BEHAVIOUR.getBlockDataOffset(),
+                x,
+                y,
+                z
+        );
     }
 
     /**
@@ -109,7 +148,14 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-15
      */
     public int getBlockSkyLight(int x, int y, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readSkyLight(buf, SKYLIGHT_OFF, x, y, z);
+        return CHUNK_SNAPSHOT_BLOCK_LOOKUP_BEHAVIOUR.getSkyLight(
+                CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR,
+                buf,
+                CHUNK_SNAPSHOT_PACKED_BUFFER_LAYOUT_BEHAVIOUR.getSkyLightOffset(),
+                x,
+                y,
+                z
+        );
     }
 
     /**
@@ -121,7 +167,14 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return 0-15
      */
     public int getBlockEmittedLight(int x, int y, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readEmittedLight(buf, BLOCKLIGHT_OFF, x, y, z);
+        return CHUNK_SNAPSHOT_BLOCK_LOOKUP_BEHAVIOUR.getEmittedLight(
+                CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR,
+                buf,
+                CHUNK_SNAPSHOT_PACKED_BUFFER_LAYOUT_BEHAVIOUR.getBlockLightOffset(),
+                x,
+                y,
+                z
+        );
     }
 
     /**
@@ -132,7 +185,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return Y-coordinate of the highest non-air block
      */
     public int getHighestBlockYAt(int x, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readHighestBlockY(hmap, x, z);
+        return CHUNK_SNAPSHOT_BLOCK_LOOKUP_BEHAVIOUR.getHighestBlockY(CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR, hmap, x, z);
     }
 
     /**
@@ -143,7 +196,13 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return Biome at given coordinate
      */
     public Biome getBiome(int x, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readBiome(biome, x, z, BIOME_RESOLVER);
+        return CHUNK_SNAPSHOT_BIOME_LOOKUP_BEHAVIOUR.getBiome(
+                CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR,
+                biome,
+                x,
+                z,
+                BIOME_CONVERSION_BEHAVIOUR
+        );
     }
 
     /**
@@ -154,7 +213,8 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return temperature at given coordinate
      */
     public double getRawBiomeTemperature(int x, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readClimateValue(biomeTemp, x, z);
+        return CHUNK_SNAPSHOT_CLIMATE_LOOKUP_BEHAVIOUR
+                .getTemperature(CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR, biomeTemp, x, z);
     }
 
     /**
@@ -165,7 +225,8 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return rainfall at given coordinate
      */
     public double getRawBiomeRainfall(int x, int z) {
-        return CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR.readClimateValue(biomeRain, x, z);
+        return CHUNK_SNAPSHOT_CLIMATE_LOOKUP_BEHAVIOUR
+                .getRainfall(CHUNK_SNAPSHOT_DATA_ACCESS_BEHAVIOUR, biomeRain, x, z);
     }
 
     /**
@@ -173,6 +234,6 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
      * @return time in ticks
      */
     public long getCaptureFullTime() {
-        return captureFulltime;
+        return CHUNK_SNAPSHOT_METADATA_ACCESS_BEHAVIOUR.getCaptureFullTime(captureFulltime);
     }
 }

@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for detaching entities from chunk containers during removal.

@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 
 /**
  * Canonical execution flow for connection-loss disconnect handling.
@@ -27,8 +25,8 @@ public final class ConnectionLossExecutionSystem {
     public boolean executeConnectionLoss(
             boolean disconnected,
             ConnectionLossReporter connectionLossReporter,
-            MinecraftServer minecraftServer,
-            EntityPlayer player,
+            Object minecraftServer,
+            Object player,
             String reason,
             java.util.logging.Logger logger
     ) {

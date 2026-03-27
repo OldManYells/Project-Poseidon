@@ -12,6 +12,9 @@ import java.net.SocketException;
  */
 public final class NetworkSocketSystem {
     private static final NetworkSocketSystem INSTANCE = new NetworkSocketSystem();
+    private final NetworkSocketCloseSuppressionPolicy networkSocketCloseSuppressionPolicy =
+            NetworkSocketCloseSuppressionPolicy.getInstance();
+    private final NetworkSocketOptionPolicy networkSocketOptionPolicy = NetworkSocketOptionPolicy.getInstance();
 
     private NetworkSocketSystem() {
     }
@@ -22,18 +25,20 @@ public final class NetworkSocketSystem {
 
     public StreamPair openConfiguredStreams(Socket socket, boolean enableTcpNoDelay) throws IOException {
         try {
-            socket.setTrafficClass(24);
-        } catch (SocketException e) {
-            ;
+            socket.setTrafficClass(networkSocketOptionPolicy.trafficClass());
+        } catch (SocketException socketException) {
+            networkSocketCloseSuppressionPolicy.suppress(socketException);
         }
 
-        socket.setSoTimeout(30000);
+        socket.setSoTimeout(networkSocketOptionPolicy.socketTimeoutMillis());
         if (enableTcpNoDelay) {
             socket.setTcpNoDelay(true);
         }
 
         DataInputStream input = new DataInputStream(socket.getInputStream());
-        DataOutputStream output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
+        DataOutputStream output = new DataOutputStream(
+                new BufferedOutputStream(socket.getOutputStream(), networkSocketOptionPolicy.outputBufferBytes())
+        );
         return new StreamPair(input, output);
     }
 
@@ -43,23 +48,23 @@ public final class NetworkSocketSystem {
                 input.close();
             }
         } catch (Throwable throwable) {
-            ;
+            networkSocketCloseSuppressionPolicy.suppress(throwable);
         }
 
         try {
             if (output != null) {
                 output.close();
             }
-        } catch (Throwable throwable1) {
-            ;
+        } catch (Throwable throwable) {
+            networkSocketCloseSuppressionPolicy.suppress(throwable);
         }
 
         try {
             if (socket != null) {
                 socket.close();
             }
-        } catch (Throwable throwable2) {
-            ;
+        } catch (Throwable throwable) {
+            networkSocketCloseSuppressionPolicy.suppress(throwable);
         }
     }
 

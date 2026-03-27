@@ -1,15 +1,9 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.CompressedStreamTools;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.WorldData;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -25,10 +19,10 @@ public final class WorldDataPersistence {
         return INSTANCE;
     }
 
-    public WorldData loadWorldData(File worldDirectory) {
+    public <T> T loadWorldData(File worldDirectory) {
         File levelDat = new File(worldDirectory, "level.dat");
         if (levelDat.exists()) {
-            WorldData loaded = tryLoad(levelDat);
+            T loaded = tryLoad(levelDat);
             if (loaded != null) {
                 return loaded;
             }
@@ -42,37 +36,37 @@ public final class WorldDataPersistence {
         return null;
     }
 
-    public void saveWorldData(File worldDirectory, WorldData worldData) {
-        NBTTagCompound data = worldData.a();
-        writeAtomically(worldDirectory, data);
+    public void saveWorldData(File worldDirectory, Object worldData) {
+        writeAtomically(worldDirectory, WorldBridgeReflection.invoke(worldData, "a"));
     }
 
-    public void saveWorldDataWithPlayerList(File worldDirectory, WorldData worldData, List playerList) {
-        NBTTagCompound data = worldData.a(playerList);
-        writeAtomically(worldDirectory, data);
+    public void saveWorldDataWithPlayerList(File worldDirectory, Object worldData, List playerList) {
+        writeAtomically(worldDirectory, WorldBridgeReflection.invoke(worldData, "a", playerList));
     }
 
-    private WorldData tryLoad(File sourceFile) {
-        try {
-            NBTTagCompound root = CompressedStreamTools.a((InputStream) (new FileInputStream(sourceFile)));
-            NBTTagCompound data = root.k("Data");
-            return new WorldData(data);
+    private <T> T tryLoad(File sourceFile) {
+        try (FileInputStream inputStream = new FileInputStream(sourceFile)) {
+            Object root = WorldStorageCompatGatewayRegistry.gateway().readCompressed(inputStream);
+            Object data = WorldStorageCompatGatewayRegistry.gateway().extractDataTag(root);
+            return WorldBridgeReflection.cast(WorldStorageCompatGatewayRegistry.gateway().createWorldData(data));
         } catch (Exception exception) {
             exception.printStackTrace();
             return null;
         }
     }
 
-    private void writeAtomically(File worldDirectory, NBTTagCompound worldDataTag) {
-        NBTTagCompound root = new NBTTagCompound();
-        root.a("Data", (NBTBase) worldDataTag);
-
+    private void writeAtomically(File worldDirectory, Object worldDataTag) {
         try {
             File levelDatNew = new File(worldDirectory, "level.dat_new");
             File levelDatOld = new File(worldDirectory, "level.dat_old");
             File levelDat = new File(worldDirectory, "level.dat");
 
-            CompressedStreamTools.a(root, (OutputStream) (new FileOutputStream(levelDatNew)));
+            Object root = WorldStorageCompatGatewayRegistry.gateway().createRootTag();
+            WorldStorageCompatGatewayRegistry.gateway().setDataTag(root, worldDataTag);
+            try (FileOutputStream outputStream = new FileOutputStream(levelDatNew)) {
+                WorldStorageCompatGatewayRegistry.gateway().writeCompressed(root, outputStream);
+            }
+
             if (levelDatOld.exists()) {
                 levelDatOld.delete();
             }

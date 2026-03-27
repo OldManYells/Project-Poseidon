@@ -1,11 +1,17 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.CreeperPowerEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.CreeperPowerEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityTypedHandleCastBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityWrapperStringBehaviour;
 import net.minecraft.server.EntityCreeper;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Creeper;
 
 public class CraftCreeper extends CraftMonster implements Creeper {
+    private static final EntityWrapperStringBehaviour ENTITY_WRAPPER_STRING_BEHAVIOUR =
+            EntityWrapperStringBehaviour.getInstance();
+    private static final EntityTypedHandleCastBehaviour ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR =
+            EntityTypedHandleCastBehaviour.getInstance();
     private static final CreeperPowerEventBridgeBehaviour CREEPER_POWER_EVENT_BRIDGE_BEHAVIOUR =
             CreeperPowerEventBridgeBehaviour.getInstance();
 
@@ -15,16 +21,16 @@ public class CraftCreeper extends CraftMonster implements Creeper {
 
     @Override
     public EntityCreeper getHandle() {
-        return (EntityCreeper) super.getHandle();
+        return ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR.castHandle(super.getHandle(), EntityCreeper.class);
     }
 
     @Override
     public String toString() {
-        return "CraftCreeper";
+        return ENTITY_WRAPPER_STRING_BEHAVIOUR.toString("CraftCreeper");
     }
 
     public boolean isPowered() {
-        return getHandle().isPowered();
+        return CREEPER_POWER_EVENT_BRIDGE_BEHAVIOUR.isPowered(getHandle());
     }
 
     public void setPowered(boolean powered) {

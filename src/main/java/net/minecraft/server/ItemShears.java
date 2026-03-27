@@ -1,9 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.item.ShearsInteractionBehaviour;
-
 public class ItemShears extends Item {
-    private static final ShearsInteractionBehaviour SHEARS_INTERACTION_BEHAVIOUR = ShearsInteractionBehaviour.getInstance();
 
     public ItemShears(int i) {
         super(i);
@@ -12,7 +9,7 @@ public class ItemShears extends Item {
     }
 
     public boolean a(ItemStack itemstack, int i, int j, int k, int l, EntityLiving entityliving) {
-        if (SHEARS_INTERACTION_BEHAVIOUR.shouldDamageOnBlockBreak(i)) {
+        if (i == Block.LEAVES.id || i == Block.WEB.id) {
             itemstack.damage(1, entityliving);
         }
 
@@ -20,10 +17,16 @@ public class ItemShears extends Item {
     }
 
     public boolean a(Block block) {
-        return SHEARS_INTERACTION_BEHAVIOUR.canHarvest(block);
+        return block.id == Block.WEB.id;
     }
 
     public float a(ItemStack itemstack, Block block) {
-        return SHEARS_INTERACTION_BEHAVIOUR.breakSpeedMultiplier(block, super.a(itemstack, block));
+        if (block.id == Block.WEB.id || block.id == Block.LEAVES.id) {
+            return 15.0F;
+        }
+        if (block.id == Block.WOOL.id) {
+            return 5.0F;
+        }
+        return super.a(itemstack, block);
     }
 }

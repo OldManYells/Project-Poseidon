@@ -1,9 +1,6 @@
 package com.legacyminecraft.poseidon.runtime;
 
 import com.legacyminecraft.poseidon.runtime.command.ServerCommandEnvelopeBehaviour;
-import org.bukkit.Server;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.event.server.ServerCommandEvent;
 
 import java.util.List;
 
@@ -14,6 +11,8 @@ public final class ServerCommandDispatcher {
     private static final ServerCommandDispatcher INSTANCE = new ServerCommandDispatcher();
     private static final ServerCommandEnvelopeBehaviour SERVER_COMMAND_ENVELOPE_BEHAVIOUR =
             ServerCommandEnvelopeBehaviour.getInstance();
+    private static final ServerCommandDispatchPolicy SERVER_COMMAND_DISPATCH_POLICY =
+            ServerCommandDispatchPolicy.getInstance();
 
     private ServerCommandDispatcher() {
     }
@@ -32,14 +31,21 @@ public final class ServerCommandDispatcher {
 
             // During early startup failure (for example bind failures), Bukkit may not be initialized yet.
             // Preserve shutdown stability by dropping queued console commands in this transient state.
-            if (server == null || consoleSender == null) {
+            if (!SERVER_COMMAND_DISPATCH_POLICY.isBukkitReady(server, consoleSender)) {
                 continue;
             }
 
             ServerCommandEvent event = new ServerCommandEvent(consoleSender, serverCommandState.getCommandText());
             server.getPluginManager().callEvent(event);
-            serverCommandState = SERVER_COMMAND_ENVELOPE_BEHAVIOUR.createState(
+            String dispatchCommand = SERVER_COMMAND_DISPATCH_POLICY.resolveDispatchCommand(
                     event.getCommand(),
+                    serverCommandState.getCommandText()
+            );
+            if (!SERVER_COMMAND_DISPATCH_POLICY.shouldDispatch(dispatchCommand)) {
+                continue;
+            }
+            serverCommandState = SERVER_COMMAND_ENVELOPE_BEHAVIOUR.createState(
+                    dispatchCommand,
                     serverCommandState.getCommandListener()
             );
 

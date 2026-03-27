@@ -8,7 +8,6 @@ import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonServer;
-import com.legacyminecraft.poseidon.kernel.PoseidonKernel;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import jline.ConsoleReader;
 import net.minecraft.server.*;
@@ -74,12 +73,8 @@ public final class CraftServer implements Server {
     private final Map<String, World> worlds = new LinkedHashMap<String, World>();
     private final Configuration configuration;
     private final Yaml yaml = new Yaml(new SafeConstructor());
-
-    // Project Poseidon - Start
-    private volatile boolean shuttingdown = false;
-    private final List<String> hiddenCommands = new ArrayList<>();
-
-    // Project Poseidon - End
+    private boolean shuttingdown = false;
+    private final List<String> hiddenCommands = new ArrayList<>(); //Project Poseidon - Create variable
 
     public CraftServer(MinecraftServer console, ServerConfigurationManager server) {
         this.console = console;
@@ -95,10 +90,6 @@ public final class CraftServer implements Server {
 
         this.pluginManager = new SimplePluginManager(this, commandMap); //Project Poseidon - This must run after PoseidonServer is set
         this.scheduler = new CraftScheduler(this); //Project Poseidon - This must run after PoseidonServer is set
-
-        PoseidonKernel kernel = Poseidon.getKernel();
-        kernel.registerService(PluginManager.class, this.pluginManager);
-        kernel.registerService(BukkitScheduler.class, this.scheduler);
 
         configuration = new Configuration((File) console.options.valueOf("bukkit-settings"));
         loadConfig();
@@ -787,7 +778,6 @@ public final class CraftServer implements Server {
     }
 
     public void shutdown() {
-        setShuttingdown(true);
         console.a();
     }
 

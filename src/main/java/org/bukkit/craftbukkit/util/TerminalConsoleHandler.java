@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.TerminalConsoleFlushBehaviour;
+import com.legacyminecraft.compat.bukkit.TerminalConsoleFlushBehaviour;
 import jline.ConsoleReader;
 import org.bukkit.craftbukkit.Main;
 

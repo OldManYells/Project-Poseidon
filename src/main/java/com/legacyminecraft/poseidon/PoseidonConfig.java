@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon;
 
-import org.bukkit.util.config.Configuration;
+import com.legacyminecraft.compat.bukkit.Configuration;
 
 import java.io.File;
 import java.util.Arrays;

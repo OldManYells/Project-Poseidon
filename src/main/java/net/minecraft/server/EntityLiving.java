@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.entity.CombatFixConfigPolicy;
 import com.legacyminecraft.poseidon.runtime.math.TrigAtanBehaviour;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
@@ -15,6 +16,7 @@ import java.util.List;
 // CraftBukkit end
 
 public abstract class EntityLiving extends Entity {
+    private static final CombatFixConfigPolicy COMBAT_FIX_CONFIG_POLICY = CombatFixConfigPolicy.getInstance();
     private static final TrigAtanBehaviour TRIG_ATAN_BEHAVIOUR = TrigAtanBehaviour.getInstance();
 
     public int maxNoDamageTicks = 20;
@@ -156,7 +158,12 @@ public abstract class EntityLiving extends Entity {
                 if (!event.isCancelled() && event.getDamage() != 0) {
                     boolean vc = this.velocityChanged;
                     this.damageEntity((Entity) null, event.getDamage());
-                    if (PoseidonConfig.getInstance().getBoolean("settings.fix-drowning-push-down.enabled", true)) this.velocityChanged = vc;
+                    if (PoseidonConfig.getInstance().getBoolean(
+                            COMBAT_FIX_CONFIG_POLICY.drowningPushDownFixKey(),
+                            COMBAT_FIX_CONFIG_POLICY.drowningPushDownFixDefault()
+                    )) {
+                        this.velocityChanged = vc;
+                    }
                 }
                 // CraftBukkit end
             }

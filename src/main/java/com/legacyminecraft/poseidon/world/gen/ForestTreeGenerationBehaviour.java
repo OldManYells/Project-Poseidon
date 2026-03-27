@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.Block;
-import org.bukkit.BlockChangeDelegate;
 
 import java.util.Random;
 

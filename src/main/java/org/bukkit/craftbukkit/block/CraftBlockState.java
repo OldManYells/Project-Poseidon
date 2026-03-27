@@ -1,8 +1,15 @@
 
 package org.bukkit.craftbukkit.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.BlockStateDataBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.BlockStateUpdateBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateSnapshotBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateBlockLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateCoordinateProjectionBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateDataBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateIdentityAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateRawDataBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateSnapshotInitializationBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateTypeMutationBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockStateUpdateBehaviour;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,8 +21,22 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.material.MaterialData;
 
 public class CraftBlockState implements BlockState {
+    private static final BlockStateSnapshotBridgeBehaviour BLOCK_STATE_SNAPSHOT_BRIDGE_BEHAVIOUR =
+            BlockStateSnapshotBridgeBehaviour.getInstance();
+    private static final BlockStateIdentityAccessBehaviour BLOCK_STATE_IDENTITY_ACCESS_BEHAVIOUR =
+            BlockStateIdentityAccessBehaviour.getInstance();
+    private static final BlockStateSnapshotInitializationBehaviour BLOCK_STATE_SNAPSHOT_INITIALIZATION_BEHAVIOUR =
+            BlockStateSnapshotInitializationBehaviour.getInstance();
+    private static final BlockStateBlockLookupBehaviour BLOCK_STATE_BLOCK_LOOKUP_BEHAVIOUR =
+            BlockStateBlockLookupBehaviour.getInstance();
+    private static final BlockStateCoordinateProjectionBehaviour BLOCK_STATE_COORDINATE_PROJECTION_BEHAVIOUR =
+            BlockStateCoordinateProjectionBehaviour.getInstance();
     private static final BlockStateDataBehaviour BLOCK_STATE_DATA_BEHAVIOUR =
             BlockStateDataBehaviour.getInstance();
+    private static final BlockStateRawDataBehaviour BLOCK_STATE_RAW_DATA_BEHAVIOUR =
+            BlockStateRawDataBehaviour.getInstance();
+    private static final BlockStateTypeMutationBehaviour BLOCK_STATE_TYPE_MUTATION_BEHAVIOUR =
+            BlockStateTypeMutationBehaviour.getInstance();
     private static final BlockStateUpdateBehaviour BLOCK_STATE_UPDATE_BEHAVIOUR =
             BlockStateUpdateBehaviour.getInstance();
     private final CraftWorld world;
@@ -28,19 +49,20 @@ public class CraftBlockState implements BlockState {
     protected byte light;
 
     public CraftBlockState(final Block block) {
-        this.world = (CraftWorld) block.getWorld();
-        this.x = block.getX();
-        this.y = block.getY();
-        this.z = block.getZ();
-        this.type = block.getTypeId();
-        this.light = block.getLightLevel();
-        this.chunk = (CraftChunk) block.getChunk();
-
-        createData(block.getData());
+        BlockStateSnapshotInitializationBehaviour.SnapshotState snapshotState =
+                BLOCK_STATE_SNAPSHOT_INITIALIZATION_BEHAVIOUR.initialize(block);
+        this.world = snapshotState.getWorld();
+        this.chunk = snapshotState.getChunk();
+        this.x = snapshotState.getX();
+        this.y = snapshotState.getY();
+        this.z = snapshotState.getZ();
+        this.type = snapshotState.getTypeId();
+        this.light = snapshotState.getLightLevel();
+        this.data = snapshotState.getData();
     }
 
     public static CraftBlockState getBlockState(net.minecraft.server.World world, int x, int y, int z) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z));
+        return BLOCK_STATE_SNAPSHOT_BRIDGE_BEHAVIOUR.getBlockState(world, x, y, z);
     }
 
     /**
@@ -49,7 +71,7 @@ public class CraftBlockState implements BlockState {
      * @return World containing this block
      */
     public World getWorld() {
-        return world;
+        return BLOCK_STATE_IDENTITY_ACCESS_BEHAVIOUR.getWorld(world);
     }
 
     /**
@@ -58,7 +80,7 @@ public class CraftBlockState implements BlockState {
      * @return x-coordinate
      */
     public int getX() {
-        return x;
+        return BLOCK_STATE_IDENTITY_ACCESS_BEHAVIOUR.getX(x);
     }
 
     /**
@@ -67,7 +89,7 @@ public class CraftBlockState implements BlockState {
      * @return y-coordinate
      */
     public int getY() {
-        return y;
+        return BLOCK_STATE_IDENTITY_ACCESS_BEHAVIOUR.getY(y);
     }
 
     /**
@@ -76,7 +98,7 @@ public class CraftBlockState implements BlockState {
      * @return z-coordinate
      */
     public int getZ() {
-        return z;
+        return BLOCK_STATE_IDENTITY_ACCESS_BEHAVIOUR.getZ(z);
     }
 
     /**
@@ -85,7 +107,7 @@ public class CraftBlockState implements BlockState {
      * @return Containing Chunk
      */
     public Chunk getChunk() {
-        return chunk;
+        return BLOCK_STATE_IDENTITY_ACCESS_BEHAVIOUR.getChunk(chunk);
     }
 
     /**
@@ -112,7 +134,10 @@ public class CraftBlockState implements BlockState {
      * @param type Material to change this block to
      */
     public void setType(final Material type) {
-        setTypeId(type.getId());
+        BlockStateTypeMutationBehaviour.MutationResult mutationResult =
+                BLOCK_STATE_TYPE_MUTATION_BEHAVIOUR.setType(type, BLOCK_STATE_DATA_BEHAVIOUR);
+        this.type = mutationResult.getTypeId();
+        this.data = mutationResult.getData();
     }
 
     /**
@@ -121,9 +146,10 @@ public class CraftBlockState implements BlockState {
      * @param type Type-Id to change this block to
      */
     public boolean setTypeId(final int type) {
-        this.type = type;
-
-        createData((byte) 0);
+        BlockStateTypeMutationBehaviour.MutationResult mutationResult =
+                BLOCK_STATE_TYPE_MUTATION_BEHAVIOUR.setTypeId(type, BLOCK_STATE_DATA_BEHAVIOUR);
+        this.type = mutationResult.getTypeId();
+        this.data = mutationResult.getData();
         return true;
     }
 
@@ -155,7 +181,7 @@ public class CraftBlockState implements BlockState {
     }
 
     public Block getBlock() {
-        return world.getBlockAt(x, y, z);
+        return BLOCK_STATE_BLOCK_LOOKUP_BEHAVIOUR.getBlock(world, x, y, z);
     }
 
     public boolean update() {
@@ -166,19 +192,15 @@ public class CraftBlockState implements BlockState {
         return BLOCK_STATE_UPDATE_BEHAVIOUR.applyUpdate(getBlock(), this.getType(), this.getTypeId(), getRawData(), force);
     }
 
-    private void createData(final byte data) {
-        this.data = BLOCK_STATE_DATA_BEHAVIOUR.createData(type, data);
-    }
-
     public byte getRawData() {
-        return data.getData();
+        return BLOCK_STATE_RAW_DATA_BEHAVIOUR.getRawData(data);
     }
 
     public Location getLocation() {
-        return new Location(world, x, y, z);
+        return BLOCK_STATE_COORDINATE_PROJECTION_BEHAVIOUR.getLocation(world, x, y, z);
     }
 
     public void setData(byte data) {
-        createData(data);
+        this.data = BLOCK_STATE_RAW_DATA_BEHAVIOUR.setRawData(type, data, BLOCK_STATE_DATA_BEHAVIOUR);
     }
 }

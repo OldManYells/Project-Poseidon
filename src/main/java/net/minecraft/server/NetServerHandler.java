@@ -10,8 +10,11 @@ import com.legacyminecraft.poseidon.entity.PlayerActionPacketHandler;
 import com.legacyminecraft.poseidon.inventory.HotbarSelectionBehaviour;
 import com.legacyminecraft.poseidon.inventory.WindowTransactionBehaviour;
 import com.legacyminecraft.poseidon.network.ClientDisconnectPacketHandler;
+import com.legacyminecraft.poseidon.network.ChatAllowedCharacterPolicy;
+import com.legacyminecraft.poseidon.network.BlockInteractionDistancePolicy;
 import com.legacyminecraft.poseidon.network.ConnectionHeartbeatExecutionSystem;
 import com.legacyminecraft.poseidon.network.ConnectionHeartbeatSystem;
+import com.legacyminecraft.poseidon.network.ConnectionHeartbeatThresholdPolicy;
 import com.legacyminecraft.poseidon.network.ConnectionLossExecutionSystem;
 import com.legacyminecraft.poseidon.network.ConnectionLossReporter;
 import com.legacyminecraft.poseidon.network.ConnectionSessionMetadata;
@@ -19,9 +22,11 @@ import com.legacyminecraft.poseidon.network.ConnectionTerminationSystem;
 import com.legacyminecraft.poseidon.network.EntityActionPacketExecutionSystem;
 import com.legacyminecraft.poseidon.network.EntityActionResultExecutionSystem;
 import com.legacyminecraft.poseidon.network.GroundMovementDecisionExecutionSystem;
+import com.legacyminecraft.poseidon.network.GroundMovementConsoleLogBehaviour;
 import com.legacyminecraft.poseidon.network.GroundMovementDecisionLogSystem;
 import com.legacyminecraft.poseidon.network.HotbarSwitchPacketExecutionSystem;
 import com.legacyminecraft.poseidon.network.HotbarSwitchResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.IncomingChatLimitPolicy;
 import com.legacyminecraft.poseidon.network.IncomingChatPacketHandler;
 import com.legacyminecraft.poseidon.network.IncomingChatPacketExecutionSystem;
 import com.legacyminecraft.poseidon.network.IncomingChatResultExecutionSystem;
@@ -30,9 +35,11 @@ import com.legacyminecraft.poseidon.network.InvalidPositionResponseSystem;
 import com.legacyminecraft.poseidon.network.MovementCheckReenableExecutionSystem;
 import com.legacyminecraft.poseidon.network.MovementBranchExecutionSystem;
 import com.legacyminecraft.poseidon.network.MovementPacketPolicy;
+import com.legacyminecraft.poseidon.network.PacketEventConfigPolicy;
 import com.legacyminecraft.poseidon.network.PacketSendPipelineSystem;
 import com.legacyminecraft.poseidon.network.PacketSendExecutionSystem;
 import com.legacyminecraft.poseidon.network.PacketSendResultExecutionSystem;
+import com.legacyminecraft.poseidon.network.PlayerLeaveMessageConfigPolicy;
 import com.legacyminecraft.poseidon.network.PlayerChatDispatchSystem;
 import com.legacyminecraft.poseidon.network.PlayerGroundMovementSystem;
 import com.legacyminecraft.poseidon.network.PlayerInputPacketExecutionSystem;
@@ -40,6 +47,7 @@ import com.legacyminecraft.poseidon.network.PlayerMoveEventDispatchSystem;
 import com.legacyminecraft.poseidon.network.PlayerMoveEventExecutionSystem;
 import com.legacyminecraft.poseidon.network.PlayerMoveEventOutcomeSystem;
 import com.legacyminecraft.poseidon.network.PlayerMoveEventStateApplySystem;
+import com.legacyminecraft.poseidon.network.PlayerMoveInitializationPolicy;
 import com.legacyminecraft.poseidon.network.PlayerMoveOutcomeExecutionSystem;
 import com.legacyminecraft.poseidon.network.PlayerTeleportPlanApplySystem;
 import com.legacyminecraft.poseidon.network.PlayerTeleportCoordinator;
@@ -86,6 +94,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final ClientDisconnectPacketHandler clientDisconnectPacketHandler = ClientDisconnectPacketHandler.getInstance();
     private final ConnectionHeartbeatExecutionSystem connectionHeartbeatExecutionSystem = ConnectionHeartbeatExecutionSystem.getInstance();
     private final ConnectionHeartbeatSystem connectionHeartbeatSystem = ConnectionHeartbeatSystem.getInstance();
+    private final ConnectionHeartbeatThresholdPolicy connectionHeartbeatThresholdPolicy =
+            ConnectionHeartbeatThresholdPolicy.getInstance();
     private final ConnectionLossExecutionSystem connectionLossExecutionSystem = ConnectionLossExecutionSystem.getInstance();
     private final ConnectionLossReporter connectionLossReporter = ConnectionLossReporter.getInstance();
     private final ConnectionSessionMetadata sessionMetadata = new ConnectionSessionMetadata();
@@ -93,9 +103,18 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final EntityActionPacketExecutionSystem entityActionPacketExecutionSystem = EntityActionPacketExecutionSystem.getInstance();
     private final EntityActionResultExecutionSystem entityActionResultExecutionSystem = EntityActionResultExecutionSystem.getInstance();
     private final GroundMovementDecisionExecutionSystem groundMovementDecisionExecutionSystem = GroundMovementDecisionExecutionSystem.getInstance();
+    private final GroundMovementConsoleLogBehaviour groundMovementConsoleLogBehaviour =
+            GroundMovementConsoleLogBehaviour.getInstance();
     private final GroundMovementDecisionLogSystem groundMovementDecisionLogSystem = GroundMovementDecisionLogSystem.getInstance();
     private final HotbarSwitchPacketExecutionSystem hotbarSwitchPacketExecutionSystem = HotbarSwitchPacketExecutionSystem.getInstance();
     private final HotbarSwitchResultExecutionSystem hotbarSwitchResultExecutionSystem = HotbarSwitchResultExecutionSystem.getInstance();
+    private final IncomingChatLimitPolicy incomingChatLimitPolicy = IncomingChatLimitPolicy.getInstance();
+    private final ChatAllowedCharacterPolicy chatAllowedCharacterPolicy = ChatAllowedCharacterPolicy.getInstance();
+    private final BlockInteractionDistancePolicy blockInteractionDistancePolicy =
+            BlockInteractionDistancePolicy.getInstance();
+    private final PacketEventConfigPolicy packetEventConfigPolicy = PacketEventConfigPolicy.getInstance();
+    private final PlayerLeaveMessageConfigPolicy playerLeaveMessageConfigPolicy =
+            PlayerLeaveMessageConfigPolicy.getInstance();
     private final IncomingChatPacketHandler incomingChatPacketHandler = IncomingChatPacketHandler.getInstance();
     private final IncomingChatPacketExecutionSystem incomingChatPacketExecutionSystem = IncomingChatPacketExecutionSystem.getInstance();
     private final IncomingChatResultExecutionSystem incomingChatResultExecutionSystem = IncomingChatResultExecutionSystem.getInstance();
@@ -115,6 +134,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final PlayerMoveEventExecutionSystem playerMoveEventExecutionSystem = PlayerMoveEventExecutionSystem.getInstance();
     private final PlayerMoveEventOutcomeSystem playerMoveEventOutcomeSystem = PlayerMoveEventOutcomeSystem.getInstance();
     private final PlayerMoveEventStateApplySystem playerMoveEventStateApplySystem = PlayerMoveEventStateApplySystem.getInstance();
+    private final PlayerMoveInitializationPolicy playerMoveInitializationPolicy =
+            PlayerMoveInitializationPolicy.getInstance();
     private final PlayerMoveOutcomeExecutionSystem playerMoveOutcomeExecutionSystem = PlayerMoveOutcomeExecutionSystem.getInstance();
     private final PlayerTeleportPlanApplySystem playerTeleportPlanApplySystem = PlayerTeleportPlanApplySystem.getInstance();
     private final PlayerTeleportCoordinator playerTeleportCoordinator = PlayerTeleportCoordinator.getInstance();
@@ -140,8 +161,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final PlayerCommandProcessor playerCommandProcessor = PlayerCommandProcessor.getInstance();
     private final ConnectionTerminationSystem.PacketSender disconnectPacketSender = new ConnectionTerminationSystem.PacketSender() {
         @Override
-        public void sendPacket(Packet packet) {
-            NetServerHandler.this.sendPacket(packet);
+        public void sendPacket(Object packet) {
+            NetServerHandler.this.sendPacket((Packet) packet);
         }
     };
     private final ConnectionHeartbeatExecutionSystem.HeartbeatActions heartbeatActions =
@@ -152,14 +173,14 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 }
 
                 @Override
-                public void sendPacket(Packet packet) {
-                    NetServerHandler.this.sendPacket(packet);
+                public void sendPacket(Object packet) {
+                    NetServerHandler.this.sendPacket((Packet) packet);
                 }
             };
     private final GroundMovementDecisionLogSystem.ConsoleLogSink groundMovementConsoleLogSink = new GroundMovementDecisionLogSystem.ConsoleLogSink() {
         @Override
         public void println(String logLine) {
-            System.out.println(logLine);
+            groundMovementConsoleLogBehaviour.log(a, logLine);
         }
     };
     private final GroundMovementDecisionExecutionSystem.DecisionActions groundMovementDecisionActions =
@@ -185,13 +206,13 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final PlayerMoveOutcomeExecutionSystem.MoveOutcomeActions moveOutcomeActions =
             new PlayerMoveOutcomeExecutionSystem.MoveOutcomeActions() {
                 @Override
-                public void sendRollbackPacket(Packet13PlayerLookMove rollbackPacket) {
-                    NetServerHandler.this.player.netServerHandler.sendPacket(rollbackPacket);
+                public void sendRollbackPacket(Object rollbackPacket) {
+                    NetServerHandler.this.player.netServerHandler.sendPacket((Packet) rollbackPacket);
                 }
 
                 @Override
-                public void teleportPlayer(Location location) {
-                    NetServerHandler.this.player.getBukkitEntity().teleport(location);
+                public void teleportPlayer(Object location) {
+                    NetServerHandler.this.player.getBukkitEntity().teleport((Location) location);
                 }
             };
     private final VehicleMoveOutcomeExecutionSystem.VehicleMoveActions vehicleMoveActions =
@@ -304,8 +325,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final RespawnResultExecutionSystem.RespawnActions respawnActions =
             new RespawnResultExecutionSystem.RespawnActions() {
                 @Override
-                public void applyRespawnedPlayer(EntityPlayer player) {
-                    NetServerHandler.this.player = player;
+                public void applyRespawnedPlayer(Object player) {
+                    NetServerHandler.this.player = (EntityPlayer) player;
                     NetServerHandler.this.getPlayer().setHandle(NetServerHandler.this.player);
                 }
             };
@@ -368,21 +389,21 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 }
 
                 @Override
-                public void sendTeleportPacket(Packet13PlayerLookMove teleportPacket) {
-                    NetServerHandler.this.player.netServerHandler.sendPacket(teleportPacket);
+                public void sendTeleportPacket(Object teleportPacket) {
+                    NetServerHandler.this.player.netServerHandler.sendPacket((Packet) teleportPacket);
                 }
             };
     private final PlayerTeleportRequestExecutionSystem.TeleportActions teleportRequestActions =
             new PlayerTeleportRequestExecutionSystem.TeleportActions() {
                 @Override
-                public void teleport(Location destination) {
-                    NetServerHandler.this.teleport(destination);
+                public void teleport(Object destination) {
+                    NetServerHandler.this.teleport((Location) destination);
                 }
             };
     private final PlayerTeleportRequestExecutionSystem.TeleportDestinationResolver teleportDestinationResolver =
             new PlayerTeleportRequestExecutionSystem.TeleportDestinationResolver() {
                 @Override
-                public Location resolveDestination() {
+                public Object resolveDestination() {
                     return playerTeleportCoordinator.resolveTeleportDestination(
                             NetServerHandler.this.bukkitServer,
                             NetServerHandler.this.getPlayer(),
@@ -418,12 +439,12 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     private final SignUpdatePacketExecutionSystem.SignUpdateActions signUpdateActions =
             new SignUpdatePacketExecutionSystem.SignUpdateActions() {
                 @Override
-                public void process(Packet130UpdateSign packet130updateSign) {
+                public void process(Object packet130updateSign) {
                     signUpdateProcessor.processSignUpdate(
                             NetServerHandler.this.minecraftServer,
                             NetServerHandler.this.bukkitServer,
                             NetServerHandler.this.player,
-                            packet130updateSign
+                            (Packet130UpdateSign) packet130updateSign
                     );
                 }
             };
@@ -560,8 +581,13 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
         // CraftBukkit start
         this.bukkitServer = minecraftserver.server;
-        this.firePacketEvents = PoseidonConfig.getInstance().getBoolean("settings.packet-events.enabled", false); //Poseidon
-        this.msgPlayerLeave = PoseidonConfig.getInstance().getConfigString("message.player.leave");
+        this.firePacketEvents = PoseidonConfig.getInstance().getBoolean(
+                packetEventConfigPolicy.packetEventsEnabledKey(),
+                packetEventConfigPolicy.packetEventsEnabledDefault()
+        ); //Poseidon
+        this.msgPlayerLeave = PoseidonConfig.getInstance().getConfigString(
+                playerLeaveMessageConfigPolicy.playerLeaveMessageKey()
+        );
     }
 
     //Project Poseidon - Start
@@ -602,14 +628,13 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
     private final Server bukkitServer;
     private int lastTick = MinecraftServer.currentTick;
-    private static final int PLACE_DISTANCE_SQUARED = 6 * 6;
 
     // Get position of last block hit for BlockDamageLevel.STOPPED
-    private double lastPosX = Double.MAX_VALUE;
-    private double lastPosY = Double.MAX_VALUE;
-    private double lastPosZ = Double.MAX_VALUE;
-    private float lastPitch = Float.MAX_VALUE;
-    private float lastYaw = Float.MAX_VALUE;
+    private double lastPosX = playerMoveInitializationPolicy.uninitializedCoordinate();
+    private double lastPosY = playerMoveInitializationPolicy.uninitializedCoordinate();
+    private double lastPosZ = playerMoveInitializationPolicy.uninitializedCoordinate();
+    private float lastPitch = playerMoveInitializationPolicy.uninitializedRotation();
+    private float lastYaw = playerMoveInitializationPolicy.uninitializedRotation();
     private boolean justTeleported = false;
 
     public CraftPlayer getPlayer() {
@@ -621,7 +646,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         this.i = connectionHeartbeatExecutionSystem.applyHeartbeat(
                 this.f,
                 this.g,
-                20,
+                connectionHeartbeatThresholdPolicy.keepAliveThresholdTicks(),
                 this.i,
                 this.connectionHeartbeatSystem,
                 this.heartbeatActions
@@ -754,7 +779,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 this.player,
                 packet15place,
                 this.blockInteractionState,
-                PLACE_DISTANCE_SQUARED
+                blockInteractionDistancePolicy.placeDistanceSquared()
         );
     }
 
@@ -812,8 +837,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
         if (!incomingChatPacketExecutionSystem.execute(
                 packet3chat.message,
-                100,
-                FontAllowedCharacters.allowedCharacters,
+                incomingChatLimitPolicy.maxChatLength(),
+                chatAllowedCharacterPolicy.allowedCharacters(),
                 incomingChatPacketHandler,
                 incomingChatResultExecutionSystem,
                 this.incomingChatActions

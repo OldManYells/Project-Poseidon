@@ -1,9 +1,6 @@
 package com.legacyminecraft.poseidon.network;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet3Chat;
 
 import java.util.logging.Logger;
 
@@ -12,6 +9,9 @@ import java.util.logging.Logger;
  */
 public final class ConnectionLossReporter {
     private static final ConnectionLossReporter INSTANCE = new ConnectionLossReporter();
+    private final NetworkDisconnectKeyPolicy networkDisconnectKeyPolicy = NetworkDisconnectKeyPolicy.getInstance();
+    private final ConnectionLossDebugConfigPolicy connectionLossDebugConfigPolicy =
+            ConnectionLossDebugConfigPolicy.getInstance();
 
     private ConnectionLossReporter() {
     }
@@ -20,23 +20,58 @@ public final class ConnectionLossReporter {
         return INSTANCE;
     }
 
-    public boolean reportAndDisconnect(MinecraftServer minecraftServer, EntityPlayer player, String reason, Logger logger) {
+    public boolean reportAndDisconnect(Object minecraftServer, Object player, String reason, Logger logger) {
+        String playerName = String.valueOf(getField(player, "name"));
         if (shouldLogDisconnectReason(
-                (boolean) PoseidonConfig.getInstance().getConfigOption("settings.remove-join-leave-debug", true),
+                (boolean) PoseidonConfig.getInstance().getConfigOption(
+                        connectionLossDebugConfigPolicy.removeJoinLeaveDebugKey(),
+                        connectionLossDebugConfigPolicy.removeJoinLeaveDebugDefault()
+                ),
                 reason
         )) {
-            logger.info(player.name + " lost connection: " + reason);
+            logger.info(playerName + " lost connection: " + reason);
         }
 
-        logger.info(player.name + " has left the game.");
-        String quitMessage = minecraftServer.serverConfigurationManager.disconnect(player);
+        logger.info(playerName + " has left the game.");
+        Object scm = getField(minecraftServer, "serverConfigurationManager");
+        String quitMessage = cast(invoke(scm, "disconnect", player));
         if (quitMessage != null) {
-            minecraftServer.serverConfigurationManager.sendAll(new Packet3Chat(quitMessage));
+            Object packet = NetworkCompatGatewayRegistry.gateway().createChatPacket(quitMessage);
+            invoke(scm, "sendAll", packet);
         }
         return true;
     }
 
     public boolean shouldLogDisconnectReason(boolean removeJoinLeaveDebug, String reason) {
-        return !removeJoinLeaveDebug || !"disconnect.quitting".equals(reason);
+        return !removeJoinLeaveDebug || !networkDisconnectKeyPolicy.quitting().equals(reason);
+    }
+
+    private Object getField(Object target, String name) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T cast(Object value) {
+        return (T) value;
     }
 }

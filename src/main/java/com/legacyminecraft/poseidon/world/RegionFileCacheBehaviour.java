@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.RegionFile;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.World;
-import net.minecraft.server.WorldProvider;
-import org.bukkit.generator.ChunkGenerator;
 
 import java.util.Random;
 
@@ -19,7 +16,7 @@ public final class WorldSpawnPlacementBehaviour {
         return INSTANCE;
     }
 
-    public boolean canSpawn(org.bukkit.World world, WorldProvider worldProvider, ChunkGenerator generator, int x, int z) {
+    public boolean canSpawn(com.legacyminecraft.compat.bukkit.World world, WorldProvider worldProvider, ChunkGenerator generator, int x, int z) {
         if (generator != null) {
             return generator.canSpawn(world, x, z);
         }

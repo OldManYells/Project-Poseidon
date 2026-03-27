@@ -1,14 +1,12 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.world.chunk.ChunkFilePathBehaviour;
-import com.legacyminecraft.poseidon.world.chunk.ChunkNbtLayoutBehaviour;
 
 import java.io.*;
 import java.util.Iterator;
 
 public class ChunkLoader implements IChunkLoader {
     private static final ChunkFilePathBehaviour CHUNK_FILE_PATH_BEHAVIOUR = ChunkFilePathBehaviour.getInstance();
-    private static final ChunkNbtLayoutBehaviour CHUNK_NBT_LAYOUT_BEHAVIOUR = ChunkNbtLayoutBehaviour.getInstance();
 
     private File a;
     private boolean b;
@@ -30,23 +28,24 @@ public class ChunkLoader implements IChunkLoader {
                 FileInputStream fileinputstream = new FileInputStream(file1);
                 NBTTagCompound nbttagcompound = CompressedStreamTools.a((InputStream) fileinputstream);
 
-                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.hasLevelData(nbttagcompound)) {
+                if (nbttagcompound.a("Level") == null) {
                     System.out.println("Chunk file at " + i + "," + j + " is missing level data, skipping");
                     return null;
                 }
 
                 NBTTagCompound levelTag = nbttagcompound.k("Level");
-                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.hasBlockData(levelTag)) {
+                if (levelTag.a("Blocks") == null) {
                     System.out.println("Chunk file at " + i + "," + j + " is missing block data, skipping");
                     return null;
                 }
 
-                Chunk chunk = CHUNK_NBT_LAYOUT_BEHAVIOUR.loadChunk(world, levelTag);
+                Chunk chunk = a(world, levelTag);
 
-                if (!CHUNK_NBT_LAYOUT_BEHAVIOUR.isExpectedChunkLocation(chunk, i, j)) {
+                if (chunk.x != i || chunk.z != j) {
                     System.out.println("Chunk file at " + i + "," + j + " is in the wrong location; relocating. (Expected " + i + ", " + j + ", got " + chunk.x + ", " + chunk.z + ")");
-                    CHUNK_NBT_LAYOUT_BEHAVIOUR.overwriteChunkCoordinates(levelTag, i, j);
-                    chunk = CHUNK_NBT_LAYOUT_BEHAVIOUR.loadChunk(world, levelTag);
+                    levelTag.a("xPos", i);
+                    levelTag.a("zPos", j);
+                    chunk = a(world, levelTag);
                 }
 
                 chunk.h();

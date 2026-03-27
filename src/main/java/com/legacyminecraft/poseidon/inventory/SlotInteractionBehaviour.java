@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.IInventory;
-import net.minecraft.server.ItemStack;
+
+import java.lang.reflect.Method;
 
 public final class SlotInteractionBehaviour {
     private static final SlotInteractionBehaviour INSTANCE = new SlotInteractionBehaviour();
@@ -17,35 +17,61 @@ public final class SlotInteractionBehaviour {
         // Base slot behaviour only marks inventory dirty via the wrapper callback.
     }
 
-    public boolean isAllowed(ItemStack itemstack) {
+    public boolean isAllowed(Object itemstack) {
         return true;
     }
 
-    public ItemStack getItem(IInventory inventory, int index) {
-        return inventory.getItem(index);
+    public Object getItem(Object inventory, int index) {
+        return invoke(inventory, "getItem", index);
     }
 
-    public boolean hasItem(ItemStack itemstack) {
+    public boolean hasItem(Object itemstack) {
         return itemstack != null;
     }
 
-    public void setItem(IInventory inventory, int index, ItemStack itemstack) {
-        inventory.setItem(index, itemstack);
+    public void setItem(Object inventory, int index, Object itemstack) {
+        invoke(inventory, "setItem", index, itemstack);
     }
 
-    public void onInventoryChanged(IInventory inventory) {
-        inventory.update();
+    public void onInventoryChanged(Object inventory) {
+        invoke(inventory, "update");
     }
 
-    public int getMaxStackSize(IInventory inventory) {
-        return inventory.getMaxStackSize();
+    public int getMaxStackSize(Object inventory) {
+        Object value = invoke(inventory, "getMaxStackSize");
+        return value == null ? 64 : ((Number) value).intValue();
     }
 
-    public ItemStack splitStack(IInventory inventory, int index, int amount) {
-        return inventory.splitStack(index, amount);
+    public Object splitStack(Object inventory, int index, int amount) {
+        return invoke(inventory, "splitStack", index, amount);
     }
 
-    public boolean matchesInventorySlot(IInventory expectedInventory, int expectedIndex, IInventory inventory, int index) {
+    public boolean matchesInventorySlot(Object expectedInventory, int expectedIndex, Object inventory, int index) {
         return inventory == expectedInventory && index == expectedIndex;
+    }
+
+    private static Object invoke(Object target, String name, Object... args) {
+        if (target == null) {
+            return null;
+        }
+
+        Class<?> type = target.getClass();
+        while (type != null) {
+            Method[] methods = type.getDeclaredMethods();
+            for (Method method : methods) {
+                if (!method.getName().equals(name) || method.getParameterTypes().length != args.length) {
+                    continue;
+                }
+
+                try {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                } catch (Exception ignored) {
+                }
+            }
+            type = type.getSuperclass();
+        }
+
+        throw new IllegalStateException("Method not found: " + name);
     }
 }

@@ -1,7 +1,7 @@
 
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.compat.bukkit.LoggerOutputFlushBehaviour;
+import com.legacyminecraft.compat.bukkit.LoggerOutputFlushBehaviour;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

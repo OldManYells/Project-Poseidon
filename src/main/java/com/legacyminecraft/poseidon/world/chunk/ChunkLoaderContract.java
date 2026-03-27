@@ -1,7 +1,8 @@
 package com.legacyminecraft.poseidon.world.chunk;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.World;
+
+import com.legacyminecraft.poseidon.world.Chunk;
+import com.legacyminecraft.poseidon.world.World;
 
 import java.io.IOException;
 

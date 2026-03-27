@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.Packet1Login;
 
 /**
  * Role-aligned canonical facade for login verifier thread execution.

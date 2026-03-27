@@ -1,9 +1,8 @@
 package com.legacyminecraft.poseidon.world.chunk;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.ChunkLoader;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.nbt.NBTTagCompound;
+import com.legacyminecraft.poseidon.world.Chunk;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical behaviour for chunk NBT layout validation and coordinate correction.

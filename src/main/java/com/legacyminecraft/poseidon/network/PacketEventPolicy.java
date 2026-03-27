@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet;
 
 /**
  * Canonical policy decisions shared by packet event bridge services.

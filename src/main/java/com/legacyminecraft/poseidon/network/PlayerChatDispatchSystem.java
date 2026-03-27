@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.MinecraftServer;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
 
 /**
  * Canonical dispatcher for validated player chat messages and command routing.
@@ -19,9 +16,9 @@ public final class PlayerChatDispatchSystem {
     }
 
     public boolean dispatchValidatedChat(
-            Server server,
-            MinecraftServer minecraftServer,
-            Player player,
+            Object server,
+            Object minecraftServer,
+            Object player,
             boolean playerDead,
             String message,
             CommandDispatcher commandDispatcher

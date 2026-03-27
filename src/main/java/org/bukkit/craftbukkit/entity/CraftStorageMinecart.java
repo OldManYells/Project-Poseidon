@@ -1,6 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.StorageMinecartInventoryBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityWrapperDescriptionBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityTypedHandleCastBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityHandleMutationBehaviour;
+import com.legacyminecraft.compat.bukkit.StorageMinecartInventoryBridgeBehaviour;
+import net.minecraft.server.Entity;
 import net.minecraft.server.EntityMinecart;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
@@ -10,6 +14,12 @@ import org.bukkit.inventory.Inventory;
 public class CraftStorageMinecart extends CraftMinecart implements StorageMinecart {
     private static final StorageMinecartInventoryBridgeBehaviour STORAGE_MINECART_INVENTORY_BRIDGE_BEHAVIOUR =
             StorageMinecartInventoryBridgeBehaviour.getInstance();
+    private static final EntityTypedHandleCastBehaviour ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR =
+            EntityTypedHandleCastBehaviour.getInstance();
+    private static final EntityHandleMutationBehaviour ENTITY_HANDLE_MUTATION_BEHAVIOUR =
+            EntityHandleMutationBehaviour.getInstance();
+    private static final EntityWrapperDescriptionBehaviour ENTITY_WRAPPER_DESCRIPTION_BEHAVIOUR =
+            EntityWrapperDescriptionBehaviour.getInstance();
     private CraftInventory inventory;
 
     public CraftStorageMinecart(CraftServer server, EntityMinecart entity) {
@@ -22,7 +32,32 @@ public class CraftStorageMinecart extends CraftMinecart implements StorageMineca
     }
 
     @Override
+    public void setHandle(final Entity entity) {
+        final EntityMinecart minecartHandle = ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR.castHandle(entity, EntityMinecart.class);
+        ENTITY_HANDLE_MUTATION_BEHAVIOUR.applyHandle(
+                minecartHandle,
+                new EntityHandleMutationBehaviour.HandleMutationCallbacks() {
+                    @Override
+                    public void setSuperHandle(Object updatedHandle) {
+                        CraftStorageMinecart.super.setHandle((Entity) updatedHandle);
+                    }
+
+                    @Override
+                    public void assignHandleField(Object updatedHandle) {
+                    }
+
+                    @Override
+                    public void afterHandleAssignment(Object updatedHandle) {
+                        inventory = STORAGE_MINECART_INVENTORY_BRIDGE_BEHAVIOUR.createInventory(
+                                (EntityMinecart) updatedHandle
+                        );
+                    }
+                }
+        );
+    }
+
+    @Override
     public String toString() {
-        return "CraftStorageMinecart{" + "inventory=" + inventory + '}';
+        return ENTITY_WRAPPER_DESCRIPTION_BEHAVIOUR.craftStorageMinecartToString(inventory);
     }
 }

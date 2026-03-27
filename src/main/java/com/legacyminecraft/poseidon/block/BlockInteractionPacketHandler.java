@@ -1,23 +1,23 @@
 package com.legacyminecraft.poseidon.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PlayerInteractEventBridgeBehaviour;
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet103SetSlot;
-import net.minecraft.server.Packet14BlockDig;
-import net.minecraft.server.Packet15Place;
-import net.minecraft.server.Packet53BlockChange;
-import net.minecraft.server.Slot;
-import net.minecraft.server.WorldServer;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import com.legacyminecraft.compat.bukkit.Action;
+import com.legacyminecraft.compat.bukkit.ChunkCoordinates;
+import com.legacyminecraft.compat.bukkit.EntityPlayer;
+import com.legacyminecraft.compat.bukkit.ItemStack;
+import com.legacyminecraft.compat.bukkit.Location;
+import com.legacyminecraft.compat.bukkit.MinecraftServer;
+import com.legacyminecraft.compat.bukkit.Packet14BlockDig;
+import com.legacyminecraft.compat.bukkit.Packet15Place;
+import com.legacyminecraft.compat.bukkit.Packet3Chat;
+import com.legacyminecraft.compat.bukkit.Packet103SetSlot;
+import com.legacyminecraft.compat.bukkit.Packet53BlockChange;
+import com.legacyminecraft.compat.bukkit.Player;
+import com.legacyminecraft.compat.bukkit.PlayerInteractEvent;
+import com.legacyminecraft.compat.bukkit.PlayerInteractEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.Server;
+import com.legacyminecraft.compat.bukkit.Type;
+import com.legacyminecraft.compat.bukkit.WorldServer;
+import com.legacyminecraft.poseidon.inventory.Slot;
 
 import java.util.logging.Logger;
 
@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 public final class BlockInteractionPacketHandler {
     private static final BlockInteractionPacketHandler INSTANCE = new BlockInteractionPacketHandler();
     private final PlayerInteractEventBridgeBehaviour playerInteractEventBridge = PlayerInteractEventBridgeBehaviour.getInstance();
+    private final SpawnProtectionMessagePolicy spawnProtectionMessagePolicy = SpawnProtectionMessagePolicy.getInstance();
 
     private BlockInteractionPacketHandler() {
     }
@@ -36,14 +37,18 @@ public final class BlockInteractionPacketHandler {
     }
 
     public void handleBlockDig(
-            Server server,
-            MinecraftServer minecraftServer,
-            EntityPlayer player,
-            Packet14BlockDig digPacket,
+            Object serverRaw,
+            Object minecraftServerRaw,
+            Object playerRaw,
+            Object digPacketRaw,
             BlockInteractionSessionState state,
             Logger logger,
             int currentTick
     ) {
+        Server server = (Server) serverRaw;
+        MinecraftServer minecraftServer = (MinecraftServer) minecraftServerRaw;
+        EntityPlayer player = (EntityPlayer) playerRaw;
+        Packet14BlockDig digPacket = (Packet14BlockDig) digPacketRaw;
         if (player.dead) {
             return;
         }
@@ -84,8 +89,8 @@ public final class BlockInteractionPacketHandler {
         }
 
         ChunkCoordinates spawnCoordinates = worldserver.getSpawn();
-        int deltaSpawnX = (int) MathHelper.abs((float) (blockX - spawnCoordinates.x));
-        int deltaSpawnZ = (int) MathHelper.abs((float) (blockZ - spawnCoordinates.z));
+        int deltaSpawnX = Math.abs(blockX - spawnCoordinates.x);
+        int deltaSpawnZ = Math.abs(blockZ - spawnCoordinates.z);
 
         if (deltaSpawnX > deltaSpawnZ) {
             deltaSpawnZ = deltaSpawnX;
@@ -93,6 +98,10 @@ public final class BlockInteractionPacketHandler {
 
         if (digPacket.e == 0) {
             if (deltaSpawnZ < server.getSpawnRadius() && !flag) {
+                if (currentTick - state.getLastSpawnProtectionMessageTick() >= spawnProtectionMessagePolicy.messageCooldownTicks()) {
+                    state.setLastSpawnProtectionMessageTick(currentTick);
+                    player.netServerHandler.sendPacket(new Packet3Chat(spawnProtectionMessagePolicy.spawnProtectionDeniedMessage()));
+                }
                 player.netServerHandler.sendPacket(new Packet53BlockChange(blockX, blockY, blockZ, worldserver));
             } else {
                 player.itemInWorldManager.dig(blockX, blockY, blockZ, digPacket.face);
@@ -117,12 +126,15 @@ public final class BlockInteractionPacketHandler {
     }
 
     public void handleBlockPlace(
-            MinecraftServer minecraftServer,
-            EntityPlayer player,
-            Packet15Place packet15place,
+            Object minecraftServerRaw,
+            Object playerRaw,
+            Object packet15placeRaw,
             BlockInteractionSessionState state,
             int placeDistanceSquared
     ) {
+        MinecraftServer minecraftServer = (MinecraftServer) minecraftServerRaw;
+        EntityPlayer player = (EntityPlayer) playerRaw;
+        Packet15Place packet15place = (Packet15Place) packet15placeRaw;
         WorldServer worldserver = minecraftServer.getWorldServer(player.dimension);
         if (player.dead) {
             return;
@@ -135,7 +147,7 @@ public final class BlockInteractionPacketHandler {
             }
         } else {
             state.setLastMaterial(packet15place.itemstack == null ? -1 : packet15place.itemstack.id);
-            state.setLastPacketTimestamp(packet15place.timestamp);
+            state.setLastPacketTimestamp(System.currentTimeMillis());
         }
 
         boolean always = false;
@@ -150,19 +162,19 @@ public final class BlockInteractionPacketHandler {
 
             int itemstackAmount = itemstack.count;
             PlayerInteractEvent event = playerInteractEventBridge.callPlayerInteract(player, Action.RIGHT_CLICK_AIR, itemstack);
-            if (event.useItemInHand() != Event.Result.DENY) {
+            if (event.useItemInHand() != Type.DENY) {
                 player.itemInWorldManager.useItem(player, player.world, itemstack);
             }
 
             always = (itemstack.count != itemstackAmount);
         } else {
-            int i = packet15place.a;
-            int j = packet15place.b;
-            int k = packet15place.c;
+            int i = packet15place.x;
+            int j = packet15place.y;
+            int k = packet15place.z;
             int l = packet15place.face;
             ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
-            int i1 = (int) MathHelper.abs((float) (i - chunkcoordinates.x));
-            int j1 = (int) MathHelper.abs((float) (k - chunkcoordinates.z));
+            int i1 = Math.abs(i - chunkcoordinates.x);
+            int j1 = Math.abs(k - chunkcoordinates.z);
 
             if (i1 > j1) {
                 j1 = i1;
@@ -213,7 +225,7 @@ public final class BlockInteractionPacketHandler {
         }
 
         player.h = true;
-        player.inventory.items[player.inventory.itemInHandIndex] = ItemStack.b(player.inventory.items[player.inventory.itemInHandIndex]);
+        player.inventory.items[player.inventory.itemInHandIndex] = cloneInventoryStack(player.inventory.items[player.inventory.itemInHandIndex]);
         Slot slot = player.activeContainer.a(player.inventory, player.inventory.itemInHandIndex);
 
         player.activeContainer.a();
@@ -230,15 +242,25 @@ public final class BlockInteractionPacketHandler {
     }
 
     public boolean isDuplicateRightClickPacket(Packet15Place packet15place, BlockInteractionSessionState state) {
+        long now = System.currentTimeMillis();
         return packet15place.itemstack != null
                 && packet15place.itemstack.id == state.getLastMaterial()
                 && state.getLastPacketTimestamp() != null
-                && packet15place.timestamp - state.getLastPacketTimestamp() < 100;
+                && now - state.getLastPacketTimestamp() < 100;
     }
 
     public boolean isWithinPlaceDistanceSquared(Location eyeLoc, int x, int y, int z, int maxDistanceSquared) {
         return Math.pow(eyeLoc.getX() - x, 2)
                 + Math.pow(eyeLoc.getY() - y, 2)
                 + Math.pow(eyeLoc.getZ() - z, 2) <= maxDistanceSquared;
+    }
+
+    private com.legacyminecraft.poseidon.inventory.ItemStack cloneInventoryStack(
+            com.legacyminecraft.poseidon.inventory.ItemStack stack
+    ) {
+        if (stack == null) {
+            return null;
+        }
+        return new com.legacyminecraft.poseidon.inventory.ItemStack(stack.id, stack.count, stack.damage);
     }
 }

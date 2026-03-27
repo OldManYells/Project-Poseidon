@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.NetHandler;
-import net.minecraft.server.Packet;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -20,15 +18,45 @@ public final class InboundQueueReadSystem {
         return INSTANCE;
     }
 
-    public ReadDecision readNext(DataInputStream input, NetHandler handler, int[] inboundPacketBytes, List inboundQueue) throws IOException {
-        Packet packet = Packet.a(input, handler.c());
+    public ReadDecision readNext(
+            DataInputStream input,
+            Object handler,
+            int[] inboundPacketBytes,
+            List inboundQueue,
+            PacketReader packetReader
+    ) throws IOException {
+        Object packet = packetReader.read(input, handler);
         if (packet == null) {
             return ReadDecision.endOfStream();
         }
 
-        inboundPacketBytes[packet.b()] += packet.a() + 1;
+        inboundPacketBytes[Bridge.packetId(packet)] += Bridge.packetSize(packet) + 1;
         inboundQueue.add(packet);
         return ReadDecision.packetQueued();
+    }
+
+    private static final class Bridge {
+        private static int packetId(Object packet) {
+            return invokeInt(packet, "b");
+        }
+
+        private static int packetSize(Object packet) {
+            return invokeInt(packet, "a");
+        }
+
+        private static int invokeInt(Object target, String methodName) {
+            try {
+                java.lang.reflect.Method method = target.getClass().getMethod(methodName);
+                Object value = method.invoke(target);
+                return ((Integer) value).intValue();
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+    }
+
+    public interface PacketReader {
+        Object read(DataInputStream input, Object handler) throws IOException;
     }
 
     public static final class ReadDecision {

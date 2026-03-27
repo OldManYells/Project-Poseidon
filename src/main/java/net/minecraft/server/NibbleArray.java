@@ -2,16 +2,18 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.world.chunk.NibbleArrayBehaviour;
 
-public class NibbleArray {
+public class NibbleArray extends com.legacyminecraft.poseidon.world.NibbleArray {
     private static final NibbleArrayBehaviour NIBBLE_ARRAY_BEHAVIOUR = NibbleArrayBehaviour.getInstance();
 
     public final byte[] a;
 
     public NibbleArray(int i) {
+        super(i);
         this.a = NIBBLE_ARRAY_BEHAVIOUR.createBackingArray(i);
     }
 
     public NibbleArray(byte[] abyte) {
+        super(abyte.length << 1);
         this.a = abyte;
     }
 

@@ -40,6 +40,10 @@ public class NetworkReaderLoopServiceTest {
                     @Override
                     public void sleepQuietly(long millis) {
                     }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                    }
                 }
         );
 
@@ -86,11 +90,116 @@ public class NetworkReaderLoopServiceTest {
                         sleepCalls[0]++;
                         Assert.assertEquals(100L, millis);
                     }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                    }
                 }
         );
 
         Assert.assertEquals(2, readCalls[0]);
         Assert.assertEquals(1, sleepCalls[0]);
         Assert.assertEquals(0, threadCounter[0]);
+    }
+
+    @Test
+    public void reportsReadErrorsWhenNotShuttingDown() {
+        final int[] exceptionReports = new int[]{0};
+
+        NetworkReaderLoopSystem.getInstance().runLoop(
+                true,
+                new NetworkReaderLoopSystem.ReaderLoopOperations() {
+                    private boolean firstLoop = true;
+
+                    @Override
+                    public void incrementReaderThreadCount() {
+                    }
+
+                    @Override
+                    public void decrementReaderThreadCount() {
+                    }
+
+                    @Override
+                    public boolean isConnectionOpen() {
+                        if (firstLoop) {
+                            firstLoop = false;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isShuttingDown() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean readNextPacket() {
+                        throw new IllegalStateException("reader failed");
+                    }
+
+                    @Override
+                    public void sleepQuietly(long millis) {
+                    }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                        exceptionReports[0]++;
+                    }
+                }
+        );
+
+        Assert.assertEquals(1, exceptionReports[0]);
+    }
+
+    @Test
+    public void suppressesReadErrorsDuringShutdown() {
+        final int[] exceptionReports = new int[]{0};
+        final int[] shutdownChecks = new int[]{0};
+
+        NetworkReaderLoopSystem.getInstance().runLoop(
+                true,
+                new NetworkReaderLoopSystem.ReaderLoopOperations() {
+                    private boolean firstLoop = true;
+
+                    @Override
+                    public void incrementReaderThreadCount() {
+                    }
+
+                    @Override
+                    public void decrementReaderThreadCount() {
+                    }
+
+                    @Override
+                    public boolean isConnectionOpen() {
+                        if (firstLoop) {
+                            firstLoop = false;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isShuttingDown() {
+                        return shutdownChecks[0]++ > 0;
+                    }
+
+                    @Override
+                    public boolean readNextPacket() {
+                        throw new IllegalStateException("reader failed");
+                    }
+
+                    @Override
+                    public void sleepQuietly(long millis) {
+                    }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                        exceptionReports[0]++;
+                    }
+                }
+        );
+
+        Assert.assertEquals(0, exceptionReports[0]);
     }
 }

@@ -1,19 +1,19 @@
 package org.bukkit.craftbukkit.command;
 
-import com.legacyminecraft.poseidon.compat.bukkit.ConsoleColorRenderBehaviour;
+import com.legacyminecraft.compat.bukkit.ConsoleColorRenderBehaviour;
 import jline.ConsoleReader;
 import jline.Terminal;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.craftbukkit.CraftServer;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ColouredConsoleSender extends ConsoleCommandSender {
     private final ConsoleReader reader;
     private final Terminal terminal;
-    private final Map<ChatColor, String> replacements = new EnumMap<ChatColor, String>(ChatColor.class);
+    private final Map<String, String> replacements = new HashMap<String, String>();
     private final ChatColor[] colors = ChatColor.values();
     private final ConsoleColorRenderBehaviour consoleColorRenderBehaviour = ConsoleColorRenderBehaviour.getInstance();
 

@@ -23,7 +23,7 @@ public class TileEntitySign extends TileEntity {
     }
 
     public Packet f() {
-        return SIGN_TILE_BEHAVIOUR.createUpdatePacket(this);
+        return (Packet) SIGN_TILE_BEHAVIOUR.createUpdatePacket(this);
     }
 
     public boolean a() {

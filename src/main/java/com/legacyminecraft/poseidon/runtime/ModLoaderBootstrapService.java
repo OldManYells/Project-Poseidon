@@ -32,7 +32,7 @@ public final class ModLoaderBootstrapService {
 
     public boolean isModLoaderClassPresent() {
         try {
-            Class.forName("net.minecraft.server.ModLoader");
+            Class.forName("com.legacyminecraft.compat.bukkit.ModLoader");
             return true;
         } catch (ClassNotFoundException e) {
             return false;

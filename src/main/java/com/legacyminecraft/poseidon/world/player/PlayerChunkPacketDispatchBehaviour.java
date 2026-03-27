@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.ChunkCoordIntPair;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
 
 import java.util.List;
 
@@ -19,11 +16,39 @@ public final class PlayerChunkPacketDispatchBehaviour {
         return INSTANCE;
     }
 
-    public void sendToSubscribedPlayers(List playersInChunk, ChunkCoordIntPair chunkLocation, Packet packet) {
+    public void sendToSubscribedPlayers(List playersInChunk, Object chunkLocation, Object packet) {
         for (int index = 0; index < playersInChunk.size(); ++index) {
-            EntityPlayer player = (EntityPlayer) playersInChunk.get(index);
-            if (player.playerChunkCoordIntPairs.contains(chunkLocation)) {
-                player.netServerHandler.sendPacket(packet);
+            Object player = playersInChunk.get(index);
+            Object subscriptions = Bridge.readField(player, "playerChunkCoordIntPairs");
+            if (Boolean.TRUE.equals(Bridge.invoke(subscriptions, "contains", chunkLocation))) {
+                Object netServerHandler = Bridge.readField(player, "netServerHandler");
+                Bridge.invoke(netServerHandler, "sendPacket", packet);
+            }
+        }
+    }
+
+    private static final class Bridge {
+        private static Object readField(Object target, String fieldName) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getField(fieldName);
+                field.setAccessible(true);
+                return field.get(target);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        private static Object invoke(Object target, String methodName, Object... args) {
+            try {
+                for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        method.setAccessible(true);
+                        return method.invoke(target, args);
+                    }
+                }
+                throw new IllegalStateException("Method not found: " + methodName);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
             }
         }
     }

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerFutureLifecycleBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerFutureLifecycleBehaviour;
 
 import java.util.concurrent.*;
 

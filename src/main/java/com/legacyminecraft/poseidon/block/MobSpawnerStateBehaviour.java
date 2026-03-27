@@ -1,7 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.TileEntityMobSpawner;
+import com.legacyminecraft.poseidon.world.TileEntity;
 
 /**
  * Canonical tile/drop/opacity policy for legacy mob-spawner wrappers.

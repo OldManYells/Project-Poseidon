@@ -64,7 +64,7 @@ public class BlockPistonMoving extends BlockContainer {
     }
 
     public static TileEntity a(int i, int j, int k, boolean flag, boolean flag1) {
-        return PistonMovingBlockBehaviour.getInstance().createMovingTileEntity(i, j, k, flag, flag1);
+        return (TileEntity) PistonMovingBlockBehaviour.getInstance().createMovingTileEntity(i, j, k, flag, flag1);
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {

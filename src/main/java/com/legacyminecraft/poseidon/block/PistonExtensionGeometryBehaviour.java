@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.PistonBlockTextures;
 
 /**
  * Canonical geometry and texture policy for legacy piston-extension wrappers.

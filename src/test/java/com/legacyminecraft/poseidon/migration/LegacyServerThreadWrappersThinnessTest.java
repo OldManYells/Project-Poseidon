@@ -24,6 +24,8 @@ public class LegacyServerThreadWrappersThinnessTest {
         Assert.assertTrue(text.contains("runningState"));
         Assert.assertTrue(text.contains("commandSink"));
         Assert.assertTrue(text.contains("LOGGER"));
+        Assert.assertTrue(text.contains("ConsoleReaderExceptionPolicy"));
+        Assert.assertTrue(text.contains("consoleReaderExceptionPolicy"));
         Assert.assertTrue(text.contains("consoleInputLoopSystem.runLoop("));
         Assert.assertFalse(text.contains("ConsoleInputLoopService"));
         Assert.assertFalse(text.contains("consoleInputLoopService"));

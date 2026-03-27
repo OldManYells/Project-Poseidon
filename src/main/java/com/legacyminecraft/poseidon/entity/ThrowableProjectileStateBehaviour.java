@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.NBTTagCompound;
 
 public final class ThrowableProjectileStateBehaviour {
     private static final ThrowableProjectileStateBehaviour INSTANCE = new ThrowableProjectileStateBehaviour();
@@ -66,6 +64,62 @@ public final class ThrowableProjectileStateBehaviour {
         int shake = nbt.c("shake") & 255;
         boolean inGround = nbt.c("inGround") == 1;
         return new LoadedState(tileX, tileY, tileZ, inTile, shake, inGround);
+    }
+
+    public void writePersistedState(Object nbt, int tileX, int tileY, int tileZ, int inTile, int shake, boolean inGround) {
+        if (nbt == null) {
+            return;
+        }
+        invokeWrite(nbt, "xTile", Short.valueOf((short) tileX));
+        invokeWrite(nbt, "yTile", Short.valueOf((short) tileY));
+        invokeWrite(nbt, "zTile", Short.valueOf((short) tileZ));
+        invokeWrite(nbt, "inTile", Byte.valueOf((byte) inTile));
+        invokeWrite(nbt, "shake", Byte.valueOf((byte) shake));
+        invokeWrite(nbt, "inGround", Byte.valueOf((byte) (inGround ? 1 : 0)));
+    }
+
+    public LoadedState readPersistedState(Object nbt) {
+        int tileX = invokeReadInt(nbt, "xTile");
+        int tileY = invokeReadInt(nbt, "yTile");
+        int tileZ = invokeReadInt(nbt, "zTile");
+        int inTile = invokeReadByte(nbt, "inTile") & 255;
+        int shake = invokeReadByte(nbt, "shake") & 255;
+        boolean inGround = invokeReadByte(nbt, "inGround") == 1;
+        return new LoadedState(tileX, tileY, tileZ, inTile, shake, inGround);
+    }
+
+    private void invokeWrite(Object nbt, String key, Object value) {
+        try {
+            Class<?> valueType = value.getClass().isPrimitive() ? value.getClass() : value.getClass();
+            java.lang.reflect.Method[] methods = nbt.getClass().getMethods();
+            for (int i = 0; i < methods.length; ++i) {
+                java.lang.reflect.Method method = methods[i];
+                if ("a".equals(method.getName()) && method.getParameterTypes().length == 2
+                        && method.getParameterTypes()[0] == String.class) {
+                    method.invoke(nbt, key, value);
+                    return;
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+        }
+    }
+
+    private int invokeReadInt(Object nbt, String key) {
+        try {
+            Object value = nbt.getClass().getMethod("d", String.class).invoke(nbt, key);
+            return value instanceof Number ? ((Number) value).intValue() : 0;
+        } catch (ReflectiveOperationException ignored) {
+            return 0;
+        }
+    }
+
+    private byte invokeReadByte(Object nbt, String key) {
+        try {
+            Object value = nbt.getClass().getMethod("c", String.class).invoke(nbt, key);
+            return value instanceof Number ? ((Number) value).byteValue() : (byte) 0;
+        } catch (ReflectiveOperationException ignored) {
+            return (byte) 0;
+        }
     }
 
     public static final class LoadedState {

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.ShortConsoleLogFormatBehaviour;
+import com.legacyminecraft.compat.bukkit.ShortConsoleLogFormatBehaviour;
 import net.minecraft.server.MinecraftServer;
 
 import java.text.SimpleDateFormat;

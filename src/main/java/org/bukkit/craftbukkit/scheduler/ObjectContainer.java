@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerObjectContainerBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerObjectContainerBehaviour;
 
 import java.util.concurrent.atomic.AtomicReference;
 

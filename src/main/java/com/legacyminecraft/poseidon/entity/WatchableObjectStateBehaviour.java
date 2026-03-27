@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.WatchableObject;
 
 public final class WatchableObjectStateBehaviour {
     private static final WatchableObjectStateBehaviour INSTANCE = new WatchableObjectStateBehaviour();

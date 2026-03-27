@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityWolf;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.PathEntity;
 
 public final class WolfFollowOwnerBehaviour {
     private static final WolfFollowOwnerBehaviour INSTANCE = new WolfFollowOwnerBehaviour();

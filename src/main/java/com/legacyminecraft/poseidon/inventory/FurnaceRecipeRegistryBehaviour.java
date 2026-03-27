@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
 
 import java.util.Map;
 

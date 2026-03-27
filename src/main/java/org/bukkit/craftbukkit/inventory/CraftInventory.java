@@ -1,11 +1,11 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.legacyminecraft.poseidon.compat.bukkit.InventoryItemBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.InventoryRemovalBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.InventorySearchBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.InventoryTransactionBatchBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.InventoryTransactionEventBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.InventoryTransactionMutationBehaviour;
+import com.legacyminecraft.compat.bukkit.InventoryItemBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.InventoryRemovalBehaviour;
+import com.legacyminecraft.compat.bukkit.InventorySearchBehaviour;
+import com.legacyminecraft.compat.bukkit.InventoryTransactionBatchBehaviour;
+import com.legacyminecraft.compat.bukkit.InventoryTransactionEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.InventoryTransactionMutationBehaviour;
 import net.minecraft.server.IInventory;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryTransactionType;
@@ -50,7 +50,12 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
 
     public ItemStack[] getContents() {
         net.minecraft.server.ItemStack[] mcItems = getInventory().getContents();
-        return INVENTORY_ITEM_BRIDGE_BEHAVIOUR.toBukkitContents(mcItems, getSize());
+        Object[] projected = INVENTORY_ITEM_BRIDGE_BEHAVIOUR.toBukkitContents(mcItems, getSize());
+        ItemStack[] items = new ItemStack[projected.length];
+        for (int i = 0; i < projected.length; i++) {
+            items[i] = (ItemStack) projected[i];
+        }
+        return items;
     }
 
     public void setContents(ItemStack[] items) {
@@ -63,7 +68,7 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public void setItem(int index, ItemStack item) {
-        getInventory().setItem(index, INVENTORY_ITEM_BRIDGE_BEHAVIOUR.toNmsForSetItem(item));
+        getInventory().setItem(index, (net.minecraft.server.ItemStack) INVENTORY_ITEM_BRIDGE_BEHAVIOUR.toNmsForSetItem(item));
     }
 
     public boolean contains(int materialId) {
@@ -91,7 +96,7 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public HashMap<Integer, ItemStack> all(int materialId) {
-        return INVENTORY_SEARCH_BEHAVIOUR.allByMaterialId(getContents(), materialId);
+        return castItemMap(INVENTORY_SEARCH_BEHAVIOUR.allByMaterialId(getContents(), materialId));
     }
 
     public HashMap<Integer, ItemStack> all(Material material) {
@@ -99,7 +104,7 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public HashMap<Integer, ItemStack> all(ItemStack item) {
-        return INVENTORY_SEARCH_BEHAVIOUR.allByItem(getContents(), item);
+        return castItemMap(INVENTORY_SEARCH_BEHAVIOUR.allByItem(getContents(), item));
     }
 
     public int first(int materialId) {
@@ -131,10 +136,10 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
     }
 
     public HashMap<Integer, ItemStack> addItem(ItemStack... items) {
-        return INVENTORY_TRANSACTION_BATCH_BEHAVIOUR.processAdds(
+        return castItemMap(INVENTORY_TRANSACTION_BATCH_BEHAVIOUR.processAdds(
                 items,
                 new InventoryTransactionBatchBehaviour.TransactionGate() {
-                    public boolean isCancelled(ItemStack item) {
+                    public boolean isCancelled(Object item) {
                         return INVENTORY_TRANSACTION_EVENT_BRIDGE_BEHAVIOUR.isCancelled(
                                 InventoryTransactionType.ITEM_ADDED,
                                 CraftInventory.this,
@@ -143,18 +148,18 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
                     }
                 },
                 new InventoryTransactionBatchBehaviour.AddMutation() {
-                    public boolean tryAdd(ItemStack item) {
+                    public boolean tryAdd(Object item) {
                         return INVENTORY_TRANSACTION_MUTATION_BEHAVIOUR.addItem(createMutationAccess(), item);
                     }
                 }
-        );
+        ));
     }
 
     public HashMap<Integer, ItemStack> removeItem(ItemStack... items) {
-        return INVENTORY_TRANSACTION_BATCH_BEHAVIOUR.processRemovals(
+        return castItemMap(INVENTORY_TRANSACTION_BATCH_BEHAVIOUR.processRemovals(
                 items,
                 new InventoryTransactionBatchBehaviour.TransactionGate() {
-                    public boolean isCancelled(ItemStack item) {
+                    public boolean isCancelled(Object item) {
                         return INVENTORY_TRANSACTION_EVENT_BRIDGE_BEHAVIOUR.isCancelled(
                                 InventoryTransactionType.ITEM_REMOVED,
                                 CraftInventory.this,
@@ -163,11 +168,11 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
                     }
                 },
                 new InventoryTransactionBatchBehaviour.RemoveMutation() {
-                    public int remove(ItemStack item) {
+                    public int remove(Object item) {
                         return INVENTORY_TRANSACTION_MUTATION_BEHAVIOUR.removeItem(createMutationAccess(), item);
                     }
                 }
-        );
+        ));
     }
 
     private int getMaxItemStack() {
@@ -176,8 +181,8 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
 
     private InventoryTransactionMutationBehaviour.InventoryAccess createMutationAccess() {
         return new InventoryTransactionMutationBehaviour.InventoryAccess() {
-            public int firstPartial(ItemStack item) {
-                return CraftInventory.this.firstPartial(item);
+            public int firstPartial(Object item) {
+                return CraftInventory.this.firstPartial((ItemStack) item);
             }
 
             public int firstEmpty() {
@@ -188,23 +193,23 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
                 return CraftInventory.this.getMaxItemStack();
             }
 
-            public void setItem(int index, ItemStack item) {
-                CraftInventory.this.setItem(index, item);
+            public void setItem(int index, Object item) {
+                CraftInventory.this.setItem(index, (ItemStack) item);
             }
 
-            public ItemStack getItem(int index) {
+            public Object getItem(int index) {
                 return CraftInventory.this.getItem(index);
             }
 
-            public int first(Material material) {
-                return CraftInventory.this.first(material);
+            public int first(Object material) {
+                return CraftInventory.this.first((Material) material);
             }
 
             public void clear(int index) {
                 CraftInventory.this.clear(index);
             }
 
-            public ItemStack createItem(int typeId, int amount, short durability) {
+            public Object createItem(int typeId, int amount, short durability) {
                 return new CraftItemStack(typeId, amount, durability);
             }
         };
@@ -251,5 +256,13 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
                     }
                 }
         );
+    }
+
+    private HashMap<Integer, ItemStack> castItemMap(HashMap<Integer, Object> source) {
+        HashMap<Integer, ItemStack> cast = new HashMap<Integer, ItemStack>();
+        for (Integer key : source.keySet()) {
+            cast.put(key, (ItemStack) source.get(key));
+        }
+        return cast;
     }
 }

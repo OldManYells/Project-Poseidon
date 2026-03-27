@@ -7,6 +7,9 @@ public abstract class EntityWeather extends Entity {
 
     public EntityWeather(World world) {
         super(world);
-        WEATHER_ENTITY_BASE_BEHAVIOUR.initialize(this, world);
+        WEATHER_ENTITY_BASE_BEHAVIOUR.initialize(
+                (com.legacyminecraft.poseidon.entity.EntityWeather) (Object) this,
+                (com.legacyminecraft.poseidon.entity.World) (Object) world
+        );
     }
 }

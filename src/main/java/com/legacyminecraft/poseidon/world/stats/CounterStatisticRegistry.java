@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.stats;
 
-import net.minecraft.server.Statistic;
 
 import java.util.List;
 
@@ -18,6 +17,11 @@ public final class CounterStatisticRegistry {
     }
 
     public Statistic registerInCounterList(Statistic statistic, List counterStatistics) {
+        counterStatistics.add(statistic);
+        return statistic;
+    }
+
+    public Object registerInCounterListRaw(Object statistic, List counterStatistics) {
         counterStatistics.add(statistic);
         return statistic;
     }

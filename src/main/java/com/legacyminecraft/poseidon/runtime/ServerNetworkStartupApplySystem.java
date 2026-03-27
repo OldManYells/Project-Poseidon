@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.NetworkListenThread;
-import net.minecraft.server.PropertyManager;
 
 /**
  * Canonical application flow for network startup result state.
@@ -39,12 +37,12 @@ public final class ServerNetworkStartupApplySystem {
 
     public interface StartupStateSink {
         void apply(
-                PropertyManager propertyManager,
+                Object propertyManager,
                 boolean onlineMode,
                 boolean spawnAnimals,
                 boolean pvpMode,
                 boolean allowFlight,
-                NetworkListenThread networkListenThread
+                Object networkListenThread
         );
     }
 }

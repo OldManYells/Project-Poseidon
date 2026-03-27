@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
 
 import java.util.Random;
 

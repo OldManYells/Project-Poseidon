@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.EntityTNTPrimed;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.NBTTagCompound;
-import org.bukkit.Server;
-import org.bukkit.entity.Explosive;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public final class TntPrimedBehaviour {
     private static final TntPrimedBehaviour INSTANCE = new TntPrimedBehaviour();

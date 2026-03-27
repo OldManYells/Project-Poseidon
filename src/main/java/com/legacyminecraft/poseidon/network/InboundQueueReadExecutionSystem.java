@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.NetHandler;
 
 import java.io.DataInputStream;
 import java.util.List;
@@ -20,15 +19,16 @@ public final class InboundQueueReadExecutionSystem {
 
     public ReadStepResult execute(
             DataInputStream input,
-            NetHandler netHandler,
+            Object netHandler,
             int[] packetCounters,
             List inboundQueue,
             InboundQueueReadSystem inboundQueueReadSystem,
+            InboundQueueReadSystem.PacketReader packetReader,
             InboundReadActions inboundReadActions
     ) {
         try {
             InboundQueueReadSystem.ReadDecision readDecision =
-                    inboundQueueReadSystem.readNext(input, netHandler, packetCounters, inboundQueue);
+                    inboundQueueReadSystem.readNext(input, netHandler, packetCounters, inboundQueue, packetReader);
             if (readDecision.isEndOfStream()) {
                 inboundReadActions.disconnectEndOfStream();
             }

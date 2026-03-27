@@ -17,19 +17,14 @@ public class Packet28EntityVelocity extends Packet {
     public Packet28EntityVelocity() {}
 
     public Packet28EntityVelocity(Entity entity) {
-        PacketDataCodec.Packet28Data packetData = packetDataCodec.packet28FromEntity(entity);
-        this.a = packetData.getEntityId();
-        this.b = packetData.getVelocityX();
-        this.c = packetData.getVelocityY();
-        this.d = packetData.getVelocityZ();
+        this(entity.id, entity.motX, entity.motY, entity.motZ);
     }
 
     public Packet28EntityVelocity(int i, double d0, double d1, double d2) {
-        PacketDataCodec.Packet28Data packetData = packetDataCodec.packet28FromMotion(i, d0, d1, d2);
-        this.a = packetData.getEntityId();
-        this.b = packetData.getVelocityX();
-        this.c = packetData.getVelocityY();
-        this.d = packetData.getVelocityZ();
+        this.a = i;
+        this.b = (int) (d0 * 8000.0D);
+        this.c = (int) (d1 * 8000.0D);
+        this.d = (int) (d2 * 8000.0D);
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

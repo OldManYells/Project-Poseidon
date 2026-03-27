@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical lifecycle gate behaviour for piston tile ticks/finalization checks.

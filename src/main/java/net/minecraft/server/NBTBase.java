@@ -37,15 +37,15 @@ public abstract class NBTBase {
     }
 
     public static NBTBase b(DataInput datainput) throws IOException {
-        return nbtTypeRegistryService.readNamedTag(datainput);
+        return (NBTBase) (Object) nbtTypeRegistryService.readNamedTag(datainput);
     }
 
     public static void a(NBTBase nbtbase, DataOutput dataoutput) throws IOException {
-        nbtTypeRegistryService.writeNamedTag(nbtbase, dataoutput);
+        nbtTypeRegistryService.writeNamedTag((com.legacyminecraft.poseidon.nbt.NBTBase) (Object) nbtbase, dataoutput);
     }
 
     public static NBTBase a(byte b0) {
-        return nbtTypeRegistryService.create(b0);
+        return (NBTBase) (Object) nbtTypeRegistryService.create(b0);
     }
 
     public static String b(byte b0) {

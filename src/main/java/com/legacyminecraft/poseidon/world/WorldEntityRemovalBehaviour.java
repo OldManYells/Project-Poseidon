@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
 
 import java.util.List;
 
@@ -30,22 +28,36 @@ public final class WorldEntityRemovalBehaviour {
 
     public boolean markDeadAndWasPlayer(Entity entity) {
         entity.die();
-        return entity instanceof EntityHuman;
+        return isEntityHuman(entity);
     }
 
     public boolean isPlayer(Entity entity) {
-        return entity instanceof EntityHuman;
+        return isEntityHuman(entity);
     }
 
     public void addPlayer(List players, Entity entity) {
-        if (entity instanceof EntityHuman) {
-            players.add((EntityHuman) entity);
+        if (isEntityHuman(entity)) {
+            players.add(entity);
         }
     }
 
     public void removePlayer(List players, Entity entity) {
-        if (entity instanceof EntityHuman) {
-            players.remove((EntityHuman) entity);
+        if (isEntityHuman(entity)) {
+            players.remove(entity);
         }
+    }
+
+    private static boolean isEntityHuman(Object entity) {
+        if (entity == null) {
+            return false;
+        }
+        Class<?> current = entity.getClass();
+        while (current != null) {
+            if ("EntityHuman".equals(current.getSimpleName())) {
+                return true;
+            }
+            current = current.getSuperclass();
+        }
+        return false;
     }
 }

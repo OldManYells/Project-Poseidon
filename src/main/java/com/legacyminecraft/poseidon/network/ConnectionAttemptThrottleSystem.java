@@ -8,8 +8,7 @@ import java.util.Map;
  */
 public final class ConnectionAttemptThrottleSystem {
     private static final ConnectionAttemptThrottleSystem INSTANCE = new ConnectionAttemptThrottleSystem();
-
-    private static final String LOOPBACK_IP = "127.0.0.1";
+    private final ConnectionLoopbackPolicy connectionLoopbackPolicy = ConnectionLoopbackPolicy.getInstance();
 
     private ConnectionAttemptThrottleSystem() {
     }
@@ -21,7 +20,7 @@ public final class ConnectionAttemptThrottleSystem {
     public boolean shouldThrottle(Map connectionAttemptsByAddress, InetAddress address, long nowMillis, long cooldownMillis) {
         Long previousAttemptMillis = (Long) connectionAttemptsByAddress.get(address);
         if (previousAttemptMillis != null
-                && !LOOPBACK_IP.equals(address.getHostAddress())
+                && !connectionLoopbackPolicy.isLoopback(address)
                 && nowMillis - previousAttemptMillis.longValue() < cooldownMillis) {
             connectionAttemptsByAddress.put(address, Long.valueOf(nowMillis));
             return true;

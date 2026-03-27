@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class PropertyManager {
+public class PropertyManager extends com.legacyminecraft.poseidon.runtime.PropertyManager {
     private static final PropertyFileBehaviour PROPERTY_FILE_BEHAVIOUR = PropertyFileBehaviour.getInstance();
 
     public static Logger a = Logger.getLogger("Minecraft");

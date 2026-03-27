@@ -1,12 +1,14 @@
 package com.legacyminecraft.poseidon.network;
 
-import org.bukkit.Location;
 
 /**
  * Canonical policy for move-event triggering decisions in legacy movement packet handling.
  */
 public final class PlayerMoveEventPolicy {
     private static final PlayerMoveEventPolicy INSTANCE = new PlayerMoveEventPolicy();
+    private final MovementPacketSentinelPolicy movementPacketSentinelPolicy = MovementPacketSentinelPolicy.getInstance();
+    private final PlayerMoveDeltaThresholdPolicy playerMoveDeltaThresholdPolicy = PlayerMoveDeltaThresholdPolicy.getInstance();
+    private final PlayerMoveInitializationPolicy playerMoveInitializationPolicy = PlayerMoveInitializationPolicy.getInstance();
 
     private PlayerMoveEventPolicy() {
     }
@@ -16,7 +18,7 @@ public final class PlayerMoveEventPolicy {
     }
 
     public boolean shouldApplyPositionFromPacket(boolean hasPosition, double y, double stance) {
-        return hasPosition && !(hasPosition && y == -999.0D && stance == -999.0D);
+        return hasPosition && !movementPacketSentinelPolicy.isMotionOnlySentinel(y, stance);
     }
 
     public boolean hasSignificantMoveEventDelta(
@@ -31,7 +33,8 @@ public final class PlayerMoveEventPolicy {
                 + Math.pow(lastPosY - to.getY(), 2)
                 + Math.pow(lastPosZ - to.getZ(), 2);
         float deltaAngle = Math.abs(lastYaw - to.getYaw()) + Math.abs(lastPitch - to.getPitch());
-        return delta > 1f / 256 || deltaAngle > 10f;
+        return delta > playerMoveDeltaThresholdPolicy.positionDeltaThreshold()
+                || deltaAngle > playerMoveDeltaThresholdPolicy.angleDeltaThreshold();
     }
 
     public boolean shouldProcessMoveEvent(boolean significantDelta, boolean checkMovement, boolean playerDead) {
@@ -39,7 +42,7 @@ public final class PlayerMoveEventPolicy {
     }
 
     public boolean hasInitializedMoveFromLocation(Location from) {
-        return from.getX() != Double.MAX_VALUE;
+        return playerMoveInitializationPolicy.isInitializedCoordinate(from.getX());
     }
 
     public boolean shouldAbortAfterPluginTeleport(Location from, Location currentLocation, boolean justTeleported) {

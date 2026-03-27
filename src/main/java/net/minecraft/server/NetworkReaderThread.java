@@ -1,11 +1,13 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.network.NetworkTransportConfigPolicy;
 import com.legacyminecraft.poseidon.network.NetworkReaderLoopSystem;
 
 class NetworkReaderThread extends Thread {
     private boolean fast; // Poseidon
     final NetworkManager a;
+    private final NetworkTransportConfigPolicy networkTransportConfigPolicy = NetworkTransportConfigPolicy.getInstance();
     private final NetworkReaderLoopSystem networkReaderLoopSystem = NetworkReaderLoopSystem.getInstance();
     private final NetworkReaderLoopSystem.ReaderLoopOperations readerLoopOperations =
             new NetworkReaderLoopSystem.ReaderLoopOperations() {
@@ -46,12 +48,20 @@ class NetworkReaderThread extends Thread {
                         ;
                     }
                 }
+
+                @Override
+                public void handleException(Exception exception) {
+                    NetworkManager.a(NetworkReaderThread.this.a, exception);
+                }
             };
 
     NetworkReaderThread(NetworkManager networkmanager, String s) {
         super(s);
         this.a = networkmanager;
-        this.fast = PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true); // Poseidon
+        this.fast = PoseidonConfig.getInstance().getBoolean(
+                networkTransportConfigPolicy.fasterPacketsEnabledKey(),
+                networkTransportConfigPolicy.fasterPacketsEnabledDefault()
+        ); // Poseidon
     }
 
     public void run() {

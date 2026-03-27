@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Material;
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
+import com.legacyminecraft.poseidon.world.Material;
 
 import java.util.Random;
 
@@ -69,7 +69,8 @@ public final class FarmlandStateBehaviour {
         for (int xPos = x - 4; xPos <= x + 4; ++xPos) {
             for (int yPos = y; yPos <= y + 1; ++yPos) {
                 for (int zPos = z - 4; zPos <= z + 4; ++zPos) {
-                    if (query.getMaterial(xPos, yPos, zPos) == Material.WATER) {
+                    Object material = query.getMaterial(xPos, yPos, zPos);
+                    if (material != null && "WATER".equals(String.valueOf(material))) {
                         return true;
                     }
                 }
@@ -83,6 +84,6 @@ public final class FarmlandStateBehaviour {
     }
 
     public interface MaterialQuery {
-        Material getMaterial(int x, int y, int z);
+        Object getMaterial(int x, int y, int z);
     }
 }

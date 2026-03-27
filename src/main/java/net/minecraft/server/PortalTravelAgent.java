@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PortalCreateEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.PortalCreateEventBridgeBehaviour;
 import com.legacyminecraft.poseidon.world.PortalTravelSearchBehaviour;
 
 import java.util.Random;

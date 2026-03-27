@@ -1,8 +1,8 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.block.Block;
+import com.legacyminecraft.poseidon.world.MathHelper;
+import com.legacyminecraft.poseidon.world.World;
 
 public final class FlyingMovementBehaviour {
     private static final FlyingMovementBehaviour INSTANCE = new FlyingMovementBehaviour();

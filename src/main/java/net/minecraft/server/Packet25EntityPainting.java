@@ -19,13 +19,12 @@ public class Packet25EntityPainting extends Packet {
     public Packet25EntityPainting() {}
 
     public Packet25EntityPainting(EntityPainting entitypainting) {
-        PacketDataCodec.Packet25Data packetData = packetDataCodec.packet25FromPainting(entitypainting);
-        this.a = packetData.getEntityId();
-        this.f = packetData.getArtName();
-        this.b = packetData.getTileX();
-        this.c = packetData.getTileY();
-        this.d = packetData.getTileZ();
-        this.e = packetData.getDirection();
+        this.a = entitypainting.id;
+        this.f = entitypainting.e.A;
+        this.b = entitypainting.b;
+        this.c = entitypainting.c;
+        this.d = entitypainting.d;
+        this.e = entitypainting.a;
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

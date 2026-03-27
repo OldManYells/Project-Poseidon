@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.world.path;
 
-import net.minecraft.server.PathPoint;
+import com.legacyminecraft.poseidon.world.PathPoint;
 
 public final class PathHeapBehaviour {
     private static final PathHeapBehaviour INSTANCE = new PathHeapBehaviour();

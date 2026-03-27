@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.MetadataChunkBlock;
+import com.legacyminecraft.poseidon.world.MetadataChunkBlock;
 
 /**
  * Canonical behaviour for metadata light-update bounds merge decisions.

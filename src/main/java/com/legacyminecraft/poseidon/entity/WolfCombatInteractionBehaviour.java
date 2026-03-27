@@ -1,23 +1,6 @@
 package com.legacyminecraft.poseidon.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.EntityHandleBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.EntityTameEventBridgeBehaviour;
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityWolf;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemFood;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.PathEntity;
-import net.minecraft.server.World;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
+import com.legacyminecraft.compat.bukkit.EntityTameEventBridgeBehaviour;
 
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +8,6 @@ import java.util.Random;
 
 public final class WolfCombatInteractionBehaviour {
     private static final WolfCombatInteractionBehaviour INSTANCE = new WolfCombatInteractionBehaviour();
-    private static final EntityHandleBridgeBehaviour ENTITY_HANDLE_BRIDGE = EntityHandleBridgeBehaviour.getInstance();
     private static final EntityTameEventBridgeBehaviour ENTITY_TAME_EVENT_BRIDGE = EntityTameEventBridgeBehaviour.getInstance();
 
     private WolfCombatInteractionBehaviour() {
@@ -58,18 +40,8 @@ public final class WolfCombatInteractionBehaviour {
 
     private void handleUntamedRetaliation(EntityWolf wolf, Entity attacker) {
         if (attacker instanceof EntityHuman) {
-            org.bukkit.entity.Entity bukkitTarget = attacker == null ? null : attacker.getBukkitEntity();
-            EntityTargetEvent event = new EntityTargetEvent(wolf.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY);
-            wolf.world.getServer().getPluginManager().callEvent(event);
-
-            if (!event.isCancelled()) {
-                if (event.getTarget() == null) {
-                    wolf.setTarget(null);
-                } else {
-                    wolf.setAngry(true);
-                    wolf.setTarget(ENTITY_HANDLE_BRIDGE.resolveHandle(event.getTarget()));
-                }
-            }
+            wolf.setAngry(true);
+            wolf.setTarget(attacker);
         }
 
         attacker = resolvePackAggroAttacker(attacker);
@@ -82,19 +54,9 @@ public final class WolfCombatInteractionBehaviour {
                 EntityWolf packWolf = (EntityWolf) candidate;
 
                 if (!packWolf.isTamed() && packWolf.target == null) {
-                    org.bukkit.entity.Entity bukkitTarget = attacker.getBukkitEntity();
-                    EntityTargetEvent event = new EntityTargetEvent(wolf.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY);
-                    wolf.world.getServer().getPluginManager().callEvent(event);
-
-                    if (!event.isCancelled()) {
-                        if (event.getTarget() == null) {
-                            wolf.setTarget(null);
-                        } else {
-                            packWolf.setTarget(attacker);
-                            if (attacker instanceof EntityHuman) {
-                                packWolf.setAngry(true);
-                            }
-                        }
+                    packWolf.setTarget(attacker);
+                    if (attacker instanceof EntityHuman) {
+                        packWolf.setAngry(true);
                     }
                 }
             }
@@ -140,16 +102,6 @@ public final class WolfCombatInteractionBehaviour {
     private void performMeleeAttack(EntityWolf wolf, Entity target) {
         wolf.attackTicks = 20;
         byte damage = wolf.isTamed() ? (byte) 4 : (byte) 2;
-
-        org.bukkit.entity.Entity damager = wolf.getBukkitEntity();
-        org.bukkit.entity.Entity damagee = target == null ? null : target.getBukkitEntity();
-
-        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(damager, damagee, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage);
-        wolf.world.getServer().getPluginManager().callEvent(event);
-        if (event.isCancelled()) {
-            return;
-        }
-
         target.damageEntity(wolf, damage);
     }
 
@@ -220,7 +172,7 @@ public final class WolfCombatInteractionBehaviour {
             player.inventory.setItem(player.inventory.itemInHandIndex, (ItemStack) null);
         }
 
-        wolf.b(((ItemFood) Item.PORK).k(), EntityRegainHealthEvent.RegainReason.EATING);
+        wolf.b(((ItemFood) Item.PORK).k(), "EATING");
         return true;
     }
 

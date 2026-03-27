@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet10Flying;
-import org.bukkit.entity.Player;
 
 /**
  * Canonical policy helpers for incoming movement packet validation/threshold decisions.
@@ -32,11 +30,16 @@ public final class MovementPacketPolicy {
         return packetX == lastX && deltaY * deltaY < 0.01D && packetZ == lastZ;
     }
 
-    public boolean hasInvalidNumericPosition(Packet10Flying packet10flying, Player player, boolean disconnected) {
-        return Double.isNaN(packet10flying.x)
-                || Double.isNaN(packet10flying.y)
-                || Double.isNaN(packet10flying.z)
-                || Double.isNaN(packet10flying.stance) && player.isOnline() && !disconnected;
+    public boolean hasInvalidNumericPosition(Object packet10flying, Object player, boolean disconnected) {
+        double x = ((Number) readField(packet10flying, "x")).doubleValue();
+        double y = ((Number) readField(packet10flying, "y")).doubleValue();
+        double z = ((Number) readField(packet10flying, "z")).doubleValue();
+        double stance = ((Number) readField(packet10flying, "stance")).doubleValue();
+        boolean online = (Boolean) invoke(player, "isOnline");
+        return Double.isNaN(x)
+                || Double.isNaN(y)
+                || Double.isNaN(z)
+                || Double.isNaN(stance) && online && !disconnected;
     }
 
     public boolean isVehicleCrashAttempt(double moveX, double moveZ) {
@@ -85,5 +88,25 @@ public final class MovementPacketPolicy {
 
     public boolean shouldKickForFloatingTicks(int floatingTicks) {
         return floatingTicks > 80;
+    }
+
+    private Object readField(Object target, String fieldName) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to read field " + fieldName, exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName) {
+        try {
+            java.lang.reflect.Method method = target.getClass().getMethod(methodName);
+            method.setAccessible(true);
+            return method.invoke(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke " + methodName, exception);
+        }
     }
 }

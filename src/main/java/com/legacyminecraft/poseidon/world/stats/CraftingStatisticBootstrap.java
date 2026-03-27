@@ -1,12 +1,5 @@
 package com.legacyminecraft.poseidon.world.stats;
 
-import net.minecraft.server.CraftingManager;
-import net.minecraft.server.CraftingRecipe;
-import net.minecraft.server.CraftingStatistic;
-import net.minecraft.server.FurnaceRecipes;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Statistic;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,17 +25,10 @@ public final class CraftingStatisticBootstrap {
         }
 
         HashSet craftableItemIds = new HashSet();
-        Iterator recipeIterator = CraftingManager.getInstance().b().iterator();
-
-        while (recipeIterator.hasNext()) {
-            CraftingRecipe recipe = (CraftingRecipe) recipeIterator.next();
-            craftableItemIds.add(Integer.valueOf(recipe.b().id));
-        }
-
-        recipeIterator = FurnaceRecipes.getInstance().b().values().iterator();
-        while (recipeIterator.hasNext()) {
-            ItemStack smeltResult = (ItemStack) recipeIterator.next();
-            craftableItemIds.add(Integer.valueOf(smeltResult.id));
+        for (int itemId = 0; itemId < Item.byId.length; ++itemId) {
+            if (Item.byId[itemId] != null) {
+                craftableItemIds.add(Integer.valueOf(itemId));
+            }
         }
 
         Statistic[] craftingStatistics = new Statistic[32000];

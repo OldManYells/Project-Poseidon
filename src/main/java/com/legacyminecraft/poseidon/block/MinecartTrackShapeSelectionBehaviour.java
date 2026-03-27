@@ -1,7 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.BlockMinecartTrack;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical behaviour for selecting minecart track shape from neighbors.

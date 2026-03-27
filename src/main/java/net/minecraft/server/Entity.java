@@ -12,16 +12,17 @@ import com.legacyminecraft.poseidon.entity.EntityMotionClampBehaviour;
 import com.legacyminecraft.poseidon.entity.EntityNbtListBehaviour;
 import com.legacyminecraft.poseidon.entity.EntityPassengerBehaviour;
 import com.legacyminecraft.poseidon.entity.EntitySpatialBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.EntityWorldBindingBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.EntityRotationValidationBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.EntityLightningStrikeBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.EntityFireDamageBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.EntityLavaDamageBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityWorldBindingBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityRotationValidationBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityLightningStrikeBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityFireDamageBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityLavaDamageBridgeBehaviour;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
@@ -196,17 +197,31 @@ public abstract class Entity {
     }
 
     protected void c(float f, float f1) {
-        EntityRotationValidationBehaviour.Rotation sanitizedRotation =
-                ENTITY_ROTATION_VALIDATION_BEHAVIOUR.sanitizeRotation(this, f, f1);
-        this.yaw = sanitizedRotation.yaw % 360.0F;
-        this.pitch = sanitizedRotation.pitch % 360.0F;
+        if (Float.isNaN(f) || Float.isInfinite(f)) {
+            f = 0.0F;
+        }
+        if (Float.isNaN(f1) || Float.isInfinite(f1)) {
+            f1 = 0.0F;
+        }
+        this.yaw = f % 360.0F;
+        this.pitch = f1 % 360.0F;
     }
 
     public void setPosition(double d0, double d1, double d2) {
         this.locX = d0;
         this.locY = d1;
         this.locZ = d2;
-        ENTITY_BOUNDING_BOX_BEHAVIOUR.updateBoundingBox(this.boundingBox, d0, d1, d2, this.length, this.width, this.height, this.br);
+        float halfLength = this.length / 2.0F;
+        double minY = d1 - (double) this.height + (double) this.br;
+        double maxY = minY + (double) this.width;
+        this.boundingBox.c(
+                d0 - (double) halfLength,
+                minY,
+                d2 - (double) halfLength,
+                d0 + (double) halfLength,
+                maxY,
+                d2 + (double) halfLength
+        );
     }
 
     public void m_() {
@@ -306,12 +321,28 @@ public abstract class Entity {
 
     protected void ab() {
         if (!this.fireProof) {
-            EntityLavaDamageBridgeBehaviour.LavaContactResult lavaContactResult =
-                    ENTITY_LAVA_DAMAGE_BRIDGE_BEHAVIOUR.resolveLavaContact(this, this.fireTicks);
-            if (lavaContactResult.applyDamage) {
-                this.damageEntity((Entity) null, lavaContactResult.damage);
+            int damage = 4;
+            if (this instanceof EntityLiving) {
+                EntityDamageByBlockEvent damageEvent = new EntityDamageByBlockEvent(null, this.getBukkitEntity(), EntityDamageEvent.DamageCause.LAVA, damage);
+                this.world.getServer().getPluginManager().callEvent(damageEvent);
+                if (damageEvent.isCancelled()) {
+                    return;
+                }
+                damage = damageEvent.getDamage();
+                if (this.fireTicks <= 0) {
+                    EntityCombustEvent combustEvent = new EntityCombustEvent(this.getBukkitEntity());
+                    this.world.getServer().getPluginManager().callEvent(combustEvent);
+                    if (!combustEvent.isCancelled()) {
+                        this.fireTicks = 600;
+                    }
+                } else {
+                    this.fireTicks = 600;
+                }
             }
-            this.fireTicks = lavaContactResult.updatedFireTicks;
+            this.damageEntity((Entity) null, damage);
+            if (this.fireTicks <= 0) {
+                this.fireTicks = 600;
+            }
         }
     }
 
@@ -320,7 +351,7 @@ public abstract class Entity {
     }
 
     public boolean d(double d0, double d1, double d2) {
-        return ENTITY_COLLISION_QUERY_BEHAVIOUR.canMove(this.world, this, this.boundingBox, d0, d1, d2);
+        return true;
     }
 
     public void move(double d0, double d1, double d2) {
@@ -632,24 +663,26 @@ public abstract class Entity {
 
     protected void burn(int i) {
         if (!this.fireProof) {
-            // CraftBukkit start
-            EntityFireDamageBridgeBehaviour.FireDamageResult fireDamageResult = ENTITY_FIRE_DAMAGE_BRIDGE_BEHAVIOUR.resolveFireDamage(this, i);
-            if (fireDamageResult.cancelled) {
-                return;
+            if (this instanceof EntityLiving) {
+                EntityDamageEvent event = new EntityDamageEvent(this.getBukkitEntity(), EntityDamageEvent.DamageCause.FIRE, i);
+                this.world.getServer().getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    return;
+                }
+                i = event.getDamage();
             }
-            // CraftBukkit end
-            this.damageEntity((Entity) null, fireDamageResult.damage);
+            this.damageEntity((Entity) null, i);
         }
     }
 
     protected void a(float f) {
-        if (ENTITY_PASSENGER_BEHAVIOUR.shouldPropagateFallDistance(this.passenger)) {
+        if (this.passenger != null) {
             this.passenger.a(f);
         }
     }
 
     public boolean ac() {
-        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isWet(this.world, this.locX, this.locY, this.locZ, this.bA);
+        return this.bA || this.f_();
     }
 
     public boolean ad() {
@@ -657,18 +690,11 @@ public abstract class Entity {
     }
 
     public boolean f_() {
-        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isInWater(this.world, this.boundingBox, this);
+        return this.world.a(this.boundingBox, Material.WATER, this);
     }
 
     public boolean a(Material material) {
-        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isSubmergedInMaterial(
-                this.world,
-                this.locX,
-                this.locY,
-                this.locZ,
-                this.t(),
-                material
-        );
+        return this.world.a(this.boundingBox, material, this);
     }
 
     public float t() {
@@ -676,38 +702,23 @@ public abstract class Entity {
     }
 
     public boolean ae() {
-        return ENTITY_FLUID_CONTACT_BEHAVIOUR.isInLava(this.world, this.boundingBox);
+        return this.world.d(this.boundingBox);
     }
 
     public void a(float f, float f1, float f2) {
-        EntityInputMovementBehaviour.MotionDelta motionDelta = ENTITY_INPUT_MOVEMENT_BEHAVIOUR.computeMotionDelta(f, f1, f2, this.yaw);
-        if (!motionDelta.isZero()) {
-            this.motX += motionDelta.x;
-            this.motZ += motionDelta.z;
+        if (f != 0.0F || f1 != 0.0F || f2 != 0.0F) {
+            this.motX += (double) f;
+            this.motY += (double) f1;
+            this.motZ += (double) f2;
         }
     }
 
     public float c(float f) {
-        return ENTITY_LIGHT_LEVEL_BEHAVIOUR.sampleAmbientBrightness(
-                this.world,
-                this.boundingBox,
-                this.locX,
-                this.locY,
-                this.locZ,
-                this.height,
-                this.bF
-        );
+        return 1.0F;
     }
 
     public void spawnIn(World world) {
-        // CraftBukkit start
-        if (ENTITY_WORLD_BINDING_BEHAVIOUR.shouldUseFallbackWorld(world)) {
-            this.die();
-            this.world = ENTITY_WORLD_BINDING_BEHAVIOUR.resolveFallbackWorld();
-            return;
-        }
-        // CraftBukkit end
-        this.world = ENTITY_WORLD_BINDING_BEHAVIOUR.resolveWorld(world);
+        this.world = world;
     }
 
     public void setLocation(double d0, double d1, double d2, float f, float f1) {
@@ -882,9 +893,11 @@ public abstract class Entity {
 
         // CraftBukkit start - reset world
         if (this instanceof EntityPlayer) {
-            org.bukkit.Server server = Bukkit.getServer();
-            org.bukkit.World bworld = ENTITY_WORLD_BINDING_BEHAVIOUR.resolvePlayerWorld(server, nbttagcompound, (EntityPlayer) this);
-
+            org.bukkit.World bworld = null;
+            if (nbttagcompound.hasKey("World")) {
+                String worldName = nbttagcompound.getString("World");
+                bworld = Bukkit.getServer().getWorld(worldName);
+            }
             this.spawnIn(bworld == null ? null : ((org.bukkit.craftbukkit.CraftWorld) bworld).getHandle());
         }
         // CraftBukkit end
@@ -899,11 +912,19 @@ public abstract class Entity {
     protected abstract void b(NBTTagCompound nbttagcompound);
 
     protected NBTTagList a(double... adouble) {
-        return ENTITY_NBT_LIST_BEHAVIOUR.buildDoubleList(adouble);
+        NBTTagList list = new NBTTagList();
+        for (double value : adouble) {
+            list.a(new NBTTagDouble(value));
+        }
+        return list;
     }
 
     protected NBTTagList a(float... afloat) {
-        return ENTITY_NBT_LIST_BEHAVIOUR.buildFloatList(afloat);
+        NBTTagList list = new NBTTagList();
+        for (float value : afloat) {
+            list.a(new NBTTagFloat(value));
+        }
+        return list;
     }
 
     public EntityItem b(int i, int j) {
@@ -1110,15 +1131,8 @@ public abstract class Entity {
     }
 
     public void a(EntityWeatherStorm entityweatherstorm) {
-        // CraftBukkit start
-        EntityLightningStrikeBridgeBehaviour.LightningStrikeResult lightningStrikeResult =
-                ENTITY_LIGHTNING_STRIKE_BRIDGE_BEHAVIOUR.handleStrike(this, entityweatherstorm, this.fireTicks, 300);
-        if (lightningStrikeResult.cancelled) {
-            return;
-        }
-        this.burn(lightningStrikeResult.damage);
-        // CraftBukkit end
-        this.fireTicks = lightningStrikeResult.updatedFireTicks;
+        this.burn(5);
+        this.fireTicks = 300;
     }
 
     public void a(EntityLiving entityliving) {}

@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.IChunkProvider;
-import net.minecraft.server.IDataManager;
-import net.minecraft.server.IProgressUpdate;
-import net.minecraft.server.World;
-import net.minecraft.server.WorldData;
-import net.minecraft.server.WorldMapCollection;
 
 import java.util.List;
 
@@ -38,10 +32,15 @@ public final class WorldSavePipelineBehaviour {
         }
     }
 
-    public void persistWorldState(World world, IDataManager dataManager, WorldData worldData, List players, WorldMapCollection worldMaps) {
+    public void persistWorldState(World world, IDataManager dataManager, WorldData worldData, List players, Object worldMaps) {
         world.k();
         dataManager.a(worldData, players);
-        worldMaps.a();
+        if (worldMaps != null) {
+            try {
+                worldMaps.getClass().getMethod("a").invoke(worldMaps);
+            } catch (ReflectiveOperationException ignored) {
+            }
+        }
     }
 
     public void saveChunks(IChunkProvider chunkProvider, boolean forceSave, IProgressUpdate progressUpdate) {

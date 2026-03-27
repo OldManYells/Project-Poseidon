@@ -1,15 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.Packet17;
-import net.minecraft.server.Packet28EntityVelocity;
-import net.minecraft.server.Packet39AttachEntity;
-import net.minecraft.server.Packet40EntityMetadata;
-import net.minecraft.server.Packet5EntityEquipment;
 
 /**
  * Canonical helper for initial packet fan-out when a player starts tracking an entity.

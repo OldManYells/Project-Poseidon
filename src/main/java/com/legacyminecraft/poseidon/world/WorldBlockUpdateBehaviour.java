@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for world block-update orchestration helpers.

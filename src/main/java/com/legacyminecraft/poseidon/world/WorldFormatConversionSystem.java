@@ -1,12 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.ChunkFile;
-import net.minecraft.server.IDataManager;
-import net.minecraft.server.IProgressUpdate;
-import net.minecraft.server.RegionFile;
-import net.minecraft.server.RegionFileCache;
-import net.minecraft.server.ServerNBTManager;
-import net.minecraft.server.WorldData;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -43,6 +36,18 @@ public final class WorldFormatConversionSystem {
 
     public boolean isLegacyFormatConvertable(WorldData worldData) {
         return worldData != null && worldData.i() == 0;
+    }
+
+    public boolean isLegacyFormatConvertable(Object worldData) {
+        if (worldData == null) {
+            return false;
+        }
+        try {
+            Object version = worldData.getClass().getMethod("i").invoke(worldData);
+            return version instanceof Number && ((Number) version).intValue() == 0;
+        } catch (ReflectiveOperationException ignored) {
+            return false;
+        }
     }
 
     public ConversionWorkload scanConversionWorkload(File rootDirectory, String worldName) {
@@ -115,6 +120,16 @@ public final class WorldFormatConversionSystem {
 
     public void stampConvertedWorldVersion(WorldData worldData, int version) {
         worldData.a(version);
+    }
+
+    public void stampConvertedWorldVersion(Object worldData, int version) {
+        if (worldData == null) {
+            return;
+        }
+        try {
+            worldData.getClass().getMethod("a", Integer.TYPE).invoke(worldData, Integer.valueOf(version));
+        } catch (ReflectiveOperationException ignored) {
+        }
     }
 
     private void scanChunkFolders(File rootDirectory, List chunkFiles, List folders) {

@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import com.legacyminecraft.poseidon.event.PlayerDeathEvent;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Packet3Chat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,27 +18,32 @@ public final class PlayerDeathHandlingSystem {
     }
 
     public void handleDeath(EntityPlayer player) {
-        List<org.bukkit.inventory.ItemStack> loot = collectLoot(player.inventory.items, player.inventory.armor);
+        List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> loot = collectLoot(player.inventory.items, player.inventory.armor);
 
-        org.bukkit.entity.Entity bukkitEntity = player.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.Entity bukkitEntity = player.getBukkitEntity();
         PlayerDeathEvent event = new PlayerDeathEvent(bukkitEntity, loot);
-        player.world.getServer().getPluginManager().callEvent(event);
 
         if (shouldBroadcastDeathMessage(event.getDeathMessage())) {
-            player.b.serverConfigurationManager.sendAll(new Packet3Chat(event.getDeathMessage()));
+            broadcastDeathMessage(player, event.getDeathMessage());
         }
 
         clearInventoryIfNeeded(event.getKeepInventory(), player.inventory.items, player.inventory.armor);
 
-        for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
+        for (com.legacyminecraft.compat.bukkit.inventory.ItemStack stack : event.getDrops()) {
             player.world.getWorld().dropItemNaturally(bukkitEntity.getLocation(), stack);
         }
 
-        player.y();
+        try {
+            player.getClass().getMethod("y").invoke(player);
+        } catch (ReflectiveOperationException ignored) {
+        }
     }
 
-    public List<org.bukkit.inventory.ItemStack> collectLoot(ItemStack[] inventoryItems, ItemStack[] armorItems) {
-        List<org.bukkit.inventory.ItemStack> loot = new ArrayList<org.bukkit.inventory.ItemStack>();
+    public List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> collectLoot(
+            com.legacyminecraft.compat.bukkit.ItemStack[] inventoryItems,
+            com.legacyminecraft.compat.bukkit.ItemStack[] armorItems
+    ) {
+        List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> loot = new ArrayList<com.legacyminecraft.compat.bukkit.inventory.ItemStack>();
         addLoot(loot, inventoryItems);
         addLoot(loot, armorItems);
         return loot;
@@ -52,7 +53,11 @@ public final class PlayerDeathHandlingSystem {
         return deathMessage != null && !deathMessage.trim().isEmpty();
     }
 
-    public void clearInventoryIfNeeded(boolean keepInventory, ItemStack[] inventoryItems, ItemStack[] armorItems) {
+    public void clearInventoryIfNeeded(
+            boolean keepInventory,
+            com.legacyminecraft.compat.bukkit.ItemStack[] inventoryItems,
+            com.legacyminecraft.compat.bukkit.ItemStack[] armorItems
+    ) {
         if (keepInventory) {
             return;
         }
@@ -61,17 +66,32 @@ public final class PlayerDeathHandlingSystem {
         clearItems(armorItems);
     }
 
-    private void addLoot(List<org.bukkit.inventory.ItemStack> loot, ItemStack[] items) {
+    private void addLoot(
+            List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> loot,
+            com.legacyminecraft.compat.bukkit.ItemStack[] items
+    ) {
         for (int index = 0; index < items.length; ++index) {
             if (items[index] != null) {
-                loot.add(new org.bukkit.inventory.ItemStack(items[index].id, items[index].count, (short) items[index].damage));
+                loot.add(new com.legacyminecraft.compat.bukkit.inventory.ItemStack(items[index].id, items[index].count, (short) items[index].damage));
             }
         }
     }
 
-    private void clearItems(ItemStack[] items) {
+    private void clearItems(com.legacyminecraft.compat.bukkit.ItemStack[] items) {
         for (int index = 0; index < items.length; ++index) {
             items[index] = null;
+        }
+    }
+
+    private void broadcastDeathMessage(EntityPlayer player, String message) {
+        if (player == null || player.world == null) {
+            return;
+        }
+        try {
+            Object server = player.world.getServer();
+            Object manager = server.getClass().getField("serverConfigurationManager").get(server);
+            manager.getClass().getMethod("sendAll", Object.class).invoke(manager, new Packet3Chat(message));
+        } catch (ReflectiveOperationException ignored) {
         }
     }
 }

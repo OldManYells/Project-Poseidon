@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Chunk;
-import net.minecraft.server.Material;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.World;
 
 public final class ChunkWindowAccessBehaviour {
     private static final ChunkWindowAccessBehaviour INSTANCE = new ChunkWindowAccessBehaviour();

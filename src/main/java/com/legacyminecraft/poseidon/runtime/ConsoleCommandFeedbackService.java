@@ -1,11 +1,6 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import com.legacyminecraft.poseidon.compat.bukkit.CommandSenderBackedListener;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.ICommandListener;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet3Chat;
-import org.bukkit.entity.Player;
+import com.legacyminecraft.compat.bukkit.CommandSenderBackedListener;
 
 import java.util.logging.Logger;
 
@@ -38,10 +33,7 @@ public final class ConsoleCommandFeedbackService {
         Packet3Chat packet3chat = new Packet3Chat(message);
         String senderName = null;
         if (listener instanceof CommandSenderBackedListener) {
-            org.bukkit.command.CommandSender commandSender = ((CommandSenderBackedListener) listener).getSender();
-            if (commandSender instanceof Player) {
-                senderName = ((Player) commandSender).getName();
-            }
+            senderName = resolveSenderName(((CommandSenderBackedListener) listener).getSender());
         }
 
         java.util.List<EntityPlayer> players = server.serverConfigurationManager.players;
@@ -51,6 +43,18 @@ public final class ConsoleCommandFeedbackService {
                     && server.serverConfigurationManager.isOp(entityPlayer.name)) {
                 entityPlayer.netServerHandler.sendPacket(packet3chat);
             }
+        }
+    }
+
+    private String resolveSenderName(Object sender) {
+        if (sender == null) {
+            return null;
+        }
+        try {
+            Object value = sender.getClass().getMethod("getName").invoke(sender);
+            return value == null ? null : value.toString();
+        } catch (ReflectiveOperationException ignored) {
+            return null;
         }
     }
 }

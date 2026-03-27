@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntitySheep;
-import net.minecraft.server.EntityWolf;
-import org.bukkit.event.entity.EntityTargetEvent;
 
 import java.util.List;
 
@@ -58,7 +52,7 @@ public final class WolfAiBehaviour {
         }
 
         Entity selectedTarget = (Entity) nearbySheep.get(wolf.world.random.nextInt(nearbySheep.size()));
-        org.bukkit.entity.Entity bukkitTarget = selectedTarget == null ? null : selectedTarget.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.entity.Entity bukkitTarget = selectedTarget == null ? null : selectedTarget.getBukkitEntity();
 
         EntityTargetEvent event = new EntityTargetEvent(wolf.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.RANDOM_TARGET);
         wolf.world.getServer().getPluginManager().callEvent(event);

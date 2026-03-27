@@ -21,15 +21,15 @@ public class Packet20NamedEntitySpawn extends Packet {
     public Packet20NamedEntitySpawn() {}
 
     public Packet20NamedEntitySpawn(EntityHuman entityhuman) {
-        PacketDataCodec.Packet20Data packetData = packetDataCodec.packet20FromNamedEntity(entityhuman);
-        this.a = packetData.getEntityId();
-        this.b = packetData.getPlayerName();
-        this.c = packetData.getX();
-        this.d = packetData.getY();
-        this.e = packetData.getZ();
-        this.f = packetData.getYaw();
-        this.g = packetData.getPitch();
-        this.h = packetData.getHeldItemId();
+        ItemStack itemStack = entityhuman.inventory.getItemInHand();
+        this.a = entityhuman.id;
+        this.b = entityhuman.name;
+        this.c = (int) (entityhuman.locX * 32.0D);
+        this.d = (int) (entityhuman.locY * 32.0D);
+        this.e = (int) (entityhuman.locZ * 32.0D);
+        this.f = (byte) ((int) (entityhuman.yaw * 256.0F / 360.0F));
+        this.g = (byte) ((int) (entityhuman.pitch * 256.0F / 360.0F));
+        this.h = itemStack == null ? 0 : itemStack.id;
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

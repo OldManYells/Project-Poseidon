@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.*;
-import org.bukkit.World.Environment;
-import org.bukkit.event.world.WorldInitEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.generator.ChunkGenerator;
 
 import java.io.File;
 import java.util.logging.Logger;
@@ -48,7 +43,7 @@ public final class WorldBootstrapSystem {
             ChunkGenerator gen = server.server.getGenerator(name);
 
             if (j == 0) {
-                world = new WorldServer(server, new ServerNBTManager(new File("."), worldName, true), worldName, dimension, seed, org.bukkit.World.Environment.getEnvironment(dimension), gen);
+                world = new WorldServer(server, new ServerNBTManager(new File("."), worldName, true), worldName, dimension, seed, com.legacyminecraft.compat.bukkit.World.Environment.getEnvironment(dimension), gen);
             } else {
                 String dim = "DIM-1";
 
@@ -56,7 +51,7 @@ public final class WorldBootstrapSystem {
                 File oldWorld = new File(new File(worldName), dim);
                 legacyDimensionFolderMigrationHandler.migrateAndLog(logger, worldType, oldWorld, newWorld);
 
-                world = new SecondaryWorldServer(server, new ServerNBTManager(new File("."), name, true), name, dimension, seed, server.worlds.get(0), org.bukkit.World.Environment.getEnvironment(dimension), gen);
+                world = new SecondaryWorldServer(server, new ServerNBTManager(new File("."), name, true), name, dimension, seed, server.worlds.get(0), com.legacyminecraft.compat.bukkit.World.Environment.getEnvironment(dimension), gen);
             }
 
             if (gen != null) {

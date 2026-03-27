@@ -5,8 +5,8 @@ package com.legacyminecraft.poseidon.network;
  */
 public final class FloatingTickGuardSystem {
     private static final FloatingTickGuardSystem INSTANCE = new FloatingTickGuardSystem();
-    private static final String DEFAULT_DISCONNECT_REASON = "Flying is not enabled on this server";
     private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
+    private final FloatingKickMessagePolicy floatingKickMessagePolicy = FloatingKickMessagePolicy.getInstance();
 
     private FloatingTickGuardSystem() {
     }
@@ -27,7 +27,7 @@ public final class FloatingTickGuardSystem {
 
         int updatedFloatingTicks = currentFloatingTicks + 1;
         if (movementPacketPolicy.shouldKickForFloatingTicks(updatedFloatingTicks)) {
-            return FloatingDecision.kick(updatedFloatingTicks, DEFAULT_DISCONNECT_REASON);
+            return FloatingDecision.kick(updatedFloatingTicks, floatingKickMessagePolicy.floatingKickReason());
         }
         return FloatingDecision.increment(updatedFloatingTicks);
     }

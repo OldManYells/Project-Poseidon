@@ -1,18 +1,7 @@
 package com.legacyminecraft.poseidon.world.player;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.compat.bukkit.ChunkCompressionDispatchBridge;
-import net.minecraft.server.Chunk;
-import net.minecraft.server.ChunkCoordIntPair;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.ItemWorldMapBase;
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet29DestroyEntity;
-import net.minecraft.server.Packet51MapChunk;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.WorldServer;
+import com.legacyminecraft.compat.bukkit.ChunkCompressionDispatchBridge;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.util;
 
-import org.bukkit.Bukkit;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 
 import java.io.File;

@@ -1,8 +1,6 @@
 package com.legacyminecraft.poseidon.network;
 
 import com.legacyminecraft.poseidon.api.network.ConnectionType;
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.Packet1Login;
 
 /**
  * Canonical service for applying proxy-support results to login session state.
@@ -17,7 +15,7 @@ public final class LoginProxyAssignmentSystem {
         return INSTANCE;
     }
 
-    public ProxyAssignment resolveProxy(NetLoginHandler loginHandler, Packet1Login loginPacket) {
+    public ProxyAssignment resolveProxy(Object loginHandler, Object loginPacket) {
         return map(LoginProxySupport.handleProxy(loginHandler, loginPacket));
     }
 

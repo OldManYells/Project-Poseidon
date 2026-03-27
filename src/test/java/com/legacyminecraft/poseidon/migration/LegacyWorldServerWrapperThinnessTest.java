@@ -16,7 +16,7 @@ public class LegacyWorldServerWrapperThinnessTest {
     public void worldServerDelegatesPolicyAndRangeChecksToCanonicalBehaviour() throws IOException {
         String text = new String(Files.readAllBytes(WORLD_SERVER_PATH), StandardCharsets.UTF_8);
 
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.WorldLightningEventBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.WorldLightningEventBridgeBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldServerBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldServerChunkProviderBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldServerEntityEntryBehaviour;"));

@@ -213,7 +213,7 @@ public class EntityPainting extends Entity {
         this.b = loadedState.tileX;
         this.c = loadedState.tileY;
         this.d = loadedState.tileZ;
-        this.e = loadedState.art;
+        this.e = (EnumArt) loadedState.art;
         this.b(this.a);
     }
 

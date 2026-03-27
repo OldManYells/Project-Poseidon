@@ -1,12 +1,13 @@
 package com.legacyminecraft.poseidon.network;
 
-import java.io.IOException;
-
 /**
  * Canonical run-loop for legacy network writer threads.
  */
 public final class NetworkWriterLoopSystem {
     private static final NetworkWriterLoopSystem INSTANCE = new NetworkWriterLoopSystem();
+    private final NetworkLoopPausePolicy networkLoopPausePolicy = NetworkLoopPausePolicy.getInstance();
+    private final NetworkExceptionDisconnectSystem networkExceptionDisconnectSystem =
+            NetworkExceptionDisconnectSystem.getInstance();
 
     private NetworkWriterLoopSystem() {
     }
@@ -29,19 +30,24 @@ public final class NetworkWriterLoopSystem {
                 }
 
                 if (!fast) {
-                    operations.sleepQuietly(100L);
+                    operations.sleepQuietly(networkLoopPausePolicy.standardLoopPauseMillis());
                 }
 
                 try {
                     operations.flushOutput();
-                } catch (IOException ioexception) {
+                } catch (Exception exception) {
+                    boolean expectedDisconnectException =
+                            networkExceptionDisconnectSystem.isExpectedDisconnectException(exception);
                     if (!operations.isShuttingDown()) {
-                        operations.handleException(ioexception);
+                        operations.handleException(exception);
+                    }
+                    if (expectedDisconnectException) {
+                        break;
                     }
                 }
 
                 if (fast) {
-                    operations.sleepQuietly(2L);
+                    operations.sleepQuietly(networkLoopPausePolicy.fastLoopPauseMillis());
                 }
             }
         } finally {
@@ -60,7 +66,7 @@ public final class NetworkWriterLoopSystem {
 
         void sleepQuietly(long millis);
 
-        void flushOutput() throws IOException;
+        void flushOutput();
 
         boolean isShuttingDown();
 

@@ -4,11 +4,11 @@ import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import com.legacyminecraft.poseidon.auth.uuid.UUIDManager;
+import com.legacyminecraft.compat.bukkit.Bukkit;
+import com.legacyminecraft.compat.bukkit.NetServerHandler;
+import com.legacyminecraft.compat.bukkit.Server;
 import com.legacyminecraft.poseidon.kernel.PoseidonKernel;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NetServerHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
+import com.legacyminecraft.poseidon.runtime.MinecraftServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Properties;
 
 public final class PoseidonServer {
-    private final MinecraftServer server;
-    private final Server bukkitServer;
+    private final Object server;
+    private final Object bukkitServer;
 
     private final List<String> hiddenCommands = new ArrayList<>();
     private final Properties versionProperties = new Properties();
@@ -38,14 +38,18 @@ public final class PoseidonServer {
 
     private PoseidonConfig config;
 
-    public PoseidonServer(MinecraftServer server, Server bukkitServer) {
+    public PoseidonServer(Object server, Object bukkitServer) {
         this.server = server;
         this.bukkitServer = bukkitServer;
         this.config = PoseidonConfig.getInstance();
 
         PoseidonKernel kernel = PoseidonKernel.getInstance();
-        kernel.registerService(MinecraftServer.class, server);
-        kernel.registerService(Server.class, bukkitServer);
+        if (server instanceof MinecraftServer) {
+            kernel.registerService(MinecraftServer.class, (MinecraftServer) server);
+        }
+        if (bukkitServer instanceof Server) {
+            kernel.registerService(Server.class, (Server) bukkitServer);
+        }
         registerLegacyCraftServerService(kernel, bukkitServer);
         kernel.registerService(PoseidonConfig.class, this.config);
         kernel.registerService(PoseidonServer.class, this);
@@ -107,7 +111,12 @@ public final class PoseidonServer {
             return;
         }
 
-        poseidonVersionChecker = new PoseidonVersionChecker(bukkitServer, releaseVersion);
+        if (bukkitServer instanceof Server) {
+            poseidonVersionChecker = new PoseidonVersionChecker((Server) bukkitServer, releaseVersion);
+        } else {
+            getLogger().warning("[Poseidon] Version checker disabled: no compat server bridge available.");
+            return;
+        }
 
         getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every hour.");
         // Run the version checker in a separate thread every hour
@@ -253,9 +262,9 @@ public final class PoseidonServer {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void registerLegacyCraftServerService(PoseidonKernel kernel, Server bukkitServer) {
+    private static void registerLegacyCraftServerService(PoseidonKernel kernel, Object bukkitServer) {
         try {
-            Class<?> craftServerClass = Class.forName("org.bukkit.craftbukkit.CraftServer");
+            Class<?> craftServerClass = Class.forName("com.legacyminecraft.compat.bukkit.craftbukkit.CraftServer");
             if (craftServerClass.isInstance(bukkitServer)) {
                 kernel.registerService((Class) craftServerClass, bukkitServer);
             }

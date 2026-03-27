@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.WorldGenBigTree;
-import net.minecraft.server.WorldGenForest;
-import net.minecraft.server.WorldGenTaiga1;
-import net.minecraft.server.WorldGenTaiga2;
-import net.minecraft.server.WorldGenTrees;
-import net.minecraft.server.WorldGenerator;
 
 import java.util.Random;
 

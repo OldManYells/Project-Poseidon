@@ -1,6 +1,12 @@
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SoftMapStrongReferenceQueueBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapStrongReferenceQueueBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapReferenceCleanupBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapMapAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapPutAllBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapPutIfAbsentBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapUnsupportedOperationBehaviour;
+import com.legacyminecraft.compat.bukkit.SoftMapValueAccessBehaviour;
 import com.google.common.collect.MapMaker;
 
 import java.lang.ref.ReferenceQueue;
@@ -35,6 +41,18 @@ public class ConcurrentSoftMap<K, V> {
     private final int strongReferenceSize;
     private final SoftMapStrongReferenceQueueBehaviour softMapStrongReferenceQueueBehaviour =
             SoftMapStrongReferenceQueueBehaviour.getInstance();
+    private final SoftMapReferenceCleanupBehaviour softMapReferenceCleanupBehaviour =
+            SoftMapReferenceCleanupBehaviour.getInstance();
+    private final SoftMapMapAccessBehaviour softMapMapAccessBehaviour =
+            SoftMapMapAccessBehaviour.getInstance();
+    private final SoftMapPutAllBehaviour softMapPutAllBehaviour =
+            SoftMapPutAllBehaviour.getInstance();
+    private final SoftMapPutIfAbsentBehaviour softMapPutIfAbsentBehaviour =
+            SoftMapPutIfAbsentBehaviour.getInstance();
+    private final SoftMapUnsupportedOperationBehaviour softMapUnsupportedOperationBehaviour =
+            SoftMapUnsupportedOperationBehaviour.getInstance();
+    private final SoftMapValueAccessBehaviour softMapValueAccessBehaviour =
+            SoftMapValueAccessBehaviour.getInstance();
 
     public ConcurrentSoftMap() {
         this(20);
@@ -52,18 +70,29 @@ public class ConcurrentSoftMap<K, V> {
     // It is called whenever there is a method call of the map.
 
     private void emptyQueue() {
-        SoftMapReference ref;
+        softMapReferenceCleanupBehaviour.drain(new SoftMapReferenceCleanupBehaviour.CleanupCallbacks() {
+            @Override
+            public Object pollReference() {
+                return queue.poll();
+            }
 
-        while ((ref = (SoftMapReference) queue.poll()) != null) {
-            map.remove(ref.key);
-        }
+            @Override
+            public Object extractKey(Object reference) {
+                return ((SoftMapReference) reference).key;
+            }
+
+            @Override
+            public void removeByKey(Object key) {
+                map.remove(key);
+            }
+        });
     }
 
     public void clear() {
         synchronized (strongReferenceQueue) {
-            strongReferenceQueue.clear();
+            softMapMapAccessBehaviour.clearStrongReferences(strongReferenceQueue);
         }
-        map.clear();
+        softMapMapAccessBehaviour.clearMap(map);
         emptyQueue();
     }
 
@@ -71,28 +100,30 @@ public class ConcurrentSoftMap<K, V> {
 
     public boolean containsKey(K key) {
         emptyQueue();
-        return map.containsKey(key);
+        return softMapMapAccessBehaviour.containsKey(map, key);
     }
 
     // Shouldn't support this, since the garbage collection is async
 
     public boolean containsValue(V value) {
         emptyQueue();
-        return map.containsValue(value);
+        return softMapMapAccessBehaviour.containsValue(map, value);
     }
 
     // Shouldn't support this since it would create strong references to all the entries
 
     public Set entrySet() {
         emptyQueue();
-        throw new UnsupportedOperationException("SoftMap does not support this operation, since it creates potentially stong references");
+        throw softMapUnsupportedOperationBehaviour.unsupported(
+                "SoftMap does not support this operation, since it creates potentially stong references"
+        );
     }
 
     // Doesn't support these either
 
     public boolean equals(Object o) {
         emptyQueue();
-        throw new UnsupportedOperationException("SoftMap doesn't support equals checks");
+        throw softMapUnsupportedOperationBehaviour.unsupported("SoftMap doesn't support equals checks");
     }
 
     // This operation returns null if the entry is not in the map
@@ -103,40 +134,45 @@ public class ConcurrentSoftMap<K, V> {
     }
 
     private V fastGet(K key) {
-        SoftMapReference<K, V> ref = map.get(key);
-
-        if (ref == null) {
-            return null;
-        }
-        V value = ref.get();
-
-        if (value != null) {
-            synchronized (strongReferenceQueue) {
-                softMapStrongReferenceQueueBehaviour.promote(strongReferenceQueue, value, strongReferenceSize);
+        return (V) softMapValueAccessBehaviour.getValue(key, new SoftMapValueAccessBehaviour.GetCallbacks() {
+            @Override
+            public Object getReference(Object lookupKey) {
+                return map.get(lookupKey);
             }
-        }
-        return value;
+
+            @Override
+            public Object dereference(Object reference) {
+                return ((SoftMapReference<K, V>) reference).get();
+            }
+
+            @Override
+            public void promote(Object value) {
+                synchronized (strongReferenceQueue) {
+                    softMapStrongReferenceQueueBehaviour.promote(strongReferenceQueue, (V) value, strongReferenceSize);
+                }
+            }
+        });
     }
 
     // Doesn't support this either
 
     public int hashCode() {
         emptyQueue();
-        throw new UnsupportedOperationException("SoftMap doesn't support hashCode");
+        throw softMapUnsupportedOperationBehaviour.unsupported("SoftMap doesn't support hashCode");
     }
 
     // This is another risky method, since again, garbage collection is async
 
     public boolean isEmpty() {
         emptyQueue();
-        return map.isEmpty();
+        return softMapMapAccessBehaviour.isEmpty(map);
     }
 
     // Return all the keys, again could go out of date
 
     public Set keySet() {
         emptyQueue();
-        return map.keySet();
+        return softMapMapAccessBehaviour.keySet(map);
     }
 
     // Adds the mapping to the map
@@ -149,10 +185,28 @@ public class ConcurrentSoftMap<K, V> {
     }
 
     private void fastPut(K key, V value) {
-        map.put(key, new SoftMapReference<K, V>(key, value, queue));
-        synchronized (strongReferenceQueue) {
-            softMapStrongReferenceQueueBehaviour.promote(strongReferenceQueue, value, strongReferenceSize);
-        }
+        softMapValueAccessBehaviour.putAndPromote(
+                key,
+                new SoftMapReference<K, V>(key, value, queue),
+                value,
+                new SoftMapValueAccessBehaviour.PutCallbacks() {
+                    @Override
+                    public void put(Object putKey, Object reference) {
+                        softMapMapAccessBehaviour.put(map, putKey, reference);
+                    }
+
+                    @Override
+                    public void promote(Object promotedValue) {
+                        synchronized (strongReferenceQueue) {
+                            softMapStrongReferenceQueueBehaviour.promote(
+                                    strongReferenceQueue,
+                                    (V) promotedValue,
+                                    strongReferenceSize
+                            );
+                        }
+                    }
+                }
+        );
     }
 
     public V putIfAbsent(K key, V value) {
@@ -161,36 +215,33 @@ public class ConcurrentSoftMap<K, V> {
     }
 
     private V fastPutIfAbsent(K key, V value) {
-        V ret = null;
-
-        if (map.containsKey(key)) {
-            SoftMapReference<K, V> current = map.get(key);
-
-            if (current != null) {
-                ret = current.get();
+        final SoftMapReference<K, V> newValue = new SoftMapReference<K, V>(key, value, queue);
+        V ret = (V) softMapPutIfAbsentBehaviour.putIfAbsent(key, newValue, new SoftMapPutIfAbsentBehaviour.PutIfAbsentCallbacks() {
+            @Override
+            public boolean containsKey(Object lookupKey) {
+                return softMapMapAccessBehaviour.containsKey(map, lookupKey);
             }
-        }
 
-        if (ret == null) {
-            SoftMapReference<K, V> newValue = new SoftMapReference<K, V>(key, value, queue);
-            boolean success = false;
-
-            while (!success) {
-                SoftMapReference<K, V> oldValue = map.putIfAbsent(key, newValue);
-
-                if (oldValue == null) { // put was successful (key didn't exist)
-                    ret = null;
-                    success = true;
-                } else {
-                    ret = oldValue.get();
-                    if (ret == null) { // key existed, but referenced null
-                        success = map.replace(key, oldValue, newValue); // try to swap old for new
-                    } else { // key existed, and referenced a valid object
-                        success = true;
-                    }
-                }
+            @Override
+            public Object get(Object lookupKey) {
+                return map.get(lookupKey);
             }
-        }
+
+            @Override
+            public Object dereference(Object reference) {
+                return ((SoftMapReference<K, V>) reference).get();
+            }
+
+            @Override
+            public Object putIfAbsent(Object lookupKey, Object reference) {
+                return softMapMapAccessBehaviour.putIfAbsent(map, lookupKey, reference);
+            }
+
+            @Override
+            public boolean replace(Object lookupKey, Object oldReference, Object newReference) {
+                return softMapMapAccessBehaviour.replace(map, lookupKey, oldReference, newReference);
+            }
+        });
 
         if (ret == null) {
             synchronized (strongReferenceQueue) {
@@ -205,37 +256,45 @@ public class ConcurrentSoftMap<K, V> {
 
     public void putAll(Map other) {
         emptyQueue();
-        Iterator<K> itr = other.keySet().iterator();
-        while (itr.hasNext()) {
-            K key = itr.next();
-            fastPut(key, (V) other.get(key));
-        }
+        softMapPutAllBehaviour.putAll(other, new SoftMapPutAllBehaviour.PutCallbacks() {
+            @Override
+            public void put(Object key, Object value) {
+                fastPut((K) key, (V) value);
+            }
+        });
     }
 
     // Remove object
 
     public V remove(K key) {
         emptyQueue();
-        SoftMapReference<K, V> ref = map.remove(key);
+        return (V) softMapValueAccessBehaviour.removeAndDereference(key, new SoftMapValueAccessBehaviour.RemoveCallbacks() {
+            @Override
+            public Object remove(Object removeKey) {
+                return softMapMapAccessBehaviour.remove(map, removeKey);
+            }
 
-        if (ref != null) {
-            return ref.get();
-        }
-        return null;
+            @Override
+            public Object dereference(Object reference) {
+                return ((SoftMapReference<K, V>) reference).get();
+            }
+        });
     }
 
     // Returns size, could go out of date
 
     public int size() {
         emptyQueue();
-        return map.size();
+        return softMapMapAccessBehaviour.size(map);
     }
 
     // Shouldn't support this since it would create strong references to all the entries
 
     public Collection values() {
         emptyQueue();
-        throw new UnsupportedOperationException("SoftMap does not support this operation, since it creates potentially stong references");
+        throw softMapUnsupportedOperationBehaviour.unsupported(
+                "SoftMap does not support this operation, since it creates potentially stong references"
+        );
     }
 
     private static class SoftMapReference<K, V> extends SoftReference<V> {

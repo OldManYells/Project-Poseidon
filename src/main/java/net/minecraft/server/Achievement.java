@@ -42,6 +42,6 @@ public class Achievement extends Statistic {
     }
 
     public Achievement c() {
-        return AchievementRegistry.getInstance().register(this);
+        return (Achievement) AchievementRegistry.getInstance().registerRaw(this);
     }
 }

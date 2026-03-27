@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import org.bukkit.plugin.Plugin;
+import com.legacyminecraft.compat.bukkit.Plugin;
 
 public interface LoginPauseController {
     ConnectionPause createConnectionPause(Plugin plugin, String connectionPauseName);

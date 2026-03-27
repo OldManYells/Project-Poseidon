@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.TileEntity;
-
 /**
  * Canonical tile-entity lifecycle policy for legacy container-block wrappers.
  */
@@ -19,7 +17,7 @@ public final class ContainerBlockLifecycleBehaviour {
         isTileEntityById[blockId] = true;
     }
 
-    public void placeTileEntity(WorldTileEntityAccess worldAccess, int x, int y, int z, TileEntity tileEntity) {
+    public void placeTileEntity(WorldTileEntityAccess worldAccess, int x, int y, int z, Object tileEntity) {
         worldAccess.setTileEntity(x, y, z, tileEntity);
     }
 
@@ -28,7 +26,7 @@ public final class ContainerBlockLifecycleBehaviour {
     }
 
     public interface WorldTileEntityAccess {
-        void setTileEntity(int x, int y, int z, TileEntity tileEntity);
+        void setTileEntity(int x, int y, int z, Object tileEntity);
 
         void removeTileEntity(int x, int y, int z);
     }

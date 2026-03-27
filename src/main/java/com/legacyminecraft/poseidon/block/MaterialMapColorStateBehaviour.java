@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.MaterialMapColor;
 
 /**
  * Canonical state behaviour for legacy material map colors.
@@ -15,7 +14,7 @@ public final class MaterialMapColorStateBehaviour {
         return INSTANCE;
     }
 
-    public MaterialMapColorState initialize(MaterialMapColor[] registry, int colorIndex, int colorRgb, MaterialMapColor self) {
+    public MaterialMapColorState initialize(Object[] registry, int colorIndex, int colorRgb, Object self) {
         registry[colorIndex] = self;
         return new MaterialMapColorState(colorRgb, colorIndex);
     }

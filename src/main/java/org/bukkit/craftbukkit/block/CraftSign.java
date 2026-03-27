@@ -1,34 +1,37 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.TileEntityBlockStateUpdateBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityBlockStateUpdateBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.SignLineAccessBehaviour;
 import net.minecraft.server.TileEntitySign;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.craftbukkit.CraftWorld;
 
 public class CraftSign extends CraftBlockState implements Sign {
     private static final TileEntityBlockStateUpdateBehaviour TILE_ENTITY_BLOCK_STATE_UPDATE_BEHAVIOUR =
             TileEntityBlockStateUpdateBehaviour.getInstance();
+    private static final TileEntityLookupBehaviour TILE_ENTITY_LOOKUP_BEHAVIOUR =
+            TileEntityLookupBehaviour.getInstance();
+    private static final SignLineAccessBehaviour SIGN_LINE_ACCESS_BEHAVIOUR =
+            SignLineAccessBehaviour.getInstance();
 
     private final TileEntitySign sign;
 
     public CraftSign(final Block block) {
         super(block);
-
-        CraftWorld world = (CraftWorld) block.getWorld();
-        sign = (TileEntitySign) world.getTileEntityAt(getX(), getY(), getZ());
+        sign = TILE_ENTITY_LOOKUP_BEHAVIOUR.resolveSign(block, getX(), getY(), getZ());
     }
 
     public String[] getLines() {
-        return sign.lines;
+        return SIGN_LINE_ACCESS_BEHAVIOUR.getLines(sign);
     }
 
     public String getLine(int index) throws IndexOutOfBoundsException {
-        return sign.lines[index];
+        return SIGN_LINE_ACCESS_BEHAVIOUR.getLine(sign, index);
     }
 
     public void setLine(int index, String line) throws IndexOutOfBoundsException {
-        sign.lines[index] = line;
+        SIGN_LINE_ACCESS_BEHAVIOUR.setLine(sign, index, line);
     }
 
     @Override

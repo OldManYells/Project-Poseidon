@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for entity ambient-light sampling.

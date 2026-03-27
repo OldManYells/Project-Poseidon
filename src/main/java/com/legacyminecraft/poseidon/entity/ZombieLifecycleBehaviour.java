@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.EntityZombie;
-import net.minecraft.server.Item;
-import net.minecraft.server.MathHelper;
-import org.bukkit.event.entity.EntityCombustEvent;
 
 public final class ZombieLifecycleBehaviour {
     private static final ZombieLifecycleBehaviour INSTANCE = new ZombieLifecycleBehaviour();

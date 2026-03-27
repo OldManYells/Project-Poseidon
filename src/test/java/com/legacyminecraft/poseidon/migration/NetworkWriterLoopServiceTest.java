@@ -4,8 +4,6 @@ import com.legacyminecraft.poseidon.network.NetworkWriterLoopSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class NetworkWriterLoopServiceTest {
     @Test
     public void exitsImmediatelyWhenConnectionIsClosed() {
@@ -151,8 +149,8 @@ public class NetworkWriterLoopServiceTest {
                     }
 
                     @Override
-                    public void flushOutput() throws IOException {
-                        throw new IOException("flush failed");
+                    public void flushOutput() {
+                        throw new RuntimeException("flush failed");
                     }
 
                     @Override
@@ -167,6 +165,168 @@ public class NetworkWriterLoopServiceTest {
                 }
         );
 
+        Assert.assertEquals(1, exceptionReports[0]);
+    }
+
+    @Test
+    public void reportsRuntimeFlushErrorsWhenNotShuttingDown() {
+        final int[] exceptionReports = new int[]{0};
+
+        NetworkWriterLoopSystem.getInstance().runLoop(
+                true,
+                new NetworkWriterLoopSystem.WriterLoopOperations() {
+                    private boolean firstLoop = true;
+
+                    @Override
+                    public void incrementWriterThreadCount() {
+                    }
+
+                    @Override
+                    public void decrementWriterThreadCount() {
+                    }
+
+                    @Override
+                    public boolean isConnectionOpen() {
+                        if (firstLoop) {
+                            firstLoop = false;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean writeNextPacket() {
+                        return false;
+                    }
+
+                    @Override
+                    public void sleepQuietly(long millis) {
+                    }
+
+                    @Override
+                    public void flushOutput() {
+                        throw new IllegalStateException("runtime flush failed");
+                    }
+
+                    @Override
+                    public boolean isShuttingDown() {
+                        return false;
+                    }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                        exceptionReports[0]++;
+                    }
+                }
+        );
+
+        Assert.assertEquals(1, exceptionReports[0]);
+    }
+
+    @Test
+    public void suppressesFlushErrorsDuringShutdown() {
+        final int[] exceptionReports = new int[]{0};
+
+        NetworkWriterLoopSystem.getInstance().runLoop(
+                true,
+                new NetworkWriterLoopSystem.WriterLoopOperations() {
+                    private boolean firstLoop = true;
+
+                    @Override
+                    public void incrementWriterThreadCount() {
+                    }
+
+                    @Override
+                    public void decrementWriterThreadCount() {
+                    }
+
+                    @Override
+                    public boolean isConnectionOpen() {
+                        if (firstLoop) {
+                            firstLoop = false;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean writeNextPacket() {
+                        return false;
+                    }
+
+                    @Override
+                    public void sleepQuietly(long millis) {
+                    }
+
+                    @Override
+                    public void flushOutput() {
+                        throw new RuntimeException("flush failed");
+                    }
+
+                    @Override
+                    public boolean isShuttingDown() {
+                        return true;
+                    }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                        exceptionReports[0]++;
+                    }
+                }
+        );
+
+        Assert.assertEquals(0, exceptionReports[0]);
+    }
+
+    @Test
+    public void expectedSocketClosureFlushErrorStopsLoopAfterSingleReport() {
+        final int[] exceptionReports = new int[]{0};
+        final int[] flushCalls = new int[]{0};
+
+        NetworkWriterLoopSystem.getInstance().runLoop(
+                true,
+                new NetworkWriterLoopSystem.WriterLoopOperations() {
+                    @Override
+                    public void incrementWriterThreadCount() {
+                    }
+
+                    @Override
+                    public void decrementWriterThreadCount() {
+                    }
+
+                    @Override
+                    public boolean isConnectionOpen() {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean writeNextPacket() {
+                        return false;
+                    }
+
+                    @Override
+                    public void sleepQuietly(long millis) {
+                    }
+
+                    @Override
+                    public void flushOutput() {
+                        flushCalls[0]++;
+                        throw new RuntimeException(new java.net.SocketException("Socket closed"));
+                    }
+
+                    @Override
+                    public boolean isShuttingDown() {
+                        return false;
+                    }
+
+                    @Override
+                    public void handleException(Exception exception) {
+                        exceptionReports[0]++;
+                    }
+                }
+        );
+
+        Assert.assertEquals(1, flushCalls[0]);
         Assert.assertEquals(1, exceptionReports[0]);
     }
 }

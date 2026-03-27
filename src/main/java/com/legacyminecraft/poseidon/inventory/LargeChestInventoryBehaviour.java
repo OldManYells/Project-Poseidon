@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.ItemStack;
 
 /**
  * Canonical operations for combined two-inventory chest views.

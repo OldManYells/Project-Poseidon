@@ -1,11 +1,12 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.compat.bukkit.ExplosionEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.ExplosionEventBridgeBehaviour;
 import com.legacyminecraft.poseidon.world.ExplosionBlockDestructionBehaviour;
 import com.legacyminecraft.poseidon.world.ExplosionEntityImpactSystem;
 import com.legacyminecraft.poseidon.world.ExplosionEffectBehaviour;
 import com.legacyminecraft.poseidon.world.ExplosionRaycastBehaviour;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.*;
@@ -19,6 +20,7 @@ public class Explosion {
     private static final ExplosionEffectBehaviour EXPLOSION_EFFECT_BEHAVIOUR = ExplosionEffectBehaviour.getInstance();
     private static final ExplosionRaycastBehaviour EXPLOSION_RAYCAST_BEHAVIOUR = ExplosionRaycastBehaviour.getInstance();
     private static final ExplosionEventBridgeBehaviour EXPLOSION_EVENT_BRIDGE_BEHAVIOUR = ExplosionEventBridgeBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     public boolean setFire = false;
     private final Random random = new Random();
@@ -48,7 +50,7 @@ public class Explosion {
         int j;
         int k;
 
-        EXPLOSION_RAYCAST_BEHAVIOUR.collectAffectedBlocks(this.world, this.source, this.size, this.posX, this.posY, this.posZ, this.blocks);
+        EXPLOSION_RAYCAST_BEHAVIOUR.collectAffectedBlocks(this.world, this.source, this.size, this.posX, this.posY, this.posZ, (Set) this.blocks);
 
         this.size *= 2.0F;
         i = MathHelper.floor(this.posX - (double) this.size - 1.0D);
@@ -66,8 +68,14 @@ public class Explosion {
          * Config option:
          * optimizedExplosions: false
          */
-        boolean optimizeExplosions = (boolean) PoseidonConfig.getInstance().getProperty("world-settings.optimized-explosions");
-        boolean sendMotion = (boolean) PoseidonConfig.getInstance().getProperty("world-settings.send-explosion-velocity");
+        boolean optimizeExplosions = PoseidonConfig.getInstance().getBoolean(
+                WORLD_FEATURE_CONFIG_POLICY.optimizedExplosionsKey(),
+                WORLD_FEATURE_CONFIG_POLICY.optimizedExplosionsDefault()
+        );
+        boolean sendMotion = PoseidonConfig.getInstance().getBoolean(
+                WORLD_FEATURE_CONFIG_POLICY.sendExplosionVelocityKey(),
+                WORLD_FEATURE_CONFIG_POLICY.sendExplosionVelocityDefault()
+        );
 
         EXPLOSION_ENTITY_IMPACT_SYSTEM.applyImpacts(
                 this.world,
@@ -117,8 +125,8 @@ public class Explosion {
                         this.posX,
                         this.posY,
                         this.posZ,
-                        blocksCopy,
-                        this.blocks
+                        (List) blocksCopy,
+                        (Set) this.blocks
                 );
 
         if (explosionEventResult.isCancelled()) {

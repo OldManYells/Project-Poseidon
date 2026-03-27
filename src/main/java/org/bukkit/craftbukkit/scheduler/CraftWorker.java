@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerWorkerIdentityBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerWorkerLifecycleBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerWorkerIdentityBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerWorkerLifecycleBehaviour;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitWorker;
 

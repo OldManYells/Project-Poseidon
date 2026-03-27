@@ -1,8 +1,6 @@
 package com.legacyminecraft.poseidon.world.tile;
 
-import net.minecraft.server.Material;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import java.lang.reflect.Method;
 
 public final class NoteBlockTileBehaviour {
     private static final NoteBlockTileBehaviour INSTANCE = new NoteBlockTileBehaviour();
@@ -17,8 +15,8 @@ public final class NoteBlockTileBehaviour {
         return INSTANCE;
     }
 
-    public byte readNote(NBTTagCompound tag) {
-        byte noteValue = tag.c("note");
+    public byte readNote(Object tag) {
+        byte noteValue = ((Number) invoke(tag, "c", new Class<?>[]{String.class}, "note")).byteValue();
         if (noteValue < MIN_NOTE) {
             return MIN_NOTE;
         }
@@ -28,35 +26,45 @@ public final class NoteBlockTileBehaviour {
         return noteValue;
     }
 
-    public void writeNote(NBTTagCompound tag, byte noteValue) {
-        tag.a("note", noteValue);
+    public void writeNote(Object tag, byte noteValue) {
+        invoke(tag, "a", new Class<?>[]{String.class, byte.class}, "note", noteValue);
     }
 
     public byte incrementNote(byte noteValue) {
         return (byte) ((noteValue + 1) % NOTE_COUNT);
     }
 
-    public boolean canPlay(World world, int x, int y, int z) {
-        return world.getMaterial(x, y + 1, z) == Material.AIR;
+    public boolean canPlay(Object world, int x, int y, int z) {
+        return typeId(world, x, y + 1, z) == 0;
     }
 
-    public byte resolveInstrument(World world, int x, int y, int z) {
-        Material materialBelow = world.getMaterial(x, y - 1, z);
-        byte instrument = 0;
+    public byte resolveInstrument(Object world, int x, int y, int z) {
+        int below = typeId(world, x, y - 1, z);
+        if (below == 1) { // stone
+            return 1;
+        }
+        if (below == 12) { // sand
+            return 2;
+        }
+        if (below == 20) { // glass
+            return 3;
+        }
+        if (below == 5) { // planks
+            return 4;
+        }
+        return 0;
+    }
 
-        if (materialBelow == Material.STONE) {
-            instrument = 1;
-        }
-        if (materialBelow == Material.SAND) {
-            instrument = 2;
-        }
-        if (materialBelow == Material.SHATTERABLE) {
-            instrument = 3;
-        }
-        if (materialBelow == Material.WOOD) {
-            instrument = 4;
-        }
+    private static int typeId(Object world, int x, int y, int z) {
+        return ((Number) invoke(world, "getTypeId", new Class<?>[]{int.class, int.class, int.class}, x, y, z)).intValue();
+    }
 
-        return instrument;
+    private static Object invoke(Object target, String name, Class<?>[] parameterTypes, Object... args) {
+        try {
+            Method method = target.getClass().getMethod(name, parameterTypes);
+            return method.invoke(target, args);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to invoke " + name + " on " + target.getClass().getName(), exception);
+        }
     }
 }

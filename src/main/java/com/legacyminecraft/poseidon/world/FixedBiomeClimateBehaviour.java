@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.BiomeBase;
 
 import java.util.Arrays;
 

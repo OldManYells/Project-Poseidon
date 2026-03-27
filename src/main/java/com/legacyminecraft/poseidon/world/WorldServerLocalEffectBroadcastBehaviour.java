@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.Explosion;
-import net.minecraft.server.Packet;
-import net.minecraft.server.ServerConfigurationManager;
 
 /**
  * Canonical behaviour for world-server local-effect packet broadcast orchestration.

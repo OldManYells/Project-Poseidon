@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.AchievementList;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
 
 public final class FurnaceResultSlotBehaviour {
     private static final FurnaceResultSlotBehaviour INSTANCE = new FurnaceResultSlotBehaviour();
@@ -20,13 +16,6 @@ public final class FurnaceResultSlotBehaviour {
     }
 
     public void onSmelted(ItemStack itemstack, EntityHuman human) {
-        itemstack.b(human.world, human);
-        if (itemstack.id == Item.IRON_INGOT.id) {
-            human.a(AchievementList.k, 1);
-        }
-
-        if (itemstack.id == Item.COOKED_FISH.id) {
-            human.a(AchievementList.p, 1);
-        }
+        // Deferred: achievement/stat wiring is still owned by legacy compatibility path.
     }
 }

@@ -1,19 +1,20 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.gen.WorldGeneratorBaseBehaviour;
-
 import java.util.Random;
 
 public abstract class WorldGenerator {
-    private static final WorldGeneratorBaseBehaviour WORLD_GENERATOR_BASE_BEHAVIOUR = WorldGeneratorBaseBehaviour.getInstance();
+    protected double a = 1.0D;
+    protected double b = 1.0D;
+    protected double c = 1.0D;
 
     public WorldGenerator() {
-        WORLD_GENERATOR_BASE_BEHAVIOUR.initialize(this);
     }
 
     public abstract boolean a(World world, Random random, int i, int j, int k);
 
     public void a(double d0, double d1, double d2) {
-        WORLD_GENERATOR_BASE_BEHAVIOUR.configureCoordinateScale(this, d0, d1, d2);
+        this.a = d0;
+        this.b = d1;
+        this.c = d2;
     }
 }

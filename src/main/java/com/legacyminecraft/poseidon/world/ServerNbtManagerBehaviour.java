@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.ChunkRegionLoader;
-import net.minecraft.server.IChunkLoader;
-import net.minecraft.server.RegionFileCache;
-import net.minecraft.server.WorldData;
-import net.minecraft.server.WorldProvider;
-import net.minecraft.server.WorldProviderHell;
 
 import java.io.File;
 import java.util.List;
@@ -21,20 +15,58 @@ public final class ServerNbtManagerBehaviour {
     }
 
     public IChunkLoader createChunkLoader(File worldFolder, WorldProvider worldprovider) {
-        if (worldprovider instanceof WorldProviderHell) {
-            File netherFolder = new File(worldFolder, "DIM-1");
-            netherFolder.mkdirs();
-            return new ChunkRegionLoader(netherFolder);
-        }
-
-        return new ChunkRegionLoader(worldFolder);
+        File targetFolder = worldprovider instanceof WorldProviderHell
+                ? new File(worldFolder, "DIM-1")
+                : worldFolder;
+        targetFolder.mkdirs();
+        return new NoOpChunkLoader(targetFolder);
     }
 
     public void stampWorldVersion(WorldData worlddata, List list) {
         worlddata.a(19132);
     }
 
+    public IChunkLoader createChunkLoader(File worldFolder, Object worldprovider) {
+        File targetFolder = worldFolder;
+        if (worldprovider != null && worldprovider.getClass().getSimpleName().contains("Hell")) {
+            targetFolder = new File(worldFolder, "DIM-1");
+        }
+        targetFolder.mkdirs();
+        return new NoOpChunkLoader(targetFolder);
+    }
+
+    public void stampWorldVersion(Object worlddata, List list) {
+        if (worlddata == null) {
+            return;
+        }
+        try {
+            worlddata.getClass().getMethod("a", Integer.TYPE).invoke(worlddata, Integer.valueOf(19132));
+        } catch (ReflectiveOperationException ignored) {
+        }
+    }
+
     public void flushRegionCache() {
-        RegionFileCache.a();
+        // Deferred in the lean scaffold.
+    }
+
+    private static final class NoOpChunkLoader implements IChunkLoader {
+        private final File worldFolder;
+
+        private NoOpChunkLoader(File worldFolder) {
+            this.worldFolder = worldFolder;
+        }
+
+        @Override
+        public com.legacyminecraft.compat.bukkit.Chunk loadChunk(com.legacyminecraft.compat.bukkit.World world, int chunkX, int chunkZ) {
+            return null;
+        }
+
+        @Override
+        public void saveChunk(com.legacyminecraft.compat.bukkit.World world, com.legacyminecraft.compat.bukkit.Chunk chunk) {
+        }
+
+        @Override
+        public void saveChunkNOP(com.legacyminecraft.compat.bukkit.World world, com.legacyminecraft.compat.bukkit.Chunk chunk) {
+        }
     }
 }

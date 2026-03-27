@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.block.FlowingFluidPropagationBehaviour;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.BlockFromToEvent;
 
@@ -16,6 +17,7 @@ public class BlockFlowing extends BlockFluids {
     boolean[] b = new boolean[4];
     int[] c = new int[4];
     private static final FlowingFluidPropagationBehaviour FLOWING_FLUID_PROPAGATION_SERVICE = FlowingFluidPropagationBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     protected BlockFlowing(int i, Material material) {
         super(i, material);
@@ -74,7 +76,10 @@ public class BlockFlowing extends BlockFluids {
 
             if (this.material == Material.LAVA && l < 8 && i1 < 8 && i1 > l && random.nextInt(4) != 0) {
                 // Poseidon start - Fix flowing lava not disappearing
-                boolean fixFlowingLava = PoseidonConfig.getInstance().getConfigBoolean("world.settings.flowing-lava-fix.enabled", true);
+                boolean fixFlowingLava = PoseidonConfig.getInstance().getConfigBoolean(
+                        WORLD_FEATURE_CONFIG_POLICY.flowingLavaFixEnabledKey(),
+                        WORLD_FEATURE_CONFIG_POLICY.flowingLavaFixEnabledDefault()
+                );
                 FlowingFluidPropagationBehaviour.LavaSlowdownResult lavaSlowdownResult = FLOWING_FLUID_PROPAGATION_SERVICE.applyLavaSlowdown(true, l, i1, 1, fixFlowingLava);
                 i1 = lavaSlowdownResult.adjustedNextLevel;
                 // Poseidon end

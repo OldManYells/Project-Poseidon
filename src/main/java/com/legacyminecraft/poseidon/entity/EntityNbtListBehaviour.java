@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagDouble;
-import net.minecraft.server.NBTTagFloat;
-import net.minecraft.server.NBTTagList;
 
 /**
  * Canonical behaviour for building entity NBT numeric list tags.

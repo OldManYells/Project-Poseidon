@@ -1,6 +1,10 @@
 package org.bukkit.craftbukkit.scheduler;
 
 import com.legacyminecraft.poseidon.Poseidon;
+import com.legacyminecraft.compat.bukkit.CraftSchedulerMainThreadHeartbeatSystem;
+import com.legacyminecraft.compat.bukkit.CraftSchedulerRunLoopSystem;
+import com.legacyminecraft.compat.bukkit.SchedulerTaskCancellationBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerTaskInspectionBehaviour;
 import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.plugin.Plugin;
@@ -13,12 +17,19 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CraftScheduler implements BukkitScheduler, Runnable {
 
     private static final Logger logger = Logger.getLogger("Minecraft");
+    private static final CraftSchedulerRunLoopSystem craftSchedulerRunLoopSystem =
+            CraftSchedulerRunLoopSystem.getInstance();
+    private static final CraftSchedulerMainThreadHeartbeatSystem craftSchedulerMainThreadHeartbeatSystem =
+            CraftSchedulerMainThreadHeartbeatSystem.getInstance();
+    private static final SchedulerTaskCancellationBehaviour schedulerTaskCancellationBehaviour =
+            SchedulerTaskCancellationBehaviour.getInstance();
+    private static final SchedulerTaskInspectionBehaviour schedulerTaskInspectionBehaviour =
+            SchedulerTaskInspectionBehaviour.getInstance();
 
     private final CraftServer server;
 
@@ -37,61 +48,47 @@ public class CraftScheduler implements BukkitScheduler, Runnable {
     private final Lock syncedTasksLock = new ReentrantLock();
 
     public void run() {
-
-        while (true) {
-            boolean stop = false;
-            long firstTick = -1;
-            long currentTick = -1;
-            CraftTask first = null;
-            do {
-                synchronized (schedulerQueue) {
-                    first = null;
-                    if (!schedulerQueue.isEmpty()) {
-                        first = schedulerQueue.firstKey();
-                        if (first != null) {
-                            currentTick = getCurrentTick();
-
-                            firstTick = first.getExecutionTick();
-
-                            if (currentTick >= firstTick) {
-                                schedulerQueue.remove(first);
-                                processTask(first);
-                                if (first.getPeriod() >= 0) {
-                                    first.updateExecution();
-                                    schedulerQueue.put(first, first.isSync());
-                                }
-                            } else {
-                                stop = true;
-                            }
-                        } else {
-                            stop = true;
-                        }
-                    } else {
-                        stop = true;
-                    }
-                }
-            } while (!stop);
-
-            long sleepTime = 0;
-            if (first == null) {
-                sleepTime = 60000L;
-            } else {
-                currentTick = getCurrentTick();
-                sleepTime = (firstTick - currentTick) * 50 + 25;
+        craftSchedulerRunLoopSystem.runLoop(new CraftSchedulerRunLoopSystem.SchedulerRunLoopAccess() {
+            public Object getSchedulerQueueMonitor() {
+                return schedulerQueue;
             }
 
-            if (sleepTime < 50L) {
-                sleepTime = 50L;
-            } else if (sleepTime > 60000L) {
-                sleepTime = 60000L;
+            public boolean isSchedulerQueueEmpty() {
+                return schedulerQueue.isEmpty();
             }
 
-            synchronized (schedulerQueue) {
-                try {
-                    schedulerQueue.wait(sleepTime);
-                } catch (InterruptedException ie) {}
+            public CraftTask getFirstScheduledTask() {
+                return schedulerQueue.firstKey();
             }
-        }
+
+            public long getCurrentTick() {
+                return CraftScheduler.this.getCurrentTick();
+            }
+
+            public long getExecutionTick(CraftTask task) {
+                return task.getExecutionTick();
+            }
+
+            public long getPeriod(CraftTask task) {
+                return task.getPeriod();
+            }
+
+            public void processTask(CraftTask task) {
+                CraftScheduler.this.processTask(task);
+            }
+
+            public void removeScheduledTask(CraftTask task) {
+                schedulerQueue.remove(task);
+            }
+
+            public void updateExecution(CraftTask task) {
+                task.updateExecution();
+            }
+
+            public void enqueueScheduledTask(CraftTask task) {
+                schedulerQueue.put(task, task.isSync());
+            }
+        });
     }
 
     void processTask(CraftTask task) {
@@ -127,59 +124,77 @@ public class CraftScheduler implements BukkitScheduler, Runnable {
     // Project Poseidon - End - Synchronous task performance reporting
 
 
-    // If the main thread cannot obtain the lock, it doesn't wait
     public void mainThreadHeartbeat(long currentTick) {
-        if (syncedTasksLock.tryLock()) {
-            try {
-                if (mainThreadLock.tryLock()) {
-                    try {
-                        this.currentTick = currentTick;
-                        while (!mainThreadQueue.isEmpty()) {
-                            syncedTasks.addLast(mainThreadQueue.removeFirst());
-                        }
-                    } finally {
-                        mainThreadLock.unlock();
-                    }
-                }
-                long breakTime = System.currentTimeMillis() + 35; // max time spent in loop = 35ms
-                while (!syncedTasks.isEmpty() && System.currentTimeMillis() <= breakTime) {
-                    CraftTask task = syncedTasks.removeFirst();
-                    long startTime = System.currentTimeMillis(); // Poseidon - Synchronous task performance reporting
-                    try {
-                        task.getTask().run();
+        craftSchedulerMainThreadHeartbeatSystem.runHeartbeat(new MainThreadHeartbeatAccessAdapter(), currentTick);
+    }
 
-                        // Poseidon - Start - Synchronous task performance reporting
-                        if(taskPerformanceEnabled) {
-                            long duration = System.currentTimeMillis() - startTime;  // Calculate duration in milliseconds
+    private final class MainThreadHeartbeatAccessAdapter implements CraftSchedulerMainThreadHeartbeatSystem.MainThreadHeartbeatAccess {
+        public boolean tryLockSyncedTasks() {
+            return syncedTasksLock.tryLock();
+        }
 
-                            String taskKey = (task == null || task.getOwner() == null || task.getOwner().getDescription() == null || task.getOwner().getDescription().getName() == null)
-                                    ? "Unknown"
-                                    : task.getOwner().getDescription().getName();
+        public void unlockSyncedTasks() {
+            syncedTasksLock.unlock();
+        }
 
-                            taskPerformance.computeIfAbsent(taskKey, k -> new PerformanceStatistic()).update(duration);
+        public boolean tryLockMainThread() {
+            return mainThreadLock.tryLock();
+        }
 
-                            // If task took longer than the threshold, print the performance statistics for the listener
-                            if (printOnSlowTask && duration > printOnSlowTaskThreshold) {
-                                server.getLogger().log(Level.WARNING, String.format(
-                                        "[Poseidon] Synchronous task from plugin %s took %d milliseconds. Statistics: %s",
-                                        taskKey,
-                                        duration,
-                                        taskPerformance.get(taskKey).printStats()
-                                ));
-                            }
-                        }
-                        // Poseidon - End - Synchronous task performance reporting
-                    } catch (Throwable t) {
-                        // Bad plugin!
-                        logger.log(Level.WARNING, "Task of '" + task.getOwner().getDescription().getName() + "' generated an exception", t);
-                        synchronized (schedulerQueue) {
-                            schedulerQueue.remove(task);
-                        }
-                    }
-                }
-            } finally {
-                syncedTasksLock.unlock();
+        public void unlockMainThread() {
+            mainThreadLock.unlock();
+        }
+
+        public void setCurrentTick(long currentTick) {
+            CraftScheduler.this.currentTick = currentTick;
+        }
+
+        public void transferMainThreadQueueToSyncedTasks() {
+            while (!mainThreadQueue.isEmpty()) {
+                syncedTasks.addLast(mainThreadQueue.removeFirst());
             }
+        }
+
+        public boolean isSyncedTasksEmpty() {
+            return syncedTasks.isEmpty();
+        }
+
+        public CraftTask removeFirstSyncedTask() {
+            return syncedTasks.removeFirst();
+        }
+
+        public void runSyncedTask(CraftTask task) {
+            task.getTask().run();
+        }
+
+        public void removeScheduledTask(CraftTask task) {
+            synchronized (schedulerQueue) {
+                schedulerQueue.remove(task);
+            }
+        }
+
+        public boolean isTaskPerformanceEnabled() {
+            return taskPerformanceEnabled;
+        }
+
+        public Map<String, PerformanceStatistic> getTaskPerformance() {
+            return taskPerformance;
+        }
+
+        public boolean isPrintOnSlowTaskEnabled() {
+            return printOnSlowTask;
+        }
+
+        public int getPrintOnSlowTaskThreshold() {
+            return printOnSlowTaskThreshold;
+        }
+
+        public Logger getTaskLogger() {
+            return logger;
+        }
+
+        public Logger getServerLogger() {
+            return server.getLogger();
         }
     }
 
@@ -287,144 +302,60 @@ public class CraftScheduler implements BukkitScheduler, Runnable {
     }
 
     public void cancelTask(int taskId) {
-        syncedTasksLock.lock();
-        try {
-            synchronized (schedulerQueue) {
-                mainThreadLock.lock();
-                try {
-                    Iterator<CraftTask> itr = schedulerQueue.keySet().iterator();
-                    while (itr.hasNext()) {
-                        CraftTask current = itr.next();
-                        if (current.getIdNumber() == taskId) {
-                            itr.remove();
-                        }
-                    }
-                    itr = mainThreadQueue.iterator();
-                    while (itr.hasNext()) {
-                        CraftTask current = itr.next();
-                        if (current.getIdNumber() == taskId) {
-                            itr.remove();
-                        }
-                    }
-                    itr = syncedTasks.iterator();
-                    while (itr.hasNext()) {
-                        CraftTask current = itr.next();
-                        if (current.getIdNumber() == taskId) {
-                            itr.remove();
-                        }
-                    }
-                } finally {
-                    mainThreadLock.unlock();
-                }
-            }
-        } finally {
-            syncedTasksLock.unlock();
-        }
-
-        craftThreadManager.interruptTask(taskId);
+        schedulerTaskCancellationBehaviour.cancelTask(
+                schedulerQueue,
+                mainThreadQueue,
+                syncedTasks,
+                mainThreadLock,
+                syncedTasksLock,
+                craftThreadManager.workers,
+                taskId
+        );
     }
 
     public void cancelTasks(Plugin plugin) {
-        syncedTasksLock.lock();
-        try {
-            synchronized (schedulerQueue) {
-                mainThreadLock.lock();
-                try {
-                    Iterator<CraftTask> itr = schedulerQueue.keySet().iterator();
-                    while (itr.hasNext()) {
-                        CraftTask current = itr.next();
-                        if (current.getOwner().equals(plugin)) {
-                            itr.remove();
-                        }
-                    }
-                    itr = mainThreadQueue.iterator();
-                    while (itr.hasNext()) {
-                        CraftTask current = itr.next();
-                        if (current.getOwner().equals(plugin)) {
-                            itr.remove();
-                        }
-                    }
-                    itr = syncedTasks.iterator();
-                    while (itr.hasNext()) {
-                        CraftTask current = itr.next();
-                        if (current.getOwner().equals(plugin)) {
-                            itr.remove();
-                        }
-                    }
-                } finally {
-                    mainThreadLock.unlock();
-                }
-            }
-        } finally {
-            syncedTasksLock.unlock();
-        }
-
-        craftThreadManager.interruptTasks(plugin);
+        schedulerTaskCancellationBehaviour.cancelTasks(
+                schedulerQueue,
+                mainThreadQueue,
+                syncedTasks,
+                mainThreadLock,
+                syncedTasksLock,
+                craftThreadManager.workers,
+                plugin
+        );
     }
 
     public void cancelAllTasks() {
-        synchronized (schedulerQueue) {
-            schedulerQueue.clear();
-        }
-        wipeMainThreadQueue();
-        wipeSyncedTasks();
-
-        craftThreadManager.interruptAllTasks();
+        schedulerTaskCancellationBehaviour.cancelAllTasks(
+                schedulerQueue,
+                mainThreadQueue,
+                syncedTasks,
+                mainThreadLock,
+                syncedTasksLock,
+                craftThreadManager.workers
+        );
     }
 
     public boolean isCurrentlyRunning(int taskId) {
-        return craftThreadManager.isAlive(taskId);
+        return schedulerTaskInspectionBehaviour.isCurrentlyRunning(craftThreadManager.workers, taskId);
     }
 
     public boolean isQueued(int taskId) {
-        synchronized (schedulerQueue) {
-            Iterator<CraftTask> itr = schedulerQueue.keySet().iterator();
-            while (itr.hasNext()) {
-                CraftTask current = itr.next();
-                if (current.getIdNumber() == taskId) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return schedulerTaskInspectionBehaviour.isQueued(schedulerQueue, taskId);
     }
 
     public List<BukkitWorker> getActiveWorkers() {
-        synchronized (craftThreadManager.workers) {
-            List<BukkitWorker> workerList = new ArrayList<BukkitWorker>(craftThreadManager.workers.size());
-            Iterator<CraftWorker> itr = craftThreadManager.workers.iterator();
-
-            while (itr.hasNext()) {
-                workerList.add((BukkitWorker) itr.next());
-            }
-            return workerList;
-        }
+        return schedulerTaskInspectionBehaviour.getActiveWorkers(craftThreadManager.workers);
     }
 
     public List<BukkitTask> getPendingTasks() {
-        List<CraftTask> taskList = null;
-        syncedTasksLock.lock();
-        try {
-            synchronized (schedulerQueue) {
-                mainThreadLock.lock();
-                try {
-                    taskList = new ArrayList<CraftTask>(mainThreadQueue.size() + syncedTasks.size() + schedulerQueue.size());
-                    taskList.addAll(mainThreadQueue);
-                    taskList.addAll(syncedTasks);
-                    taskList.addAll(schedulerQueue.keySet());
-                } finally {
-                    mainThreadLock.unlock();
-                }
-            }
-        } finally {
-            syncedTasksLock.unlock();
-        }
-        List<BukkitTask> newTaskList = new ArrayList<BukkitTask>(taskList.size());
-
-        for (CraftTask craftTask : taskList) {
-            newTaskList.add((BukkitTask) craftTask);
-        }
-        return newTaskList;
+        return schedulerTaskInspectionBehaviour.getPendingTasks(
+                mainThreadQueue,
+                syncedTasks,
+                schedulerQueue,
+                mainThreadLock,
+                syncedTasksLock
+        );
     }
 
 }

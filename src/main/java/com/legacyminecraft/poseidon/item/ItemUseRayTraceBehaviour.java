@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.MovingObjectPosition;
-import net.minecraft.server.Vec3D;
-import net.minecraft.server.World;
 
 public final class ItemUseRayTraceBehaviour {
     private static final ItemUseRayTraceBehaviour INSTANCE = new ItemUseRayTraceBehaviour();

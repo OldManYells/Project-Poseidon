@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.runtime.ConsoleInputLoopSystem;
+import com.legacyminecraft.poseidon.runtime.ConsoleReaderExceptionPolicy;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +11,7 @@ public class ThreadCommandReader extends Thread {
     private static final Logger LOGGER = Logger.getLogger(ThreadCommandReader.class.getName());
     final MinecraftServer server;
     private final ConsoleInputLoopSystem consoleInputLoopSystem = ConsoleInputLoopSystem.getInstance();
+    private final ConsoleReaderExceptionPolicy consoleReaderExceptionPolicy = ConsoleReaderExceptionPolicy.getInstance();
     private final ConsoleInputLoopSystem.LineReader consoleLineReader = new ConsoleInputLoopSystem.LineReader() {
         @Override
         public String readLine() throws java.io.IOException {
@@ -19,6 +21,9 @@ public class ThreadCommandReader extends Thread {
                 }
                 return ThreadCommandReader.this.server.reader.readLine();
             } catch (Throwable throwable) {
+                if (consoleReaderExceptionPolicy.isExpectedShutdownThrowable(throwable)) {
+                    return null;
+                }
                 LOGGER.log(Level.SEVERE, "Console reader failed; stopping command input loop", throwable);
                 return null;
             }

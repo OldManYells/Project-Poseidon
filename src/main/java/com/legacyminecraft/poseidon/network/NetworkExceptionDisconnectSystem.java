@@ -2,14 +2,18 @@ package com.legacyminecraft.poseidon.network;
 
 import java.io.EOFException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedChannelException;
-import java.util.Locale;
 
 /**
  * Canonical exception routing for network wrappers.
  */
 public final class NetworkExceptionDisconnectSystem {
     private static final NetworkExceptionDisconnectSystem INSTANCE = new NetworkExceptionDisconnectSystem();
+    private final NetworkExpectedExceptionMessagePolicy networkExpectedExceptionMessagePolicy =
+            NetworkExpectedExceptionMessagePolicy.getInstance();
+    private final NetworkDisconnectReasonPolicy networkDisconnectReasonPolicy =
+            NetworkDisconnectReasonPolicy.getInstance();
 
     private NetworkExceptionDisconnectSystem() {
     }
@@ -28,27 +32,31 @@ public final class NetworkExceptionDisconnectSystem {
     }
 
     public boolean isExpectedDisconnectException(Exception exception) {
-        if (exception instanceof SocketException || exception instanceof EOFException || exception instanceof ClosedChannelException) {
-            return true;
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof SocketException
+                    || current instanceof SocketTimeoutException
+                    || current instanceof EOFException
+                    || current instanceof ClosedChannelException) {
+                return true;
+            }
+
+            String message = current.getMessage();
+            if (networkExpectedExceptionMessagePolicy.isExpectedDisconnectMessage(message)) {
+                return true;
+            }
+
+            current = current.getCause();
         }
 
-        String message = exception.getMessage();
-        if (message == null) {
-            return false;
-        }
-
-        String normalizedMessage = message.toLowerCase(Locale.ROOT);
-        return normalizedMessage.contains("socket closed")
-                || normalizedMessage.contains("broken pipe")
-                || normalizedMessage.contains("connection reset")
-                || normalizedMessage.contains("connection aborted");
+        return false;
     }
 
     public String resolveDisconnectReason(Exception exception, boolean expectedDisconnectException) {
         if (expectedDisconnectException) {
-            return "Connection closed";
+            return networkDisconnectReasonPolicy.connectionClosed();
         }
-        return "Internal exception: " + exception.toString();
+        return networkDisconnectReasonPolicy.internalExceptionPrefix() + exception;
     }
 
     public interface ExceptionActions {

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet;
 
 /**
  * Canonical execution flow for applying heartbeat decisions to a connection.
@@ -40,6 +39,6 @@ public final class ConnectionHeartbeatExecutionSystem {
     public interface HeartbeatActions {
         void pollNetwork();
 
-        void sendPacket(Packet packet);
+        void sendPacket(Object packet);
     }
 }

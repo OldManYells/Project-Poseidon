@@ -24,6 +24,8 @@ public class LegacyMinecraftServerWrapperThinnessTest {
         Assert.assertTrue(text.contains("serverNetworkStartupApplySystem"));
         Assert.assertTrue(text.contains("startupStateSink"));
         Assert.assertTrue(text.contains("serverNetworkStartupApplySystem.applyStartupResult("));
+        Assert.assertTrue(text.contains("ModLoaderSupportConfigPolicy"));
+        Assert.assertTrue(text.contains("modLoaderSupportConfigPolicy"));
         Assert.assertTrue(text.contains("serverRunFailureRecoverySystem"));
         Assert.assertTrue(text.contains("runFailureActions"));
         Assert.assertTrue(text.contains("serverRunFailureRecoverySystem.executeOnInitFailure("));
@@ -54,5 +56,6 @@ public class LegacyMinecraftServerWrapperThinnessTest {
         Assert.assertFalse(text.contains("log.log(Level.SEVERE, \"Unexpected exception\", throwable);"));
         Assert.assertFalse(text.contains("worldBootstrapService"));
         Assert.assertFalse(text.contains("worldLookupService"));
+        Assert.assertFalse(text.contains("\"settings.support.modloader.enable\""));
     }
 }

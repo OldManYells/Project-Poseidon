@@ -1,17 +1,5 @@
 package com.legacyminecraft.poseidon.nbt;
 
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagByte;
-import net.minecraft.server.NBTTagByteArray;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagDouble;
-import net.minecraft.server.NBTTagEnd;
-import net.minecraft.server.NBTTagFloat;
-import net.minecraft.server.NBTTagInt;
-import net.minecraft.server.NBTTagList;
-import net.minecraft.server.NBTTagLong;
-import net.minecraft.server.NBTTagShort;
-import net.minecraft.server.NBTTagString;
 
 import java.io.DataInput;
 import java.io.DataOutput;

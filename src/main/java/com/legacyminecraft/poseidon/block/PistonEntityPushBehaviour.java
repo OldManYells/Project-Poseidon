@@ -1,10 +1,8 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Block;
-import net.minecraft.server.Entity;
-import net.minecraft.server.PistonBlockTextures;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
+import com.legacyminecraft.poseidon.world.Entity;
+import com.legacyminecraft.poseidon.world.World;
 
 import java.util.Iterator;
 import java.util.List;

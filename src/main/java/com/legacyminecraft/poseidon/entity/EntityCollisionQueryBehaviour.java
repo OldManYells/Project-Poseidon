@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
-import net.minecraft.server.World;
 
 import java.util.List;
 

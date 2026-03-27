@@ -19,6 +19,10 @@ public class CanonicalStatsBoundaryTest {
         assertNoLegacyCollectorImport(STAT_ARRAY_BUILDER_PATH);
         assertNoLegacyCollectorImport(CRAFTING_BOOTSTRAP_PATH);
         assertNoLegacyCollectorImport(STAT_BOOTSTRAP_PATH);
+
+        String statBootstrapText = new String(Files.readAllBytes(STAT_BOOTSTRAP_PATH), StandardCharsets.UTF_8);
+        Assert.assertTrue(statBootstrapText.contains("CounterStatisticFactoryBehaviour"));
+        Assert.assertFalse(statBootstrapText.contains("new CounterStatistic("));
     }
 
     private void assertNoLegacyCollectorImport(Path path) throws IOException {

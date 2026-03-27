@@ -15,6 +15,6 @@ public class CounterStatistic extends Statistic {
 
     public Statistic d() {
         super.d();
-        return counterStatisticRegistry.registerInCounterList(this, StatisticList.c);
+        return (Statistic) counterStatisticRegistry.registerInCounterListRaw(this, StatisticList.c);
     }
 }

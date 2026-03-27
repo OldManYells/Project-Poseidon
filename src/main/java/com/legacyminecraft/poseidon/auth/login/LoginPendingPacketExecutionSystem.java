@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.Packet1Login;
 
 /**
  * Canonical helper for scoped pending login-packet state around delegated execution.
@@ -15,7 +14,7 @@ public final class LoginPendingPacketExecutionSystem {
         return INSTANCE;
     }
 
-    public void execute(Packet1Login loginPacket, PendingPacketState pendingPacketState, Runnable execution) {
+    public void execute(Object loginPacket, PendingPacketState pendingPacketState, Runnable execution) {
         pendingPacketState.set(loginPacket);
         try {
             execution.run();
@@ -25,7 +24,7 @@ public final class LoginPendingPacketExecutionSystem {
     }
 
     public interface PendingPacketState {
-        void set(Packet1Login loginPacket);
+        void set(Object loginPacket);
 
         void clear();
     }

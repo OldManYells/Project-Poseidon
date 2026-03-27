@@ -27,6 +27,19 @@ public class ServerCommandQueueBehaviourTest {
         Assert.assertSame(commandListener, serverCommandState.getCommandListener());
     }
 
+    @Test
+    public void enqueueNormalizesNullCommandTextToEmptyString() {
+        List<ServerCommandEnvelopeBehaviour.ServerCommandState> commandQueue =
+                new ArrayList<ServerCommandEnvelopeBehaviour.ServerCommandState>();
+        ICommandListener commandListener = new TestCommandListener();
+
+        serverCommandQueueBehaviour.enqueue(commandQueue, null, commandListener);
+
+        Assert.assertEquals(1, commandQueue.size());
+        Assert.assertEquals("", commandQueue.get(0).getCommandText());
+        Assert.assertSame(commandListener, commandQueue.get(0).getCommandListener());
+    }
+
     private static final class TestCommandListener implements ICommandListener {
         @Override
         public void sendMessage(String s) {

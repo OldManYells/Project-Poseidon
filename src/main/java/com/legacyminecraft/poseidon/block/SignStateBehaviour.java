@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.TileEntity;
+import com.legacyminecraft.poseidon.world.TileEntity;
 
 /**
  * Canonical bounds/attachment/tile-entity policy for legacy sign wrappers.

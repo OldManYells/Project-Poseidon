@@ -1,15 +1,15 @@
 package com.legacyminecraft.poseidon;
 
 import com.avaje.ebean.EbeanServer;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
-import org.bukkit.util.config.Configuration;
+import com.legacyminecraft.compat.bukkit.Bukkit;
+import com.legacyminecraft.compat.bukkit.ChunkGenerator;
+import com.legacyminecraft.compat.bukkit.Command;
+import com.legacyminecraft.compat.bukkit.CommandSender;
+import com.legacyminecraft.compat.bukkit.Configuration;
+import com.legacyminecraft.compat.bukkit.Plugin;
+import com.legacyminecraft.compat.bukkit.PluginDescriptionFile;
+import com.legacyminecraft.compat.bukkit.PluginLoader;
+import com.legacyminecraft.compat.bukkit.Server;
 
 import java.io.File;
 

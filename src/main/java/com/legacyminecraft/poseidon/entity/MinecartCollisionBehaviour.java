@@ -1,13 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.MathHelper;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 
 public final class MinecartCollisionBehaviour {
     private static final MinecartCollisionBehaviour INSTANCE = new MinecartCollisionBehaviour();
@@ -29,7 +21,7 @@ public final class MinecartCollisionBehaviour {
         }
 
         Vehicle vehicle = (Vehicle) minecart.getBukkitEntity();
-        org.bukkit.entity.Entity hitEntity = other == null ? null : other.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.entity.Entity hitEntity = other == null ? null : other.getBukkitEntity();
 
         VehicleEntityCollisionEvent collisionEvent = new VehicleEntityCollisionEvent(vehicle, hitEntity);
         minecart.world.getServer().getPluginManager().callEvent(collisionEvent);

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.EntityPlayer;
 
 import java.util.List;
 

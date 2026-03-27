@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
 
 /**
  * Canonical placement and shape policy for legacy cactus wrappers.

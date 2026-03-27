@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet13PlayerLookMove;
 
 /**
  * Canonical execution flow for applying prepared teleport plans.
@@ -51,6 +50,6 @@ public final class PlayerTeleportPlanApplySystem {
 
         void applyPlayerLocation(double x, double y, double z, float yaw, float pitch);
 
-        void sendTeleportPacket(Packet13PlayerLookMove teleportPacket);
+        void sendTeleportPacket(Object teleportPacket);
     }
 }

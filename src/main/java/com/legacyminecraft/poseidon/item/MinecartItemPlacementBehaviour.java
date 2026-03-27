@@ -1,13 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PlayerInteractEventBridgeBehaviour;
-import net.minecraft.server.BlockMinecartTrack;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import com.legacyminecraft.compat.bukkit.PlayerInteractEventBridgeBehaviour;
 
 public final class MinecartItemPlacementBehaviour {
     private static final MinecartItemPlacementBehaviour INSTANCE = new MinecartItemPlacementBehaviour();

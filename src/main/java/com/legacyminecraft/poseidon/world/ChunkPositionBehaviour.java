@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.ChunkPosition;
 
 public final class ChunkPositionBehaviour {
     private static final ChunkPositionBehaviour INSTANCE = new ChunkPositionBehaviour();

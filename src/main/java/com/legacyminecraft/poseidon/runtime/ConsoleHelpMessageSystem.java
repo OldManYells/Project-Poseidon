@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.ICommandListener;
 
 /**
  * Role-aligned canonical facade for console help-message rendering.

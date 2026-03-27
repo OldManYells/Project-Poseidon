@@ -3,7 +3,7 @@ package org.bukkit.plugin;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.legacyminecraft.poseidon.Poseidon;
-import com.legacyminecraft.poseidon.event.PoseidonCustomListener;
+import org.bukkit.event.poseidon.PoseidonCustomListener;
 import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import org.bukkit.Server;
 import org.bukkit.command.Command;

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
 
 /**
  * Canonical furnace refuel flow behaviour around event-driven fuel application.
@@ -15,7 +14,7 @@ public final class FurnaceRefuelFlowBehaviour {
         return INSTANCE;
     }
 
-    public boolean shouldAttemptRefuel(int burnTime, boolean canBurn, ItemStack fuelStack) {
+    public boolean shouldAttemptRefuel(int burnTime, boolean canBurn, Object fuelStack) {
         return burnTime <= 0 && canBurn && fuelStack != null;
     }
 

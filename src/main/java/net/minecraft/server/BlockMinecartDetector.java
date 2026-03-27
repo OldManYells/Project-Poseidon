@@ -47,7 +47,17 @@ public class BlockMinecartDetector extends BlockMinecartTrack {
     private void f(World world, int i, int j, int k, int l) {
         boolean flag = detectorRailStateService.isPowered(l);
         boolean flag1 = false;
-        List list = world.a(EntityMinecart.class, detectorRailStateService.createDetectionBox(i, j, k, 0.125F));
+        List list = world.a(
+                EntityMinecart.class,
+                AxisAlignedBB.b(
+                        (double) ((float) i + 0.125F),
+                        (double) j,
+                        (double) ((float) k + 0.125F),
+                        (double) ((float) (i + 1) - 0.125F),
+                        (double) j + 0.25D,
+                        (double) ((float) (k + 1) - 0.125F)
+                )
+        );
 
         flag1 = detectorRailStateService.hasMinecart(list);
 

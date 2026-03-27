@@ -1,8 +1,6 @@
 package com.legacyminecraft.poseidon.world;
 
-import com.legacyminecraft.poseidon.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;
-import net.minecraft.server.Block;
-import net.minecraft.server.World;
+import com.legacyminecraft.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;
 
 /**
  * Canonical behaviour for world block-physics execution flow.

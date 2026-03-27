@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
-import org.bukkit.Server;
-import org.bukkit.event.packet.PacketReceivedEvent;
 
 /**
  * Canonical service for incoming packet event emission and cancellation checks.
@@ -19,9 +15,37 @@ public final class IncomingPacketEventSystem {
         return INSTANCE;
     }
 
-    public boolean allowIncomingPacket(Server server, EntityPlayer player, Packet packet) {
-        PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player.name), packet);
-        server.getPluginManager().callEvent(event);
-        return eventPolicy.isIncomingAllowed(event.isCancelled());
+    public boolean allowIncomingPacket(Object server, Object player, Object packet) {
+        Object bukkitPlayer = invoke(server, "getPlayer", String.valueOf(getField(player, "name")));
+        Object event = NetworkCompatGatewayRegistry.gateway().createPacketReceivedEvent(bukkitPlayer, packet);
+        Object pluginManager = invoke(server, "getPluginManager");
+        invoke(pluginManager, "callEvent", event);
+        boolean cancelled = Boolean.TRUE.equals(invoke(event, "isCancelled"));
+        return eventPolicy.isIncomingAllowed(cancelled);
     }
+
+    private Object getField(Object target, String name) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
 }

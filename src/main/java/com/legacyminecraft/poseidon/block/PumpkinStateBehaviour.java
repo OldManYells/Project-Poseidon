@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.MathHelper;
 
 /**
  * Canonical texture, placement, and orientation policy for legacy pumpkin wrappers.

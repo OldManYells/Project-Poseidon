@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world.stats;
 
-import net.minecraft.server.CounterStatistic;
-import net.minecraft.server.Statistic;
 
 /**
  * Canonical bootstrap for legacy core (non-item/non-block) statistics.
@@ -9,6 +7,7 @@ import net.minecraft.server.Statistic;
 public final class StatisticBootstrap {
     private static final StatisticBootstrap INSTANCE = new StatisticBootstrap();
     private final StatisticTranslationBehaviour statisticTranslationBehaviour = StatisticTranslationBehaviour.getInstance();
+    private final CounterStatisticFactoryBehaviour counterStatisticFactoryBehaviour = CounterStatisticFactoryBehaviour.getInstance();
 
     private StatisticBootstrap() {
     }
@@ -18,29 +17,29 @@ public final class StatisticBootstrap {
     }
 
     public StatisticSet bootstrapCoreStatistics() {
-        Statistic startGame = (new CounterStatistic(1000, statisticTranslationBehaviour.translate("stat.startGame"))).e().d();
-        Statistic createWorld = (new CounterStatistic(1001, statisticTranslationBehaviour.translate("stat.createWorld"))).e().d();
-        Statistic loadWorld = (new CounterStatistic(1002, statisticTranslationBehaviour.translate("stat.loadWorld"))).e().d();
-        Statistic joinMultiplayer = (new CounterStatistic(1003, statisticTranslationBehaviour.translate("stat.joinMultiplayer"))).e().d();
-        Statistic leaveGame = (new CounterStatistic(1004, statisticTranslationBehaviour.translate("stat.leaveGame"))).e().d();
-        Statistic playOneMinute = (new CounterStatistic(1100, statisticTranslationBehaviour.translate("stat.playOneMinute"), Statistic.j)).e().d();
-        Statistic walkOneCm = (new CounterStatistic(2000, statisticTranslationBehaviour.translate("stat.walkOneCm"), Statistic.k)).e().d();
-        Statistic swimOneCm = (new CounterStatistic(2001, statisticTranslationBehaviour.translate("stat.swimOneCm"), Statistic.k)).e().d();
-        Statistic fallOneCm = (new CounterStatistic(2002, statisticTranslationBehaviour.translate("stat.fallOneCm"), Statistic.k)).e().d();
-        Statistic climbOneCm = (new CounterStatistic(2003, statisticTranslationBehaviour.translate("stat.climbOneCm"), Statistic.k)).e().d();
-        Statistic flyOneCm = (new CounterStatistic(2004, statisticTranslationBehaviour.translate("stat.flyOneCm"), Statistic.k)).e().d();
-        Statistic diveOneCm = (new CounterStatistic(2005, statisticTranslationBehaviour.translate("stat.diveOneCm"), Statistic.k)).e().d();
-        Statistic minecartOneCm = (new CounterStatistic(2006, statisticTranslationBehaviour.translate("stat.minecartOneCm"), Statistic.k)).e().d();
-        Statistic boatOneCm = (new CounterStatistic(2007, statisticTranslationBehaviour.translate("stat.boatOneCm"), Statistic.k)).e().d();
-        Statistic pigOneCm = (new CounterStatistic(2008, statisticTranslationBehaviour.translate("stat.pigOneCm"), Statistic.k)).e().d();
-        Statistic jump = (new CounterStatistic(2010, statisticTranslationBehaviour.translate("stat.jump"))).e().d();
-        Statistic drop = (new CounterStatistic(2011, statisticTranslationBehaviour.translate("stat.drop"))).e().d();
-        Statistic damageDealt = (new CounterStatistic(2020, statisticTranslationBehaviour.translate("stat.damageDealt"))).d();
-        Statistic damageTaken = (new CounterStatistic(2021, statisticTranslationBehaviour.translate("stat.damageTaken"))).d();
-        Statistic deaths = (new CounterStatistic(2022, statisticTranslationBehaviour.translate("stat.deaths"))).d();
-        Statistic mobKills = (new CounterStatistic(2023, statisticTranslationBehaviour.translate("stat.mobKills"))).d();
-        Statistic playerKills = (new CounterStatistic(2024, statisticTranslationBehaviour.translate("stat.playerKills"))).d();
-        Statistic fishCaught = (new CounterStatistic(2025, statisticTranslationBehaviour.translate("stat.fishCaught"))).d();
+        Statistic startGame = counterStatisticFactoryBehaviour.createCore(1000, statisticTranslationBehaviour.translate("stat.startGame"));
+        Statistic createWorld = counterStatisticFactoryBehaviour.createCore(1001, statisticTranslationBehaviour.translate("stat.createWorld"));
+        Statistic loadWorld = counterStatisticFactoryBehaviour.createCore(1002, statisticTranslationBehaviour.translate("stat.loadWorld"));
+        Statistic joinMultiplayer = counterStatisticFactoryBehaviour.createCore(1003, statisticTranslationBehaviour.translate("stat.joinMultiplayer"));
+        Statistic leaveGame = counterStatisticFactoryBehaviour.createCore(1004, statisticTranslationBehaviour.translate("stat.leaveGame"));
+        Statistic playOneMinute = counterStatisticFactoryBehaviour.createCore(1100, statisticTranslationBehaviour.translate("stat.playOneMinute"), Statistic.j);
+        Statistic walkOneCm = counterStatisticFactoryBehaviour.createCore(2000, statisticTranslationBehaviour.translate("stat.walkOneCm"), Statistic.k);
+        Statistic swimOneCm = counterStatisticFactoryBehaviour.createCore(2001, statisticTranslationBehaviour.translate("stat.swimOneCm"), Statistic.k);
+        Statistic fallOneCm = counterStatisticFactoryBehaviour.createCore(2002, statisticTranslationBehaviour.translate("stat.fallOneCm"), Statistic.k);
+        Statistic climbOneCm = counterStatisticFactoryBehaviour.createCore(2003, statisticTranslationBehaviour.translate("stat.climbOneCm"), Statistic.k);
+        Statistic flyOneCm = counterStatisticFactoryBehaviour.createCore(2004, statisticTranslationBehaviour.translate("stat.flyOneCm"), Statistic.k);
+        Statistic diveOneCm = counterStatisticFactoryBehaviour.createCore(2005, statisticTranslationBehaviour.translate("stat.diveOneCm"), Statistic.k);
+        Statistic minecartOneCm = counterStatisticFactoryBehaviour.createCore(2006, statisticTranslationBehaviour.translate("stat.minecartOneCm"), Statistic.k);
+        Statistic boatOneCm = counterStatisticFactoryBehaviour.createCore(2007, statisticTranslationBehaviour.translate("stat.boatOneCm"), Statistic.k);
+        Statistic pigOneCm = counterStatisticFactoryBehaviour.createCore(2008, statisticTranslationBehaviour.translate("stat.pigOneCm"), Statistic.k);
+        Statistic jump = counterStatisticFactoryBehaviour.createCore(2010, statisticTranslationBehaviour.translate("stat.jump"));
+        Statistic drop = counterStatisticFactoryBehaviour.createCore(2011, statisticTranslationBehaviour.translate("stat.drop"));
+        Statistic damageDealt = counterStatisticFactoryBehaviour.createCounterOnly(2020, statisticTranslationBehaviour.translate("stat.damageDealt"));
+        Statistic damageTaken = counterStatisticFactoryBehaviour.createCounterOnly(2021, statisticTranslationBehaviour.translate("stat.damageTaken"));
+        Statistic deaths = counterStatisticFactoryBehaviour.createCounterOnly(2022, statisticTranslationBehaviour.translate("stat.deaths"));
+        Statistic mobKills = counterStatisticFactoryBehaviour.createCounterOnly(2023, statisticTranslationBehaviour.translate("stat.mobKills"));
+        Statistic playerKills = counterStatisticFactoryBehaviour.createCounterOnly(2024, statisticTranslationBehaviour.translate("stat.playerKills"));
+        Statistic fishCaught = counterStatisticFactoryBehaviour.createCounterOnly(2025, statisticTranslationBehaviour.translate("stat.fishCaught"));
 
         return new StatisticSet(
                 startGame,

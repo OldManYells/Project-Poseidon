@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.runtime.ConsoleLogFileConfigPolicy;
 import org.bukkit.craftbukkit.util.ShortConsoleLogFormatter;
 import org.bukkit.craftbukkit.util.TerminalConsoleHandler;
 
@@ -16,6 +17,8 @@ public class ConsoleLogManager {
 
     public static Logger a = Logger.getLogger("Minecraft");
     public static Logger global = Logger.getLogger(""); // CraftBukkit
+    private static final ConsoleLogFileConfigPolicy CONSOLE_LOG_FILE_CONFIG_POLICY =
+            ConsoleLogFileConfigPolicy.getInstance();
 
     public ConsoleLogManager() {
     }
@@ -41,9 +44,13 @@ public class ConsoleLogManager {
         try {
             //Project Poseidon Start
             FileHandler filehandler;
-            if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.enabled")) {
+            if ((boolean) PoseidonConfig.getInstance().getConfigOption(
+                    CONSOLE_LOG_FILE_CONFIG_POLICY.perDayLogFileEnabledKey()
+            )) {
                 //If latest log file is enabled, create a new log file for each day
-                if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.latest-log.enabled")) {
+                if ((boolean) PoseidonConfig.getInstance().getConfigOption(
+                        CONSOLE_LOG_FILE_CONFIG_POLICY.latestLogEnabledKey()
+                )) {
                     String latestLogFileName = "latest";
                     File log = new File("." + File.separator + "logs" + File.separator);
                     log.getParentFile().mkdirs();

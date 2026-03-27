@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet;
 
 import java.util.Random;
 
@@ -31,6 +30,6 @@ public final class LoginHandshakeExecutionSystem {
     }
 
     public interface HandshakeActions {
-        void queueResponsePacket(Packet responsePacket);
+        void queueResponsePacket(Object responsePacket);
     }
 }

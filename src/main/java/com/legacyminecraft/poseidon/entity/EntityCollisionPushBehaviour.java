@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.MathHelper;
 
 /**
  * Canonical behaviour for entity horizontal collision push-vector calculation.

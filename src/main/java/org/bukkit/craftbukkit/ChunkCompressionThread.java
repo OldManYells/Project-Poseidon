@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.compat.bukkit.ChunkMapPacketCompressionBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.ChunkCompressionQueueBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkMapPacketCompressionBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkCompressionQueueBehaviour;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.Packet;
 import net.minecraft.server.Packet51MapChunk;

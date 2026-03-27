@@ -3,8 +3,6 @@ package com.legacyminecraft.poseidon.runtime;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.util.ServerLogRotator;
 import joptsimple.OptionSet;
-import net.minecraft.server.PropertyManager;
-import org.bukkit.Server;
 
 import java.util.logging.Logger;
 

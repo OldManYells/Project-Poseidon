@@ -47,6 +47,6 @@ public final class ItemCoreBehaviour {
     }
 
     public String localizeItemName(String translationKey) {
-        return net.minecraft.server.StatisticCollector.a(translationKey + ".name");
+        return com.legacyminecraft.compat.bukkit.StatisticCollector.a(translationKey + ".name");
     }
 }

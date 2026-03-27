@@ -1,19 +1,11 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MinecraftException;
-import net.minecraft.server.NBTTagCompound;
-import org.bukkit.Bukkit;
-
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class ItemEntityStateBehaviour {
     private static final ItemEntityStateBehaviour INSTANCE = new ItemEntityStateBehaviour();
+    private static final Logger LOGGER = Logger.getLogger(ItemEntityStateBehaviour.class.getName());
     private static final int DEFAULT_ITEM_HEALTH = 5;
     private static final int DESPAWN_AGE_TICKS = 6000;
     private static final int INVALID_ITEM_SENTINEL_AGE = 6000174;
@@ -40,8 +32,8 @@ public final class ItemEntityStateBehaviour {
         boolean invalid = itemStack.id < 0 || itemStack.id >= itemRegistryLength || Item.byId[itemStack.id] == null;
         if (invalid) {
             MinecraftException exception = new MinecraftException("Unknown item id " + itemStack.id);
-            Bukkit.getLogger().log(Level.WARNING, "Created the EntityItem object with an unknown item: " + itemStack, exception);
-            return new InitializationState(new ItemStack(Block.STONE), true);
+            LOGGER.log(Level.WARNING, "Created the EntityItem object with an unknown item: " + itemStack, exception);
+            return new InitializationState(new ItemStack(com.legacyminecraft.poseidon.block.Block.STONE.id, 1, 0), true);
         }
         return new InitializationState(itemStack, false);
     }
@@ -74,7 +66,7 @@ public final class ItemEntityStateBehaviour {
             return 0.98F;
         }
         if (blockIdBelow > 0) {
-            return Block.byId[blockIdBelow].frictionFactor * 0.98F;
+            return com.legacyminecraft.poseidon.block.Block.byId[blockIdBelow].frictionFactor * 0.98F;
         }
         return 0.58800006F;
     }
@@ -100,8 +92,15 @@ public final class ItemEntityStateBehaviour {
     public LoadedNbtState readNbt(NBTTagCompound nbt) {
         int health = nbt.d("Health") & 255;
         int age = nbt.d("Age");
-        ItemStack itemStack = new ItemStack(nbt.k("Item"));
+        ItemStack itemStack = new ItemStack(asEntityTag(nbt.k("Item")));
         return new LoadedNbtState(health, age, itemStack);
+    }
+
+    private static com.legacyminecraft.poseidon.entity.NBTTagCompound asEntityTag(Object value) {
+        if (value instanceof com.legacyminecraft.poseidon.entity.NBTTagCompound) {
+            return (com.legacyminecraft.poseidon.entity.NBTTagCompound) value;
+        }
+        return new com.legacyminecraft.poseidon.entity.NBTTagCompound();
     }
 
     public int defaultItemHealth() {

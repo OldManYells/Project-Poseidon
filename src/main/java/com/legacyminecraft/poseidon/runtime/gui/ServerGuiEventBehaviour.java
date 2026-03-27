@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.runtime.gui;
 
-import net.minecraft.server.ICommandListener;
-import net.minecraft.server.MinecraftServer;
 
 import javax.swing.JTextField;
 

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.MathHelper;
 
 import java.util.Random;
 

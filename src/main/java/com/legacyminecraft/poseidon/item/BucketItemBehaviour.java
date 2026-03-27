@@ -1,18 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
-import com.legacyminecraft.poseidon.compat.bukkit.BucketEventBridgeBehaviour;
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityCow;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EnumMovingObjectType;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Material;
-import net.minecraft.server.MovingObjectPosition;
-import net.minecraft.server.World;
-import org.bukkit.Location;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
+import com.legacyminecraft.compat.bukkit.BucketEventBridgeBehaviour;
 
 public final class BucketItemBehaviour {
     private static final BucketItemBehaviour INSTANCE = new BucketItemBehaviour();

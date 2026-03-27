@@ -22,9 +22,12 @@ public class LegacyNetworkThreadWrappersThinnessTest {
         String text = new String(Files.readAllBytes(NETWORK_READER_THREAD_PATH), StandardCharsets.UTF_8);
 
         Assert.assertTrue(text.contains("NetworkReaderLoopSystem"));
+        Assert.assertTrue(text.contains("NetworkTransportConfigPolicy"));
         Assert.assertTrue(text.contains("networkReaderLoopSystem"));
+        Assert.assertTrue(text.contains("networkTransportConfigPolicy"));
         Assert.assertTrue(text.contains("readerLoopOperations"));
         Assert.assertTrue(text.contains("networkReaderLoopSystem.runLoop(this.fast, this.readerLoopOperations);"));
+        Assert.assertFalse(text.contains("\"settings.faster-packets.enabled\""));
         Assert.assertFalse(text.contains("networkReaderLoopService"));
     }
 
@@ -33,9 +36,12 @@ public class LegacyNetworkThreadWrappersThinnessTest {
         String text = new String(Files.readAllBytes(NETWORK_WRITER_THREAD_PATH), StandardCharsets.UTF_8);
 
         Assert.assertTrue(text.contains("NetworkWriterLoopSystem"));
+        Assert.assertTrue(text.contains("NetworkTransportConfigPolicy"));
         Assert.assertTrue(text.contains("networkWriterLoopSystem"));
+        Assert.assertTrue(text.contains("networkTransportConfigPolicy"));
         Assert.assertTrue(text.contains("writerLoopOperations"));
         Assert.assertTrue(text.contains("networkWriterLoopSystem.runLoop(this.fast, this.writerLoopOperations);"));
+        Assert.assertFalse(text.contains("\"settings.faster-packets.enabled\""));
         Assert.assertFalse(text.contains("networkWriterLoopService"));
     }
 

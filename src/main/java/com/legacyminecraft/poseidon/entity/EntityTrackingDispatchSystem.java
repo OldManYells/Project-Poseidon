@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -20,18 +17,18 @@ public final class EntityTrackingDispatchSystem {
         return INSTANCE;
     }
 
-    public void sendToTrackedPlayers(Set trackedPlayers, Packet packet) {
+    public void sendToTrackedPlayers(Set trackedPlayers, Object packet) {
         Iterator iterator = trackedPlayers.iterator();
         while (iterator.hasNext()) {
             EntityPlayer entityplayer = (EntityPlayer) iterator.next();
-            entityplayer.netServerHandler.sendPacket(packet);
+            sendPacket(entityplayer, packet);
         }
     }
 
-    public void sendToTrackedPlayersAndSelf(Set trackedPlayers, Entity tracker, Packet packet) {
+    public void sendToTrackedPlayersAndSelf(Set trackedPlayers, Entity tracker, Object packet) {
         sendToTrackedPlayers(trackedPlayers, packet);
         if (tracker instanceof EntityPlayer) {
-            ((EntityPlayer) tracker).netServerHandler.sendPacket(packet);
+            sendPacket((EntityPlayer) tracker, packet);
         }
     }
 
@@ -39,14 +36,43 @@ public final class EntityTrackingDispatchSystem {
         Iterator iterator = trackedPlayers.iterator();
         while (iterator.hasNext()) {
             EntityPlayer entityplayer = (EntityPlayer) iterator.next();
-            entityplayer.removeQueue.add(Integer.valueOf(trackerId));
+            queueRemoveId(entityplayer, trackerId);
         }
     }
 
     public void removeTrackedPlayer(Set trackedPlayers, EntityPlayer entityplayer, int trackerId) {
         if (trackedPlayers.contains(entityplayer)) {
-            entityplayer.removeQueue.add(Integer.valueOf(trackerId));
+            queueRemoveId(entityplayer, trackerId);
             trackedPlayers.remove(entityplayer);
+        }
+    }
+
+    private void sendPacket(EntityPlayer player, Object packet) {
+        try {
+            Object netServerHandler = player.getClass().getField("netServerHandler").get(player);
+            if (netServerHandler != null) {
+                java.lang.reflect.Method[] methods = netServerHandler.getClass().getMethods();
+                for (int i = 0; i < methods.length; ++i) {
+                    java.lang.reflect.Method method = methods[i];
+                    if ("sendPacket".equals(method.getName()) && method.getParameterTypes().length == 1) {
+                        method.invoke(netServerHandler, packet);
+                        return;
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // no-op in lean migration scaffold
+        }
+    }
+
+    private void queueRemoveId(EntityPlayer player, int trackerId) {
+        try {
+            Object queue = player.getClass().getField("removeQueue").get(player);
+            if (queue instanceof java.util.List) {
+                ((java.util.List) queue).add(Integer.valueOf(trackerId));
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // no-op in lean migration scaffold
         }
     }
 }

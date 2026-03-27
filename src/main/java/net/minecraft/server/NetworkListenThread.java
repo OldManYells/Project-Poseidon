@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class NetworkListenThread {
+public class NetworkListenThread extends com.legacyminecraft.poseidon.runtime.NetworkListenThread {
 
     public static Logger a = Logger.getLogger("Minecraft");
     private ServerSocket d;

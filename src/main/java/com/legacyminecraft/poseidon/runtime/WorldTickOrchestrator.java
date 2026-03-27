@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.IUpdatePlayerListBox;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet4UpdateTime;
-import net.minecraft.server.WorldServer;
 
 import java.util.List;
 

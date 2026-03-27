@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityPlayer;
-import org.bukkit.entity.Player;
 
 import java.util.Set;
 

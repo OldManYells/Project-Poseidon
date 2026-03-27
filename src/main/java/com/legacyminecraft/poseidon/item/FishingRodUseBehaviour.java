@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.EntityFish;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
-import org.bukkit.event.player.PlayerFishEvent;
 
 public final class FishingRodUseBehaviour {
     private static final FishingRodUseBehaviour INSTANCE = new FishingRodUseBehaviour();
@@ -24,7 +19,7 @@ public final class FishingRodUseBehaviour {
             return itemstack;
         }
 
-        PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) entityhuman.getBukkitEntity(), null, PlayerFishEvent.State.FISHING);
+        PlayerFishEvent playerFishEvent = new PlayerFishEvent((com.legacyminecraft.compat.bukkit.entity.Player) entityhuman.getBukkitEntity(), null, PlayerFishEvent.State.FISHING);
         world.getServer().getPluginManager().callEvent(playerFishEvent);
         if (playerFishEvent.isCancelled()) {
             return itemstack;

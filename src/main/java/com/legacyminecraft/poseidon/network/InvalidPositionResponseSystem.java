@@ -1,14 +1,16 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet10Flying;
-import org.bukkit.entity.Player;
+
+import java.util.logging.Logger;
 
 /**
  * Canonical response handler for invalid numeric movement packets.
  */
 public final class InvalidPositionResponseSystem {
+    private static final Logger LOGGER = Logger.getLogger(InvalidPositionResponseSystem.class.getName());
     private static final InvalidPositionResponseSystem INSTANCE = new InvalidPositionResponseSystem();
     private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
+    private final InvalidPositionLogBehaviour invalidPositionLogBehaviour = InvalidPositionLogBehaviour.getInstance();
 
     private InvalidPositionResponseSystem() {
     }
@@ -17,14 +19,16 @@ public final class InvalidPositionResponseSystem {
         return INSTANCE;
     }
 
-    public boolean handleInvalidPositionIfNeeded(Packet10Flying packet10flying, Player player, boolean disconnected) {
+    public boolean handleInvalidPositionIfNeeded(Object packet10flying, Object player, boolean disconnected) {
         if (!movementPacketPolicy.hasInvalidNumericPosition(packet10flying, player, disconnected)) {
             return false;
         }
 
-        player.teleport(player.getWorld().getSpawnLocation());
-        System.err.println(createInvalidPositionLogMessage(player.getName()));
-        player.kickPlayer(getInvalidPositionKickMessage());
+        Object world = invoke(player, "getWorld");
+        Object spawnLocation = invoke(world, "getSpawnLocation");
+        invoke(player, "teleport", spawnLocation);
+        invalidPositionLogBehaviour.logInvalidPosition(LOGGER, createInvalidPositionLogMessage(String.valueOf(invoke(player, "getName"))));
+        invoke(player, "kickPlayer", getInvalidPositionKickMessage());
         return true;
     }
 
@@ -34,5 +38,20 @@ public final class InvalidPositionResponseSystem {
 
     public String getInvalidPositionKickMessage() {
         return "Nope!";
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            java.lang.reflect.Method[] methods = target.getClass().getMethods();
+            for (java.lang.reflect.Method method : methods) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke: " + methodName, exception);
+        }
     }
 }

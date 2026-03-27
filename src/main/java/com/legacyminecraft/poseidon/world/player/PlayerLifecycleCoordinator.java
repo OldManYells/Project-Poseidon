@@ -2,15 +2,6 @@ package com.legacyminecraft.poseidon.world.player;
 
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet3Chat;
-import net.minecraft.server.PlayerFileData;
-import net.minecraft.server.WorldServer;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.List;
 

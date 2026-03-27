@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.packet;
 
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.DataWatcher;
-import net.minecraft.server.Packet;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -37,12 +34,12 @@ public final class PacketDataCodec {
         return 0;
     }
 
-    public Packet20Data packet20FromNamedEntity(net.minecraft.server.EntityHuman entityHuman) {
-        net.minecraft.server.ItemStack itemStack = entityHuman.inventory.getItemInHand();
+    public Packet20Data packet20FromNamedEntity(com.legacyminecraft.compat.bukkit.EntityHuman entityHuman) {
+        com.legacyminecraft.compat.bukkit.ItemStack itemStack = entityHuman.inventory.getItemInHand();
         int heldItemId = itemStack == null ? 0 : itemStack.id;
         return new Packet20Data(
                 entityHuman.id,
-                entityHuman.name,
+                entityHuman.getName(),
                 toPacketCoordinate(entityHuman.locX),
                 toPacketCoordinate(entityHuman.locY),
                 toPacketCoordinate(entityHuman.locZ),
@@ -52,7 +49,7 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet21Data packet21FromPickupEntity(net.minecraft.server.EntityItem entityItem) {
+    public Packet21Data packet21FromPickupEntity(com.legacyminecraft.compat.bukkit.EntityItem entityItem) {
         return new Packet21Data(
                 entityItem.id,
                 entityItem.itemStack.id,
@@ -67,7 +64,7 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet23Data packet23FromVehicleEntity(net.minecraft.server.Entity entity, int vehicleType, int throwerId) {
+    public Packet23Data packet23FromVehicleEntity(com.legacyminecraft.compat.bukkit.Entity entity, int vehicleType, int throwerId) {
         int velocityX = 0;
         int velocityY = 0;
         int velocityZ = 0;
@@ -90,10 +87,10 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet24Data packet24FromMobEntity(net.minecraft.server.EntityLiving entityLiving) {
+    public Packet24Data packet24FromMobEntity(com.legacyminecraft.compat.bukkit.EntityLiving entityLiving) {
         return new Packet24Data(
                 entityLiving.id,
-                net.minecraft.server.EntityTypes.a(entityLiving),
+                com.legacyminecraft.compat.bukkit.EntityTypes.a(entityLiving),
                 toPacketCoordinate(entityLiving.locX),
                 toPacketCoordinate(entityLiving.locY),
                 toPacketCoordinate(entityLiving.locZ),
@@ -103,7 +100,7 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet25Data packet25FromPainting(net.minecraft.server.EntityPainting entityPainting) {
+    public Packet25Data packet25FromPainting(com.legacyminecraft.compat.bukkit.EntityPainting entityPainting) {
         return new Packet25Data(
                 entityPainting.id,
                 entityPainting.e.A,
@@ -114,7 +111,7 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet28Data packet28FromEntity(net.minecraft.server.Entity entity) {
+    public Packet28Data packet28FromEntity(com.legacyminecraft.compat.bukkit.Entity entity) {
         return packet28FromMotion(entity.id, entity.motX, entity.motY, entity.motZ);
     }
 
@@ -127,7 +124,7 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet34Data packet34FromEntity(net.minecraft.server.Entity entity) {
+    public Packet34Data packet34FromEntity(com.legacyminecraft.compat.bukkit.Entity entity) {
         return new Packet34Data(
                 entity.id,
                 toPacketCoordinate(entity.locX),
@@ -138,8 +135,8 @@ public final class PacketDataCodec {
         );
     }
 
-    public Packet71WeatherData packet71FromWeatherEntity(net.minecraft.server.Entity entity) {
-        int weatherType = entity instanceof net.minecraft.server.EntityWeatherStorm ? 1 : 0;
+    public Packet71WeatherData packet71FromWeatherEntity(com.legacyminecraft.compat.bukkit.Entity entity) {
+        int weatherType = entity instanceof com.legacyminecraft.compat.bukkit.EntityWeatherStorm ? 1 : 0;
         return new Packet71WeatherData(
                 entity.id,
                 weatherType,
@@ -766,7 +763,7 @@ public final class PacketDataCodec {
     public Packet25Data readPacket25(DataInputStream input) throws IOException {
         return new Packet25Data(
                 input.readInt(),
-                Packet.a(input, net.minecraft.server.EnumArt.z),
+                Packet.a(input, com.legacyminecraft.compat.bukkit.EnumArt.z),
                 input.readInt(),
                 input.readInt(),
                 input.readInt(),
@@ -1284,7 +1281,7 @@ public final class PacketDataCodec {
     }
 
     private int toPacketCoordinate(double coordinate) {
-        return net.minecraft.server.MathHelper.floor(coordinate * 32.0D);
+        return com.legacyminecraft.compat.bukkit.MathHelper.floor(coordinate * 32.0D);
     }
 
     private byte toPackedAngle(float angle) {

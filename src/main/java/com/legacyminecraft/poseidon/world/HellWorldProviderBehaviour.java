@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.Block;
-import net.minecraft.server.ChunkProviderHell;
-import net.minecraft.server.IChunkProvider;
-import net.minecraft.server.World;
-import net.minecraft.server.WorldChunkManagerHell;
 
 public final class HellWorldProviderBehaviour {
     private static final HellWorldProviderBehaviour INSTANCE = new HellWorldProviderBehaviour();

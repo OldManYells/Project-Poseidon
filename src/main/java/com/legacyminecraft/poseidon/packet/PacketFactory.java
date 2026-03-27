@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.packet;
 
-import net.minecraft.server.Packet;
 
 /**
  * Canonical packet instance factory.

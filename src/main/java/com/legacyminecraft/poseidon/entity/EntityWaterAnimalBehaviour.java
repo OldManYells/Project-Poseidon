@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.World;
 
 public final class EntityWaterAnimalBehaviour {
     private static final EntityWaterAnimalBehaviour INSTANCE = new EntityWaterAnimalBehaviour();

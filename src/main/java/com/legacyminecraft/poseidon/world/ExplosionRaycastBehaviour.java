@@ -1,10 +1,6 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.Entity;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.block.Block;
 
 import java.util.Set;
 
@@ -23,13 +19,14 @@ public final class ExplosionRaycastBehaviour {
         return INSTANCE;
     }
 
-    public void collectAffectedBlocks(World world,
-                                      Entity source,
+    public void collectAffectedBlocks(Object world,
+                                      Object source,
                                       float explosionSize,
                                       double explosionX,
                                       double explosionY,
                                       double explosionZ,
                                       Set<ChunkPosition> affectedBlocks) {
+        java.util.Random random = readRandom(world);
         for (int sampleXIndex = 0; sampleXIndex < RAY_GRID; ++sampleXIndex) {
             for (int sampleYIndex = 0; sampleYIndex < RAY_GRID; ++sampleYIndex) {
                 for (int sampleZIndex = 0; sampleZIndex < RAY_GRID; ++sampleZIndex) {
@@ -46,7 +43,7 @@ public final class ExplosionRaycastBehaviour {
                     directionY /= directionLength;
                     directionZ /= directionLength;
 
-                    float rayStrength = explosionSize * (0.7F + world.random.nextFloat() * 0.6F);
+                    float rayStrength = explosionSize * (0.7F + random.nextFloat() * 0.6F);
                     double rayX = explosionX;
                     double rayY = explosionY;
                     double rayZ = explosionZ;
@@ -55,10 +52,10 @@ public final class ExplosionRaycastBehaviour {
                         int blockX = MathHelper.floor(rayX);
                         int blockY = MathHelper.floor(rayY);
                         int blockZ = MathHelper.floor(rayZ);
-                        int blockTypeId = world.getTypeId(blockX, blockY, blockZ);
+                        int blockTypeId = invokeInt(world, "getTypeId", blockX, blockY, blockZ);
 
                         if (blockTypeId > 0) {
-                            rayStrength -= (Block.byId[blockTypeId].a(source) + 0.3F) * step;
+                            rayStrength -= (Block.byId[blockTypeId].a(asEntity(source)) + 0.3F) * step;
                         }
 
                         if (rayStrength > 0.0F) {
@@ -78,5 +75,32 @@ public final class ExplosionRaycastBehaviour {
         return xIndex == 0 || xIndex == RAY_GRID - 1
                 || yIndex == 0 || yIndex == RAY_GRID - 1
                 || zIndex == 0 || zIndex == RAY_GRID - 1;
+    }
+
+    private static java.util.Random readRandom(Object world) {
+        try {
+            java.lang.reflect.Field field = world.getClass().getField("random");
+            Object value = field.get(world);
+            if (value instanceof java.util.Random) {
+                return (java.util.Random) value;
+            }
+        } catch (ReflectiveOperationException ignored) {
+        }
+        return new java.util.Random();
+    }
+
+    private static int invokeInt(Object target, String method, int x, int y, int z) {
+        try {
+            Object value = target.getClass()
+                    .getMethod(method, Integer.TYPE, Integer.TYPE, Integer.TYPE)
+                    .invoke(target, Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z));
+            return value instanceof Integer ? ((Integer) value).intValue() : 0;
+        } catch (ReflectiveOperationException ignored) {
+            return 0;
+        }
+    }
+
+    private static Entity asEntity(Object source) {
+        return source instanceof Entity ? (Entity) source : null;
     }
 }

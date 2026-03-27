@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world.stats;
 
-import net.minecraft.server.Achievement;
-import net.minecraft.server.Block;
-import net.minecraft.server.Item;
 
 /**
  * Canonical bootstrap for legacy default achievements.

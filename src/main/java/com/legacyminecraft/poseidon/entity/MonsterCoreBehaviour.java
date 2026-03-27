@@ -1,13 +1,6 @@
 package com.legacyminecraft.poseidon.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.EntityHandleBridgeBehaviour;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityMonster;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
+import com.legacyminecraft.compat.bukkit.EntityHandleBridgeBehaviour;
 
 public final class MonsterCoreBehaviour {
     private static final MonsterCoreBehaviour INSTANCE = new MonsterCoreBehaviour();
@@ -39,7 +32,7 @@ public final class MonsterCoreBehaviour {
         }
 
         if (attacker != monster) {
-            org.bukkit.entity.Entity bukkitTarget = attacker == null ? null : attacker.getBukkitEntity();
+            com.legacyminecraft.compat.bukkit.entity.Entity bukkitTarget = attacker == null ? null : attacker.getBukkitEntity();
             EntityTargetEvent event = new EntityTargetEvent(monster.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY);
             monster.world.getServer().getPluginManager().callEvent(event);
 
@@ -63,7 +56,7 @@ public final class MonsterCoreBehaviour {
         monster.attackTicks = 20;
 
         if (target instanceof EntityLiving && !(target instanceof EntityHuman)) {
-            org.bukkit.entity.Entity damagee = target.getBukkitEntity();
+            com.legacyminecraft.compat.bukkit.entity.Entity damagee = target.getBukkitEntity();
             EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(monster.getBukkitEntity(), damagee, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage);
             monster.world.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {

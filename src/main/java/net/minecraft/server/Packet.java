@@ -6,7 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public abstract class Packet {
+public abstract class Packet extends com.legacyminecraft.poseidon.packet.Packet {
 
     private static final PacketProtocol packetProtocolService = PacketProtocol.getInstance();
     public final long timestamp = System.currentTimeMillis();
@@ -32,7 +32,7 @@ public abstract class Packet {
     }
 
     public static Packet a(int i) {
-        return packetProtocolService.createPacket(i);
+        return (Packet) packetProtocolService.createPacket(i);
     }
 
     public final int b() {
@@ -41,7 +41,7 @@ public abstract class Packet {
 
     // CraftBukkit - throws IOException
     public static Packet a(DataInputStream datainputstream, boolean flag) throws IOException {
-        return packetProtocolService.readPacket(datainputstream, flag);
+        return (Packet) packetProtocolService.readPacket(datainputstream, flag);
     }
 
     // CraftBukkit - throws IOException

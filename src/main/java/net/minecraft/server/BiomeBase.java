@@ -1,9 +1,5 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.biome.BiomeClimateSelectionBehaviour;
-import com.legacyminecraft.poseidon.world.biome.BiomeSpawnListLookupBehaviour;
-import com.legacyminecraft.poseidon.world.biome.BiomeTreeGeneratorSelectionBehaviour;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -34,9 +30,6 @@ public class BiomeBase {
     private boolean v;
     private boolean w;
     private static BiomeBase[] x = new BiomeBase[4096];
-    private static final BiomeClimateSelectionBehaviour BIOME_CLIMATE_SELECTION_SERVICE = BiomeClimateSelectionBehaviour.getInstance();
-    private static final BiomeTreeGeneratorSelectionBehaviour BIOME_TREE_GENERATOR_SELECTION_SERVICE = BiomeTreeGeneratorSelectionBehaviour.getInstance();
-    private static final BiomeSpawnListLookupBehaviour BIOME_SPAWN_LIST_LOOKUP_SERVICE = BiomeSpawnListLookupBehaviour.getInstance();
 
     protected BiomeBase() {
         this.p = (byte) Block.GRASS.id;
@@ -64,11 +57,17 @@ public class BiomeBase {
     }
 
     public static void a() {
-        BIOME_CLIMATE_SELECTION_SERVICE.bootstrapClimateLookupTable(x, DESERT, ICE_DESERT, (byte) Block.SAND.id);
+        for (int i = 0; i < 64; ++i) {
+            for (int j = 0; j < 64; ++j) {
+                x[i + j * 64] = a((float) i / 63.0F, (float) j / 63.0F);
+            }
+        }
+        DESERT.p = DESERT.q = (byte) Block.SAND.id;
+        ICE_DESERT.p = ICE_DESERT.q = (byte) Block.SAND.id;
     }
 
     public WorldGenerator a(Random random) {
-        return BIOME_TREE_GENERATOR_SELECTION_SERVICE.selectDefaultTreeGenerator(random);
+        return (WorldGenerator) (random.nextInt(10) == 0 ? new WorldGenBigTree() : new WorldGenTrees());
     }
 
     protected BiomeBase b() {
@@ -92,15 +91,44 @@ public class BiomeBase {
     }
 
     public static BiomeBase a(double d0, double d1) {
-        return BIOME_CLIMATE_SELECTION_SERVICE.lookupBiome(x, d0, d1);
+        int i = (int) (d0 * 63.0D);
+        int j = (int) (d1 * 63.0D);
+        return x[i + j * 64];
     }
 
     public static BiomeBase a(float f, float f1) {
-        return BIOME_CLIMATE_SELECTION_SERVICE.selectClimateBiome(f, f1);
+        f1 *= f;
+        if (f < 0.1F) {
+            return TUNDRA;
+        } else if (f1 < 0.2F) {
+            if (f < 0.5F) {
+                return TUNDRA;
+            } else if (f < 0.95F) {
+                return SAVANNA;
+            } else {
+                return DESERT;
+            }
+        } else if (f1 > 0.5F && f < 0.7F) {
+            return SWAMPLAND;
+        } else if (f < 0.5F) {
+            return TAIGA;
+        } else if (f < 0.97F) {
+            if (f1 < 0.35F) {
+                return SHRUBLAND;
+            } else {
+                return FOREST;
+            }
+        } else if (f1 < 0.45F) {
+            return PLAINS;
+        } else if (f1 < 0.9F) {
+            return SEASONAL_FOREST;
+        } else {
+            return RAINFOREST;
+        }
     }
 
     public List a(EnumCreatureType enumcreaturetype) {
-        return BIOME_SPAWN_LIST_LOOKUP_SERVICE.resolveSpawnList(enumcreaturetype, this.s, this.t, this.u);
+        return enumcreaturetype == EnumCreatureType.MONSTER ? this.s : (enumcreaturetype == EnumCreatureType.CREATURE ? this.t : (enumcreaturetype == EnumCreatureType.WATER_CREATURE ? this.u : null));
     }
 
     public boolean c() {

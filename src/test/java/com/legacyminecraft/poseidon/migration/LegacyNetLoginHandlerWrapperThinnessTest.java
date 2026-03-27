@@ -58,6 +58,8 @@ public class LegacyNetLoginHandlerWrapperThinnessTest {
         Assert.assertTrue(text.contains("loginProtocolErrorExecutionSystem"));
         Assert.assertTrue(text.contains("loginProtocolErrorActions"));
         Assert.assertTrue(text.contains("loginProtocolErrorExecutionSystem.execute("));
+        Assert.assertTrue(text.contains("LoginShutdownMessageConfigPolicy"));
+        Assert.assertTrue(text.contains("loginShutdownMessageConfigPolicy"));
         Assert.assertTrue(text.contains("loginGatekeepingExecutionSystem"));
         Assert.assertTrue(text.contains("loginPacketExecutionSystem"));
         Assert.assertTrue(text.contains("loginPacketExecutionSystem.execute("));
@@ -103,5 +105,6 @@ public class LegacyNetLoginHandlerWrapperThinnessTest {
         Assert.assertFalse(text.contains("loginAuthenticatedSessionExecutionSystem.execute(new LoginAuthenticatedSessionExecutionSystem.CompletionActions()"));
         Assert.assertFalse(text.contains("this.pendingLoginFlowPacket = packet1login;"));
         Assert.assertFalse(text.contains("this.pendingAuthenticatedSessionPacket = packet1login;"));
+        Assert.assertFalse(text.contains("\"message.kick.shutdown\""));
     }
 }

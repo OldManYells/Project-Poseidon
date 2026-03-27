@@ -1,10 +1,18 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.BlockFaceConversionBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.BlockMaterialPropertyBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.BiomeConversionBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.BlockPowerQueryBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.CraftBlockStateFactoryBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockFaceConversionBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockClimateLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockCoordinateProjectionBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftBlockIdentityBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockIdentityAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockMaterialPropertyBehaviour;
+import com.legacyminecraft.compat.bukkit.BiomeConversionBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockPowerQueryBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftBlockStateFactoryBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftBlockTypeMutationBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftBlockWriteBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockRelativeLookupBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockTypeLookupBehaviour;
 import net.minecraft.server.BiomeBase;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -17,14 +25,30 @@ import org.bukkit.util.BlockVector;
 public class CraftBlock implements Block {
     private static final BlockFaceConversionBehaviour BLOCK_FACE_CONVERSION_BEHAVIOUR =
             BlockFaceConversionBehaviour.getInstance();
+    private static final BlockIdentityAccessBehaviour BLOCK_IDENTITY_ACCESS_BEHAVIOUR =
+            BlockIdentityAccessBehaviour.getInstance();
+    private static final BlockClimateLookupBehaviour BLOCK_CLIMATE_LOOKUP_BEHAVIOUR =
+            BlockClimateLookupBehaviour.getInstance();
     private static final BiomeConversionBehaviour BIOME_CONVERSION_BEHAVIOUR =
             BiomeConversionBehaviour.getInstance();
     private static final BlockPowerQueryBehaviour BLOCK_POWER_QUERY_BEHAVIOUR =
             BlockPowerQueryBehaviour.getInstance();
     private static final BlockMaterialPropertyBehaviour BLOCK_MATERIAL_PROPERTY_BEHAVIOUR =
             BlockMaterialPropertyBehaviour.getInstance();
+    private static final BlockCoordinateProjectionBehaviour BLOCK_COORDINATE_PROJECTION_BEHAVIOUR =
+            BlockCoordinateProjectionBehaviour.getInstance();
     private static final CraftBlockStateFactoryBehaviour CRAFT_BLOCK_STATE_FACTORY_BEHAVIOUR =
             CraftBlockStateFactoryBehaviour.getInstance();
+    private static final CraftBlockWriteBehaviour CRAFT_BLOCK_WRITE_BEHAVIOUR =
+            CraftBlockWriteBehaviour.getInstance();
+    private static final CraftBlockTypeMutationBehaviour CRAFT_BLOCK_TYPE_MUTATION_BEHAVIOUR =
+            CraftBlockTypeMutationBehaviour.getInstance();
+    private static final CraftBlockIdentityBehaviour CRAFT_BLOCK_IDENTITY_BEHAVIOUR =
+            CraftBlockIdentityBehaviour.getInstance();
+    private static final BlockRelativeLookupBehaviour BLOCK_RELATIVE_LOOKUP_BEHAVIOUR =
+            BlockRelativeLookupBehaviour.getInstance();
+    private static final BlockTypeLookupBehaviour BLOCK_TYPE_LOOKUP_BEHAVIOUR =
+            BlockTypeLookupBehaviour.getInstance();
     private final CraftChunk chunk;
     private final int x;
     private final int y;
@@ -38,107 +62,91 @@ public class CraftBlock implements Block {
     }
 
     public World getWorld() {
-        return chunk.getWorld();
+        return BLOCK_IDENTITY_ACCESS_BEHAVIOUR.getWorld(chunk);
     }
 
     public Location getLocation() {
-        return new Location(getWorld(), x, y, z);
+        return BLOCK_COORDINATE_PROJECTION_BEHAVIOUR.createLocation(getWorld(), x, y, z);
     }
 
     public BlockVector getVector() {
-        return new BlockVector(x, y, z);
+        return BLOCK_COORDINATE_PROJECTION_BEHAVIOUR.createVector(x, y, z);
     }
 
     public int getX() {
-        return x;
+        return BLOCK_IDENTITY_ACCESS_BEHAVIOUR.getX(x);
     }
 
     public int getY() {
-        return y;
+        return BLOCK_IDENTITY_ACCESS_BEHAVIOUR.getY(y);
     }
 
     public int getZ() {
-        return z;
+        return BLOCK_IDENTITY_ACCESS_BEHAVIOUR.getZ(z);
     }
 
     public Chunk getChunk() {
-        return chunk;
+        return BLOCK_IDENTITY_ACCESS_BEHAVIOUR.getChunk(chunk);
     }
 
     public void setData(final byte data) {
-        chunk.getHandle().world.setData(x, y, z, data);
+        CRAFT_BLOCK_WRITE_BEHAVIOUR.setData(chunk.getHandle().world, x, y, z, data, true);
     }
 
     public void setData(final byte data, boolean applyPhysics) {
-        if (applyPhysics) {
-            chunk.getHandle().world.setData(x, y, z, data);
-        } else {
-            chunk.getHandle().world.setRawData(x, y, z, data);
-        }
+        CRAFT_BLOCK_WRITE_BEHAVIOUR.setData(chunk.getHandle().world, x, y, z, data, applyPhysics);
     }
 
     public byte getData() {
-        return (byte) chunk.getHandle().getData(this.x & 0xF, this.y & 0x7F, this.z & 0xF);
+        return BLOCK_TYPE_LOOKUP_BEHAVIOUR.getData(chunk.getHandle(), this.x, this.y, this.z);
     }
 
     public void setType(final Material type) {
-        setTypeId(type.getId());
+        CRAFT_BLOCK_TYPE_MUTATION_BEHAVIOUR.setType(this, type);
     }
 
     public boolean setTypeId(final int type) {
-        return chunk.getHandle().world.setTypeId(x, y, z, type);
+        return CRAFT_BLOCK_WRITE_BEHAVIOUR.setTypeId(chunk.getHandle().world, x, y, z, type, true);
     }
 
     public boolean setTypeId(final int type, final boolean applyPhysics) {
-        if (applyPhysics) {
-            return setTypeId(type);
-        } else {
-            return chunk.getHandle().world.setRawTypeId(x, y, z, type);
-        }
+        return CRAFT_BLOCK_WRITE_BEHAVIOUR.setTypeId(chunk.getHandle().world, x, y, z, type, applyPhysics);
     }
 
     public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics) {
-        if (applyPhysics) {
-            return chunk.getHandle().world.setTypeIdAndData(x, y, z, type, data);
-        } else {
-            boolean success = chunk.getHandle().world.setRawTypeIdAndData(x, y, z, type, data);
-            if (success) {
-                chunk.getHandle().world.notify(x, y, z);
-            }
-            return success;
-        }
+        return CRAFT_BLOCK_WRITE_BEHAVIOUR.setTypeIdAndData(chunk.getHandle().world, x, y, z, type, data, applyPhysics);
     }
 
     public Material getType() {
-        return Material.getMaterial(getTypeId());
+        return BLOCK_TYPE_LOOKUP_BEHAVIOUR.getType(chunk.getHandle(), this.x, this.y, this.z);
     }
 
     public int getTypeId() {
-        return chunk.getHandle().getTypeId(this.x & 0xF, this.y & 0x7F, this.z & 0xF);
+        return BLOCK_TYPE_LOOKUP_BEHAVIOUR.getTypeId(chunk.getHandle(), this.x, this.y, this.z);
     }
 
     public byte getLightLevel() {
-        return (byte) chunk.getHandle().world.getLightLevel(this.x, this.y, this.z);
+        return BLOCK_TYPE_LOOKUP_BEHAVIOUR.getLightLevel(chunk.getHandle().world, this.x, this.y, this.z);
     }
 
     public Block getFace(final BlockFace face) {
-        return getRelative(face, 1);
+        return BLOCK_RELATIVE_LOOKUP_BEHAVIOUR.getFace(getWorld(), getX(), getY(), getZ(), face);
     }
 
     public Block getFace(final BlockFace face, final int distance) {
-        return getRelative(face, distance);
+        return BLOCK_RELATIVE_LOOKUP_BEHAVIOUR.getFace(getWorld(), getX(), getY(), getZ(), face, distance);
     }
 
     public Block getRelative(final int modX, final int modY, final int modZ) {
-        return getWorld().getBlockAt(getX() + modX, getY() + modY, getZ() + modZ);
+        return BLOCK_RELATIVE_LOOKUP_BEHAVIOUR.getRelative(getWorld(), getX(), getY(), getZ(), modX, modY, modZ);
     }
 
     public Block getRelative(BlockFace face) {
-        return getRelative(face, 1);
+        return BLOCK_RELATIVE_LOOKUP_BEHAVIOUR.getRelative(getWorld(), getX(), getY(), getZ(), face, 1);
     }
 
     public Block getRelative(BlockFace face, int distance) {
-        return getRelative(face.getModX() * distance, face.getModY() * distance, face.getModZ() * distance);
+        return BLOCK_RELATIVE_LOOKUP_BEHAVIOUR.getRelative(getWorld(), getX(), getY(), getZ(), face, distance);
     }
 
     public BlockFace getFace(final Block block) {
@@ -147,7 +155,7 @@ public class CraftBlock implements Block {
 
     @Override
     public String toString() {
-        return "CraftBlock{" + "chunk=" + chunk + "x=" + x + "y=" + y + "z=" + z + '}';
+        return CRAFT_BLOCK_IDENTITY_BEHAVIOUR.toString(chunk, x, y, z);
     }
 
     /**
@@ -169,7 +177,7 @@ public class CraftBlock implements Block {
     }
 
     public Biome getBiome() {
-        return biomeBaseToBiome(chunk.getHandle().world.getWorldChunkManager().getBiome(x, z));
+        return BLOCK_CLIMATE_LOOKUP_BEHAVIOUR.getBiome(chunk.getHandle().world, x, z, BIOME_CONVERSION_BEHAVIOUR);
     }
 
     public static final Biome biomeBaseToBiome(BiomeBase base) {
@@ -177,11 +185,11 @@ public class CraftBlock implements Block {
     }
 
     public double getTemperature() {
-        return getWorld().getTemperature(x, z);
+        return BLOCK_CLIMATE_LOOKUP_BEHAVIOUR.getTemperature(getWorld(), x, z);
     }
 
     public double getHumidity() {
-        return getWorld().getHumidity(x, z);
+        return BLOCK_CLIMATE_LOOKUP_BEHAVIOUR.getHumidity(getWorld(), x, z);
     }
 
     public boolean isBlockPowered() {
@@ -194,7 +202,7 @@ public class CraftBlock implements Block {
 
     @Override
     public boolean equals(Object o) {
-        return this == o;
+        return CRAFT_BLOCK_IDENTITY_BEHAVIOUR.isSameInstance(this, o);
     }
 
     public boolean isBlockFacePowered(BlockFace face) {

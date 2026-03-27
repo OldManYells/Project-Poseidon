@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerTaskIdentityBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerTaskIdentityBehaviour;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 

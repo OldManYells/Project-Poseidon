@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet13PlayerLookMove;
-import org.bukkit.Location;
 
 /**
  * Canonical resolver for applying PlayerMoveEvent dispatch outcomes.

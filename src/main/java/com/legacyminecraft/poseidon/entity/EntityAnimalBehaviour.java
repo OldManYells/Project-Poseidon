@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
 
 public final class EntityAnimalBehaviour {
     private static final EntityAnimalBehaviour INSTANCE = new EntityAnimalBehaviour();

@@ -1,13 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntitySkeleton;
-import net.minecraft.server.Item;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,24 +77,24 @@ public final class SkeletonLifecycleBehaviour {
         return Item.ARROW.id;
     }
 
-    public void dropDeathLoot(World world, org.bukkit.entity.Entity bukkitEntity, Random random) {
-        List<org.bukkit.inventory.ItemStack> drops = new ArrayList<org.bukkit.inventory.ItemStack>();
+    public void dropDeathLoot(World world, com.legacyminecraft.compat.bukkit.entity.Entity bukkitEntity, Random random) {
+        List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> drops = new ArrayList<com.legacyminecraft.compat.bukkit.inventory.ItemStack>();
 
         int arrowCount = random.nextInt(3);
         if (arrowCount > 0) {
-            drops.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.ARROW, arrowCount));
+            drops.add(new com.legacyminecraft.compat.bukkit.inventory.ItemStack(com.legacyminecraft.compat.bukkit.Material.ARROW, arrowCount));
         }
 
         int boneCount = random.nextInt(3);
         if (boneCount > 0) {
-            drops.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.BONE, boneCount));
+            drops.add(new com.legacyminecraft.compat.bukkit.inventory.ItemStack(com.legacyminecraft.compat.bukkit.Material.BONE, boneCount));
         }
 
-        org.bukkit.World bukkitWorld = world.getWorld();
+        com.legacyminecraft.compat.bukkit.World bukkitWorld = world.getWorld();
         EntityDeathEvent event = new EntityDeathEvent(bukkitEntity, drops);
         world.getServer().getPluginManager().callEvent(event);
 
-        for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
+        for (com.legacyminecraft.compat.bukkit.inventory.ItemStack stack : event.getDrops()) {
             bukkitWorld.dropItemNaturally(bukkitEntity.getLocation(), stack);
         }
     }

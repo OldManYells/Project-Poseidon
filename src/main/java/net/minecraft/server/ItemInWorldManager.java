@@ -161,7 +161,7 @@ public class ItemInWorldManager {
             // Poseidon start - CraftBukkit backport
             // Tell the client the block is gone immediately then process events
             if (world.getTileEntity(i, j, k) == null) {
-                ((EntityPlayer) this.player).netServerHandler.sendPacket(new ArtificialPacket53BlockChange(i, j, k, 0,0));
+                ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, this.world));
             }
             // Poseidon end
             BlockBreakEvent event = new BlockBreakEvent(block, (org.bukkit.entity.Player) this.player.getBukkitEntity());
@@ -169,7 +169,7 @@ public class ItemInWorldManager {
 
             if (event.isCancelled()) {
                 // Poseidon - Inform the client if the event was cancelled
-                ((EntityPlayer) this.player).netServerHandler.sendPacket(new ArtificialPacket53BlockChange(i, j, k, l, i1));
+                ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, this.world));
                 return false;
             }
         }

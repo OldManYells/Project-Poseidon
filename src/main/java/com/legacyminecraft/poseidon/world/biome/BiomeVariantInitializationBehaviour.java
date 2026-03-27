@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.BiomeBase;
 
 /**
  * Canonical initialization hooks for thin biome variant wrappers.

@@ -2,9 +2,11 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.block.SpongePhysicsBehaviour;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 
 public class BlockSponge extends Block {
     private final SpongePhysicsBehaviour spongePhysicsService = SpongePhysicsBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     protected BlockSponge(int i) {
         super(i, Material.SPONGE);
@@ -23,7 +25,12 @@ public class BlockSponge extends Block {
             }
         };
 
-        if (spongePhysicsService.shouldUseOptimizedRemoval(PoseidonConfig.getInstance().getConfigBoolean("fix.optimize-sponges.enabled", true))) {
+        if (spongePhysicsService.shouldUseOptimizedRemoval(
+                PoseidonConfig.getInstance().getConfigBoolean(
+                        WORLD_FEATURE_CONFIG_POLICY.optimizeSpongeRemovalKey(),
+                        WORLD_FEATURE_CONFIG_POLICY.optimizeSpongeRemovalDefault()
+                )
+        )) {
             spongePhysicsService.applyOptimizedRemoval(
                     physicsWorld,
                     i,

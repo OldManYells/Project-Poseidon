@@ -1,16 +1,14 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet13PlayerLookMove;
-import org.bukkit.Location;
 
 /**
  * Canonical helper for legacy teleport execution packet/state planning.
  */
 public final class PlayerTeleportExecutionSystem {
-    private static final double LEGACY_EYE_HEIGHT_OFFSET = 1.6200000047683716D;
     private static final PlayerTeleportExecutionSystem INSTANCE = new PlayerTeleportExecutionSystem();
 
     private final PlayerTeleportCoordinator teleportCoordinator = PlayerTeleportCoordinator.getInstance();
+    private final PlayerTeleportHeightPolicy playerTeleportHeightPolicy = PlayerTeleportHeightPolicy.getInstance();
 
     private PlayerTeleportExecutionSystem() {
     }
@@ -33,14 +31,22 @@ public final class PlayerTeleportExecutionSystem {
         );
     }
 
+    public TeleportExecutionPlan createExecutionPlan(Object destination) {
+        return createExecutionPlan((Location) destination);
+    }
+
     public Packet13PlayerLookMove createLookMovePacket(Location location) {
         return createLookMovePacket(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+    }
+
+    public Packet13PlayerLookMove createLookMovePacket(Object location) {
+        return createLookMovePacket((Location) location);
     }
 
     public Packet13PlayerLookMove createLookMovePacket(double x, double y, double z, float yaw, float pitch) {
         return new Packet13PlayerLookMove(
                 x,
-                y + LEGACY_EYE_HEIGHT_OFFSET,
+                y + playerTeleportHeightPolicy.legacyEyeHeightOffset(),
                 y,
                 z,
                 yaw,

@@ -36,7 +36,7 @@ public class Statistic {
     }
 
     public Statistic d() {
-        return StatisticRegistry.getInstance().register(this, StatisticList.a, StatisticList.b);
+        return (Statistic) StatisticRegistry.getInstance().register(this, StatisticList.a, StatisticList.b);
     }
 
     public String toString() {

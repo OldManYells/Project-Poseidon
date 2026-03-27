@@ -40,19 +40,19 @@ public abstract class Container {
     }
 
     public Slot a(IInventory iinventory, int i) {
-        return interactionService.findSlot(this.e, iinventory, i);
+        return (Slot) (Object) interactionService.findSlot(this.e, iinventory, i);
     }
 
     public Slot b(int i) {
-        return interactionService.getSlot(this.e, i);
+        return (Slot) (Object) interactionService.getSlot(this.e, i);
     }
 
     public ItemStack a(int i) {
-        return interactionService.getSlotItem(this.e, i);
+        return (ItemStack) (Object) interactionService.getSlotItem(this.e, i);
     }
 
     public ItemStack a(int i, int j, boolean flag, EntityHuman entityhuman) {
-        return interactionService.clickSlot(this, this.e, i, j, flag, entityhuman);
+        return (ItemStack) (Object) interactionService.clickSlot(this, this.e, i, j, flag, entityhuman);
     }
 
     public void a(EntityHuman entityhuman) {

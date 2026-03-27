@@ -1,8 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.BlockAccessContract;
-
-public interface IBlockAccess extends BlockAccessContract {
+public interface IBlockAccess {
 
     int getTypeId(int i, int j, int k);
 

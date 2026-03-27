@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet;
 
 /**
  * Canonical behaviour for world-server tracker packet dispatch.

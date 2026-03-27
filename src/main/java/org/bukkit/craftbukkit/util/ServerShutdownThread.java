@@ -1,7 +1,7 @@
 
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.ServerShutdownThreadBehaviour;
+import com.legacyminecraft.compat.bukkit.ServerShutdownThreadBehaviour;
 import net.minecraft.server.MinecraftServer;
 
 public class ServerShutdownThread extends Thread {
@@ -15,6 +15,6 @@ public class ServerShutdownThread extends Thread {
 
     @Override
     public void run() {
-        serverShutdownThreadBehaviour.requestStop(this.server);
+        serverShutdownThreadBehaviour.requestStopRaw(this.server);
     }
 }

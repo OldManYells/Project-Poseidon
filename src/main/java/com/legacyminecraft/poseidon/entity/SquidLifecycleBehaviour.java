@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.Material;
-import net.minecraft.server.World;
-import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,18 +41,18 @@ public final class SquidLifecycleBehaviour {
         return 0;
     }
 
-    public void dropDeathLoot(World world, org.bukkit.entity.Entity bukkitEntity, Random random) {
-        List<org.bukkit.inventory.ItemStack> loot = new ArrayList<org.bukkit.inventory.ItemStack>();
+    public void dropDeathLoot(World world, com.legacyminecraft.compat.bukkit.entity.Entity bukkitEntity, Random random) {
+        List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> loot = new ArrayList<com.legacyminecraft.compat.bukkit.inventory.ItemStack>();
         int inkSackCount = random.nextInt(3) + 1;
         if (inkSackCount > 0) {
-            loot.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.INK_SACK, inkSackCount));
+            loot.add(new com.legacyminecraft.compat.bukkit.inventory.ItemStack(com.legacyminecraft.compat.bukkit.Material.INK_SACK, inkSackCount));
         }
 
-        org.bukkit.World bukkitWorld = world.getWorld();
+        com.legacyminecraft.compat.bukkit.World bukkitWorld = world.getWorld();
         EntityDeathEvent event = new EntityDeathEvent(bukkitEntity, loot);
         world.getServer().getPluginManager().callEvent(event);
 
-        for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
+        for (com.legacyminecraft.compat.bukkit.inventory.ItemStack stack : event.getDrops()) {
             bukkitWorld.dropItemNaturally(bukkitEntity.getLocation(), stack);
         }
     }

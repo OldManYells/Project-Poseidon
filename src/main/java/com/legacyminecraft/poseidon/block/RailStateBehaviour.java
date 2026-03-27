@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Block;
 
 /**
  * Canonical rail state, shape, and support policy for legacy minecart track wrappers.

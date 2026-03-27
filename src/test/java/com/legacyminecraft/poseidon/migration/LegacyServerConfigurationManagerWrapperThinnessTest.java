@@ -25,6 +25,10 @@ public class LegacyServerConfigurationManagerWrapperThinnessTest {
         Assert.assertTrue(text.contains("ServerPlayerViewDistanceBehaviour"));
         Assert.assertTrue(text.contains("OperatorPermissionRefreshBridgeBehaviour"));
         Assert.assertTrue(text.contains("PlayerFileDataBindingBehaviour"));
+        Assert.assertTrue(text.contains("ServerAccessMessageConfigPolicy"));
+        Assert.assertTrue(text.contains("PlayerLeaveMessageConfigPolicy"));
+        Assert.assertTrue(text.contains("serverAccessMessageConfigPolicy"));
+        Assert.assertTrue(text.contains("playerLeaveMessageConfigPolicy"));
         Assert.assertTrue(text.contains("playerFileDataBindingBehaviour.bindIfAbsent("));
         Assert.assertTrue(text.contains("serverPlayerViewDistanceBehaviour.resolveFurthestViewableBlock("));
         Assert.assertTrue(text.contains("accessListAdmissionPolicyBehaviour.isWhitelisted("));
@@ -54,5 +58,11 @@ public class LegacyServerConfigurationManagerWrapperThinnessTest {
         Assert.assertFalse(text.contains("playerLoginAdmissionService"));
         Assert.assertFalse(text.contains("playerSessionService"));
         Assert.assertFalse(text.contains("playerWorldMoveService"));
+        Assert.assertFalse(text.contains("\"message.kick.banned\""));
+        Assert.assertFalse(text.contains("\"message.kick.ip-banned\""));
+        Assert.assertFalse(text.contains("\"message.kick.not-whitelisted\""));
+        Assert.assertFalse(text.contains("\"message.kick.full\""));
+        Assert.assertFalse(text.contains("\"message.player.join\""));
+        Assert.assertFalse(text.contains("\"message.player.leave\""));
     }
 }

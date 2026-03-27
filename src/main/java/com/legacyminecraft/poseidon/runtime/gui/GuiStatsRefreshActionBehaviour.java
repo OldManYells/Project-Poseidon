@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime.gui;
 
-import net.minecraft.server.GuiStatsComponent;
 
 import java.awt.event.ActionEvent;
 

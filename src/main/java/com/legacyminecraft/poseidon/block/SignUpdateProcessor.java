@@ -1,16 +1,18 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.FontAllowedCharacters;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet130UpdateSign;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.TileEntitySign;
-import net.minecraft.server.WorldServer;
-import org.bukkit.Server;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.SignChangeEvent;
+import com.legacyminecraft.compat.bukkit.EntityPlayer;
+import com.legacyminecraft.compat.bukkit.FontAllowedCharacters;
+import com.legacyminecraft.compat.bukkit.MinecraftServer;
+import com.legacyminecraft.compat.bukkit.Packet130UpdateSign;
+import com.legacyminecraft.compat.bukkit.Player;
+import com.legacyminecraft.compat.bukkit.Server;
+import com.legacyminecraft.compat.bukkit.SignChangeEvent;
+import com.legacyminecraft.compat.bukkit.TileEntity;
+import com.legacyminecraft.compat.bukkit.TileEntitySign;
+import com.legacyminecraft.compat.bukkit.WorldServer;
+import com.legacyminecraft.compat.bukkit.CraftWorld;
+import com.legacyminecraft.compat.bukkit.block.Block;
+
 
 /**
  * Canonical processor for sign-edit packet validation and application flow.
@@ -25,7 +27,11 @@ public final class SignUpdateProcessor {
         return INSTANCE;
     }
 
-    public void processSignUpdate(MinecraftServer minecraftServer, Server server, EntityPlayer player, Packet130UpdateSign signUpdatePacket) {
+    public void processSignUpdate(Object minecraftServerRaw, Object serverRaw, Object playerRaw, Object signUpdatePacketRaw) {
+        MinecraftServer minecraftServer = (MinecraftServer) minecraftServerRaw;
+        Server server = (Server) serverRaw;
+        EntityPlayer player = (EntityPlayer) playerRaw;
+        Packet130UpdateSign signUpdatePacket = (Packet130UpdateSign) signUpdatePacketRaw;
         WorldServer worldserver = minecraftServer.getWorldServer(player.dimension);
         if (!worldserver.isLoaded(signUpdatePacket.x, signUpdatePacket.y, signUpdatePacket.z)) {
             return;
@@ -50,7 +56,7 @@ public final class SignUpdateProcessor {
         int signZ = signUpdatePacket.z;
 
         Player bukkitPlayer = (Player) player.getBukkitEntity();
-        Block signBlock = bukkitPlayer.getWorld().getBlockAt(signX, signY, signZ);
+        Block signBlock = ((CraftWorld) bukkitPlayer.getWorld()).getBlockAt(signX, signY, signZ);
         SignChangeEvent event = new SignChangeEvent(signBlock, bukkitPlayer, signUpdatePacket.lines);
         server.getPluginManager().callEvent(event);
 

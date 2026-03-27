@@ -1,12 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockFluids;
-import net.minecraft.server.Entity;
-import net.minecraft.server.Material;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for entity fluid-contact bounding-box probes.

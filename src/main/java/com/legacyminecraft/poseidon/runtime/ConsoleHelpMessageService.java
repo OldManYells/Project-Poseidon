@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.ICommandListener;
 
 /**
  * Canonical formatter for legacy console help text.

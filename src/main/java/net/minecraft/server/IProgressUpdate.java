@@ -1,8 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.ProgressUpdateContract;
-
-public interface IProgressUpdate extends ProgressUpdateContract {
+public interface IProgressUpdate extends com.legacyminecraft.poseidon.world.IProgressUpdate {
 
     void a(String s);
 

@@ -1,11 +1,6 @@
 package com.legacyminecraft.poseidon.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.EntityHandleBridgeBehaviour;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPigZombie;
-import net.minecraft.server.Item;
-import org.bukkit.event.entity.EntityTargetEvent;
+import com.legacyminecraft.compat.bukkit.EntityHandleBridgeBehaviour;
 
 import java.util.List;
 import java.util.Random;
@@ -59,7 +54,7 @@ public final class PigZombieAggroBehaviour {
     }
 
     public void applyAggroTarget(EntityPigZombie pigZombie, Entity target, Random random) {
-        org.bukkit.entity.Entity bukkitTarget = target == null ? null : target.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.entity.Entity bukkitTarget = target == null ? null : target.getBukkitEntity();
         EntityTargetEvent event = new EntityTargetEvent(pigZombie.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.PIG_ZOMBIE_TARGET);
         pigZombie.world.getServer().getPluginManager().callEvent(event);
 

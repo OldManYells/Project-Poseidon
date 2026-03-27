@@ -5,6 +5,7 @@ package com.legacyminecraft.poseidon.network;
  */
 public final class NetworkReaderLoopSystem {
     private static final NetworkReaderLoopSystem INSTANCE = new NetworkReaderLoopSystem();
+    private final NetworkLoopPausePolicy networkLoopPausePolicy = NetworkLoopPausePolicy.getInstance();
 
     private NetworkReaderLoopSystem() {
     }
@@ -26,11 +27,19 @@ public final class NetworkReaderLoopSystem {
                     break;
                 }
 
-                while (operations.readNextPacket()) {
-                    ;
+                try {
+                    while (operations.readNextPacket()) {
+                        ;
+                    }
+                } catch (Exception exception) {
+                    if (!operations.isShuttingDown()) {
+                        operations.handleException(exception);
+                    }
                 }
 
-                operations.sleepQuietly(fast ? 2L : 100L);
+                operations.sleepQuietly(fast
+                        ? networkLoopPausePolicy.fastLoopPauseMillis()
+                        : networkLoopPausePolicy.standardLoopPauseMillis());
             }
         } finally {
             operations.decrementReaderThreadCount();
@@ -49,5 +58,7 @@ public final class NetworkReaderLoopSystem {
         boolean readNextPacket();
 
         void sleepQuietly(long millis);
+
+        void handleException(Exception exception);
     }
 }

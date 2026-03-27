@@ -2,7 +2,6 @@ package com.legacyminecraft.poseidon.runtime;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import net.minecraft.server.MinecraftServer;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,14 +31,14 @@ public final class CraftBukkitBootstrapService {
         try {
             options = parser.parse(args);
         } catch (joptsimple.OptionException ex) {
-            Logger.getLogger(org.bukkit.craftbukkit.Main.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage());
+            Logger.getLogger(CraftBukkitBootstrapService.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage());
         }
 
         if ((options == null) || (options.has("?"))) {
             try {
                 parser.printHelpOn(System.out);
             } catch (IOException ex) {
-                Logger.getLogger(org.bukkit.craftbukkit.Main.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CraftBukkitBootstrapService.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (options.has("v")) {
             System.out.println(resolveImplementationVersion());

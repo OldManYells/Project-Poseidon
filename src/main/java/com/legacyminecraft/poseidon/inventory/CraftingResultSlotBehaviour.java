@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.AchievementList;
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
 
 public final class CraftingResultSlotBehaviour {
     private static final CraftingResultSlotBehaviour INSTANCE = new CraftingResultSlotBehaviour();

@@ -7,7 +7,8 @@ import com.legacyminecraft.poseidon.block.PistonPowerTransitionBehaviour;
 import com.legacyminecraft.poseidon.block.PistonPushabilityBehaviour;
 import com.legacyminecraft.poseidon.block.PistonStateBehaviour;
 import com.legacyminecraft.poseidon.block.PistonStickyRetractionBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.PistonEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.PistonEventBridgeBehaviour;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 
 import java.util.ArrayList;
 
@@ -25,6 +26,7 @@ public class BlockPiston extends Block {
     private static final PistonPowerTransitionBehaviour PISTON_POWER_TRANSITION_BEHAVIOUR = PistonPowerTransitionBehaviour.getInstance();
     private static final PistonStickyRetractionBehaviour PISTON_STICKY_RETRACTION_BEHAVIOUR = PistonStickyRetractionBehaviour.getInstance();
     private static final PistonEventBridgeBehaviour PISTON_EVENT_BRIDGE_BEHAVIOUR = PistonEventBridgeBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
     private static final PistonMovementChainBehaviour.PushabilityQuery MOVEMENT_CHAIN_PUSHABILITY_QUERY =
             new PistonMovementChainBehaviour.PushabilityQuery() {
                 public boolean canPush(int blockId, World queryWorld, int x, int y, int z, boolean allowDestroy) {
@@ -264,7 +266,10 @@ public class BlockPiston extends Block {
     }
 
     private boolean i(World world, int i, int j, int k, int l) {
-        final boolean useRawAirClear = PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true);
+        final boolean useRawAirClear = PoseidonConfig.getInstance().getConfigBoolean(
+                WORLD_FEATURE_CONFIG_POLICY.pistonOtherFixesEnabledKey(),
+                WORLD_FEATURE_CONFIG_POLICY.pistonOtherFixesEnabledDefault()
+        );
         PistonMovementChainBehaviour.BlockClearAction blockClearAction = useRawAirClear
                 ? RAW_AIR_CLEAR_ACTION
                 : TYPE_AIR_CLEAR_ACTION;

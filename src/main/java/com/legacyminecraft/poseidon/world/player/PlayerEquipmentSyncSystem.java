@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.EntityTracker;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Packet5EntityEquipment;
 
 import java.util.ArrayList;
 import java.util.List;

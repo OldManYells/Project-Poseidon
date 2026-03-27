@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Vec3D;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for explosion block-density cache keying and lookup.
@@ -18,7 +15,7 @@ public final class ExplosionDensityCacheBehaviour {
     }
 
     public float getOrComputeDensity(World world,
-                                     Vec3D explosionCenter,
+                                     Object explosionCenter,
                                      double explosionX,
                                      double explosionY,
                                      double explosionZ,
@@ -26,11 +23,29 @@ public final class ExplosionDensityCacheBehaviour {
         CacheKey key = new CacheKey(world, explosionX, explosionY, explosionZ, targetBounds);
         Float blockDensity = world.explosionDensityCache.get(key);
         if (blockDensity == null) {
-            blockDensity = world.a(explosionCenter, targetBounds);
+            blockDensity = Float.valueOf(sampleBlockDensity(world, explosionCenter, targetBounds));
             world.explosionDensityCache.put(key, blockDensity);
         }
 
         return blockDensity.floatValue();
+    }
+
+    private static float sampleBlockDensity(World world, Object explosionCenter, AxisAlignedBB targetBounds) {
+        if (explosionCenter instanceof Vec3D) {
+            return (float) world.a((Vec3D) explosionCenter, targetBounds);
+        }
+        try {
+            java.lang.reflect.Method[] methods = world.getClass().getMethods();
+            for (int index = 0; index < methods.length; index++) {
+                java.lang.reflect.Method method = methods[index];
+                if (method.getName().equals("a") && method.getParameterTypes().length == 2) {
+                    Object value = method.invoke(world, explosionCenter, targetBounds);
+                    return value instanceof Double ? ((Double) value).floatValue() : 0.0F;
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+        }
+        return 0.0F;
     }
 
     public static final class CacheKey {

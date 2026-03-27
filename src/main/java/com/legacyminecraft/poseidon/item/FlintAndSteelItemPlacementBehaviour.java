@@ -1,14 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
-import com.legacyminecraft.poseidon.compat.bukkit.BlockPlaceEventBridgeBehaviour;
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
-import org.bukkit.block.BlockState;
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import com.legacyminecraft.compat.bukkit.BlockPlaceEventBridgeBehaviour;
 
 public final class FlintAndSteelItemPlacementBehaviour {
     private static final FlintAndSteelItemPlacementBehaviour INSTANCE = new FlintAndSteelItemPlacementBehaviour();
@@ -47,7 +39,7 @@ public final class FlintAndSteelItemPlacementBehaviour {
 
         int targetBlockId = world.getTypeId(x, y, z);
         if (targetBlockId == 0) {
-            org.bukkit.block.Block blockClicked = world.getWorld().getBlockAt(x, y, z);
+            com.legacyminecraft.compat.bukkit.block.Block blockClicked = world.getWorld().getBlockAt(x, y, z);
             Player thePlayer = (Player) entityhuman.getBukkitEntity();
             BlockIgniteEvent eventIgnite = new BlockIgniteEvent(blockClicked, BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL, thePlayer);
             world.getServer().getPluginManager().callEvent(eventIgnite);

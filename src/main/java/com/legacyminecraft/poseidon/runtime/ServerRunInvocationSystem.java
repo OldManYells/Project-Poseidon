@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.MinecraftServer;
 
 /**
  * Role-aligned canonical facade for invoking the server run entrypoint.
@@ -18,5 +17,9 @@ public final class ServerRunInvocationSystem {
 
     public void runServer(MinecraftServer server) {
         delegate.runServer(server);
+    }
+
+    public void runServerRaw(Object server) {
+        delegate.runServerRaw(server);
     }
 }

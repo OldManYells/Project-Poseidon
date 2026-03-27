@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockJukeBox;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
 
 public final class RecordItemPlacementBehaviour {
     private static final RecordItemPlacementBehaviour INSTANCE = new RecordItemPlacementBehaviour();

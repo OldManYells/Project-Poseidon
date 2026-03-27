@@ -1,13 +1,6 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet3Chat;
-import net.minecraft.server.Packet4UpdateTime;
-import net.minecraft.server.Packet70Bed;
-import net.minecraft.server.PlayerFileData;
-import net.minecraft.server.WorldServer;
+import com.legacyminecraft.compat.bukkit.Packet;
 
 import java.util.List;
 import java.util.Set;
@@ -69,7 +62,7 @@ public final class PlayerSessionSystem {
         }
     }
 
-    public void sendPacketNearby(List players, EntityHuman ignoredPlayer, double x, double y, double z, double radius, int dimension, Packet packet) {
+    public void sendPacketNearby(List players, EntityPlayer ignoredPlayer, double x, double y, double z, double radius, int dimension, Packet packet) {
         for (int i = 0; i < players.size(); ++i) {
             EntityPlayer entityplayer = (EntityPlayer) players.get(i);
 
@@ -106,7 +99,7 @@ public final class PlayerSessionSystem {
 
     public void savePlayers(PlayerFileData playerFileData, List players) {
         for (int i = 0; i < players.size(); ++i) {
-            playerFileData.a((EntityHuman) players.get(i));
+            playerFileData.a((EntityPlayer) players.get(i));
         }
     }
 

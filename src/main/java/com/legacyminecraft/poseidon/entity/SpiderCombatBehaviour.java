@@ -1,14 +1,7 @@
 package com.legacyminecraft.poseidon.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.EntityHandleBridgeBehaviour;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntitySpider;
-import net.minecraft.server.MathHelper;
-import org.bukkit.event.entity.EntityTargetEvent;
-
 public final class SpiderCombatBehaviour {
     private static final SpiderCombatBehaviour INSTANCE = new SpiderCombatBehaviour();
-    private static final EntityHandleBridgeBehaviour ENTITY_HANDLE_BRIDGE = EntityHandleBridgeBehaviour.getInstance();
 
     private SpiderCombatBehaviour() {
     }
@@ -38,17 +31,8 @@ public final class SpiderCombatBehaviour {
 
     public boolean handleAttack(EntitySpider spider, Entity target, float distance, float brightness, int forgetTargetRoll, int leapRoll) {
         if (brightness > 0.5F && forgetTargetRoll == 0) {
-            EntityTargetEvent event = new EntityTargetEvent(spider.getBukkitEntity(), null, EntityTargetEvent.TargetReason.FORGOT_TARGET);
-            spider.world.getServer().getPluginManager().callEvent(event);
-
-            if (!event.isCancelled()) {
-                if (event.getTarget() == null) {
-                    spider.setTarget(null);
-                } else {
-                    spider.setTarget(ENTITY_HANDLE_BRIDGE.resolveHandle(event.getTarget()));
-                }
-                return true;
-            }
+            spider.setTarget(null);
+            return true;
         }
 
         if (distance > 2.0F && distance < 6.0F && leapRoll == 0 && spider.onGround) {
@@ -66,6 +50,6 @@ public final class SpiderCombatBehaviour {
     }
 
     public int getDropItemId() {
-        return net.minecraft.server.Item.STRING.id;
+        return com.legacyminecraft.compat.bukkit.Item.STRING.id;
     }
 }

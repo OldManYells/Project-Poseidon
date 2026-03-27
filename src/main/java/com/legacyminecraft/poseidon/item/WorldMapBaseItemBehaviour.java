@@ -1,9 +1,8 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Packet;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.entity.EntityHuman;
+import com.legacyminecraft.poseidon.packet.Packet;
+import com.legacyminecraft.poseidon.world.World;
 
 public final class WorldMapBaseItemBehaviour {
     private static final WorldMapBaseItemBehaviour INSTANCE = new WorldMapBaseItemBehaviour();

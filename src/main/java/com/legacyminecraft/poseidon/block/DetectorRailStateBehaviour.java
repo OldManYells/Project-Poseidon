@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
+
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
 
 import java.util.List;
 

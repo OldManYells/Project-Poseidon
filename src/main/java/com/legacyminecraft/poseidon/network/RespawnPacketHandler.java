@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 
 /**
  * Canonical handler for Packet9Respawn server-side behavior.
@@ -16,12 +14,14 @@ public final class RespawnPacketHandler {
         return INSTANCE;
     }
 
-    public RespawnResult handleRespawnPacket(MinecraftServer minecraftServer, EntityPlayer currentPlayer) {
-        if (!shouldRespawn(currentPlayer.health)) {
+    public RespawnResult handleRespawnPacket(Object minecraftServer, Object currentPlayer) {
+        int health = ((Number) getField(currentPlayer, "health")).intValue();
+        if (!shouldRespawn(health)) {
             return RespawnResult.noRespawn(currentPlayer);
         }
 
-        EntityPlayer respawnedPlayer = minecraftServer.serverConfigurationManager.moveToWorld(currentPlayer, 0);
+        Object serverConfigurationManager = getField(minecraftServer, "serverConfigurationManager");
+        Object respawnedPlayer = invoke(serverConfigurationManager, "moveToWorld", currentPlayer, 0);
         return RespawnResult.respawned(respawnedPlayer);
     }
 
@@ -31,18 +31,18 @@ public final class RespawnPacketHandler {
 
     public static final class RespawnResult {
         private final boolean respawned;
-        private final EntityPlayer player;
+        private final Object player;
 
-        private RespawnResult(boolean respawned, EntityPlayer player) {
+        private RespawnResult(boolean respawned, Object player) {
             this.respawned = respawned;
             this.player = player;
         }
 
-        public static RespawnResult noRespawn(EntityPlayer player) {
+        public static RespawnResult noRespawn(Object player) {
             return new RespawnResult(false, player);
         }
 
-        public static RespawnResult respawned(EntityPlayer player) {
+        public static RespawnResult respawned(Object player) {
             return new RespawnResult(true, player);
         }
 
@@ -50,8 +50,33 @@ public final class RespawnPacketHandler {
             return respawned;
         }
 
-        public EntityPlayer getPlayer() {
+        public Object getPlayer() {
             return player;
+        }
+    }
+
+    private Object getField(Object target, String fieldName) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to read field: " + fieldName, exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            java.lang.reflect.Method[] methods = target.getClass().getMethods();
+            for (java.lang.reflect.Method method : methods) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke: " + methodName, exception);
         }
     }
 }

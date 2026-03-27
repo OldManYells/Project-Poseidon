@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for raw world block mutation paths.

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PlayerInventoryBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.PlayerInventoryBridgeBehaviour;
 import net.minecraft.server.InventoryPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -14,7 +14,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public InventoryPlayer getInventory() {
-        return (InventoryPlayer) inventory;
+        return PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.getInventory(inventory);
     }
 
     public int getSize() {
@@ -26,7 +26,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public void setItemInHand(ItemStack stack) {
-        setItem(getHeldItemSlot(), stack);
+        PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.setItemInHand(this, stack);
     }
 
     public int getHeldItemSlot() {
@@ -34,39 +34,44 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public ItemStack getHelmet() {
-        return getItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 3));
+        return PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.getHelmet(this);
     }
 
     public ItemStack getChestplate() {
-        return getItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 2));
+        return PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.getChestplate(this);
     }
 
     public ItemStack getLeggings() {
-        return getItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 1));
+        return PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.getLeggings(this);
     }
 
     public ItemStack getBoots() {
-        return getItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 0));
+        return PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.getBoots(this);
     }
 
     public void setHelmet(ItemStack helmet) {
-        setItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 3), helmet);
+        PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.setHelmet(this, helmet);
     }
 
     public void setChestplate(ItemStack chestplate) {
-        setItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 2), chestplate);
+        PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.setChestplate(this, chestplate);
     }
 
     public void setLeggings(ItemStack leggings) {
-        setItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 1), leggings);
+        PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.setLeggings(this, leggings);
     }
 
     public void setBoots(ItemStack boots) {
-        setItem(PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.armorSlotIndex(getSize(), 0), boots);
+        PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.setBoots(this, boots);
     }
 
-    public CraftItemStack[] getArmorContents() {
-        return PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.toArmorContents(getInventory().getArmorContents());
+    public ItemStack[] getArmorContents() {
+        Object[] projected = PLAYER_INVENTORY_BRIDGE_BEHAVIOUR.toArmorContents(getInventory().getArmorContents());
+        ItemStack[] result = new ItemStack[projected.length];
+        for (int i = 0; i < projected.length; i++) {
+            result[i] = (ItemStack) projected[i];
+        }
+        return result;
     }
 
     public void setArmorContents(ItemStack[] items) {
@@ -78,8 +83,8 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
                         CraftInventoryPlayer.this.clear(slot);
                     }
 
-                    public void set(int slot, ItemStack item) {
-                        CraftInventoryPlayer.this.setItem(slot, item);
+                    public void set(int slot, Object item) {
+                        CraftInventoryPlayer.this.setItem(slot, (ItemStack) item);
                     }
                 }
         );

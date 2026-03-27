@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.utility;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.Server;
+import com.legacyminecraft.compat.bukkit.Server;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 

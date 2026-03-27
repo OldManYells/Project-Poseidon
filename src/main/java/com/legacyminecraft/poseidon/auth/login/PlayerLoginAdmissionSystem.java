@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NetLoginHandler;
-import org.bukkit.Server;
 
 import java.util.List;
 import java.util.Set;

@@ -277,11 +277,23 @@ public class EntityArrow extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        ARROW_STATE_BEHAVIOUR.writePersistedState(nbttagcompound, this.d, this.e, this.f, this.g, this.h, this.shake, this.inGround, this.fromPlayer);
+        ARROW_STATE_BEHAVIOUR.writePersistedState(
+                (com.legacyminecraft.poseidon.entity.NBTTagCompound) (Object) nbttagcompound,
+                this.d,
+                this.e,
+                this.f,
+                this.g,
+                this.h,
+                this.shake,
+                this.inGround,
+                this.fromPlayer
+        );
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        ArrowStateBehaviour.LoadedState loadedState = ARROW_STATE_BEHAVIOUR.readPersistedState(nbttagcompound);
+        ArrowStateBehaviour.LoadedState loadedState = ARROW_STATE_BEHAVIOUR.readPersistedState(
+                (com.legacyminecraft.poseidon.entity.NBTTagCompound) (Object) nbttagcompound
+        );
         this.d = loadedState.tileX;
         this.e = loadedState.tileY;
         this.f = loadedState.tileZ;

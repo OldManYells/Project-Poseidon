@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.PlayerFileData;
 
 /**
  * Canonical policy for binding player file data only once.

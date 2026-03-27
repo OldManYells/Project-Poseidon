@@ -21,8 +21,8 @@ public class LegacyWorldWrapperThinnessTest {
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldBlockStateMutationBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldBlockPhysicsExecutionBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldBlockUpdateBehaviour;"));
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;"));
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.WorldEntitySpawnEventBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.WorldEntitySpawnEventBridgeBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldAccessNotificationBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldChunkAccessCacheBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.world.WorldChunkLoadWindowBehaviour;"));

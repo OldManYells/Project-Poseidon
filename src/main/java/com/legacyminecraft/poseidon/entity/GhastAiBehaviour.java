@@ -1,13 +1,7 @@
 package com.legacyminecraft.poseidon.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.EntityHandleBridgeBehaviour;
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityFireball;
-import net.minecraft.server.EntityGhast;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.Vec3D;
-import org.bukkit.event.entity.EntityTargetEvent;
+import com.legacyminecraft.compat.bukkit.EntityHandleBridgeBehaviour;
+import com.legacyminecraft.poseidon.compat.LegacyCompatGatewayRegistry;
 
 public final class GhastAiBehaviour {
     private static final GhastAiBehaviour INSTANCE = new GhastAiBehaviour();
@@ -18,6 +12,13 @@ public final class GhastAiBehaviour {
 
     public static GhastAiBehaviour getInstance() {
         return INSTANCE;
+    }
+
+    public void tickAi(Object ghast) {
+        // Legacy wrapper bridge path; canonical typed AI remains in tickAi(EntityGhast).
+        if (ghast instanceof EntityGhast) {
+            tickAi((EntityGhast) ghast);
+        }
     }
 
     public void tickAi(EntityGhast ghast) {
@@ -59,14 +60,12 @@ public final class GhastAiBehaviour {
     private Entity updateTargetSelection(EntityGhast ghast) {
         Entity currentTarget = ghast.poseidonGetTargetEntity();
         if (currentTarget != null && currentTarget.dead) {
-            EntityTargetEvent event = new EntityTargetEvent(ghast.getBukkitEntity(), null, EntityTargetEvent.TargetReason.TARGET_DIED);
-            ghast.world.getServer().getPluginManager().callEvent(event);
-
-            if (!event.isCancelled()) {
-                if (event.getTarget() == null) {
+            TargetResolution resolution = resolveTargetEvent(ghast, null, "TARGET_DIED");
+            if (!resolution.cancelled) {
+                if (resolution.target == null) {
                     currentTarget = null;
                 } else {
-                    currentTarget = ENTITY_HANDLE_BRIDGE.resolveHandle(event.getTarget());
+                    currentTarget = ENTITY_HANDLE_BRIDGE.resolveHandle(resolution.target);
                 }
             }
         }
@@ -75,14 +74,12 @@ public final class GhastAiBehaviour {
         if (currentTarget == null || targetRefreshTicks-- <= 0) {
             Entity nearbyPlayer = ghast.world.findNearbyPlayer(ghast, 100.0D);
             if (nearbyPlayer != null) {
-                EntityTargetEvent event = new EntityTargetEvent(ghast.getBukkitEntity(), nearbyPlayer.getBukkitEntity(), EntityTargetEvent.TargetReason.CLOSEST_PLAYER);
-                ghast.world.getServer().getPluginManager().callEvent(event);
-
-                if (!event.isCancelled()) {
-                    if (event.getTarget() == null) {
+                TargetResolution resolution = resolveTargetEvent(ghast, nearbyPlayer.getBukkitEntity(), "CLOSEST_PLAYER");
+                if (!resolution.cancelled) {
+                    if (resolution.target == null) {
                         currentTarget = null;
                     } else {
-                        currentTarget = ENTITY_HANDLE_BRIDGE.resolveHandle(event.getTarget());
+                        currentTarget = ENTITY_HANDLE_BRIDGE.resolveHandle(resolution.target);
                     }
                 }
             }
@@ -149,15 +146,80 @@ public final class GhastAiBehaviour {
         double stepX = (waypointX - ghast.locX) / distanceToWaypoint;
         double stepY = (waypointY - ghast.locY) / distanceToWaypoint;
         double stepZ = (waypointZ - ghast.locZ) / distanceToWaypoint;
-        AxisAlignedBB sampledBox = ghast.boundingBox.clone();
+        Object sampledBox = ghast.boundingBox == null ? null : ghast.boundingBox.clone();
 
         for (int pathStep = 1; (double) pathStep < distanceToWaypoint; ++pathStep) {
-            sampledBox.d(stepX, stepY, stepZ);
-            if (ghast.world.getEntities(ghast, sampledBox).size() > 0) {
+            sampledBox = translateBox(sampledBox, stepX, stepY, stepZ);
+            if (hasEntitiesOnPath(ghast.world, ghast, sampledBox)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public boolean canTravelPath(Object ghast, double waypointX, double waypointY, double waypointZ, double distanceToWaypoint) {
+        if (ghast instanceof EntityGhast) {
+            return canTravelPath((EntityGhast) ghast, waypointX, waypointY, waypointZ, distanceToWaypoint);
+        }
+        return true;
+    }
+
+    private TargetResolution resolveTargetEvent(EntityGhast ghast, Object bukkitTarget, String reasonName) {
+        try {
+            Object event = LegacyCompatGatewayRegistry.gateway().createEntityTargetEvent(ghast.getBukkitEntity(), bukkitTarget, reasonName);
+            Object pluginManager = ghast.world.getServer().getPluginManager();
+            invokeOneArgument(pluginManager, "callEvent", event);
+            boolean cancelled = LegacyCompatGatewayRegistry.gateway().isEventCancelled(event);
+            Object target = LegacyCompatGatewayRegistry.gateway().getEntityTargetEventTarget(event);
+            return new TargetResolution(target, cancelled);
+        } catch (Exception ignored) {
+            return new TargetResolution(bukkitTarget, false);
+        }
+    }
+
+    private boolean hasEntitiesOnPath(Object world, Object source, Object sampledBox) {
+        try {
+            Object result = world.getClass()
+                    .getMethod("getEntities", source.getClass().getSuperclass(), sampledBox.getClass().getSuperclass())
+                    .invoke(world, source, sampledBox);
+            return result instanceof java.util.List && !((java.util.List) result).isEmpty();
+        } catch (ReflectiveOperationException ignored) {
+            return false;
+        }
+    }
+
+    private Object translateBox(Object box, double x, double y, double z) {
+        if (box == null) {
+            return null;
+        }
+        try {
+            return box.getClass().getMethod("a", Double.TYPE, Double.TYPE, Double.TYPE).invoke(box, Double.valueOf(x), Double.valueOf(y), Double.valueOf(z));
+        } catch (ReflectiveOperationException ignored) {
+            return box;
+        }
+    }
+
+    private void invokeOneArgument(Object target, String methodName, Object argument) throws ReflectiveOperationException {
+        for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+            if (!method.getName().equals(methodName) || method.getParameterTypes().length != 1) {
+                continue;
+            }
+            if (argument == null || method.getParameterTypes()[0].isAssignableFrom(argument.getClass())) {
+                method.invoke(target, argument);
+                return;
+            }
+        }
+        throw new NoSuchMethodException(methodName);
+    }
+
+    private static final class TargetResolution {
+        private final Object target;
+        private final boolean cancelled;
+
+        private TargetResolution(Object target, boolean cancelled) {
+            this.target = target;
+            this.cancelled = cancelled;
+        }
     }
 }

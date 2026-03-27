@@ -26,16 +26,17 @@ public class Packet23VehicleSpawn extends Packet {
     }
 
     public Packet23VehicleSpawn(Entity entity, int i, int j) {
-        PacketDataCodec.Packet23Data packetData = packetDataCodec.packet23FromVehicleEntity(entity, i, j);
-        this.a = packetData.getEntityId();
-        this.h = packetData.getType();
-        this.b = packetData.getX();
-        this.c = packetData.getY();
-        this.d = packetData.getZ();
-        this.i = packetData.getThrowerId();
-        this.e = packetData.getVelocityX();
-        this.f = packetData.getVelocityY();
-        this.g = packetData.getVelocityZ();
+        this.a = entity.id;
+        this.h = i;
+        this.b = MathHelper.floor(entity.locX * 32.0D);
+        this.c = MathHelper.floor(entity.locY * 32.0D);
+        this.d = MathHelper.floor(entity.locZ * 32.0D);
+        this.i = j;
+        if (j > 0) {
+            this.e = (int) (entity.motX * 8000.0D);
+            this.f = (int) (entity.motY * 8000.0D);
+            this.g = (int) (entity.motZ * 8000.0D);
+        }
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

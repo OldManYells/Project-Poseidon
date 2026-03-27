@@ -1,8 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.inventory.InventoryContract;
-
-public interface IInventory extends InventoryContract {
+public interface IInventory {
 
     int getSize();
 

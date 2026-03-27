@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntitySlime;
-import net.minecraft.server.Item;
-import net.minecraft.server.MathHelper;
 
 import java.util.Random;
 

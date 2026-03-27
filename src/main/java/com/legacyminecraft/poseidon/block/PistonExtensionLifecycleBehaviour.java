@@ -1,9 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockPiston;
-import net.minecraft.server.PistonBlockTextures;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical lifecycle policy for piston extension blocks.

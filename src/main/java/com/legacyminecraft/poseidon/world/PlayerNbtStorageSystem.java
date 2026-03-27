@@ -1,15 +1,11 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.CompressedStreamTools;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.WorldProvider;
-import net.minecraft.server.WorldProviderHell;
+
+import com.legacyminecraft.poseidon.compat.LegacyCompatGatewayRegistry;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 
 /**
@@ -33,8 +29,8 @@ public final class PlayerNbtStorageSystem {
         }
     }
 
-    public File resolveChunkStorageDirectory(File worldDirectory, WorldProvider worldprovider) {
-        if (worldprovider instanceof WorldProviderHell) {
+    public File resolveChunkStorageDirectory(File worldDirectory, Object worldprovider) {
+        if (worldprovider != null && worldprovider.getClass().getSimpleName().equals("WorldProviderHell")) {
             File netherDirectory = new File(worldDirectory, "DIM-1");
             netherDirectory.mkdirs();
             return netherDirectory;
@@ -43,10 +39,12 @@ public final class PlayerNbtStorageSystem {
         return worldDirectory;
     }
 
-    public void savePlayerData(File playersDirectory, File playerDataFile, String username, NBTTagCompound playerTag, Logger logger) {
+    public void savePlayerData(File playersDirectory, File playerDataFile, String username, Object playerTag, Logger logger) {
         try {
             File tempFile = new File(playersDirectory, "_tmp_.dat");
-            CompressedStreamTools.a(playerTag, (OutputStream) (new FileOutputStream(tempFile)));
+            try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+                LegacyCompatGatewayRegistry.gateway().writeCompressed(playerTag, outputStream);
+            }
             if (playerDataFile.exists()) {
                 playerDataFile.delete();
             }
@@ -56,10 +54,12 @@ public final class PlayerNbtStorageSystem {
         }
     }
 
-    public NBTTagCompound loadPlayerData(File playerDataFile, String username, Logger logger) {
+    public <T> T loadPlayerData(File playerDataFile, String username, Logger logger) {
         try {
             if (playerDataFile.exists()) {
-                return CompressedStreamTools.a((InputStream) (new FileInputStream(playerDataFile)));
+                try (FileInputStream inputStream = new FileInputStream(playerDataFile)) {
+                    return WorldBridgeReflection.cast(LegacyCompatGatewayRegistry.gateway().readCompressed(inputStream));
+                }
             }
         } catch (Exception exception) {
             logger.warning("Failed to load player data for " + username);

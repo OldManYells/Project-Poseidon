@@ -1,8 +1,8 @@
 package com.legacyminecraft.poseidon.world.chunk;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.IChunkProvider;
-import net.minecraft.server.IProgressUpdate;
+
+import com.legacyminecraft.poseidon.world.Chunk;
+import com.legacyminecraft.poseidon.world.IProgressUpdate;
 
 public interface ChunkProviderContract {
     boolean isChunkLoaded(int chunkX, int chunkZ);

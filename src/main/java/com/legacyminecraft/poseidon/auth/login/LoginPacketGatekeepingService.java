@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.Packet1Login;
 
 /**
  * Canonical gatekeeping logic for initial login packets before proxy/auth flow.
@@ -16,13 +15,15 @@ public final class LoginPacketGatekeepingService {
         return INSTANCE;
     }
 
-    public GatekeepingResult evaluate(Packet1Login packet1login, boolean receivedLoginPacket) {
+    public GatekeepingResult evaluate(Object packet1login, boolean receivedLoginPacket) {
         if (LoginPacketValidation.isDuplicateLoginPacket(receivedLoginPacket)) {
             return GatekeepingResult.reject(DUPLICATE_LOGIN_KICK_MESSAGE);
         }
 
-        String protocolKickMessage = LoginPacketValidation.getProtocolVersionKickMessage(packet1login.a);
-        return GatekeepingResult.accept(packet1login.name, protocolKickMessage);
+        int protocolVersion = ((Number) Bridge.readField(packet1login, "a")).intValue();
+        String username = String.valueOf(Bridge.readField(packet1login, "name"));
+        String protocolKickMessage = LoginPacketValidation.getProtocolVersionKickMessage(protocolVersion);
+        return GatekeepingResult.accept(username, protocolKickMessage);
     }
 
     public static final class GatekeepingResult {
@@ -65,6 +66,18 @@ public final class LoginPacketGatekeepingService {
 
         public String getProtocolKickMessage() {
             return protocolKickMessage;
+        }
+    }
+
+    private static final class Bridge {
+        private static Object readField(Object target, String fieldName) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getField(fieldName);
+                field.setAccessible(true);
+                return field.get(target);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
         }
     }
 }

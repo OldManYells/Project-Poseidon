@@ -11,5 +11,6 @@ public class ChatMessageRouterTest {
 
         Assert.assertTrue(router.isCommandMessage("/help"));
         Assert.assertFalse(router.isCommandMessage("hello world"));
+        Assert.assertFalse(router.isCommandMessage(null));
     }
 }

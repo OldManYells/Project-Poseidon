@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world.stats;
 
-import net.minecraft.server.Achievement;
-import net.minecraft.server.AchievementList;
 
 /**
  * Canonical achievement registration and bounds tracking service.
@@ -33,6 +31,20 @@ public final class AchievementRegistry {
 
     public Achievement register(Achievement achievement) {
         achievement.d();
+        AchievementList.e.add(achievement);
+        return achievement;
+    }
+
+    public Object registerRaw(Object achievement) {
+        if (achievement == null) {
+            return null;
+        }
+        try {
+            java.lang.reflect.Method method = achievement.getClass().getMethod("d");
+            method.invoke(achievement);
+        } catch (ReflectiveOperationException ignored) {
+            // no-op for lean migration scaffolds
+        }
         AchievementList.e.add(achievement);
         return achievement;
     }

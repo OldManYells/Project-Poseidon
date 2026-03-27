@@ -38,8 +38,12 @@ public class CanonicalEntityTargetBridgeBoundaryTest {
 
         String entityHandleBridgeText = read(ENTITY_HANDLE_BRIDGE_BEHAVIOUR_PATH);
         String entityTameBridgeText = read(ENTITY_TAME_EVENT_BRIDGE_BEHAVIOUR_PATH);
-        Assert.assertTrue(entityHandleBridgeText.contains("import org.bukkit.craftbukkit.entity.CraftEntity;"));
-        Assert.assertTrue(entityTameBridgeText.contains("CraftEventFactory.callEntityTameEvent"));
+        Assert.assertTrue(entityHandleBridgeText.contains("EntityBukkitProjectionBridgeBehaviour"));
+        Assert.assertTrue(entityHandleBridgeText.contains("ENTITY_BUKKIT_PROJECTION_BRIDGE_BEHAVIOUR.resolveCraftEntity(bukkitEntity)"));
+        Assert.assertFalse(entityHandleBridgeText.contains("((CraftEntity) bukkitEntity).getHandle()"));
+        Assert.assertTrue(entityTameBridgeText.contains("EventFactoryLifecycleSystem"));
+        Assert.assertTrue(entityTameBridgeText.contains("EVENT_FACTORY_LIFECYCLE_SYSTEM.callEntityTameEvent"));
+        Assert.assertFalse(entityTameBridgeText.contains("org.bukkit.craftbukkit.event.CraftEventFactory"));
     }
 
     private static void assertNoDirectCraftBukkitImports(String text) {

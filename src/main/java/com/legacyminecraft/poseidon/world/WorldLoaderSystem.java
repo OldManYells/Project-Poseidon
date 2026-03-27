@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.CompressedStreamTools;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.WorldData;
 
 import java.io.File;
 import java.io.FileInputStream;

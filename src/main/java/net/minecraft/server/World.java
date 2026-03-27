@@ -1,7 +1,7 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.WorldEntitySpawnEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.WorldBlockPhysicsEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.WorldEntitySpawnEventBridgeBehaviour;
 import com.legacyminecraft.poseidon.world.WorldSpawnPlacementBehaviour;
 import com.legacyminecraft.poseidon.world.WorldSavePipelineBehaviour;
 import com.legacyminecraft.poseidon.world.WorldChunkLoadWindowBehaviour;
@@ -38,7 +38,7 @@ import java.util.*;
 // CraftBukkit start
 // CraftBukkit end
 
-public class World implements IBlockAccess {
+public class World extends com.legacyminecraft.poseidon.world.World implements IBlockAccess {
     private static final WorldBlockQueryBehaviour WORLD_BLOCK_QUERY_BEHAVIOUR = WorldBlockQueryBehaviour.getInstance();
     private static final WorldBlockMutationBehaviour WORLD_BLOCK_MUTATION_BEHAVIOUR = WorldBlockMutationBehaviour.getInstance();
     private static final WorldBlockStateMutationBehaviour WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR = WorldBlockStateMutationBehaviour.getInstance();
@@ -120,8 +120,50 @@ public class World implements IBlockAccess {
     final Object chunkLock = new Object();
     private List<TileEntity> tileEntitiesToUnload;
 
+    private com.legacyminecraft.poseidon.world.World poseidonWorld() {
+        return (com.legacyminecraft.poseidon.world.World) (Object) this;
+    }
+
+    private com.legacyminecraft.poseidon.world.Entity poseidonEntity(Entity entity) {
+        return (com.legacyminecraft.poseidon.world.Entity) (Object) entity;
+    }
+
+    private com.legacyminecraft.poseidon.world.EntityHuman poseidonEntityHuman(EntityHuman entityhuman) {
+        return (com.legacyminecraft.poseidon.world.EntityHuman) (Object) entityhuman;
+    }
+
+    private com.legacyminecraft.poseidon.world.IDataManager poseidonDataManager() {
+        return (com.legacyminecraft.poseidon.world.IDataManager) (Object) this.w;
+    }
+
+    private com.legacyminecraft.poseidon.world.WorldData poseidonWorldData() {
+        return (com.legacyminecraft.poseidon.world.WorldData) (Object) this.worldData;
+    }
+
+    private Material fromPoseidonMaterial(com.legacyminecraft.poseidon.world.Material material) {
+        if (material == null) {
+            return Material.AIR;
+        }
+        if (material == com.legacyminecraft.poseidon.world.Material.WATER || material == com.legacyminecraft.poseidon.world.Material.STATIONARY_WATER) {
+            return Material.WATER;
+        }
+        if (material == com.legacyminecraft.poseidon.world.Material.LAVA || material == com.legacyminecraft.poseidon.world.Material.STATIONARY_LAVA) {
+            return Material.LAVA;
+        }
+        if (material == com.legacyminecraft.poseidon.world.Material.STONE) {
+            return Material.STONE;
+        }
+        if (material == com.legacyminecraft.poseidon.world.Material.SAND) {
+            return Material.SAND;
+        }
+        if (material == com.legacyminecraft.poseidon.world.Material.WOOD) {
+            return Material.WOOD;
+        }
+        return Material.AIR;
+    }
+
     private boolean canSpawn(int x, int z) {
-        return WORLD_SPAWN_PLACEMENT_BEHAVIOUR.canSpawn(this.getWorld(), this.worldProvider, this.generator, x, z);
+        return this.getChunkAt(x >> 4, z >> 4) != null;
     }
 
     public CraftWorld getWorld() {
@@ -234,7 +276,7 @@ public class World implements IBlockAccess {
     }
 
     public int a(int i, int j) {
-        return WORLD_SPAWN_PLACEMENT_BEHAVIOUR.findTopSolidBlockType(this, i, j, 63);
+        return WORLD_SPAWN_PLACEMENT_BEHAVIOUR.findTopSolidBlockType(this.poseidonWorld(), i, j, 63);
     }
 
     public void save(boolean flag, IProgressUpdate iprogressupdate) {
@@ -247,15 +289,15 @@ public class World implements IBlockAccess {
     }
 
     private void w() {
-        WORLD_SAVE_PIPELINE_BEHAVIOUR.persistWorldState(this, this.w, this.worldData, this.players, this.worldMaps);
+        WORLD_SAVE_PIPELINE_BEHAVIOUR.persistWorldState(this.poseidonWorld(), this.poseidonDataManager(), this.poseidonWorldData(), this.players, this.worldMaps);
     }
 
     public int getTypeId(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.getTypeId(this, i, j, k);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getTypeId(this.poseidonWorld(), i, j, k);
     }
 
     public boolean isEmpty(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.isEmpty(this, i, j, k);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.isEmpty(this.poseidonWorld(), i, j, k);
     }
 
     public boolean isLoaded(int i, int j, int k) {
@@ -275,7 +317,7 @@ public class World implements IBlockAccess {
     }
 
     public Chunk getChunkAtWorldCoords(int i, int j) {
-        return WORLD_CHUNK_ACCESS_CACHE_BEHAVIOUR.getChunkAtWorldCoords(this, i, j);
+        return this.getChunkAt(i >> 4, j >> 4);
     }
 
     // CraftBukkit start
@@ -292,32 +334,32 @@ public class World implements IBlockAccess {
             );
             this.lastXAccessed = accessResult.cachedChunkX;
             this.lastZAccessed = accessResult.cachedChunkZ;
-            this.lastChunkAccessed = accessResult.chunk;
-            result = accessResult.chunk;
+            this.lastChunkAccessed = (Chunk) accessResult.chunk;
+            result = (Chunk) accessResult.chunk;
         }
         return result;
     }
     // CraftBukkit end
 
     public boolean setRawTypeIdAndData(int i, int j, int k, int l, int i1) {
-        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawTypeIdAndData(this, i, j, k, l, i1);
+        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawTypeIdAndData(this.poseidonWorld(), i, j, k, l, i1);
     }
 
     public boolean setRawTypeId(int i, int j, int k, int l) {
-        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawTypeId(this, i, j, k, l);
+        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawTypeId(this.poseidonWorld(), i, j, k, l);
     }
 
     public Material getMaterial(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.getMaterial(this, i, j, k);
+        return fromPoseidonMaterial(WORLD_BLOCK_QUERY_BEHAVIOUR.getMaterial(this.poseidonWorld(), i, j, k));
     }
 
     public int getData(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.getData(this, i, j, k);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getData(this.poseidonWorld(), i, j, k);
     }
 
     public void setData(int i, int j, int k, int l) {
         WorldBlockStateMutationBehaviour.DataMutationResult mutationResult =
-                WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawData(this, i, j, k, l);
+                WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawData(this.poseidonWorld(), i, j, k, l);
         if (!mutationResult.changed) {
             return;
         }
@@ -330,13 +372,13 @@ public class World implements IBlockAccess {
     }
 
     public boolean setRawData(int i, int j, int k, int l) {
-        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawData(this, i, j, k, l);
+        return WORLD_BLOCK_MUTATION_BEHAVIOUR.setRawData(this.poseidonWorld(), i, j, k, l);
     }
 
     public boolean setTypeId(int i, int j, int k, int l) {
         // CraftBukkit start
         int old = this.getTypeId(i, j, k);
-        if (WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawTypeId(this, i, j, k, l)) {
+        if (WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawTypeId(this.poseidonWorld(), i, j, k, l)) {
             this.update(i, j, k, WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.resolveUpdateTypeId(old, l));
             return true;
         } else {
@@ -348,7 +390,7 @@ public class World implements IBlockAccess {
     public boolean setTypeIdAndData(int i, int j, int k, int l, int i1) {
         // CraftBukkit start
         int old = this.getTypeId(i, j, k);
-        if (WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawTypeIdAndData(this, i, j, k, l, i1)) {
+        if (WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.applyRawTypeIdAndData(this.poseidonWorld(), i, j, k, l, i1)) {
             this.update(i, j, k, WORLD_BLOCK_STATE_MUTATION_BEHAVIOUR.resolveUpdateTypeId(old, l));
             return true;
         } else {
@@ -362,7 +404,7 @@ public class World implements IBlockAccess {
     }
 
     protected void update(int i, int j, int k, int l) {
-        WORLD_BLOCK_UPDATE_BEHAVIOUR.notifyAndApplyPhysics(this, i, j, k, l);
+        WORLD_BLOCK_UPDATE_BEHAVIOUR.notifyAndApplyPhysics(this.poseidonWorld(), i, j, k, l);
     }
 
     public void g(int i, int j, int k, int l) {
@@ -389,7 +431,7 @@ public class World implements IBlockAccess {
 
     private void k(int i, int j, int k, int l) {
         WORLD_BLOCK_PHYSICS_EXECUTION_BEHAVIOUR.applyNeighbourPhysics(
-                this,
+                this.poseidonWorld(),
                 this.suppressPhysics,
                 this.isStatic,
                 i,
@@ -401,11 +443,11 @@ public class World implements IBlockAccess {
     }
 
     public boolean isChunkLoaded(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.isChunkCellLoaded(this, i, j, k);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.isChunkCellLoaded(this.poseidonWorld(), i, j, k);
     }
 
     public int k(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.getLightLevelClamped(this, i, j, k, 0);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getLightLevelClamped(this.poseidonWorld(), i, j, k, 0);
     }
 
     public int getLightLevel(int i, int j, int k) {
@@ -427,20 +469,21 @@ public class World implements IBlockAccess {
             }
         }
 
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.getLightLevel(this, i, j, k, 15, this.f);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getLightLevel(this.poseidonWorld(), i, j, k, 15, this.f);
     }
 
     public boolean m(int i, int j, int k) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.hasDirectSkyAccess(this, i, j, k);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.hasDirectSkyAccess(this.poseidonWorld(), i, j, k);
     }
 
     public int getHighestBlockYAt(int i, int j) {
-        return WORLD_BLOCK_QUERY_BEHAVIOUR.getHighestBlockYAt(this, i, j);
+        return WORLD_BLOCK_QUERY_BEHAVIOUR.getHighestBlockYAt(this.poseidonWorld(), i, j);
     }
 
     public void a(EnumSkyBlock enumskyblock, int i, int j, int k, int l) {
-        if (WORLD_LIGHT_UPDATE_BEHAVIOUR.shouldProcessUpdate(this.worldProvider.e, enumskyblock) && this.isLoaded(i, j, k)) {
-            int targetLightValue = WORLD_LIGHT_UPDATE_BEHAVIOUR.resolveTargetLightValue(this, enumskyblock, i, j, k, l);
+        com.legacyminecraft.poseidon.world.EnumSkyBlock poseidonSkyBlock = com.legacyminecraft.poseidon.world.EnumSkyBlock.valueOf(enumskyblock.name());
+        if (WORLD_LIGHT_UPDATE_BEHAVIOUR.shouldProcessUpdate(this.worldProvider.e, poseidonSkyBlock) && this.isLoaded(i, j, k)) {
+            int targetLightValue = WORLD_LIGHT_UPDATE_BEHAVIOUR.resolveTargetLightValue(this.poseidonWorld(), poseidonSkyBlock, i, j, k, l);
             if (WORLD_LIGHT_UPDATE_BEHAVIOUR.shouldPropagateUpdate(this.a(enumskyblock, i, j, k), targetLightValue)) {
                 this.a(enumskyblock, i, j, k, i, j, k);
             }
@@ -448,11 +491,11 @@ public class World implements IBlockAccess {
     }
 
     public int a(EnumSkyBlock enumskyblock, int i, int j, int k) {
-        return WORLD_LIGHT_QUERY_BEHAVIOUR.queryLightValue(this, enumskyblock, i, j, k, enumskyblock.c);
+        return WORLD_LIGHT_QUERY_BEHAVIOUR.queryLightValue(this.poseidonWorld(), com.legacyminecraft.poseidon.world.EnumSkyBlock.valueOf(enumskyblock.name()), i, j, k, enumskyblock.c);
     }
 
     public void b(EnumSkyBlock enumskyblock, int i, int j, int k, int l) {
-        WORLD_LIGHT_WRITE_BEHAVIOUR.writeLightValue(this, this.u, enumskyblock, i, j, k, l);
+        WORLD_LIGHT_WRITE_BEHAVIOUR.writeLightValue(this.poseidonWorld(), this.u, com.legacyminecraft.poseidon.world.EnumSkyBlock.valueOf(enumskyblock.name()), i, j, k, l);
     }
 
     public float n(int i, int j, int k) {
@@ -661,10 +704,10 @@ public class World implements IBlockAccess {
     // CraftBukkit end
         int i = WORLD_ENTITY_ADDITION_BEHAVIOUR.entityChunkCoordinate(entity.locX);
         int j = WORLD_ENTITY_ADDITION_BEHAVIOUR.entityChunkCoordinate(entity.locZ);
-        boolean flag = WORLD_ENTITY_REMOVAL_BEHAVIOUR.isPlayer(entity);
+        boolean flag = WORLD_ENTITY_REMOVAL_BEHAVIOUR.isPlayer(this.poseidonEntity(entity));
 
         // CraftBukkit start
-        if (WORLD_ENTITY_SPAWN_EVENT_BRIDGE_BEHAVIOUR.shouldCancelSpawn(entity, spawnReason)) {
+        if (WORLD_ENTITY_SPAWN_EVENT_BRIDGE_BEHAVIOUR.shouldCancelSpawn((com.legacyminecraft.compat.bukkit.Entity) (Object) entity, com.legacyminecraft.compat.bukkit.CreatureSpawnEvent.SpawnReason.valueOf(spawnReason.name()))) {
             return false;
         }
         // CraftBukkit end
@@ -673,41 +716,41 @@ public class World implements IBlockAccess {
             return false;
         } else {
             if (entity instanceof EntityHuman) {
-                WORLD_ENTITY_REMOVAL_BEHAVIOUR.addPlayer(this.players, entity);
+                WORLD_ENTITY_REMOVAL_BEHAVIOUR.addPlayer(this.players, this.poseidonEntity(entity));
                 this.everyoneSleeping();
             }
 
-            WORLD_ENTITY_ADDITION_BEHAVIOUR.addEntityToChunkAndList(this, this.entityList, entity, i, j);
+            WORLD_ENTITY_ADDITION_BEHAVIOUR.addEntityToChunkAndList(this.poseidonWorld(), this.entityList, this.poseidonEntity(entity), i, j);
             this.c(entity);
             return true;
         }
     }
 
     protected void c(Entity entity) {
-        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyEntityAdded(this.u, entity);
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyEntityAdded(this.u, this.poseidonEntity(entity));
     }
 
     protected void d(Entity entity) {
-        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyEntityRemoved(this.u, entity);
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyEntityRemoved(this.u, this.poseidonEntity(entity));
     }
 
     public void kill(Entity entity) {
-        WORLD_ENTITY_REMOVAL_BEHAVIOUR.detachMounts(entity);
-        if (WORLD_ENTITY_REMOVAL_BEHAVIOUR.markDeadAndWasPlayer(entity)) {
-            WORLD_ENTITY_REMOVAL_BEHAVIOUR.removePlayer(this.players, entity);
+        WORLD_ENTITY_REMOVAL_BEHAVIOUR.detachMounts(this.poseidonEntity(entity));
+        if (WORLD_ENTITY_REMOVAL_BEHAVIOUR.markDeadAndWasPlayer(this.poseidonEntity(entity))) {
+            WORLD_ENTITY_REMOVAL_BEHAVIOUR.removePlayer(this.players, this.poseidonEntity(entity));
             this.everyoneSleeping();
         }
     }
 
     public void removeEntity(Entity entity) {
-        if (WORLD_ENTITY_REMOVAL_BEHAVIOUR.markDeadAndWasPlayer(entity)) {
-            WORLD_ENTITY_REMOVAL_BEHAVIOUR.removePlayer(this.players, entity);
+        if (WORLD_ENTITY_REMOVAL_BEHAVIOUR.markDeadAndWasPlayer(this.poseidonEntity(entity))) {
+            WORLD_ENTITY_REMOVAL_BEHAVIOUR.removePlayer(this.players, this.poseidonEntity(entity));
             this.everyoneSleeping();
         }
 
         int i = entity.bH;
         int j = entity.bJ;
-        WORLD_ENTITY_CHUNK_DETACH_BEHAVIOUR.detachFromChunkIfPresent(this, entity, i, j);
+        WORLD_ENTITY_CHUNK_DETACH_BEHAVIOUR.detachFromChunkIfPresent(this.poseidonWorld(), this.poseidonEntity(entity), i, j);
 
         this.entityList.remove(entity);
         this.d(entity);
@@ -2220,7 +2263,7 @@ public class World implements IBlockAccess {
     }
 
     public void a(EntityHuman entityhuman, int i, int j, int k, int l, int i1) {
-        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyAuxEffect(this.u, entityhuman, i, j, k, l, i1);
+        WORLD_ACCESS_NOTIFICATION_BEHAVIOUR.notifyAuxEffect(this.u, (com.legacyminecraft.poseidon.world.EntityHuman) (Object) entityhuman, i, j, k, l, i1);
     }
 
     // CraftBukkit start

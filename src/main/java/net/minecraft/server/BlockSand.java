@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.block.FallingBlockBehaviour;
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 
 import java.util.Random;
 
@@ -9,6 +10,7 @@ public class BlockSand extends Block {
 
     public static boolean instaFall = false;
     private static final FallingBlockBehaviour FALLING_BLOCK_SERVICE = FallingBlockBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     public BlockSand(int i, int j) {
         super(i, j, Material.SAND);
@@ -32,7 +34,10 @@ public class BlockSand extends Block {
 
             if (FALLING_BLOCK_SERVICE.shouldSpawnFallingEntity(instaFall, world.a(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0))) {
                 if (FALLING_BLOCK_SERVICE.shouldApplyDupingFix(
-                        PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.sand-gravel-duping-fix.enabled", true)
+                        PoseidonConfig.getInstance().getConfigBoolean(
+                                WORLD_FEATURE_CONFIG_POLICY.pistonSandGravelDupingFixEnabledKey(),
+                                WORLD_FEATURE_CONFIG_POLICY.pistonSandGravelDupingFixEnabledDefault()
+                        )
                 )) {
                     world.setTypeId(i, j, k, 0);
                 }

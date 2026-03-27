@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
 
 /**
  * Canonical inventory-grid operations for legacy InventoryCrafting wrappers.

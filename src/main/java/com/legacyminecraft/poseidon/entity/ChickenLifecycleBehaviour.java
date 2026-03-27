@@ -80,7 +80,7 @@ public final class ChickenLifecycleBehaviour {
     }
 
     public int getDropItemId() {
-        return net.minecraft.server.Item.FEATHER.id;
+        return com.legacyminecraft.compat.bukkit.Item.FEATHER.id;
     }
 
     public static final class ChickenTickState {

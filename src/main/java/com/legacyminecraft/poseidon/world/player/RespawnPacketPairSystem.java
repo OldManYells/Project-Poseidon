@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet9Respawn;
-import net.minecraft.server.WorldServer;
 
 /**
  * Canonical helpers for legacy dual-respawn packet sequencing during world transfer.

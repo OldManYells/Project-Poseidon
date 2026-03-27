@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.EnumSkyBlock;
-import net.minecraft.server.IWorldAccess;
-import net.minecraft.server.World;
 
 import java.util.List;
 
@@ -32,7 +28,7 @@ public final class WorldLightWriteBehaviour {
         }
 
         Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-        chunk.a(lightLayer, x & 15, y, z & 15, lightValue);
+        chunk.a(lightLayer.ordinal(), x & 15, y, z & 15, lightValue);
 
         for (int listenerIndex = 0; listenerIndex < worldAccessListeners.size(); ++listenerIndex) {
             ((IWorldAccess) worldAccessListeners.get(listenerIndex)).a(x, y, z);

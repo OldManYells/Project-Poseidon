@@ -16,11 +16,11 @@ public class LegacyEntityWrapperThinnessTest {
     public void entityDelegatesSpatialMathToCanonicalBehaviour() throws IOException {
         String text = new String(Files.readAllBytes(ENTITY_PATH), StandardCharsets.UTF_8);
 
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityWorldBindingBehaviour;"));
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityRotationValidationBehaviour;"));
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityLightningStrikeBridgeBehaviour;"));
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityFireDamageBridgeBehaviour;"));
-        Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.compat.bukkit.EntityLavaDamageBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.EntityWorldBindingBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.EntityRotationValidationBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.EntityLightningStrikeBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.EntityFireDamageBridgeBehaviour;"));
+        Assert.assertTrue(text.contains("import com.legacyminecraft.compat.bukkit.EntityLavaDamageBridgeBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityBoundingBoxBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityCollisionPushBehaviour;"));
         Assert.assertTrue(text.contains("import com.legacyminecraft.poseidon.entity.EntityCollisionQueryBehaviour;"));

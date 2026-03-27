@@ -5,6 +5,7 @@ package com.legacyminecraft.poseidon.network;
  */
 public final class ConnectionMonitorSystem {
     private static final ConnectionMonitorSystem INSTANCE = new ConnectionMonitorSystem();
+    private final ConnectionMonitorDelayPolicy connectionMonitorDelayPolicy = ConnectionMonitorDelayPolicy.getInstance();
 
     private ConnectionMonitorSystem() {
     }
@@ -15,13 +16,15 @@ public final class ConnectionMonitorSystem {
 
     public void monitorAndDisconnectIfOpen(ConnectionState connectionState, Runnable interruptWriter, Runnable disconnectAction) {
         try {
-            Thread.sleep(2000L);
+            Thread.sleep(connectionMonitorDelayPolicy.watchdogDelayMillis());
             if (connectionState.isConnectionOpen()) {
                 interruptWriter.run();
                 disconnectAction.run();
             }
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (InterruptedException interruptedException) {
+            Thread.currentThread().interrupt();
+        } catch (Exception ignored) {
+            // Preserve legacy "best effort" semantics without spamming shutdown noise.
         }
     }
 

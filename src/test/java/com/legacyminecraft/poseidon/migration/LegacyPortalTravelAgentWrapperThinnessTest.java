@@ -34,9 +34,14 @@ public class LegacyPortalTravelAgentWrapperThinnessTest {
 
         Assert.assertTrue(text.contains("PortalCreationBehaviour"));
         Assert.assertTrue(text.contains("PORTAL_CREATION_BEHAVIOUR"));
+        Assert.assertTrue(text.contains("WorldHandleBridgeBehaviour"));
+        Assert.assertTrue(text.contains("WORLD_HANDLE_BRIDGE_BEHAVIOUR"));
+        Assert.assertTrue(text.contains("resolveWorldServerHandle(location.getWorld())"));
         Assert.assertTrue(text.contains("PORTAL_CREATION_BEHAVIOUR.createPortal("));
         Assert.assertFalse(text.contains("label271:"));
         Assert.assertFalse(text.contains("PortalCreateEvent event ="));
         Assert.assertFalse(text.contains("world.suppressPhysics = true;"));
+        Assert.assertFalse(text.contains("((CraftWorld) location.getWorld()).getHandle()"));
+        Assert.assertFalse(text.contains("(CraftWorld) location.getWorld()"));
     }
 }

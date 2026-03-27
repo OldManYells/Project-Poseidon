@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.ChunkPosition;
+import com.legacyminecraft.poseidon.world.World;
 
 import java.util.List;
 
@@ -54,9 +54,9 @@ public final class MinecartTrackConnectionLayoutBehaviour {
     }
 
     public boolean hasAdjacentTrack(World world, int x, int y, int z) {
-        return net.minecraft.server.BlockMinecartTrack.g(world, x, y, z)
-                || net.minecraft.server.BlockMinecartTrack.g(world, x, y + 1, z)
-                || net.minecraft.server.BlockMinecartTrack.g(world, x, y - 1, z);
+        return com.legacyminecraft.compat.bukkit.BlockMinecartTrack.g(world, x, y, z)
+                || com.legacyminecraft.compat.bukkit.BlockMinecartTrack.g(world, x, y + 1, z)
+                || com.legacyminecraft.compat.bukkit.BlockMinecartTrack.g(world, x, y - 1, z);
     }
 
     public int countAdjacentTracks(World world, int x, int y, int z) {
@@ -82,15 +82,15 @@ public final class MinecartTrackConnectionLayoutBehaviour {
     }
 
     public Integer resolveTrackY(World world, int x, int y, int z) {
-        if (net.minecraft.server.BlockMinecartTrack.g(world, x, y, z)) {
+        if (com.legacyminecraft.compat.bukkit.BlockMinecartTrack.g(world, x, y, z)) {
             return Integer.valueOf(y);
         }
 
-        if (net.minecraft.server.BlockMinecartTrack.g(world, x, y + 1, z)) {
+        if (com.legacyminecraft.compat.bukkit.BlockMinecartTrack.g(world, x, y + 1, z)) {
             return Integer.valueOf(y + 1);
         }
 
-        if (net.minecraft.server.BlockMinecartTrack.g(world, x, y - 1, z)) {
+        if (com.legacyminecraft.compat.bukkit.BlockMinecartTrack.g(world, x, y - 1, z)) {
             return Integer.valueOf(y - 1);
         }
 

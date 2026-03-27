@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
-
 /**
  * Canonical armor and equipment lifecycle operations for legacy InventoryPlayer wrappers.
  */
@@ -15,13 +13,13 @@ public final class PlayerInventoryEquipmentBehaviour {
         return INSTANCE;
     }
 
-    public int calculateArmorValue(ItemStack[] armor, ArmorStatsResolver resolver) {
+    public int calculateArmorValue(Object[] armor, ArmorStatsResolver resolver) {
         int armorPoints = 0;
         int remainingDurability = 0;
         int maxDurability = 0;
 
         for (int i = 0; i < armor.length; ++i) {
-            ItemStack stack = armor[i];
+            Object stack = armor[i];
             if (stack != null && resolver.isArmor(stack)) {
                 int stackMaxDurability = resolver.getMaxDurability(stack);
                 int stackDamage = resolver.getCurrentDamage(stack);
@@ -39,12 +37,13 @@ public final class PlayerInventoryEquipmentBehaviour {
         return (armorPoints - 1) * remainingDurability / maxDurability + 1;
     }
 
-    public void damageArmor(ItemStack[] armor, int amount, ArmorDamageCallbacks callbacks) {
+    public void damageArmor(Object[] armor, int amount, ArmorDamageCallbacks callbacks) {
         for (int i = 0; i < armor.length; ++i) {
-            ItemStack stack = armor[i];
+            Object stack = armor[i];
             if (stack != null && callbacks.isArmor(stack)) {
                 callbacks.damage(stack, amount);
-                if (stack.count == 0) {
+                int count = ((Number) getField(stack, "count")).intValue();
+                if (count == 0) {
                     callbacks.onBroken(stack);
                     armor[i] = null;
                 }
@@ -52,7 +51,7 @@ public final class PlayerInventoryEquipmentBehaviour {
         }
     }
 
-    public void dropAll(ItemStack[] items, ItemStack[] armor, DropSink dropSink) {
+    public void dropAll(Object[] items, Object[] armor, DropSink dropSink) {
         for (int i = 0; i < items.length; ++i) {
             if (items[i] != null) {
                 dropSink.drop(items[i]);
@@ -68,39 +67,64 @@ public final class PlayerInventoryEquipmentBehaviour {
         }
     }
 
-    public boolean contains(ItemStack[] armor, ItemStack[] items, ItemStack target) {
+    public boolean contains(Object[] armor, Object[] items, Object target) {
         for (int i = 0; i < armor.length; ++i) {
-            if (armor[i] != null && armor[i].c(target)) {
+            if (armor[i] != null && (Boolean) invoke(armor[i], "c", target)) {
                 return true;
             }
         }
         for (int i = 0; i < items.length; ++i) {
-            if (items[i] != null && items[i].c(target)) {
+            if (items[i] != null && (Boolean) invoke(items[i], "c", target)) {
                 return true;
             }
         }
         return false;
     }
 
+    private Object getField(Object target, String fieldName) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to read field: " + fieldName, exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object arg) {
+        try {
+            java.lang.reflect.Method[] methods = target.getClass().getMethods();
+            for (java.lang.reflect.Method method : methods) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == 1) {
+                    method.setAccessible(true);
+                    return method.invoke(target, arg);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke method: " + methodName, exception);
+        }
+    }
+
     public interface ArmorStatsResolver {
-        boolean isArmor(ItemStack stack);
+        boolean isArmor(Object stack);
 
-        int getMaxDurability(ItemStack stack);
+        int getMaxDurability(Object stack);
 
-        int getCurrentDamage(ItemStack stack);
+        int getCurrentDamage(Object stack);
 
-        int getArmorReduction(ItemStack stack);
+        int getArmorReduction(Object stack);
     }
 
     public interface ArmorDamageCallbacks {
-        boolean isArmor(ItemStack stack);
+        boolean isArmor(Object stack);
 
-        void damage(ItemStack stack, int amount);
+        void damage(Object stack, int amount);
 
-        void onBroken(ItemStack stack);
+        void onBroken(Object stack);
     }
 
     public interface DropSink {
-        void drop(ItemStack stack);
+        void drop(Object stack);
     }
 }

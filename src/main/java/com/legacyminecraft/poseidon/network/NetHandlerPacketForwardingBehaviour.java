@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.NetHandler;
-import net.minecraft.server.Packet;
 
 /**
  * Canonical forwarding behaviour for legacy typed NetHandler packet callbacks.

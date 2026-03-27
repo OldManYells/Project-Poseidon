@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Block;
 
 /**
  * Canonical placement, attachment, and bounds policy for legacy torch wrappers.

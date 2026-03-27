@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityEgg;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntitySnowball;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
 
 public final class ThrowableItemBehaviour {
     private static final ThrowableItemBehaviour INSTANCE = new ThrowableItemBehaviour();

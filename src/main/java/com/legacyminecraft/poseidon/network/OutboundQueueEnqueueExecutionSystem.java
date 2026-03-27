@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ public final class OutboundQueueEnqueueExecutionSystem {
             Object queueLock,
             List highPriorityQueue,
             List lowPriorityQueue,
-            Packet packet,
+            Object packet,
             int queuedBytes,
             OutboundQueueSystem outboundQueueSystem
     ) {

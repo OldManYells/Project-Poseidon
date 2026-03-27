@@ -1,9 +1,6 @@
 package com.legacyminecraft.poseidon.runtime;
 
 import joptsimple.OptionSet;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NetworkListenThread;
-import net.minecraft.server.PropertyManager;
 
 import java.net.UnknownHostException;
 import java.util.logging.Logger;

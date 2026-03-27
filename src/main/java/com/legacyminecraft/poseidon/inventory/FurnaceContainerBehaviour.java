@@ -1,13 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Container;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ICrafting;
-import net.minecraft.server.InventoryPlayer;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Slot;
-import net.minecraft.server.SlotResult2;
-import net.minecraft.server.TileEntityFurnace;
 
 import java.util.List;
 

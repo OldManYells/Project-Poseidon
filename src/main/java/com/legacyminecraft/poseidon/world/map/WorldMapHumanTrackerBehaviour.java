@@ -1,10 +1,7 @@
 package com.legacyminecraft.poseidon.world.map;
 
-import com.legacyminecraft.poseidon.compat.bukkit.WorldMapRenderBridgeBehaviour;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.WorldMap;
-import org.bukkit.map.MapCursor;
+import com.legacyminecraft.compat.bukkit.MapCursor;
+import com.legacyminecraft.compat.bukkit.WorldMapRenderBridgeBehaviour;
 
 import java.util.List;
 
@@ -26,7 +23,7 @@ public final class WorldMapHumanTrackerBehaviour {
         }
     }
 
-    public UpdateState createUpdate(WorldMap worldMap, EntityHuman trackee, ItemStack itemstack, int[] minByColumn, int[] maxByColumn,
+    public UpdateState createUpdate(Object worldMap, Object trackee, Object itemstack, int[] minByColumn, int[] maxByColumn,
                                     int updateCursor, int markerCooldown, byte[] lastMarkerPacket) {
         WorldMapRenderBridgeBehaviour.RenderSnapshot render = WORLD_MAP_RENDER_BRIDGE.render(worldMap, trackee);
 

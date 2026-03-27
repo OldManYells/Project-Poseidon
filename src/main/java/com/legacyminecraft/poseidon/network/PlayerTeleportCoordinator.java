@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 
 /**
  * Canonical helper for teleport destination resolution and orientation sanitization.
@@ -18,22 +14,25 @@ public final class PlayerTeleportCoordinator {
         return INSTANCE;
     }
 
-    public Location resolveTeleportDestination(Server server, Player player, double x, double y, double z, float yaw, float pitch) {
-        Location from = player.getLocation();
-        Location to = new Location(player.getWorld(), x, y, z, yaw, pitch);
-        PlayerTeleportEvent event = new PlayerTeleportEvent(player, from, to);
-        server.getPluginManager().callEvent(event);
+    public Object resolveTeleportDestination(Object server, Object player, double x, double y, double z, float yaw, float pitch) {
+        Object from = invoke(player, "getLocation");
+        Object world = invoke(player, "getWorld");
+        Object to = newLocation(world, x, y, z, yaw, pitch);
+        Object event = newPlayerTeleportEvent(player, from, to);
+        Object pluginManager = invoke(server, "getPluginManager");
+        invoke(pluginManager, "callEvent", event);
 
-        from = event.getFrom();
-        return event.isCancelled() ? from : event.getTo();
+        Object resolvedFrom = invoke(event, "getFrom");
+        boolean cancelled = Boolean.TRUE.equals(invoke(event, "isCancelled"));
+        return cancelled ? resolvedFrom : invoke(event, "getTo");
     }
 
-    public TeleportPlan createTeleportPlan(Location destination) {
-        double x = destination.getX();
-        double y = destination.getY();
-        double z = destination.getZ();
-        float yaw = sanitizeRotationComponent(destination.getYaw());
-        float pitch = sanitizeRotationComponent(destination.getPitch());
+    public TeleportPlan createTeleportPlan(Object destination) {
+        double x = ((Number) invoke(destination, "getX")).doubleValue();
+        double y = ((Number) invoke(destination, "getY")).doubleValue();
+        double z = ((Number) invoke(destination, "getZ")).doubleValue();
+        float yaw = sanitizeRotationComponent(((Number) invoke(destination, "getYaw")).floatValue());
+        float pitch = sanitizeRotationComponent(((Number) invoke(destination, "getPitch")).floatValue());
         return new TeleportPlan(x, y, z, yaw, pitch);
     }
 
@@ -75,5 +74,28 @@ public final class PlayerTeleportCoordinator {
         public float getPitch() {
             return pitch;
         }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            java.lang.reflect.Method[] methods = target.getClass().getMethods();
+            for (java.lang.reflect.Method method : methods) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke: " + methodName, exception);
+        }
+    }
+
+    private Object newLocation(Object world, double x, double y, double z, float yaw, float pitch) {
+        return NetworkCompatGatewayRegistry.gateway().createLocation(world, x, y, z, yaw, pitch);
+    }
+
+    private Object newPlayerTeleportEvent(Object player, Object from, Object to) {
+        return NetworkCompatGatewayRegistry.gateway().createPlayerTeleportEvent(player, from, to);
     }
 }

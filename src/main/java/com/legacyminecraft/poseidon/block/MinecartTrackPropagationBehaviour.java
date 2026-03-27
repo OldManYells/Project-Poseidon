@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.ChunkPosition;
+import com.legacyminecraft.poseidon.world.World;
 
 import java.util.List;
 

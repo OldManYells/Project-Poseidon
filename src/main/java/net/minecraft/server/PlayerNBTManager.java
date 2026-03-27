@@ -20,12 +20,14 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
     private final long e = System.currentTimeMillis();
     private final PlayerDataStoragePolicy playerDataStoragePolicy = PlayerDataStoragePolicy.getInstance();
     private final SessionLockManager sessionLockManager = SessionLockManager.getInstance();
-    private final WorldDataPersistence worldDataPersistence = WorldDataPersistence.getInstance();
+    private final WorldDataPersistence worldDataPersistence;
     private final WorldIdentityStore worldIdentityStore = WorldIdentityStore.getInstance();
     private final PlayerNbtStorageSystem playerNbtStorageSystem = PlayerNbtStorageSystem.getInstance();
     private UUID uuid = null; // CraftBukkit
 
     public PlayerNBTManager(File file1, String s, boolean flag) {
+        PoseidonWorldStorageCompatGatewayBootstrap.ensureInstalled();
+        this.worldDataPersistence = WorldDataPersistence.getInstance();
         this.b = new File(file1, s);
         this.c = new File(this.b, "players");
         this.d = new File(this.b, "data");
@@ -36,6 +38,16 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
 
     private void f() {
         sessionLockManager.writeSessionLock(this.b, this.e);
+    }
+
+    @Override
+    public void savePlayerData(com.legacyminecraft.poseidon.world.EntityHuman player) {
+        // Legacy world-local bridge only.
+    }
+
+    @Override
+    public void loadPlayerData(com.legacyminecraft.poseidon.world.EntityHuman player) {
+        // Legacy world-local bridge only.
     }
 
     protected File a() {

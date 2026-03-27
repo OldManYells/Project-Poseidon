@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityCreeper;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 public final class CreeperFuseBehaviour {
     private static final CreeperFuseBehaviour INSTANCE = new CreeperFuseBehaviour();

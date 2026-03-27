@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  */
 public final class HotbarSwitchResultExecutionSystem {
     private static final HotbarSwitchResultExecutionSystem INSTANCE = new HotbarSwitchResultExecutionSystem();
-    private static final String INVALID_SWITCH_KICK_MESSAGE = "Invalid hotbar selection (Hacking?)";
+    private final HotbarSwitchMessagePolicy hotbarSwitchMessagePolicy = HotbarSwitchMessagePolicy.getInstance();
 
     private HotbarSwitchResultExecutionSystem() {
     }
@@ -26,7 +26,7 @@ public final class HotbarSwitchResultExecutionSystem {
     ) {
         if (switchResult == HotbarSelectionBehaviour.SwitchResult.INVALID_SELECTION) {
             logger.warning(playerName + " tried to set an invalid carried item");
-            switchActions.disconnect(INVALID_SWITCH_KICK_MESSAGE);
+            switchActions.disconnect(hotbarSwitchMessagePolicy.invalidSelectionKickMessage());
             return false;
         }
         return true;

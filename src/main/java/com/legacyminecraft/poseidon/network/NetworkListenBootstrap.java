@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.NetServerHandler;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -13,6 +11,8 @@ import java.util.List;
  */
 public final class NetworkListenBootstrap {
     private static final NetworkListenBootstrap INSTANCE = new NetworkListenBootstrap();
+    private final NetworkServerSocketPreferencePolicy networkServerSocketPreferencePolicy =
+            NetworkServerSocketPreferencePolicy.getInstance();
 
     private NetworkListenBootstrap() {
     }
@@ -23,7 +23,11 @@ public final class NetworkListenBootstrap {
 
     public ServerSocket openServerSocket(int port, InetAddress bindAddress) throws IOException {
         ServerSocket serverSocket = new ServerSocket(port, 0, bindAddress);
-        serverSocket.setPerformancePreferences(0, 2, 1);
+        serverSocket.setPerformancePreferences(
+                networkServerSocketPreferencePolicy.connectionTimeWeight(),
+                networkServerSocketPreferencePolicy.latencyWeight(),
+                networkServerSocketPreferencePolicy.bandwidthWeight()
+        );
         return serverSocket;
     }
 
@@ -32,7 +36,7 @@ public final class NetworkListenBootstrap {
         return acceptThread;
     }
 
-    public void addPendingLogin(List pendingLoginHandlers, NetLoginHandler netloginhandler) {
+    public void addPendingLogin(List pendingLoginHandlers, Object netloginhandler) {
         if (netloginhandler == null) {
             throw new IllegalArgumentException("Got null pendingconnection!");
         }
@@ -40,7 +44,7 @@ public final class NetworkListenBootstrap {
         pendingLoginHandlers.add(netloginhandler);
     }
 
-    public void addServerHandler(List serverHandlers, NetServerHandler netserverhandler) {
+    public void addServerHandler(List serverHandlers, Object netserverhandler) {
         serverHandlers.add(netserverhandler);
     }
 }

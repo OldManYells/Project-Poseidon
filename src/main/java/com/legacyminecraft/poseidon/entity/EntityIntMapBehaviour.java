@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.EntityList;
-import net.minecraft.server.EntityListEntry;
 
 /**
  * Canonical behaviour for legacy int-keyed entity list table operations.

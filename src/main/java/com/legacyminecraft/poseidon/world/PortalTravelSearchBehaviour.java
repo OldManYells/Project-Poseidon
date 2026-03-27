@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for portal search/scoring math used by legacy portal travel wrappers.

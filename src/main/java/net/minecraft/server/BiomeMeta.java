@@ -1,23 +1,20 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.biome.BiomeSpawnEntryBehaviour;
-
 public class BiomeMeta {
-    private static final BiomeSpawnEntryBehaviour BIOME_SPAWN_ENTRY_BEHAVIOUR = BiomeSpawnEntryBehaviour.getInstance();
-
     public Class a;
     public int b;
 
     public BiomeMeta(Class oclass, int i) {
-        BIOME_SPAWN_ENTRY_BEHAVIOUR.initializeLegacyEntry(this, oclass, i);
+        this.a = oclass;
+        this.b = i;
     }
 
     public Class getEntityClass() {
-        return BIOME_SPAWN_ENTRY_BEHAVIOUR.resolveEntityClass(this);
+        return this.a;
     }
 
     public int getSpawnWeight() {
-        return BIOME_SPAWN_ENTRY_BEHAVIOUR.resolveSpawnWeight(this);
+        return this.b;
     }
 
     public void poseidonSetEntityClass(Class entityClass) {

@@ -1,6 +1,8 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * Canonical storage and slot-routing operations for legacy InventoryPlayer wrappers.
@@ -20,34 +22,36 @@ public final class PlayerInventoryStorageBehaviour {
         return HOTBAR_SIZE;
     }
 
-    public ItemStack getItemInHand(ItemStack[] items, int itemInHandIndex) {
+    public Object getItemInHand(Object[] items, int itemInHandIndex) {
         return itemInHandIndex < HOTBAR_SIZE && itemInHandIndex >= 0 ? items[itemInHandIndex] : null;
     }
 
-    public int findSlotByItemId(ItemStack[] items, int itemId) {
+    public int findSlotByItemId(Object[] items, int itemId) {
         for (int i = 0; i < items.length; ++i) {
-            if (items[i] != null && items[i].id == itemId) {
+            Object stack = items[i];
+            if (stack != null && intField(stack, "id") == itemId) {
                 return i;
             }
         }
         return -1;
     }
 
-    public int findFirstPartial(ItemStack[] items, ItemStack itemStack, int maxStackSize) {
+    public int findFirstPartial(Object[] items, Object itemStack, int maxStackSize) {
         for (int i = 0; i < items.length; ++i) {
-            if (items[i] != null
-                    && items[i].id == itemStack.id
-                    && items[i].isStackable()
-                    && items[i].count < items[i].getMaxStackSize()
-                    && items[i].count < maxStackSize
-                    && (!items[i].usesData() || items[i].getData() == itemStack.getData())) {
+            Object stack = items[i];
+            if (stack != null
+                    && intField(stack, "id") == intField(itemStack, "id")
+                    && boolCall(stack, "isStackable")
+                    && intField(stack, "count") < intCall(stack, "getMaxStackSize")
+                    && intField(stack, "count") < maxStackSize
+                    && (!boolCall(stack, "usesData") || intCall(stack, "getData") == intCall(itemStack, "getData"))) {
                 return i;
             }
         }
         return -1;
     }
 
-    public int firstEmptySlot(ItemStack[] items) {
+    public int firstEmptySlot(Object[] items) {
         for (int i = 0; i < items.length; ++i) {
             if (items[i] == null) {
                 return i;
@@ -56,65 +60,67 @@ public final class PlayerInventoryStorageBehaviour {
         return -1;
     }
 
-    public int canHold(ItemStack[] items, ItemStack itemStack, int maxStackSize) {
-        int remains = itemStack.count;
+    public int canHold(Object[] items, Object itemStack, int maxStackSize) {
+        int remains = intField(itemStack, "count");
         for (int i = 0; i < items.length; ++i) {
-            if (items[i] == null) {
-                return itemStack.count;
+            Object stack = items[i];
+            if (stack == null) {
+                return intField(itemStack, "count");
             }
 
-            if (items[i] != null
-                    && items[i].id == itemStack.id
-                    && items[i].isStackable()
-                    && items[i].count < items[i].getMaxStackSize()
-                    && items[i].count < maxStackSize
-                    && (!items[i].usesData() || items[i].getData() == itemStack.getData())) {
-                int stackCap = items[i].getMaxStackSize() < maxStackSize ? items[i].getMaxStackSize() : maxStackSize;
-                remains -= stackCap - items[i].count;
+            if (intField(stack, "id") == intField(itemStack, "id")
+                    && boolCall(stack, "isStackable")
+                    && intField(stack, "count") < intCall(stack, "getMaxStackSize")
+                    && intField(stack, "count") < maxStackSize
+                    && (!boolCall(stack, "usesData") || intCall(stack, "getData") == intCall(itemStack, "getData"))) {
+                int stackCap = Math.min(intCall(stack, "getMaxStackSize"), maxStackSize);
+                remains -= stackCap - intField(stack, "count");
             }
             if (remains <= 0) {
-                return itemStack.count;
+                return intField(itemStack, "count");
             }
         }
-        return itemStack.count - remains;
+        return intField(itemStack, "count") - remains;
     }
 
-    public boolean consumeByItemId(ItemStack[] items, int itemId) {
+    public boolean consumeByItemId(Object[] items, int itemId) {
         int index = findSlotByItemId(items, itemId);
         if (index < 0) {
             return false;
         }
 
-        if (--items[index].count <= 0) {
+        int count = intField(items[index], "count") - 1;
+        setIntField(items[index], "count", count);
+        if (count <= 0) {
             items[index] = null;
         }
         return true;
     }
 
-    public boolean pickup(ItemStack[] items, ItemStack itemStack, int maxStackSize) {
+    public boolean pickup(Object[] items, Object itemStack, int maxStackSize) {
         int previousCount;
-        if (itemStack.f()) {
+        if (boolCall(itemStack, "f")) {
             int emptySlot = firstEmptySlot(items);
             if (emptySlot >= 0) {
-                items[emptySlot] = ItemStack.b(itemStack);
-                items[emptySlot].b = 5;
-                itemStack.count = 0;
+                items[emptySlot] = staticCall(itemStack.getClass(), "b", itemStack);
+                setIntField(items[emptySlot], "b", 5);
+                setIntField(itemStack, "count", 0);
                 return true;
             }
             return false;
         }
 
         do {
-            previousCount = itemStack.count;
-            itemStack.count = storePartial(items, itemStack, maxStackSize);
-        } while (itemStack.count > 0 && itemStack.count < previousCount);
+            previousCount = intField(itemStack, "count");
+            setIntField(itemStack, "count", storePartial(items, itemStack, maxStackSize));
+        } while (intField(itemStack, "count") > 0 && intField(itemStack, "count") < previousCount);
 
-        return itemStack.count < previousCount;
+        return intField(itemStack, "count") < previousCount;
     }
 
-    private int storePartial(ItemStack[] items, ItemStack itemStack, int maxStackSize) {
-        int itemId = itemStack.id;
-        int remaining = itemStack.count;
+    private int storePartial(Object[] items, Object itemStack, int maxStackSize) {
+        int itemId = intField(itemStack, "id");
+        int remaining = intField(itemStack, "count");
         int slotIndex = findFirstPartial(items, itemStack, maxStackSize);
         if (slotIndex < 0) {
             slotIndex = firstEmptySlot(items);
@@ -124,28 +130,24 @@ public final class PlayerInventoryStorageBehaviour {
         }
 
         if (items[slotIndex] == null) {
-            items[slotIndex] = new ItemStack(itemId, 0, itemStack.getData());
+            items[slotIndex] = newItemStack(itemStack.getClass(), itemId, 0, intCall(itemStack, "getData"));
         }
 
         int toMove = remaining;
-        if (toMove > items[slotIndex].getMaxStackSize() - items[slotIndex].count) {
-            toMove = items[slotIndex].getMaxStackSize() - items[slotIndex].count;
-        }
-        if (toMove > maxStackSize - items[slotIndex].count) {
-            toMove = maxStackSize - items[slotIndex].count;
-        }
+        toMove = Math.min(toMove, intCall(items[slotIndex], "getMaxStackSize") - intField(items[slotIndex], "count"));
+        toMove = Math.min(toMove, maxStackSize - intField(items[slotIndex], "count"));
         if (toMove == 0) {
             return remaining;
         }
 
         remaining -= toMove;
-        items[slotIndex].count += toMove;
-        items[slotIndex].b = 5;
+        setIntField(items[slotIndex], "count", intField(items[slotIndex], "count") + toMove);
+        setIntField(items[slotIndex], "b", 5);
         return remaining;
     }
 
-    public ItemStack splitCombined(ItemStack[] items, ItemStack[] armor, int index, int amount) {
-        ItemStack[] target = items;
+    public Object splitCombined(Object[] items, Object[] armor, int index, int amount) {
+        Object[] target = items;
         int resolvedIndex = index;
         if (resolvedIndex >= items.length) {
             target = armor;
@@ -156,21 +158,21 @@ public final class PlayerInventoryStorageBehaviour {
             return null;
         }
 
-        if (target[resolvedIndex].count <= amount) {
-            ItemStack extracted = target[resolvedIndex];
+        if (intField(target[resolvedIndex], "count") <= amount) {
+            Object extracted = target[resolvedIndex];
             target[resolvedIndex] = null;
             return extracted;
         }
 
-        ItemStack extracted = target[resolvedIndex].a(amount);
-        if (target[resolvedIndex].count == 0) {
+        Object extracted = call(target[resolvedIndex], "a", amount);
+        if (intField(target[resolvedIndex], "count") == 0) {
             target[resolvedIndex] = null;
         }
         return extracted;
     }
 
-    public void setCombined(ItemStack[] items, ItemStack[] armor, int index, ItemStack itemStack) {
-        ItemStack[] target = items;
+    public void setCombined(Object[] items, Object[] armor, int index, Object itemStack) {
+        Object[] target = items;
         int resolvedIndex = index;
         if (resolvedIndex >= target.length) {
             resolvedIndex -= target.length;
@@ -179,17 +181,116 @@ public final class PlayerInventoryStorageBehaviour {
         target[resolvedIndex] = itemStack;
     }
 
-    public int combinedSize(ItemStack[] items, ItemStack[] armor) {
+    public int combinedSize(Object[] items, Object[] armor) {
         return items.length + armor.length;
     }
 
-    public ItemStack getCombined(ItemStack[] items, ItemStack[] armor, int index) {
-        ItemStack[] target = items;
+    public Object getCombined(Object[] items, Object[] armor, int index) {
+        Object[] target = items;
         int resolvedIndex = index;
         if (resolvedIndex >= target.length) {
             resolvedIndex -= target.length;
             target = armor;
         }
         return target[resolvedIndex];
+    }
+
+    private static int intField(Object target, String name) {
+        return ((Number) getField(target, name)).intValue();
+    }
+
+    private static void setIntField(Object target, String name, int value) {
+        try {
+            Field field = resolveField(target.getClass(), name);
+            field.setAccessible(true);
+            field.setInt(target, value);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to write field: " + name, exception);
+        }
+    }
+
+    private static Object getField(Object target, String name) {
+        try {
+            Field field = resolveField(target.getClass(), name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to read field: " + name, exception);
+        }
+    }
+
+    private static Field resolveField(Class<?> type, String name) throws NoSuchFieldException {
+        Class<?> current = type;
+        while (current != null) {
+            try {
+                return current.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                current = current.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(name);
+    }
+
+    private static boolean boolCall(Object target, String method) {
+        return (Boolean) call(target, method);
+    }
+
+    private static int intCall(Object target, String method, Object... args) {
+        return ((Number) call(target, method, args)).intValue();
+    }
+
+    private static Object staticCall(Class<?> type, String method, Object arg) {
+        try {
+            Method resolved = null;
+            for (Method candidate : type.getMethods()) {
+                if (candidate.getName().equals(method) && candidate.getParameterTypes().length == 1) {
+                    resolved = candidate;
+                    break;
+                }
+            }
+            if (resolved == null) {
+                throw new IllegalStateException("Static method not found: " + method);
+            }
+            resolved.setAccessible(true);
+            return resolved.invoke(null, arg);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke static method: " + method, exception);
+        }
+    }
+
+    private static Object call(Object target, String method, Object... args) {
+        try {
+            Method resolved = null;
+            for (Method candidate : target.getClass().getMethods()) {
+                if (candidate.getName().equals(method) && candidate.getParameterTypes().length == args.length) {
+                    resolved = candidate;
+                    break;
+                }
+            }
+            if (resolved == null) {
+                for (Method candidate : target.getClass().getDeclaredMethods()) {
+                    if (candidate.getName().equals(method) && candidate.getParameterTypes().length == args.length) {
+                        resolved = candidate;
+                        break;
+                    }
+                }
+            }
+            if (resolved == null) {
+                throw new IllegalStateException("Method not found: " + method);
+            }
+            resolved.setAccessible(true);
+            return resolved.invoke(target, args);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke method: " + method, exception);
+        }
+    }
+
+    private static Object newItemStack(Class<?> stackClass, int id, int count, int data) {
+        try {
+            Constructor<?> constructor = stackClass.getConstructor(int.class, int.class, int.class);
+            return constructor.newInstance(id, count, data);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to construct item stack", exception);
+        }
     }
 }

@@ -3,7 +3,6 @@ package com.legacyminecraft.poseidon.runtime;
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonServer;
 import com.legacyminecraft.poseidon.kernel.PoseidonKernel;
-import net.minecraft.server.MinecraftServer;
 
 import java.util.logging.Level;
 

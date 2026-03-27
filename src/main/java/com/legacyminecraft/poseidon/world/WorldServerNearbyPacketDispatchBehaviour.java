@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Packet;
-import net.minecraft.server.ServerConfigurationManager;
 
 /**
  * Canonical behaviour for world-server local-area packet dispatch.

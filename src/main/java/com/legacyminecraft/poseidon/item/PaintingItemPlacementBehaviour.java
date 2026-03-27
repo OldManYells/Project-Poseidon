@@ -1,12 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPainting;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-import org.bukkit.event.painting.PaintingPlaceEvent;
+import com.legacyminecraft.compat.bukkit.BlockFace;
 
 public final class PaintingItemPlacementBehaviour {
     private static final PaintingItemPlacementBehaviour INSTANCE = new PaintingItemPlacementBehaviour();
@@ -31,9 +25,9 @@ public final class PaintingItemPlacementBehaviour {
 
         if (!world.isStatic) {
             Player who = entityhuman == null ? null : (Player) entityhuman.getBukkitEntity();
-            org.bukkit.block.Block blockClicked = world.getWorld().getBlockAt(x, y, z);
+            com.legacyminecraft.compat.bukkit.block.Block blockClicked = world.getWorld().getBlockAt(x, y, z);
             BlockFace blockFace = resolveBlockFace(face);
-            PaintingPlaceEvent event = new PaintingPlaceEvent((org.bukkit.entity.Painting) painting.getBukkitEntity(), who, blockClicked, blockFace);
+            PaintingPlaceEvent event = new PaintingPlaceEvent((com.legacyminecraft.compat.bukkit.entity.Painting) painting.getBukkitEntity(), who, blockClicked, blockFace);
             world.getServer().getPluginManager().callEvent(event);
             if (event.isCancelled()) {
                 return false;

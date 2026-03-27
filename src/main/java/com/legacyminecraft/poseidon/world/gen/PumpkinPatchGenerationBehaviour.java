@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.World;
 
 import java.util.Random;
 
@@ -26,6 +24,13 @@ public final class PumpkinPatchGenerationBehaviour {
             }
         }
 
+        return true;
+    }
+
+    public boolean generate(Object world, Random random, int i, int j, int k) {
+        if (world instanceof World) {
+            return generate((World) world, random, i, j, k);
+        }
         return true;
     }
 

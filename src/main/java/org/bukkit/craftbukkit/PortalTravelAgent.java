@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PortalCreationBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.PortalSearchBehaviour;
+import com.legacyminecraft.compat.bukkit.PortalCreationBehaviour;
+import com.legacyminecraft.compat.bukkit.PortalSearchBehaviour;
+import com.legacyminecraft.compat.bukkit.WorldHandleBridgeBehaviour;
 import net.minecraft.server.Block;
 import net.minecraft.server.WorldServer;
 import org.bukkit.Location;
@@ -12,6 +13,8 @@ import java.util.Random;
 public class PortalTravelAgent implements TravelAgent {
     private static final PortalCreationBehaviour PORTAL_CREATION_BEHAVIOUR = PortalCreationBehaviour.getInstance();
     private static final PortalSearchBehaviour PORTAL_SEARCH_BEHAVIOUR = PortalSearchBehaviour.getInstance();
+    private static final WorldHandleBridgeBehaviour WORLD_HANDLE_BRIDGE_BEHAVIOUR =
+            WorldHandleBridgeBehaviour.getInstance();
 
     private Random random = new Random();
 
@@ -22,7 +25,7 @@ public class PortalTravelAgent implements TravelAgent {
     public PortalTravelAgent() { }
 
     public Location findOrCreate(Location location) {
-        WorldServer worldServer = ((CraftWorld) location.getWorld()).getHandle();
+        WorldServer worldServer = WORLD_HANDLE_BRIDGE_BEHAVIOUR.resolveWorldServerHandle(location.getWorld());
         worldServer.chunkProviderServer.forceChunkLoad = true;
         // Attempt to find a Portal.
         Location resultLocation = this.findPortal(location);
@@ -43,7 +46,7 @@ public class PortalTravelAgent implements TravelAgent {
     }
 
     public Location findPortal(Location location) {
-        net.minecraft.server.World world = ((CraftWorld) location.getWorld()).getHandle();
+        net.minecraft.server.World world = WORLD_HANDLE_BRIDGE_BEHAVIOUR.resolveWorldServerHandle(location.getWorld());
         PortalSearchBehaviour.SearchResult searchResult = PORTAL_SEARCH_BEHAVIOUR.findNearestPortal(
                 world,
                 location.getBlockX(),
@@ -70,7 +73,7 @@ public class PortalTravelAgent implements TravelAgent {
 
     public boolean createPortal(Location location) {
         return PORTAL_CREATION_BEHAVIOUR.createPortal(
-                (CraftWorld) location.getWorld(),
+                location.getWorld(),
                 location,
                 this.random,
                 this.creationRadius

@@ -1,9 +1,8 @@
 package com.legacyminecraft.poseidon.block;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import net.minecraft.server.Block;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.TileEntity;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical pushability rules for piston block wrappers.

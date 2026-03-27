@@ -1,10 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.CoordinateMathBehaviour;
-
 public class ChunkCoordinates implements Comparable {
-    private static final CoordinateMathBehaviour COORDINATE_MATH_BEHAVIOUR = CoordinateMathBehaviour.getInstance();
-
     public int x;
     public int y;
     public int z;
@@ -24,19 +20,32 @@ public class ChunkCoordinates implements Comparable {
     }
 
     public boolean equals(Object object) {
-        return COORDINATE_MATH_BEHAVIOUR.equals(this, object);
+        if (!(object instanceof ChunkCoordinates)) {
+            return false;
+        }
+        ChunkCoordinates other = (ChunkCoordinates) object;
+        return this.x == other.x && this.y == other.y && this.z == other.z;
     }
 
     public int hashCode() {
-        return COORDINATE_MATH_BEHAVIOUR.hash(this);
+        return (this.x * 31 + this.y) * 31 + this.z;
     }
 
     public int compareTo(Object o) {
         ChunkCoordinates chunkcoordinates = (ChunkCoordinates) o;
-        return COORDINATE_MATH_BEHAVIOUR.compare(this, chunkcoordinates);
+        if (this.y != chunkcoordinates.y) {
+            return this.y - chunkcoordinates.y;
+        }
+        if (this.z != chunkcoordinates.z) {
+            return this.z - chunkcoordinates.z;
+        }
+        return this.x - chunkcoordinates.x;
     }
 
     public double a(int i, int j, int k) {
-        return COORDINATE_MATH_BEHAVIOUR.distance(this, i, j, k);
+        double deltaX = (double) (this.x - i);
+        double deltaY = (double) (this.y - j);
+        double deltaZ = (double) (this.z - k);
+        return deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
     }
 }

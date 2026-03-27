@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 
 /**
@@ -17,14 +17,14 @@ public final class DispenserSlotSelectionBehaviour {
         return INSTANCE;
     }
 
-    public int findDispenseSlot(ItemStack[] items, Random random) {
+    public int findDispenseSlot(Object[] items, Random random) {
         int selectedSlot = -1;
         int candidateWeight = 1;
 
         for (int slot = 0; slot < items.length; ++slot) {
-            ItemStack stack = items[slot];
+            Object stack = items[slot];
 
-            if (stack == null || stack.count == 0) {
+            if (stack == null || stackCount(stack) == 0) {
                 continue;
             }
 
@@ -34,5 +34,15 @@ public final class DispenserSlotSelectionBehaviour {
         }
 
         return selectedSlot;
+    }
+
+    private static int stackCount(Object stack) {
+        try {
+            Field field = stack.getClass().getDeclaredField("count");
+            field.setAccessible(true);
+            return ((Number) field.get(stack)).intValue();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to read stack count", exception);
+        }
     }
 }

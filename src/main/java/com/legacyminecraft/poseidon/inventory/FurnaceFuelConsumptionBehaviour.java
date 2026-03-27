@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
+
+import java.lang.reflect.Field;
 
 /**
  * Canonical behaviour for consuming furnace fuel-slot items.
@@ -15,14 +16,34 @@ public final class FurnaceFuelConsumptionBehaviour {
         return INSTANCE;
     }
 
-    public void consumeFuel(ItemStack[] items, int fuelSlot) {
+    public void consumeFuel(Object[] items, int fuelSlot) {
         if (items[fuelSlot] == null) {
             return;
         }
 
-        --items[fuelSlot].count;
-        if (items[fuelSlot].count == 0) {
+        setCount(items[fuelSlot], count(items[fuelSlot]) - 1);
+        if (count(items[fuelSlot]) == 0) {
             items[fuelSlot] = null;
+        }
+    }
+
+    private static int count(Object stack) {
+        try {
+            Field field = stack.getClass().getDeclaredField("count");
+            field.setAccessible(true);
+            return ((Number) field.get(stack)).intValue();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to read stack count", exception);
+        }
+    }
+
+    private static void setCount(Object stack, int value) {
+        try {
+            Field field = stack.getClass().getDeclaredField("count");
+            field.setAccessible(true);
+            field.set(stack, Integer.valueOf(value));
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to write stack count", exception);
         }
     }
 }

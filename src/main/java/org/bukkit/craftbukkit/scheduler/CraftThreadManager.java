@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerWorkerRegistryBehaviour;
+import com.legacyminecraft.compat.bukkit.SchedulerWorkerRegistryBehaviour;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashSet;

@@ -1,8 +1,8 @@
 package com.legacyminecraft.poseidon.world.path;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.PathPoint;
-import net.minecraft.server.Vec3D;
+import com.legacyminecraft.poseidon.world.Entity;
+import com.legacyminecraft.poseidon.world.PathPoint;
+import com.legacyminecraft.poseidon.world.Vec3D;
 
 public final class PathEntityTraversalBehaviour {
     private static final PathEntityTraversalBehaviour INSTANCE = new PathEntityTraversalBehaviour();

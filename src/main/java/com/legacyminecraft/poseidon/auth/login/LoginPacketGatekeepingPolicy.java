@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.Packet1Login;
 
 /**
  * Role-aligned canonical facade for login-packet gatekeeping decisions.
@@ -16,7 +15,7 @@ public final class LoginPacketGatekeepingPolicy {
         return INSTANCE;
     }
 
-    public GatekeepingResult evaluate(Packet1Login packet1login, boolean receivedLoginPacket) {
+    public GatekeepingResult evaluate(Object packet1login, boolean receivedLoginPacket) {
         return GatekeepingResult.wrap(delegate.evaluate(packet1login, receivedLoginPacket));
     }
 

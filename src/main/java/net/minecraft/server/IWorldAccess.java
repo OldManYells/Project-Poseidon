@@ -2,7 +2,7 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.world.WorldAccessContract;
 
-public interface IWorldAccess extends WorldAccessContract {
+public interface IWorldAccess extends com.legacyminecraft.poseidon.world.IWorldAccess, WorldAccessContract {
 
     void a(int i, int j, int k);
 

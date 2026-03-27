@@ -2,7 +2,6 @@ package com.legacyminecraft.poseidon.packet;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.packets.ArtificialPacket53BlockChange;
-import net.minecraft.server.Packet;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

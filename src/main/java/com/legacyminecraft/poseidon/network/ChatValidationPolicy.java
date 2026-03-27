@@ -5,6 +5,7 @@ package com.legacyminecraft.poseidon.network;
  */
 public final class ChatValidationPolicy {
     private static final ChatValidationPolicy INSTANCE = new ChatValidationPolicy();
+    private final ChatValidationMessagePolicy chatValidationMessagePolicy = ChatValidationMessagePolicy.getInstance();
 
     private ChatValidationPolicy() {
     }
@@ -15,17 +16,17 @@ public final class ChatValidationPolicy {
 
     public ValidationResult validateIncomingMessage(String rawMessage, int maxLength, String allowedCharacters) {
         if (rawMessage == null) {
-            return ValidationResult.invalid("Illegal characters in chat");
+            return ValidationResult.invalid(chatValidationMessagePolicy.illegalCharactersMessage());
         }
 
         if (rawMessage.length() > maxLength) {
-            return ValidationResult.invalid("Chat message too long");
+            return ValidationResult.invalid(chatValidationMessagePolicy.chatTooLongMessage());
         }
 
         String normalized = rawMessage.trim();
         for (int i = 0; i < normalized.length(); ++i) {
             if (allowedCharacters.indexOf(normalized.charAt(i)) < 0) {
-                return ValidationResult.invalid("Illegal characters in chat");
+                return ValidationResult.invalid(chatValidationMessagePolicy.illegalCharactersMessage());
             }
         }
 

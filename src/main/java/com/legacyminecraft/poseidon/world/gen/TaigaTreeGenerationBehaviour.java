@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.Block;
-import org.bukkit.BlockChangeDelegate;
 
 import java.util.Random;
 
@@ -95,6 +93,13 @@ public final class TaigaTreeGenerationBehaviour {
         }
     }
 
+    public boolean generateTaiga1(Object world, Random random, int i, int j, int k) {
+        if (world instanceof BlockChangeDelegate) {
+            return generateTaiga1((BlockChangeDelegate) world, random, i, j, k);
+        }
+        return true;
+    }
+
     public boolean generateTaiga2(BlockChangeDelegate world, Random random, int i, int j, int k) {
         int l = random.nextInt(4) + 6;
         int i1 = 1 + random.nextInt(2);
@@ -186,5 +191,12 @@ public final class TaigaTreeGenerationBehaviour {
         } else {
             return false;
         }
+    }
+
+    public boolean generateTaiga2(Object world, Random random, int i, int j, int k) {
+        if (world instanceof BlockChangeDelegate) {
+            return generateTaiga2((BlockChangeDelegate) world, random, i, j, k);
+        }
+        return true;
     }
 }

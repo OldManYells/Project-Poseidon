@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityPlayer;
+import com.legacyminecraft.compat.bukkit.Entity;
+import com.legacyminecraft.compat.bukkit.EntityPlayer;
 
 /**
  * Canonical policy helpers for entity interaction packet admission and mode decoding.

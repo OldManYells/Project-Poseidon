@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet10Flying;
-import net.minecraft.server.ServerConfigurationManager;
-import net.minecraft.server.WorldServer;
 
 /**
  * Canonical coordinator for processing movement packets while a player is riding a vehicle.
@@ -11,6 +7,7 @@ import net.minecraft.server.WorldServer;
 public final class VehicleMovementPacketHandler {
     private static final VehicleMovementPacketHandler INSTANCE = new VehicleMovementPacketHandler();
     private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
+    private final MovementPacketSentinelPolicy movementPacketSentinelPolicy = MovementPacketSentinelPolicy.getInstance();
 
     private VehicleMovementPacketHandler() {
     }
@@ -20,54 +17,61 @@ public final class VehicleMovementPacketHandler {
     }
 
     public VehicleMoveResult handleVehicleMovement(
-            EntityPlayer player,
-            WorldServer worldServer,
-            ServerConfigurationManager serverConfigurationManager,
-            Packet10Flying packet10flying
+            Object player,
+            Object worldServer,
+            Object serverConfigurationManager,
+            Object packet10flying
     ) {
-        float yaw = player.yaw;
-        float pitch = player.pitch;
+        float yaw = ((Number) getField(player, "yaw")).floatValue();
+        float pitch = ((Number) getField(player, "pitch")).floatValue();
 
-        player.vehicle.f();
-        double anchorX = player.locX;
-        double anchorY = player.locY;
-        double anchorZ = player.locZ;
+        Object vehicle = getField(player, "vehicle");
+        invoke(vehicle, "f");
+        double anchorX = ((Number) getField(player, "locX")).doubleValue();
+        double anchorY = ((Number) getField(player, "locY")).doubleValue();
+        double anchorZ = ((Number) getField(player, "locZ")).doubleValue();
 
         double moveX = 0.0D;
         double moveZ = 0.0D;
-        if (packet10flying.hasLook) {
-            yaw = packet10flying.yaw;
-            pitch = packet10flying.pitch;
+        if (Boolean.TRUE.equals(getField(packet10flying, "hasLook"))) {
+            yaw = ((Number) getField(packet10flying, "yaw")).floatValue();
+            pitch = ((Number) getField(packet10flying, "pitch")).floatValue();
         }
 
-        if (packet10flying.h && packet10flying.y == -999.0D && packet10flying.stance == -999.0D) {
-            moveX = packet10flying.x;
-            moveZ = packet10flying.z;
+        boolean hasPosition = Boolean.TRUE.equals(getField(packet10flying, "h"));
+        double packetY = ((Number) getField(packet10flying, "y")).doubleValue();
+        double packetStance = ((Number) getField(packet10flying, "stance")).doubleValue();
+        if (hasPosition && movementPacketSentinelPolicy.isMotionOnlySentinel(packetY, packetStance)) {
+            moveX = ((Number) getField(packet10flying, "x")).doubleValue();
+            moveZ = ((Number) getField(packet10flying, "z")).doubleValue();
 
             if (movementPacketPolicy.isVehicleCrashAttempt(moveX, moveZ)) {
                 return VehicleMoveResult.crashAttempt();
             }
         }
 
-        player.onGround = packet10flying.g;
-        player.a(true);
-        player.move(moveX, 0.0D, moveZ);
-        player.setLocation(anchorX, anchorY, anchorZ, yaw, pitch);
-        player.motX = moveX;
-        player.motZ = moveZ;
+        setField(player, "onGround", getField(packet10flying, "g"));
+        invoke(player, "a", true);
+        invoke(player, "move", moveX, 0.0D, moveZ);
+        invoke(player, "setLocation", anchorX, anchorY, anchorZ, yaw, pitch);
+        setField(player, "motX", moveX);
+        setField(player, "motZ", moveZ);
 
-        if (player.vehicle != null) {
-            worldServer.vehicleEnteredWorld(player.vehicle, true);
+        if (vehicle != null) {
+            invoke(worldServer, "vehicleEnteredWorld", vehicle, true);
         }
 
-        if (player.vehicle != null) {
-            player.vehicle.f();
-            player.vehicle.airBorne = true;
+        if (vehicle != null) {
+            invoke(vehicle, "f");
+            setField(vehicle, "airBorne", true);
         }
 
-        serverConfigurationManager.d(player);
-        worldServer.playerJoinedWorld(player);
-        return VehicleMoveResult.handled(player.locX, player.locY, player.locZ);
+        invoke(serverConfigurationManager, "d", player);
+        invoke(worldServer, "playerJoinedWorld", player);
+        double finalX = ((Number) getField(player, "locX")).doubleValue();
+        double finalY = ((Number) getField(player, "locY")).doubleValue();
+        double finalZ = ((Number) getField(player, "locZ")).doubleValue();
+        return VehicleMoveResult.handled(finalX, finalY, finalZ);
     }
 
     public String createVehicleCrashLogMessage(String playerName, Object vehicle) {
@@ -76,6 +80,40 @@ public final class VehicleMovementPacketHandler {
 
     public String getVehicleCrashKickMessage() {
         return "Boat crash attempt detected!";
+    }
+
+    private Object getField(Object target, String name) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private void setField(Object target, String name, Object value) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(name);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     public static final class VehicleMoveResult {

@@ -1,14 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockCloth;
-import net.minecraft.server.BlockCrops;
-import net.minecraft.server.BlockSapling;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntitySheep;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
 
 public final class DyeItemBehaviour {
     private static final DyeItemBehaviour INSTANCE = new DyeItemBehaviour();

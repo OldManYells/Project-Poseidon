@@ -1,8 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.PistonBlockTextures;
+
+import com.legacyminecraft.poseidon.entity.EntityHuman;
 
 /**
  * Canonical facing, state, and shape policy for piston block wrappers.

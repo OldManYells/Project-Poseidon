@@ -1,12 +1,6 @@
 package com.legacyminecraft.poseidon.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.BucketEventBridgeBehaviour;
-import net.minecraft.server.EntityCow;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import org.bukkit.Location;
-import org.bukkit.event.player.PlayerBucketFillEvent;
+import com.legacyminecraft.compat.bukkit.BucketEventBridgeBehaviour;
 
 public final class CowInteractionBehaviour {
     private static final CowInteractionBehaviour INSTANCE = new CowInteractionBehaviour();

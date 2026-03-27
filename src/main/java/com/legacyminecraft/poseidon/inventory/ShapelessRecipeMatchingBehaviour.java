@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.InventoryCrafting;
-import net.minecraft.server.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Iterator;

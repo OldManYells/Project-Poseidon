@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.IChunkProvider;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for world chunk access cache hit/miss resolution.

@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.EnumSkyBlock;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for world light-update gating and target-value policy.

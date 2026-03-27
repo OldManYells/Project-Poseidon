@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.WorldGenerator;
 
 /**
  * Canonical base hook for legacy world-generator wrappers.

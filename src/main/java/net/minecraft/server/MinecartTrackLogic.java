@@ -4,6 +4,7 @@ import com.legacyminecraft.poseidon.block.MinecartTrackConnectionLayoutBehaviour
 import com.legacyminecraft.poseidon.block.MinecartTrackDataWriteBehaviour;
 import com.legacyminecraft.poseidon.block.MinecartTrackPropagationBehaviour;
 import com.legacyminecraft.poseidon.block.MinecartTrackShapeSelectionBehaviour;
+import com.legacyminecraft.poseidon.block.MinecartTrackStateUpdateBehaviour;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ class MinecartTrackLogic {
     private static final MinecartTrackDataWriteBehaviour MINECART_TRACK_DATA_WRITE_BEHAVIOUR = MinecartTrackDataWriteBehaviour.getInstance();
     private static final MinecartTrackPropagationBehaviour MINECART_TRACK_PROPAGATION_BEHAVIOUR = MinecartTrackPropagationBehaviour.getInstance();
     private static final MinecartTrackShapeSelectionBehaviour MINECART_TRACK_SHAPE_SELECTION_BEHAVIOUR = MinecartTrackShapeSelectionBehaviour.getInstance();
+    private static final MinecartTrackStateUpdateBehaviour MINECART_TRACK_STATE_UPDATE_BEHAVIOUR = MinecartTrackStateUpdateBehaviour.getInstance();
 
     private World b;
     private int c;
@@ -118,22 +120,29 @@ class MinecartTrackLogic {
 
         this.a(b0);
         int composedData = MINECART_TRACK_DATA_WRITE_BEHAVIOUR.composeStoredData(this.b, this.c, this.d, this.e, this.f, b0);
+        MINECART_TRACK_STATE_UPDATE_BEHAVIOUR.writeAndPropagate(
+                flag1,
+                this.b,
+                this.c,
+                this.d,
+                this.e,
+                composedData,
+                MINECART_TRACK_DATA_WRITE_BEHAVIOUR,
+                MINECART_TRACK_PROPAGATION_BEHAVIOUR,
+                this.g,
+                new MinecartTrackStateUpdateBehaviour.ConnectionUpdate() {
+                    public void propagate(ChunkPosition connection) {
+                        MinecartTrackLogic minecarttracklogic = MinecartTrackLogic.this.a(connection);
 
-        if (MINECART_TRACK_DATA_WRITE_BEHAVIOUR.shouldWriteData(flag1, this.b, this.c, this.d, this.e, composedData)) {
-            MINECART_TRACK_DATA_WRITE_BEHAVIOUR.writeData(this.b, this.c, this.d, this.e, composedData);
-            MINECART_TRACK_PROPAGATION_BEHAVIOUR.forEachConnection(this.g, new MinecartTrackPropagationBehaviour.ConnectionVisitor() {
-                public void visit(ChunkPosition connection) {
-                    MinecartTrackLogic minecarttracklogic = MinecartTrackLogic.this.a(connection);
-
-                    if (minecarttracklogic != null) {
-                        minecarttracklogic.a();
-                        if (minecarttracklogic.c(MinecartTrackLogic.this)) {
-                            minecarttracklogic.d(MinecartTrackLogic.this);
+                        if (minecarttracklogic != null) {
+                            minecarttracklogic.a();
+                            if (minecarttracklogic.c(MinecartTrackLogic.this)) {
+                                minecarttracklogic.d(MinecartTrackLogic.this);
+                            }
                         }
                     }
                 }
-            });
-        }
+        );
     }
 
     static int a(MinecartTrackLogic minecarttracklogic) {

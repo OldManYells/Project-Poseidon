@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet13PlayerLookMove;
-import org.bukkit.Location;
 
 /**
  * Canonical execution flow for resolved player move outcomes.
@@ -30,8 +28,8 @@ public final class PlayerMoveOutcomeExecutionSystem {
     }
 
     public interface MoveOutcomeActions {
-        void sendRollbackPacket(Packet13PlayerLookMove rollbackPacket);
+        void sendRollbackPacket(Object rollbackPacket);
 
-        void teleportPlayer(Location location);
+        void teleportPlayer(Object location);
     }
 }

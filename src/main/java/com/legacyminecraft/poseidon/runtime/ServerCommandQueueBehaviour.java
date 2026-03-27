@@ -1,7 +1,6 @@
 package com.legacyminecraft.poseidon.runtime;
 
 import com.legacyminecraft.poseidon.runtime.command.ServerCommandEnvelopeBehaviour;
-import net.minecraft.server.ICommandListener;
 
 import java.util.List;
 

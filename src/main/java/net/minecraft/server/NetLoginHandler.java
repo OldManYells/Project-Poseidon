@@ -19,6 +19,7 @@ import com.legacyminecraft.poseidon.auth.login.LoginTickPolicy;
 import com.legacyminecraft.poseidon.auth.login.LoginTransitionSystem;
 import com.legacyminecraft.poseidon.network.LoginHandshakePacketHandler;
 import com.legacyminecraft.poseidon.network.LoginHandshakeExecutionSystem;
+import com.legacyminecraft.poseidon.network.LoginShutdownMessageConfigPolicy;
 import com.legacyminecraft.poseidon.network.LoginProxyAssignmentSystem;
 import com.legacyminecraft.poseidon.network.LoginProxySessionApplySystem;
 import com.legacyminecraft.poseidon.network.LoginSessionStateSystem;
@@ -69,6 +70,8 @@ public class NetLoginHandler extends NetHandler {
     private final LoginPendingPacketExecutionSystem loginPendingPacketExecutionSystem =
             LoginPendingPacketExecutionSystem.getInstance();
     private final LoginProtocolErrorExecutionSystem loginProtocolErrorExecutionSystem = LoginProtocolErrorExecutionSystem.getInstance();
+    private final LoginShutdownMessageConfigPolicy loginShutdownMessageConfigPolicy =
+            LoginShutdownMessageConfigPolicy.getInstance();
     private Packet1Login pendingLoginFlowPacket;
     private Packet1Login pendingAuthenticatedSessionPacket;
     private final LoginTickExecutionSystem.TickActions loginTickActions = new LoginTickExecutionSystem.TickActions() {
@@ -117,8 +120,8 @@ public class NetLoginHandler extends NetHandler {
     private final LoginHandshakeExecutionSystem.HandshakeActions loginHandshakeActions =
             new LoginHandshakeExecutionSystem.HandshakeActions() {
                 @Override
-                public void queueResponsePacket(Packet responsePacket) {
-                    NetLoginHandler.this.networkManager.queue(responsePacket);
+                public void queueResponsePacket(Object responsePacket) {
+                    NetLoginHandler.this.networkManager.queue((Packet) responsePacket);
                 }
             };
     private final LoginCompletionStateApplySystem.CompletionStateSink loginCompletionStateSink =
@@ -212,22 +215,22 @@ public class NetLoginHandler extends NetHandler {
     private final LoginPacketExecutionSystem.ProxyAssignmentResolver loginProxyAssignmentResolver =
             new LoginPacketExecutionSystem.ProxyAssignmentResolver() {
                 @Override
-                public LoginProxyAssignmentSystem.ProxyAssignment resolveProxy(Packet1Login loginPacket) {
+                public LoginProxyAssignmentSystem.ProxyAssignment resolveProxy(Object loginPacket) {
                     return loginProxyAssignmentSystem.resolveProxy(NetLoginHandler.this, loginPacket);
                 }
             };
     private final LoginPacketExecutionSystem.LoginStartActions loginStartActions =
             new LoginPacketExecutionSystem.LoginStartActions() {
                 @Override
-                public void finishLogin(Packet1Login loginPacket) {
-                    NetLoginHandler.this.finishLogin(loginPacket);
+                public void finishLogin(Object loginPacket) {
+                    NetLoginHandler.this.finishLogin((Packet1Login) loginPacket);
                 }
             };
     private final LoginPendingPacketExecutionSystem.PendingPacketState loginFlowPendingPacketState =
             new LoginPendingPacketExecutionSystem.PendingPacketState() {
                 @Override
-                public void set(Packet1Login loginPacket) {
-                    NetLoginHandler.this.pendingLoginFlowPacket = loginPacket;
+                public void set(Object loginPacket) {
+                    NetLoginHandler.this.pendingLoginFlowPacket = (Packet1Login) loginPacket;
                 }
 
                 @Override
@@ -244,8 +247,8 @@ public class NetLoginHandler extends NetHandler {
     private final LoginPendingPacketExecutionSystem.PendingPacketState authenticatedSessionPendingPacketState =
             new LoginPendingPacketExecutionSystem.PendingPacketState() {
                 @Override
-                public void set(Packet1Login loginPacket) {
-                    NetLoginHandler.this.pendingAuthenticatedSessionPacket = loginPacket;
+                public void set(Object loginPacket) {
+                    NetLoginHandler.this.pendingAuthenticatedSessionPacket = (Packet1Login) loginPacket;
                 }
 
                 @Override
@@ -267,7 +270,9 @@ public class NetLoginHandler extends NetHandler {
         this.networkManager = new NetworkManager(socket, s, this);
         this.networkManager.f = 0;
 
-        this.msgKickShutdown = PoseidonConfig.getInstance().getConfigString("message.kick.shutdown");
+        this.msgKickShutdown = PoseidonConfig.getInstance().getConfigString(
+                loginShutdownMessageConfigPolicy.kickShutdownKey()
+        );
     }
 
     // CraftBukkit start

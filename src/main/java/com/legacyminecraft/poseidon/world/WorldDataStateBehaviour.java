@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.WorldData;
 
 import java.util.List;
 

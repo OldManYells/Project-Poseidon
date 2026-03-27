@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.IUpdatePlayerListBox;
 
 import java.util.List;
 

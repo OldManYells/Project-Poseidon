@@ -1,15 +1,12 @@
 package com.legacyminecraft.poseidon.network;
 
-import org.bukkit.ChatColor;
-
 /**
  * Canonical policy for packet-spam queue threshold enforcement.
  */
 public final class PacketSpamGuardSystem {
     private static final PacketSpamGuardSystem INSTANCE = new PacketSpamGuardSystem();
-    private static final String UNKNOWN_USERNAME = "Unknown";
-    private static final String DEFAULT_DISCONNECT_KEY = "disconnect.spam";
-    private static final String KICK_REASON = ChatColor.RED + "[Poseidon] You have been kicked for packet spamming.";
+    private final NetworkDisconnectKeyPolicy networkDisconnectKeyPolicy = NetworkDisconnectKeyPolicy.getInstance();
+    private final PacketSpamMessagePolicy packetSpamMessagePolicy = PacketSpamMessagePolicy.getInstance();
 
     private PacketSpamGuardSystem() {
     }
@@ -23,12 +20,12 @@ public final class PacketSpamGuardSystem {
             return SpamDecision.noAction();
         }
 
-        String resolvedUsername = username == null ? UNKNOWN_USERNAME : username;
+        String resolvedUsername = username == null ? packetSpamMessagePolicy.unknownUsername() : username;
         String logMessage = createKickLogMessage(resolvedUsername, queueSize, threshold);
         if (playerConnection) {
-            return SpamDecision.kickPlayer(logMessage, KICK_REASON);
+            return SpamDecision.kickPlayer(logMessage, packetSpamMessagePolicy.spamKickReason());
         }
-        return SpamDecision.disconnectConnection(logMessage, DEFAULT_DISCONNECT_KEY);
+        return SpamDecision.disconnectConnection(logMessage, networkDisconnectKeyPolicy.spam());
     }
 
     public String createKickLogMessage(String username, int queueSize, int threshold) {

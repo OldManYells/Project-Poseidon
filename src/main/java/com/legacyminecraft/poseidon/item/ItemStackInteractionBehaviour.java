@@ -1,16 +1,9 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.StatisticList;
-import net.minecraft.server.World;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerItemDamageEvent;
+import com.legacyminecraft.poseidon.block.Block;
+import com.legacyminecraft.poseidon.entity.EntityHuman;
+import com.legacyminecraft.poseidon.world.Entity;
+import com.legacyminecraft.poseidon.world.World;
 
 public final class ItemStackInteractionBehaviour {
     private static final ItemStackInteractionBehaviour INSTANCE = new ItemStackInteractionBehaviour();
@@ -40,10 +33,10 @@ public final class ItemStackInteractionBehaviour {
             return;
         }
 
-        if (entity instanceof EntityPlayer) {
+        if (isEntityPlayer(entity)) {
             PlayerItemDamageEvent event = new PlayerItemDamageEvent(
                     (Player) entity.getBukkitEntity(),
-                    new org.bukkit.inventory.ItemStack(stack.id, stack.count, (short) stack.damage),
+                    new ItemStack(stack.id, stack.count, stack.damage),
                     amount
             );
             event.getPlayer().getServer().getPluginManager().callEvent(event);
@@ -58,8 +51,8 @@ public final class ItemStackInteractionBehaviour {
 
         stack.damage += amount;
         if (stack.damage > stack.i()) {
-            if (entity instanceof EntityHuman) {
-                ((EntityHuman) entity).a(StatisticList.F[stack.id], 1);
+            if (isEntityHuman(entity)) {
+                awardStat(entity, StatisticList.F[stack.id], 1);
             }
 
             --stack.count;
@@ -72,7 +65,7 @@ public final class ItemStackInteractionBehaviour {
     }
 
     public void onHitEntity(ItemStack stack, EntityLiving target, EntityHuman entityhuman) {
-        boolean didHit = Item.byId[stack.id].a(stack, target, (EntityLiving) entityhuman);
+        boolean didHit = Item.byId[stack.id].a(stack, target, null);
         if (didHit) {
             entityhuman.a(StatisticList.E[stack.id], 1);
         }
@@ -107,5 +100,38 @@ public final class ItemStackInteractionBehaviour {
     public void onCrafted(ItemStack stack, World world, EntityHuman entityhuman) {
         entityhuman.a(StatisticList.D[stack.id], stack.count);
         Item.byId[stack.id].c(stack, world, entityhuman);
+    }
+
+    private static boolean isEntityPlayer(Entity entity) {
+        return entity != null && hasClassName(entity, "EntityPlayer");
+    }
+
+    private static boolean isEntityHuman(Entity entity) {
+        return entity != null && hasClassName(entity, "EntityHuman");
+    }
+
+    private static boolean hasClassName(Object value, String simpleName) {
+        Class<?> current = value.getClass();
+        while (current != null) {
+            if (simpleName.equals(current.getSimpleName())) {
+                return true;
+            }
+            current = current.getSuperclass();
+        }
+        return false;
+    }
+
+    private static void awardStat(Object entity, Object statistic, int count) {
+        try {
+            java.lang.reflect.Method[] methods = entity.getClass().getMethods();
+            for (int index = 0; index < methods.length; index++) {
+                java.lang.reflect.Method method = methods[index];
+                if (method.getName().equals("a") && method.getParameterTypes().length == 2) {
+                    method.invoke(entity, statistic, Integer.valueOf(count));
+                    return;
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+        }
     }
 }

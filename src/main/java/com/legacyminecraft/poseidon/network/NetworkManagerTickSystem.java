@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.NetHandler;
 
 import java.util.List;
 
@@ -9,8 +8,9 @@ import java.util.List;
  */
 public final class NetworkManagerTickSystem {
     private static final NetworkManagerTickSystem INSTANCE = new NetworkManagerTickSystem();
-    private static final int DEFAULT_TIMEOUT_THRESHOLD = 1200;
 
+    private final NetworkDisconnectKeyPolicy networkDisconnectKeyPolicy = NetworkDisconnectKeyPolicy.getInstance();
+    private final NetworkTimeoutPolicy networkTimeoutPolicy = NetworkTimeoutPolicy.getInstance();
     private final ConnectionQueuePolicy connectionQueuePolicy = ConnectionQueuePolicy.getInstance();
     private final InboundPacketProcessingSystem inboundPacketProcessingSystem = InboundPacketProcessingSystem.getInstance();
     private final PacketSpamGuardSystem packetSpamGuardSystem = PacketSpamGuardSystem.getInstance();
@@ -24,17 +24,17 @@ public final class NetworkManagerTickSystem {
 
     public TickState tick(TickRequest request, TickActions actions) {
         if (connectionQueuePolicy.isOverflow(request.getQueuedBytes(), request.isFastModeEnabled())) {
-            actions.disconnect("disconnect.overflow");
+            actions.disconnect(networkDisconnectKeyPolicy.overflow());
         }
 
         ConnectionQueuePolicy.TimeoutDecision timeoutDecision =
                 connectionQueuePolicy.evaluateTimeout(
                         request.isInboundQueueEmpty(),
                         request.getIdleTicks(),
-                        DEFAULT_TIMEOUT_THRESHOLD
+                        networkTimeoutPolicy.idleTimeoutTicks()
                 );
         if (timeoutDecision.shouldDisconnect()) {
-            actions.disconnect("disconnect.timeout");
+            actions.disconnect(networkDisconnectKeyPolicy.timeout());
         }
 
         PacketSpamGuardSystem.SpamDecision spamDecision = packetSpamGuardSystem.evaluate(
@@ -85,7 +85,7 @@ public final class NetworkManagerTickSystem {
         private final String username;
         private final boolean playerConnection;
         private final List inboundQueue;
-        private final NetHandler handler;
+        private final Object handler;
         private final boolean firePacketEvents;
 
         public TickRequest(
@@ -99,7 +99,7 @@ public final class NetworkManagerTickSystem {
                 String username,
                 boolean playerConnection,
                 List inboundQueue,
-                NetHandler handler,
+                Object handler,
                 boolean firePacketEvents
         ) {
             this.fastModeEnabled = fastModeEnabled;
@@ -156,7 +156,7 @@ public final class NetworkManagerTickSystem {
             return inboundQueue;
         }
 
-        public NetHandler getHandler() {
+        public Object getHandler() {
             return handler;
         }
 

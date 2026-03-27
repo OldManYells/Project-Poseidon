@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.NetworkManager;
 
 import java.util.logging.Logger;
 
@@ -18,7 +17,7 @@ public final class LoginConnectionLifecycleSystem {
         return INSTANCE;
     }
 
-    public void disconnect(NetworkManager networkManager, Logger logger, String identity, String reason) {
+    public void disconnect(Object networkManager, Logger logger, String identity, String reason) {
         delegate.disconnect(networkManager, logger, identity, reason);
     }
 

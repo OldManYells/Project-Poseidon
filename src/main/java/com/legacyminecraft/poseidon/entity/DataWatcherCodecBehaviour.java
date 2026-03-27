@@ -1,9 +1,8 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Packet;
-import net.minecraft.server.WatchableObject;
+import com.legacyminecraft.poseidon.item.ItemStack;
+import com.legacyminecraft.poseidon.packet.Packet;
+import com.legacyminecraft.poseidon.world.ChunkCoordinates;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

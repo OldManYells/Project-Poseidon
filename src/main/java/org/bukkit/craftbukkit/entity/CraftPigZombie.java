@@ -1,11 +1,17 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.MobPropertyBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityWrapperStringBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityTypedHandleCastBehaviour;
+import com.legacyminecraft.compat.bukkit.MobPropertyBehaviour;
 import net.minecraft.server.EntityPigZombie;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.PigZombie;
 
 public class CraftPigZombie extends CraftZombie implements PigZombie {
+    private static final EntityWrapperStringBehaviour ENTITY_WRAPPER_STRING_BEHAVIOUR =
+            EntityWrapperStringBehaviour.getInstance();
+    private static final EntityTypedHandleCastBehaviour ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR =
+            EntityTypedHandleCastBehaviour.getInstance();
     private static final MobPropertyBehaviour MOB_PROPERTY_BEHAVIOUR = MobPropertyBehaviour.getInstance();
 
     public CraftPigZombie(CraftServer server, EntityPigZombie entity) {
@@ -14,12 +20,12 @@ public class CraftPigZombie extends CraftZombie implements PigZombie {
 
     @Override
     public EntityPigZombie getHandle() {
-        return (EntityPigZombie) super.getHandle();
+        return ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR.castHandle(super.getHandle(), EntityPigZombie.class);
     }
 
     @Override
     public String toString() {
-        return "CraftPigZombie";
+        return ENTITY_WRAPPER_STRING_BEHAVIOUR.toString("CraftPigZombie");
     }
 
     public int getAnger() {

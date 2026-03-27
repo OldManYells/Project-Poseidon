@@ -1,19 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ContainerChest;
-import net.minecraft.server.ContainerDispenser;
-import net.minecraft.server.ContainerFurnace;
-import net.minecraft.server.ContainerWorkbench;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.ICrafting;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.Packet100OpenWindow;
-import net.minecraft.server.Packet101CloseWindow;
-import net.minecraft.server.Packet103SetSlot;
-import net.minecraft.server.TileEntityDispenser;
-import net.minecraft.server.TileEntityFurnace;
-import org.bukkit.event.inventory.ChestOpenedEvent;
 
 /**
  * Canonical player window/container lifecycle orchestration.
@@ -40,7 +26,7 @@ public final class PlayerWindowLifecycleBehaviour {
     }
 
     public boolean fireChestOpenedEvent(EntityPlayer player, IInventory inventory) {
-        ChestOpenedEvent event = new ChestOpenedEvent((org.bukkit.entity.Player) player.getBukkitEntity(), inventory.getContents());
+        ChestOpenedEvent event = new ChestOpenedEvent((com.legacyminecraft.compat.bukkit.entity.Player) player.getBukkitEntity(), inventory.getContents());
         player.world.getServer().getPluginManager().callEvent(event);
         return !event.isCancelled();
     }

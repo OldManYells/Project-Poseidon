@@ -1,15 +1,8 @@
 package com.legacyminecraft.poseidon.item;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PlayerInteractEventBridgeBehaviour;
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityBoat;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EnumMovingObjectType;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MovingObjectPosition;
-import net.minecraft.server.World;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import com.legacyminecraft.compat.bukkit.Action;
+import com.legacyminecraft.compat.bukkit.PlayerInteractEvent;
+import com.legacyminecraft.compat.bukkit.PlayerInteractEventBridgeBehaviour;
 
 public final class BoatItemPlacementBehaviour {
     private static final BoatItemPlacementBehaviour INSTANCE = new BoatItemPlacementBehaviour();
@@ -41,7 +34,7 @@ public final class BoatItemPlacementBehaviour {
                     y,
                     z,
                     movingobjectposition.face,
-                    itemstack
+                    new com.legacyminecraft.compat.bukkit.ItemStack(itemstack.id, itemstack.count, itemstack.damage)
             );
             if (event.isCancelled()) {
                 return itemstack;

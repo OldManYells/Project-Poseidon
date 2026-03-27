@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.inventory.recipe;
 
-import net.minecraft.server.InventoryCrafting;
-import net.minecraft.server.ItemStack;
+import com.legacyminecraft.poseidon.inventory.InventoryCrafting;
+import com.legacyminecraft.poseidon.inventory.ItemStack;
 
 /**
  * Canonical recipe contract bridged by legacy crafting recipe wrappers.

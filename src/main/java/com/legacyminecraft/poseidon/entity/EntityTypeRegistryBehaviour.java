@@ -1,32 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityBoat;
-import net.minecraft.server.EntityChicken;
-import net.minecraft.server.EntityCow;
-import net.minecraft.server.EntityCreeper;
-import net.minecraft.server.EntityFallingSand;
-import net.minecraft.server.EntityGhast;
-import net.minecraft.server.EntityGiantZombie;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.EntityMonster;
-import net.minecraft.server.EntityPainting;
-import net.minecraft.server.EntityPig;
-import net.minecraft.server.EntityPigZombie;
-import net.minecraft.server.EntitySheep;
-import net.minecraft.server.EntitySkeleton;
-import net.minecraft.server.EntitySlime;
-import net.minecraft.server.EntitySnowball;
-import net.minecraft.server.EntitySpider;
-import net.minecraft.server.EntitySquid;
-import net.minecraft.server.EntityTNTPrimed;
-import net.minecraft.server.EntityWolf;
-import net.minecraft.server.EntityZombie;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
 
 import java.util.Map;
 

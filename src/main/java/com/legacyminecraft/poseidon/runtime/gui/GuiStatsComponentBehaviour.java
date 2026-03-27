@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime.gui;
 
-import net.minecraft.server.NetworkManager;
 
 import javax.swing.JComponent;
 import javax.swing.Timer;

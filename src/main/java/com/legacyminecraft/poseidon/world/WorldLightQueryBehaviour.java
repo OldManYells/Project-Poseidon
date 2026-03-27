@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.EnumSkyBlock;
-import net.minecraft.server.World;
 
 /**
  * Canonical behaviour for world light-value query policy.
@@ -30,7 +27,7 @@ public final class WorldLightQueryBehaviour {
         }
 
         Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-        return chunk.a(lightLayer, x & 15, clampedY, z & 15);
+        return chunk.c(x & 15, clampedY, z & 15, outOfBoundsFallback);
     }
 
     public float mapBrightness(float[] brightnessTable, int lightLevel) {

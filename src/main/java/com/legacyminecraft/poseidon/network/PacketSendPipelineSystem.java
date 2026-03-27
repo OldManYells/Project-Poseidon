@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.NetworkManager;
-import net.minecraft.server.Packet;
-import org.bukkit.entity.Player;
 
 /**
  * Canonical pipeline for outgoing packet filtering and dispatch.
@@ -21,13 +17,13 @@ public final class PacketSendPipelineSystem {
     }
 
     public boolean sendPacket(
-            NetworkManager networkManager,
-            EntityPlayer player,
-            Player bukkitPlayer,
-            Packet packet,
+            Object networkManager,
+            Object player,
+            Object bukkitPlayer,
+            Object packet,
             boolean firePacketEvents
     ) {
-        Packet filteredPacket = outgoingPacketEventSystem.filterOutgoingPacket(firePacketEvents, player, packet);
+        Object filteredPacket = outgoingPacketEventSystem.filterOutgoingPacket(firePacketEvents, player, packet);
         if (filteredPacket == null) {
             return false;
         }

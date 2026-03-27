@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,9 +18,9 @@ public final class OutboundQueueSystem {
         return INSTANCE;
     }
 
-    public QueueState enqueuePacket(List highPriorityQueue, List lowPriorityQueue, Packet packet, int queuedBytes) {
-        int updatedQueuedBytes = queuedBytes + packet.a() + 1;
-        if (packet.k) {
+    public QueueState enqueuePacket(List highPriorityQueue, List lowPriorityQueue, Object packet, int queuedBytes) {
+        int updatedQueuedBytes = queuedBytes + Bridge.packetSize(packet) + 1;
+        if (Bridge.isLowPriority(packet)) {
             lowPriorityQueue.add(packet);
         } else {
             highPriorityQueue.add(packet);
@@ -44,9 +43,9 @@ public final class OutboundQueueSystem {
         int updatedQueuedBytes = queuedBytes;
         int updatedLowPriorityQueueDelay = lowPriorityQueueDelay;
 
-        if (!highPriorityQueue.isEmpty() && canWriteHighPriority(packetDelayMs, nowMillis, (Packet) highPriorityQueue.get(0))) {
-            Packet packet = removeFirst(queueLock, highPriorityQueue);
-            updatedQueuedBytes -= packet.a() + 1;
+        if (!highPriorityQueue.isEmpty() && canWriteHighPriority(packetDelayMs, nowMillis, highPriorityQueue.get(0))) {
+            Object packet = removeFirst(queueLock, highPriorityQueue);
+            updatedQueuedBytes -= Bridge.packetSize(packet) + 1;
             writePacket(packet, output, outboundPacketBytes);
             wrotePacket = true;
         }
@@ -60,9 +59,9 @@ public final class OutboundQueueSystem {
 
         if (allowLowPriorityDrain
                 && !lowPriorityQueue.isEmpty()
-                && (highPriorityQueue.isEmpty() || isLowPriorityOlder((Packet) highPriorityQueue.get(0), (Packet) lowPriorityQueue.get(0)))) {
-            Packet packet = removeFirst(queueLock, lowPriorityQueue);
-            updatedQueuedBytes -= packet.a() + 1;
+                && (highPriorityQueue.isEmpty() || isLowPriorityOlder(highPriorityQueue.get(0), lowPriorityQueue.get(0)))) {
+            Object packet = removeFirst(queueLock, lowPriorityQueue);
+            updatedQueuedBytes -= Bridge.packetSize(packet) + 1;
             writePacket(packet, output, outboundPacketBytes);
             updatedLowPriorityQueueDelay = 0;
             wrotePacket = true;
@@ -71,23 +70,72 @@ public final class OutboundQueueSystem {
         return new DrainResult(wrotePacket, updatedQueuedBytes, updatedLowPriorityQueueDelay);
     }
 
-    private Packet removeFirst(Object queueLock, List queue) {
+    private Object removeFirst(Object queueLock, List queue) {
         synchronized (queueLock) {
-            return (Packet) queue.remove(0);
+            return queue.remove(0);
         }
     }
 
-    private boolean canWriteHighPriority(int packetDelayMs, long nowMillis, Packet firstHighPriorityPacket) {
-        return packetDelayMs == 0 || nowMillis - firstHighPriorityPacket.timestamp >= (long) packetDelayMs;
+    private boolean canWriteHighPriority(int packetDelayMs, long nowMillis, Object firstHighPriorityPacket) {
+        return packetDelayMs == 0 || nowMillis - Bridge.packetTimestamp(firstHighPriorityPacket) >= (long) packetDelayMs;
     }
 
-    private boolean isLowPriorityOlder(Packet firstHighPriorityPacket, Packet firstLowPriorityPacket) {
-        return firstHighPriorityPacket.timestamp > firstLowPriorityPacket.timestamp;
+    private boolean isLowPriorityOlder(Object firstHighPriorityPacket, Object firstLowPriorityPacket) {
+        return Bridge.packetTimestamp(firstHighPriorityPacket) > Bridge.packetTimestamp(firstLowPriorityPacket);
     }
 
-    private void writePacket(Packet packet, DataOutputStream output, int[] outboundPacketBytes) throws IOException {
-        Packet.a(packet, output);
-        outboundPacketBytes[packet.b()] += packet.a() + 1;
+    private void writePacket(Object packet, DataOutputStream output, int[] outboundPacketBytes) throws IOException {
+        Bridge.writePacket(packet, output);
+        outboundPacketBytes[Bridge.packetId(packet)] += Bridge.packetSize(packet) + 1;
+    }
+
+    private static final class Bridge {
+        private static boolean isLowPriority(Object packet) {
+            return readBooleanField(packet, "k");
+        }
+
+        private static long packetTimestamp(Object packet) {
+            return readLongField(packet, "timestamp");
+        }
+
+        private static int packetId(Object packet) {
+            return invokeInt(packet, "b");
+        }
+
+        private static int packetSize(Object packet) {
+            return invokeInt(packet, "a");
+        }
+
+        private static void writePacket(Object packet, DataOutputStream output) throws IOException {
+            NetworkCompatGatewayRegistry.gateway().writePacket(packet, output);
+        }
+
+        private static int invokeInt(Object target, String methodName) {
+            try {
+                java.lang.reflect.Method method = target.getClass().getMethod(methodName);
+                return ((Integer) method.invoke(target)).intValue();
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        private static boolean readBooleanField(Object target, String fieldName) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getField(fieldName);
+                return field.getBoolean(target);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        private static long readLongField(Object target, String fieldName) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getField(fieldName);
+                return field.getLong(target);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
     }
 
     public static final class QueueState {

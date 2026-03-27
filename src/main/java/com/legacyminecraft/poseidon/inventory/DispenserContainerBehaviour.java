@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Container;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.Slot;
-import net.minecraft.server.TileEntityDispenser;
 
 public final class DispenserContainerBehaviour {
     private static final DispenserContainerBehaviour INSTANCE = new DispenserContainerBehaviour();

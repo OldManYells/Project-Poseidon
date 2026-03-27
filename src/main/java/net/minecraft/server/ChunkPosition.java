@@ -2,7 +2,7 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.world.ChunkPositionBehaviour;
 
-public class ChunkPosition {
+public class ChunkPosition extends com.legacyminecraft.poseidon.world.ChunkPosition {
     private static final ChunkPositionBehaviour CHUNK_POSITION_BEHAVIOUR = ChunkPositionBehaviour.getInstance();
 
     public final int x;
@@ -10,6 +10,7 @@ public class ChunkPosition {
     public final int z;
 
     public ChunkPosition(int i, int j, int k) {
+        super(i, j, k);
         this.x = i;
         this.y = j;
         this.z = k;

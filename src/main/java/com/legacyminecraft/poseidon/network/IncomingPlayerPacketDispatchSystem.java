@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import com.legacyminecraft.poseidon.event.PlayerReceivePacketEvent;
-import net.minecraft.server.NetHandler;
-import net.minecraft.server.NetServerHandler;
-import net.minecraft.server.Packet;
-import org.bukkit.Bukkit;
 
 /**
  * Canonical service for NetworkManager incoming packet dispatch resolution.
@@ -19,29 +14,29 @@ public final class IncomingPlayerPacketDispatchSystem {
         return INSTANCE;
     }
 
-    public DispatchDecision resolve(boolean firePacketEvents, NetHandler netHandler, String username, Packet packet) {
-        if (!firePacketEvents || !(netHandler instanceof NetServerHandler)) {
+    public DispatchDecision resolve(boolean firePacketEvents, Object netHandler, String username, Object packet) {
+        if (!firePacketEvents || !Bridge.isNetServerHandler(netHandler)) {
             return DispatchDecision.dispatch(packet);
         }
 
-        PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(username, packet);
-        Bukkit.getPluginManager().callEvent(event);
-        if (event.isCancelled()) {
+        Object event = Bridge.newReceiveEvent(username, packet);
+        Bridge.callBukkitEvent(event);
+        if (Bridge.isEventCancelled(event)) {
             return DispatchDecision.skipDispatch();
         }
-        return DispatchDecision.dispatch(event.getPacket());
+        return DispatchDecision.dispatch(Bridge.getEventPacket(event));
     }
 
     public static final class DispatchDecision {
         private final boolean shouldDispatch;
-        private final Packet packet;
+        private final Object packet;
 
-        private DispatchDecision(boolean shouldDispatch, Packet packet) {
+        private DispatchDecision(boolean shouldDispatch, Object packet) {
             this.shouldDispatch = shouldDispatch;
             this.packet = packet;
         }
 
-        public static DispatchDecision dispatch(Packet packet) {
+        public static DispatchDecision dispatch(Object packet) {
             return new DispatchDecision(true, packet);
         }
 
@@ -53,8 +48,38 @@ public final class IncomingPlayerPacketDispatchSystem {
             return shouldDispatch;
         }
 
-        public Packet getPacket() {
+        public Object getPacket() {
             return packet;
+        }
+    }
+
+    private static final class Bridge {
+        private static boolean isNetServerHandler(Object handler) {
+            return handler != null && NetworkCompatGatewayRegistry.gateway().isNetServerHandler(handler);
+        }
+
+        private static Object newReceiveEvent(String username, Object packet) {
+            return NetworkCompatGatewayRegistry.gateway().createPlayerReceivePacketEvent(username, packet);
+        }
+
+        private static void callBukkitEvent(Object event) {
+            NetworkCompatGatewayRegistry.gateway().callGlobalEvent(event);
+        }
+
+        private static boolean isEventCancelled(Object event) {
+            try {
+                return Boolean.TRUE.equals(event.getClass().getMethod("isCancelled").invoke(event));
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        private static Object getEventPacket(Object event) {
+            try {
+                return event.getClass().getMethod("getPacket").invoke(event);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
         }
     }
 }

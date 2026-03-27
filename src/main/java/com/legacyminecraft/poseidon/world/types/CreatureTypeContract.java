@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.types;
 
-import net.minecraft.server.Material;
 
 /**
  * Canonical contract for world creature spawn categories.

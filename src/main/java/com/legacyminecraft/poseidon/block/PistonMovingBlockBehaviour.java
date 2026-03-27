@@ -1,11 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Block;
-import net.minecraft.server.PistonBlockTextures;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.TileEntityPiston;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.compat.LegacyCompatGatewayRegistry;
 
 /**
  * Canonical behavior service for moving-piston block wrappers.
@@ -20,67 +15,102 @@ public final class PistonMovingBlockBehaviour {
         return INSTANCE;
     }
 
-    public TileEntity createMovingTileEntity(int movedBlockId, int movedBlockData, int facing, boolean extending, boolean renderHead) {
-        return new TileEntityPiston(movedBlockId, movedBlockData, facing, extending, renderHead);
+    public Object createMovingTileEntity(int movedBlockId, int movedBlockData, int facing, boolean extending, boolean renderHead) {
+        return LegacyCompatGatewayRegistry.gateway()
+                .createMovingTileEntityPiston(movedBlockId, movedBlockData, facing, extending, renderHead);
     }
 
-    public TileEntityPiston extractPistonTileEntity(TileEntity tileEntity) {
-        return tileEntity instanceof TileEntityPiston ? (TileEntityPiston) tileEntity : null;
+    public <T> T extractPistonTileEntity(Object tileEntity) {
+        if (tileEntity == null) {
+            return null;
+        }
+        if (LegacyCompatGatewayRegistry.gateway().isTileEntityPiston(tileEntity)) {
+            @SuppressWarnings("unchecked")
+            T cast = (T) tileEntity;
+            return cast;
+        }
+        return null;
     }
 
-    public boolean handleRemove(World world, int x, int y, int z) {
-        TileEntityPiston tileEntityPiston = extractPistonTileEntity(world.getTileEntity(x, y, z));
+    public boolean handleRemove(Object world, int x, int y, int z) {
+        Object tileEntity = Reflection.invoke(world, "getTileEntity", x, y, z);
+        Object tileEntityPiston = extractPistonTileEntity(tileEntity);
         if (tileEntityPiston == null) {
             return false;
         }
-
-        tileEntityPiston.k();
+        Reflection.invoke(tileEntityPiston, "k");
         return true;
     }
 
-    public boolean shouldClearOrphanMovingBlock(World world, int x, int y, int z) {
-        return !world.isStatic && world.getTileEntity(x, y, z) == null;
+    public boolean shouldClearOrphanMovingBlock(Object world, int x, int y, int z) {
+        boolean isStatic = (Boolean) Reflection.getField(world, "isStatic");
+        Object tile = Reflection.invoke(world, "getTileEntity", x, y, z);
+        return !isStatic && tile == null;
     }
 
-    public void dropMovedBlockNaturally(World world, int x, int y, int z, TileEntityPiston tileEntityPiston) {
-        if (!world.isStatic && tileEntityPiston != null) {
-            Block.byId[tileEntityPiston.a()].g(world, x, y, z, tileEntityPiston.e());
+    public void dropMovedBlockNaturally(Object world, int x, int y, int z, Object tileEntityPiston) {
+        boolean isStatic = (Boolean) Reflection.getField(world, "isStatic");
+        if (isStatic || tileEntityPiston == null) {
+            return;
         }
+
+        int movedBlockId = ((Number) Reflection.invoke(tileEntityPiston, "a")).intValue();
+        int movedData = ((Number) Reflection.invoke(tileEntityPiston, "e")).intValue();
+        Object block = LegacyCompatGatewayRegistry.gateway().blockById(movedBlockId);
+        Reflection.invoke(block, "g", world, x, y, z, movedData);
     }
 
-    public float resolveRenderProgress(TileEntityPiston tileEntityPiston) {
-        float progress = tileEntityPiston.a(0.0F);
-        return tileEntityPiston.c() ? 1.0F - progress : progress;
+    public float resolveRenderProgress(Object tileEntityPiston) {
+        float progress = ((Number) Reflection.invoke(tileEntityPiston, "a", 0.0F)).floatValue();
+        boolean extending = (Boolean) Reflection.invoke(tileEntityPiston, "c");
+        return extending ? 1.0F - progress : progress;
     }
 
-    public AxisAlignedBB resolveShiftedCollisionBox(World world, int x, int y, int z, int movedBlockId, float progress, int facing, int movingBlockId) {
+    public <T> T resolveShiftedCollisionBox(Object world, int x, int y, int z, int movedBlockId, float progress, int facing, int movingBlockId) {
         if (movedBlockId == 0 || movedBlockId == movingBlockId) {
             return null;
         }
 
-        AxisAlignedBB axisAlignedBB = Block.byId[movedBlockId].e(world, x, y, z);
+        Object movedBlock = LegacyCompatGatewayRegistry.gateway().blockById(movedBlockId);
+        Object axisAlignedBB = Reflection.invoke(movedBlock, "e", world, x, y, z);
         if (axisAlignedBB == null) {
             return null;
         }
 
-        axisAlignedBB.a -= (double) ((float) PistonBlockTextures.b[facing] * progress);
-        axisAlignedBB.d -= (double) ((float) PistonBlockTextures.b[facing] * progress);
-        axisAlignedBB.b -= (double) ((float) PistonBlockTextures.c[facing] * progress);
-        axisAlignedBB.e -= (double) ((float) PistonBlockTextures.c[facing] * progress);
-        axisAlignedBB.c -= (double) ((float) PistonBlockTextures.d[facing] * progress);
-        axisAlignedBB.f -= (double) ((float) PistonBlockTextures.d[facing] * progress);
-        return axisAlignedBB;
+        int[] b = LegacyCompatGatewayRegistry.gateway().pistonOffsetX();
+        int[] c = LegacyCompatGatewayRegistry.gateway().pistonOffsetY();
+        int[] d = LegacyCompatGatewayRegistry.gateway().pistonOffsetZ();
+
+        shiftBoundingField(axisAlignedBB, "a", b[facing], progress);
+        shiftBoundingField(axisAlignedBB, "d", b[facing], progress);
+        shiftBoundingField(axisAlignedBB, "b", c[facing], progress);
+        shiftBoundingField(axisAlignedBB, "e", c[facing], progress);
+        shiftBoundingField(axisAlignedBB, "c", d[facing], progress);
+        shiftBoundingField(axisAlignedBB, "f", d[facing], progress);
+
+        @SuppressWarnings("unchecked")
+        T cast = (T) axisAlignedBB;
+        return cast;
     }
 
-    public Bounds resolveShiftedOutlineBounds(Block movedBlock, float progress, int facing) {
+    public Bounds resolveShiftedOutlineBounds(Object movedBlock, float progress, int facing) {
+        int[] b = LegacyCompatGatewayRegistry.gateway().pistonOffsetX();
+        int[] c = LegacyCompatGatewayRegistry.gateway().pistonOffsetY();
+        int[] d = LegacyCompatGatewayRegistry.gateway().pistonOffsetZ();
+
         return new Bounds(
-                movedBlock.minX - (double) ((float) PistonBlockTextures.b[facing] * progress),
-                movedBlock.minY - (double) ((float) PistonBlockTextures.c[facing] * progress),
-                movedBlock.minZ - (double) ((float) PistonBlockTextures.d[facing] * progress),
-                movedBlock.maxX - (double) ((float) PistonBlockTextures.b[facing] * progress),
-                movedBlock.maxY - (double) ((float) PistonBlockTextures.c[facing] * progress),
-                movedBlock.maxZ - (double) ((float) PistonBlockTextures.d[facing] * progress)
+                ((Number) Reflection.getField(movedBlock, "minX")).doubleValue() - (double) ((float) b[facing] * progress),
+                ((Number) Reflection.getField(movedBlock, "minY")).doubleValue() - (double) ((float) c[facing] * progress),
+                ((Number) Reflection.getField(movedBlock, "minZ")).doubleValue() - (double) ((float) d[facing] * progress),
+                ((Number) Reflection.getField(movedBlock, "maxX")).doubleValue() - (double) ((float) b[facing] * progress),
+                ((Number) Reflection.getField(movedBlock, "maxY")).doubleValue() - (double) ((float) c[facing] * progress),
+                ((Number) Reflection.getField(movedBlock, "maxZ")).doubleValue() - (double) ((float) d[facing] * progress)
         );
+    }
+
+    private static void shiftBoundingField(Object axisAlignedBB, String fieldName, int axisDelta, float progress) {
+        double current = ((Number) Reflection.getField(axisAlignedBB, fieldName)).doubleValue();
+        Reflection.setField(axisAlignedBB, fieldName, current - (double) ((float) axisDelta * progress));
     }
 
     public static final class Bounds {
@@ -100,28 +130,85 @@ public final class PistonMovingBlockBehaviour {
             this.maxZ = maxZ;
         }
 
-        public double getMinX() {
-            return minX;
+        public double getMinX() { return minX; }
+        public double getMinY() { return minY; }
+        public double getMinZ() { return minZ; }
+        public double getMaxX() { return maxX; }
+        public double getMaxY() { return maxY; }
+        public double getMaxZ() { return maxZ; }
+    }
+
+    private static final class Reflection {
+        private Reflection() {
         }
 
-        public double getMinY() {
-            return minY;
+        static Object getStaticField(Class<?> type, String name) {
+            try {
+                java.lang.reflect.Field field = type.getDeclaredField(name);
+                field.setAccessible(true);
+                return field.get(null);
+            } catch (Exception exception) {
+                throw new IllegalStateException("Unable to read static field: " + name, exception);
+            }
         }
 
-        public double getMinZ() {
-            return minZ;
+        static Object getField(Object target, String name) {
+            Class<?> type = target.getClass();
+            while (type != null) {
+                try {
+                    java.lang.reflect.Field field = type.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return field.get(target);
+                } catch (NoSuchFieldException ignored) {
+                    type = type.getSuperclass();
+                } catch (Exception exception) {
+                    throw new IllegalStateException("Unable to read field: " + name, exception);
+                }
+            }
+            throw new IllegalStateException("Field not found: " + name);
         }
 
-        public double getMaxX() {
-            return maxX;
+        static void setField(Object target, String name, Object value) {
+            Class<?> type = target.getClass();
+            while (type != null) {
+                try {
+                    java.lang.reflect.Field field = type.getDeclaredField(name);
+                    field.setAccessible(true);
+                    field.set(target, value);
+                    return;
+                } catch (NoSuchFieldException ignored) {
+                    type = type.getSuperclass();
+                } catch (Exception exception) {
+                    throw new IllegalStateException("Unable to write field: " + name, exception);
+                }
+            }
+            throw new IllegalStateException("Field not found: " + name);
         }
 
-        public double getMaxY() {
-            return maxY;
-        }
-
-        public double getMaxZ() {
-            return maxZ;
+        static Object invoke(Object target, String methodName, Object... args) {
+            Class<?> type = target.getClass();
+            while (type != null) {
+                for (java.lang.reflect.Method method : type.getMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        try {
+                            method.setAccessible(true);
+                            return method.invoke(target, args);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                for (java.lang.reflect.Method method : type.getDeclaredMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        try {
+                            method.setAccessible(true);
+                            return method.invoke(target, args);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                type = type.getSuperclass();
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
         }
     }
 }

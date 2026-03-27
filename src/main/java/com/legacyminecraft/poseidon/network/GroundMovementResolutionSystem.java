@@ -1,17 +1,17 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.WorldServer;
+import com.legacyminecraft.poseidon.entity.EntityPlayer;
+import com.legacyminecraft.poseidon.world.WorldServer;
 
 /**
  * Canonical coordinator for post-move collision checks, moved-wrongly detection, and floating guards.
  */
 public final class GroundMovementResolutionSystem {
     private static final GroundMovementResolutionSystem INSTANCE = new GroundMovementResolutionSystem();
-    private static final float COLLISION_MARGIN = 0.0625F;
 
     private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
     private final FloatingTickGuardSystem floatingTickGuardSystem = FloatingTickGuardSystem.getInstance();
+    private final GroundCollisionMarginPolicy groundCollisionMarginPolicy = GroundCollisionMarginPolicy.getInstance();
 
     private GroundMovementResolutionSystem() {
     }
@@ -34,9 +34,16 @@ public final class GroundMovementResolutionSystem {
             boolean allowFlight,
             int floatingTicks
     ) {
+        com.legacyminecraft.poseidon.world.Entity worldEntity =
+                (com.legacyminecraft.poseidon.world.Entity) (Object) player;
+
         boolean hadNoInitialCollisions = worldServer.getEntities(
-                player,
-                player.boundingBox.clone().shrink((double) COLLISION_MARGIN, (double) COLLISION_MARGIN, (double) COLLISION_MARGIN)
+                worldEntity,
+                toWorldBoundingBox(player.boundingBox.clone().shrink(
+                        (double) groundCollisionMarginPolicy.collisionMargin(),
+                        (double) groundCollisionMarginPolicy.collisionMargin(),
+                        (double) groundCollisionMarginPolicy.collisionMargin()
+                ))
         ).size() == 0;
 
         player.move(deltaX, deltaY, deltaZ);
@@ -54,8 +61,12 @@ public final class GroundMovementResolutionSystem {
         player.setLocation(targetX, targetY, targetZ, targetYaw, targetPitch);
 
         boolean hasNoFinalCollisions = worldServer.getEntities(
-                player,
-                player.boundingBox.clone().shrink((double) COLLISION_MARGIN, (double) COLLISION_MARGIN, (double) COLLISION_MARGIN)
+                worldEntity,
+                toWorldBoundingBox(player.boundingBox.clone().shrink(
+                        (double) groundCollisionMarginPolicy.collisionMargin(),
+                        (double) groundCollisionMarginPolicy.collisionMargin(),
+                        (double) groundCollisionMarginPolicy.collisionMargin()
+                ))
         ).size() == 0;
 
         boolean shouldTeleportToLastGoodPosition = movementPacketPolicy.shouldTeleportToLastGoodPosition(
@@ -67,7 +78,11 @@ public final class GroundMovementResolutionSystem {
 
         FloatingTickGuardSystem.FloatingDecision floatingDecision = floatingTickGuardSystem.evaluate(
                 allowFlight,
-                worldServer.b(player.boundingBox.clone().b((double) COLLISION_MARGIN, (double) COLLISION_MARGIN, (double) COLLISION_MARGIN).a(0.0D, -0.55D, 0.0D)),
+                worldServer.b(toWorldBoundingBox(player.boundingBox.clone().b(
+                        (double) groundCollisionMarginPolicy.collisionMargin(),
+                        (double) groundCollisionMarginPolicy.collisionMargin(),
+                        (double) groundCollisionMarginPolicy.collisionMargin()
+                ).a(0.0D, -0.55D, 0.0D))),
                 adjustedDeltaY,
                 floatingTicks
         );
@@ -98,6 +113,12 @@ public final class GroundMovementResolutionSystem {
 
     public String createFloatingKickLogMessage(String playerName) {
         return floatingTickGuardSystem.createFloatingKickLogMessage(playerName);
+    }
+
+    private com.legacyminecraft.poseidon.world.AxisAlignedBB toWorldBoundingBox(
+            com.legacyminecraft.compat.bukkit.AxisAlignedBB box
+    ) {
+        return com.legacyminecraft.poseidon.world.AxisAlignedBB.b(box.a, box.b, box.c, box.d, box.e, box.f);
     }
 
     public static final class GroundMovementResult {

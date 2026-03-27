@@ -7,7 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-public class DataWatcher {
+public class DataWatcher extends com.legacyminecraft.poseidon.packet.DataWatcher {
     private static final DataWatcherCodecBehaviour DATA_WATCHER_CODEC_BEHAVIOUR = DataWatcherCodecBehaviour.getInstance();
 
     private boolean d = true;

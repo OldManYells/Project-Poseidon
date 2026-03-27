@@ -1,25 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.BiomeMeta;
-import net.minecraft.server.BlockBed;
-import net.minecraft.server.ChunkCoordIntPair;
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntitySheep;
-import net.minecraft.server.EntitySkeleton;
-import net.minecraft.server.EntitySpider;
-import net.minecraft.server.EntityZombie;
-import net.minecraft.server.EnumCreatureType;
-import net.minecraft.server.Material;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.PathEntity;
-import net.minecraft.server.PathPoint;
-import net.minecraft.server.Pathfinder;
-import net.minecraft.server.World;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import java.util.HashSet;
 import java.util.Iterator;

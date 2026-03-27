@@ -1,9 +1,6 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import com.legacyminecraft.poseidon.compat.bukkit.SchedulerHeartbeatBridge;
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Vec3D;
+import com.legacyminecraft.compat.bukkit.SchedulerHeartbeatBridge;
 
 import java.util.List;
 import java.util.Map;

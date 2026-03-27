@@ -1,24 +1,7 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.CompressedStreamTools;
-import net.minecraft.server.IDataManager;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagShort;
-import net.minecraft.server.WorldMapBase;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.io.DataInput;
-import java.io.DataOutput;
 
 /**
  * Canonical map-data persistence and id-counter behavior for legacy WorldMapCollection wrappers.
@@ -42,20 +25,6 @@ public final class WorldMapCollectionSystem {
         }
 
         WorldMapBase loaded = null;
-        if (dataManager != null) {
-            try {
-                File mapFile = dataManager.b(key);
-                if (mapFile != null && mapFile.exists()) {
-                    loaded = instantiateMap(mapClass, key);
-                    FileInputStream fileInputStream = new FileInputStream(mapFile);
-                    NBTTagCompound rootTag = CompressedStreamTools.a((InputStream) fileInputStream);
-                    fileInputStream.close();
-                    loaded.a(rootTag.k(DATA_TAG_KEY));
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
 
         if (loaded != null) {
             loadedMaps.put(key, loaded);
@@ -89,49 +58,11 @@ public final class WorldMapCollectionSystem {
     }
 
     public void saveMap(IDataManager dataManager, WorldMapBase map) {
-        if (dataManager != null) {
-            try {
-                File mapFile = dataManager.b(map.a);
-                if (mapFile != null) {
-                    NBTTagCompound mapData = new NBTTagCompound();
-                    map.b(mapData);
-                    NBTTagCompound rootTag = new NBTTagCompound();
-                    rootTag.a(DATA_TAG_KEY, mapData);
-
-                    FileOutputStream fileOutputStream = new FileOutputStream(mapFile);
-                    CompressedStreamTools.a(rootTag, (OutputStream) fileOutputStream);
-                    fileOutputStream.close();
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
+        // no-op in lean migration scaffold
     }
 
     public void loadIdCounts(IDataManager dataManager, Map idCounts) {
-        try {
-            idCounts.clear();
-            if (dataManager == null) {
-                return;
-            }
-
-            File idCountsFile = dataManager.b(IDCOUNTS_FILE);
-            if (idCountsFile != null && idCountsFile.exists()) {
-                DataInputStream dataInputStream = new DataInputStream(new FileInputStream(idCountsFile));
-                NBTTagCompound rootTag = CompressedStreamTools.a((DataInput) dataInputStream);
-                dataInputStream.close();
-                Iterator iterator = rootTag.c().iterator();
-                while (iterator.hasNext()) {
-                    NBTBase nbtBase = (NBTBase) iterator.next();
-                    if (nbtBase instanceof NBTTagShort) {
-                        NBTTagShort shortTag = (NBTTagShort) nbtBase;
-                        idCounts.put(shortTag.b(), Short.valueOf(shortTag.a));
-                    }
-                }
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
+        idCounts.clear();
     }
 
     public int nextId(String key, Map idCounts, IDataManager dataManager) {
@@ -143,29 +74,6 @@ public final class WorldMapCollectionSystem {
         }
 
         idCounts.put(key, value);
-        if (dataManager == null) {
-            return value.shortValue();
-        }
-
-        try {
-            File idCountsFile = dataManager.b(IDCOUNTS_FILE);
-            if (idCountsFile != null) {
-                NBTTagCompound rootTag = new NBTTagCompound();
-                Iterator iterator = idCounts.keySet().iterator();
-                while (iterator.hasNext()) {
-                    String idKey = (String) iterator.next();
-                    short idValue = ((Short) idCounts.get(idKey)).shortValue();
-                    rootTag.a(idKey, idValue);
-                }
-
-                DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(idCountsFile));
-                CompressedStreamTools.a(rootTag, (DataOutput) dataOutputStream);
-                dataOutputStream.close();
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
         return value.shortValue();
     }
 

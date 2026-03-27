@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet2Handshake;
 
 import java.util.Random;
 
@@ -25,14 +24,14 @@ public final class LoginHandshakePacketHandler {
         }
 
         String handshakeToken = loginHandshakeSystem.resolveHandshakeToken(onlineMode, serverId);
-        return new HandshakeDecision(serverId, new Packet2Handshake(handshakeToken));
+        return new HandshakeDecision(serverId, NetworkCompatGatewayRegistry.gateway().createHandshakePacket(handshakeToken));
     }
 
     public static final class HandshakeDecision {
         private final String serverId;
-        private final Packet2Handshake responsePacket;
+        private final Object responsePacket;
 
-        private HandshakeDecision(String serverId, Packet2Handshake responsePacket) {
+        private HandshakeDecision(String serverId, Object responsePacket) {
             this.serverId = serverId;
             this.responsePacket = responsePacket;
         }
@@ -41,8 +40,9 @@ public final class LoginHandshakePacketHandler {
             return serverId;
         }
 
-        public Packet2Handshake getResponsePacket() {
+        public Object getResponsePacket() {
             return responsePacket;
         }
     }
+
 }

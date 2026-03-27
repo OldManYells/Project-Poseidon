@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet130UpdateSign;
 
 /**
  * Canonical execution flow for sign update packet handling preconditions.
@@ -15,7 +14,7 @@ public final class SignUpdatePacketExecutionSystem {
         return INSTANCE;
     }
 
-    public void execute(boolean playerDead, Packet130UpdateSign packet130updateSign, SignUpdateActions signUpdateActions) {
+    public void execute(boolean playerDead, Object packet130updateSign, SignUpdateActions signUpdateActions) {
         if (playerDead) {
             return;
         }
@@ -23,6 +22,6 @@ public final class SignUpdatePacketExecutionSystem {
     }
 
     public interface SignUpdateActions {
-        void process(Packet130UpdateSign packet130updateSign);
+        void process(Object packet130updateSign);
     }
 }

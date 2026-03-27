@@ -1,8 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.IInventory;
-import net.minecraft.server.InventoryLargeChest;
-import net.minecraft.server.TileEntityChest;
+import com.legacyminecraft.poseidon.inventory.IInventory;
+import com.legacyminecraft.poseidon.inventory.InventoryLargeChest;
 
 import java.util.Random;
 
@@ -68,19 +67,19 @@ public final class ChestStateBehaviour {
         IInventory inventory = center;
 
         if (access.getTypeId(x - 1, y, z) == chestBlockId) {
-            inventory = new InventoryLargeChest("Large chest", access.getChest(x - 1, y, z), inventory);
+            inventory = new InventoryLargeChest("Large chest", (IInventory) access.getChest(x - 1, y, z), inventory);
         }
 
         if (access.getTypeId(x + 1, y, z) == chestBlockId) {
-            inventory = new InventoryLargeChest("Large chest", inventory, access.getChest(x + 1, y, z));
+            inventory = new InventoryLargeChest("Large chest", inventory, (IInventory) access.getChest(x + 1, y, z));
         }
 
         if (access.getTypeId(x, y, z - 1) == chestBlockId) {
-            inventory = new InventoryLargeChest("Large chest", access.getChest(x, y, z - 1), inventory);
+            inventory = new InventoryLargeChest("Large chest", (IInventory) access.getChest(x, y, z - 1), inventory);
         }
 
         if (access.getTypeId(x, y, z + 1) == chestBlockId) {
-            inventory = new InventoryLargeChest("Large chest", inventory, access.getChest(x, y, z + 1));
+            inventory = new InventoryLargeChest("Large chest", inventory, (IInventory) access.getChest(x, y, z + 1));
         }
 
         return inventory;
@@ -110,6 +109,6 @@ public final class ChestStateBehaviour {
     public interface ChestAccess {
         int getTypeId(int x, int y, int z);
 
-        TileEntityChest getChest(int x, int y, int z);
+        Object getChest(int x, int y, int z);
     }
 }

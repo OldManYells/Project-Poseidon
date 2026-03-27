@@ -32,7 +32,7 @@ public class PlayerList {
     public void a(long i, Object object) {
         PLAYER_LIST_BEHAVIOUR.updateExistingValues(this.a, i, object);
         PlayerListBehaviour.PutState state = PLAYER_LIST_BEHAVIOUR.put(this.a, this.b, this.c, this.e, this.d, i, object);
-        this.a = state.table;
+        this.a = (PlayerListEntry[]) state.table;
         this.b = state.size;
         this.c = state.threshold;
         this.e = state.modCount;
@@ -46,10 +46,10 @@ public class PlayerList {
 
     final PlayerListEntry c(long i) {
         PlayerListBehaviour.RemoveState state = PLAYER_LIST_BEHAVIOUR.remove(this.a, this.b, this.e, i);
-        this.a = state.table;
+        this.a = (PlayerListEntry[]) state.table;
         this.b = state.size;
         this.e = state.modCount;
-        return state.removedEntry;
+        return (PlayerListEntry) state.removedEntry;
     }
 
     static int d(long i) {

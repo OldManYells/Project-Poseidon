@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.command;
 
-import com.legacyminecraft.poseidon.compat.bukkit.CommandSenderBackedListener;
-import com.legacyminecraft.poseidon.compat.bukkit.ServerCommandListenerBehaviour;
+import com.legacyminecraft.compat.bukkit.CommandSenderBackedListener;
+import com.legacyminecraft.compat.bukkit.ServerCommandListenerBehaviour;
 import net.minecraft.server.ICommandListener;
 import org.bukkit.command.CommandSender;
 

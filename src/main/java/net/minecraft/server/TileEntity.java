@@ -5,7 +5,7 @@ import com.legacyminecraft.poseidon.world.tile.TileEntityRegistryBehaviour;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TileEntity {
+public class TileEntity extends com.legacyminecraft.poseidon.world.TileEntity {
     private static final TileEntityRegistryBehaviour TILE_ENTITY_REGISTRY_BEHAVIOUR = TileEntityRegistryBehaviour.getInstance();
 
     private static Map a = new HashMap();
@@ -33,7 +33,7 @@ public class TileEntity {
     public void g_() {}
 
     public static TileEntity c(NBTTagCompound nbttagcompound) {
-        return TILE_ENTITY_REGISTRY_BEHAVIOUR.createFromTag(a, nbttagcompound);
+        return (TileEntity) (Object) TILE_ENTITY_REGISTRY_BEHAVIOUR.createFromTag(a, nbttagcompound);
     }
 
     public int e() {

@@ -1,10 +1,8 @@
 package com.legacyminecraft.poseidon.block;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import net.minecraft.server.AxisAlignedBB;
-import net.minecraft.server.Block;
-import net.minecraft.server.IBlockAccess;
-import net.minecraft.server.Material;
+import com.legacyminecraft.poseidon.world.AxisAlignedBB;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical fence placement and collision policy service.

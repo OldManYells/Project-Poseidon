@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.IChunkProvider;
 
 /**
  * Canonical behaviour for world chunk-window loaded checks.

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.BiomeBase;
 
 /**
  * Canonical climate-to-biome lookup policy and bootstrap service.

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet27;
 
 /**
  * Canonical execution flow for packet 27 player input forwarding.
@@ -15,18 +14,28 @@ public final class PlayerInputPacketExecutionSystem {
         return INSTANCE;
     }
 
-    public void execute(Packet27 packet27, InputActions inputActions) {
+    public void execute(Object packet27, InputActions inputActions) {
         inputActions.applyInput(
-                packet27.c(),
-                packet27.e(),
-                packet27.g(),
-                packet27.h(),
-                packet27.d(),
-                packet27.f()
+                ((Number) invoke(packet27, "c")).floatValue(),
+                ((Number) invoke(packet27, "e")).floatValue(),
+                Boolean.TRUE.equals(invoke(packet27, "g")),
+                Boolean.TRUE.equals(invoke(packet27, "h")),
+                ((Number) invoke(packet27, "d")).floatValue(),
+                ((Number) invoke(packet27, "f")).floatValue()
         );
     }
 
     public interface InputActions {
         void applyInput(float primaryX, float primaryY, boolean primaryFlag, boolean secondaryFlag, float secondaryX, float secondaryY);
+    }
+
+    private Object invoke(Object target, String methodName) {
+        try {
+            java.lang.reflect.Method method = target.getClass().getMethod(methodName);
+            method.setAccessible(true);
+            return method.invoke(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to invoke: " + methodName, exception);
+        }
     }
 }

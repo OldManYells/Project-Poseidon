@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.PlayerListEntry;
+import com.legacyminecraft.poseidon.compat.LegacyCompatGatewayRegistry;
 
 public final class PlayerListBehaviour {
     private static final PlayerListBehaviour INSTANCE = new PlayerListBehaviour();
@@ -25,34 +25,34 @@ public final class PlayerListBehaviour {
         return hash & length - 1;
     }
 
-    public Object get(PlayerListEntry[] table, long key) {
+    public Object get(Object[] table, long key) {
         int hash = this.hashLong(key);
 
-        for (PlayerListEntry entry = table[this.indexFor(hash, table.length)]; entry != null; entry = entry.d()) {
-            if (entry.a() == key) {
-                return entry.b();
+        for (Object entry = table[this.indexFor(hash, table.length)]; entry != null; entry = Bridge.next(entry)) {
+            if (Bridge.key(entry) == key) {
+                return Bridge.value(entry);
             }
         }
 
         return null;
     }
 
-    public void updateExistingValues(PlayerListEntry[] table, long key, Object value) {
+    public void updateExistingValues(Object[] table, long key, Object value) {
         int hash = this.hashLong(key);
         int bucket = this.indexFor(hash, table.length);
 
-        for (PlayerListEntry entry = table[bucket]; entry != null; entry = entry.d()) {
-            if (entry.a() == key) {
-                entry.a(value);
+        for (Object entry = table[bucket]; entry != null; entry = Bridge.next(entry)) {
+            if (Bridge.key(entry) == key) {
+                Bridge.setValue(entry, value);
             }
         }
     }
 
-    public PutState put(PlayerListEntry[] table, int size, int threshold, int modCount, float loadFactor, long key, Object value) {
+    public PutState put(Object[] table, int size, int threshold, int modCount, float loadFactor, long key, Object value) {
         int hash = this.hashLong(key);
         int bucket = this.indexFor(hash, table.length);
 
-        table[bucket] = new PlayerListEntry(hash, key, value, table[bucket]);
+        table[bucket] = Bridge.newEntry(hash, key, value, table[bucket]);
 
         if (size++ >= threshold) {
             ResizeState resizeState = this.resize(table, 2 * table.length, loadFactor, threshold);
@@ -63,18 +63,18 @@ public final class PlayerListBehaviour {
         return new PutState(table, size, threshold, modCount + 1);
     }
 
-    public RemoveState remove(PlayerListEntry[] table, int size, int modCount, long key) {
+    public RemoveState remove(Object[] table, int size, int modCount, long key) {
         int hash = this.hashLong(key);
         int bucket = this.indexFor(hash, table.length);
-        PlayerListEntry previous = table[bucket];
+        Object previous = table[bucket];
 
-        for (PlayerListEntry current = previous; current != null; current = current.d()) {
-            PlayerListEntry next = current.d();
-            if (current.a() == key) {
+        for (Object current = previous; current != null; current = Bridge.next(current)) {
+            Object next = Bridge.next(current);
+            if (Bridge.key(current) == key) {
                 if (previous == current) {
                     table[bucket] = next;
                 } else {
-                    previous.a(next);
+                    Bridge.setNext(previous, next);
                 }
 
                 return new RemoveState(table, size - 1, modCount + 1, current);
@@ -86,32 +86,32 @@ public final class PlayerListBehaviour {
         return new RemoveState(table, size, modCount, null);
     }
 
-    private ResizeState resize(PlayerListEntry[] table, int newCapacity, float loadFactor, int currentThreshold) {
+    private ResizeState resize(Object[] table, int newCapacity, float loadFactor, int currentThreshold) {
         int oldCapacity = table.length;
 
         if (oldCapacity == 1073741824) {
             return new ResizeState(table, Integer.MAX_VALUE);
         }
 
-        PlayerListEntry[] resized = new PlayerListEntry[newCapacity];
+        Object[] resized = new Object[newCapacity];
         this.transfer(table, resized);
         return new ResizeState(resized, (int) ((float) newCapacity * loadFactor));
     }
 
-    private void transfer(PlayerListEntry[] source, PlayerListEntry[] target) {
+    private void transfer(Object[] source, Object[] target) {
         int newLength = target.length;
 
         for (int i = 0; i < source.length; ++i) {
-            PlayerListEntry entry = source[i];
+            Object entry = source[i];
 
             if (entry != null) {
                 source[i] = null;
 
                 do {
-                    PlayerListEntry next = entry.d();
-                    int bucket = this.indexFor(entry.c(), newLength);
+                    Object next = Bridge.next(entry);
+                    int bucket = this.indexFor(Bridge.hash(entry), newLength);
 
-                    entry.a(target[bucket]);
+                    Bridge.setNext(entry, target[bucket]);
                     target[bucket] = entry;
                     entry = next;
                 } while (entry != null);
@@ -120,12 +120,12 @@ public final class PlayerListBehaviour {
     }
 
     public static final class PutState {
-        public final PlayerListEntry[] table;
+        public final Object[] table;
         public final int size;
         public final int threshold;
         public final int modCount;
 
-        PutState(PlayerListEntry[] table, int size, int threshold, int modCount) {
+        PutState(Object[] table, int size, int threshold, int modCount) {
             this.table = table;
             this.size = size;
             this.threshold = threshold;
@@ -134,12 +134,12 @@ public final class PlayerListBehaviour {
     }
 
     public static final class RemoveState {
-        public final PlayerListEntry[] table;
+        public final Object[] table;
         public final int size;
         public final int modCount;
-        public final PlayerListEntry removedEntry;
+        public final Object removedEntry;
 
-        RemoveState(PlayerListEntry[] table, int size, int modCount, PlayerListEntry removedEntry) {
+        RemoveState(Object[] table, int size, int modCount, Object removedEntry) {
             this.table = table;
             this.size = size;
             this.modCount = modCount;
@@ -148,12 +148,56 @@ public final class PlayerListBehaviour {
     }
 
     private static final class ResizeState {
-        private final PlayerListEntry[] table;
+        private final Object[] table;
         private final int threshold;
 
-        private ResizeState(PlayerListEntry[] table, int threshold) {
+        private ResizeState(Object[] table, int threshold) {
             this.table = table;
             this.threshold = threshold;
+        }
+    }
+
+    private static final class Bridge {
+        private static Object newEntry(int hash, long key, Object value, Object next) {
+            return LegacyCompatGatewayRegistry.gateway().createPlayerListEntry(hash, key, value, next);
+        }
+
+        private static long key(Object entry) {
+            return ((Long) invoke(entry, "a")).longValue();
+        }
+
+        private static Object value(Object entry) {
+            return invoke(entry, "b");
+        }
+
+        private static int hash(Object entry) {
+            return ((Integer) invoke(entry, "c")).intValue();
+        }
+
+        private static Object next(Object entry) {
+            return invoke(entry, "d");
+        }
+
+        private static void setValue(Object entry, Object value) {
+            invoke(entry, "a", value);
+        }
+
+        private static void setNext(Object entry, Object next) {
+            invoke(entry, "a", next);
+        }
+
+        private static Object invoke(Object target, String methodName, Object... args) {
+            try {
+                for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        method.setAccessible(true);
+                        return method.invoke(target, args);
+                    }
+                }
+                throw new IllegalStateException("Method not found: " + methodName);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
         }
     }
 }

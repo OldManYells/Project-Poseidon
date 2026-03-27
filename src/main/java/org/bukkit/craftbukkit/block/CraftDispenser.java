@@ -1,8 +1,9 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.DispenserActivationBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.TileEntityBlockStateUpdateBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.TileEntityInventoryBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.DispenserActivationBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityBlockStateUpdateBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityInventoryBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityLookupBehaviour;
 import net.minecraft.server.TileEntityDispenser;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
@@ -16,6 +17,8 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
             TileEntityInventoryBridgeBehaviour.getInstance();
     private static final TileEntityBlockStateUpdateBehaviour TILE_ENTITY_BLOCK_STATE_UPDATE_BEHAVIOUR =
             TileEntityBlockStateUpdateBehaviour.getInstance();
+    private static final TileEntityLookupBehaviour TILE_ENTITY_LOOKUP_BEHAVIOUR =
+            TileEntityLookupBehaviour.getInstance();
 
     private final CraftWorld world;
     private final TileEntityDispenser dispenser;
@@ -23,8 +26,8 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
     public CraftDispenser(final Block block) {
         super(block);
 
-        world = (CraftWorld) block.getWorld();
-        dispenser = (TileEntityDispenser) world.getTileEntityAt(getX(), getY(), getZ());
+        world = TILE_ENTITY_LOOKUP_BEHAVIOUR.resolveWorld(block);
+        dispenser = TILE_ENTITY_LOOKUP_BEHAVIOUR.resolveDispenser(block, getX(), getY(), getZ());
     }
 
     public Inventory getInventory() {

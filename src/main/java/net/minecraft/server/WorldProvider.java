@@ -1,10 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.WorldProviderBehaviour;
-
 public abstract class WorldProvider {
-    private static final WorldProviderBehaviour WORLD_PROVIDER_BEHAVIOUR = WorldProviderBehaviour.getInstance();
-
     public World a;
     public WorldChunkManager b;
     public boolean c = false;
@@ -23,30 +19,48 @@ public abstract class WorldProvider {
     }
 
     protected void c() {
-        this.f = WORLD_PROVIDER_BEHAVIOUR.buildLightBrightnessTable(0.05F);
+        float floor = 0.05F;
+        for (int i = 0; i <= 15; ++i) {
+            float f1 = 1.0F - (float) i / 15.0F;
+            this.f[i] = (1.0F - f1) / (f1 * 3.0F + 1.0F) * (1.0F - floor) + floor;
+        }
     }
 
     protected void a() {
-        this.b = WORLD_PROVIDER_BEHAVIOUR.createDefaultChunkManager(this.a);
+        this.b = new WorldChunkManager(this.a);
     }
 
     public IChunkProvider getChunkProvider() {
-        return WORLD_PROVIDER_BEHAVIOUR.createOverworldChunkProvider(this.a);
+        return new ChunkProviderGenerate(this.a, this.a.getSeed());
     }
 
     public boolean canSpawn(int i, int j) {
-        return WORLD_PROVIDER_BEHAVIOUR.canSpawnOnSand(this.a, i, j);
+        int k = this.a.a(i, j);
+        return k == Block.SAND.id;
     }
 
     public float a(long i, float f) {
-        return WORLD_PROVIDER_BEHAVIOUR.computeCelestialAngle(i, f);
+        int j = (int) (i % 24000L);
+        float f1 = ((float) j + f) / 24000.0F - 0.25F;
+
+        if (f1 < 0.0F) {
+            ++f1;
+        }
+
+        if (f1 > 1.0F) {
+            --f1;
+        }
+
+        float f2 = f1;
+        f1 = 1.0F - (float) ((Math.cos((double) f1 * Math.PI) + 1.0D) / 2.0D);
+        return f2 + (f1 - f2) / 3.0F;
     }
 
     public boolean d() {
-        return WORLD_PROVIDER_BEHAVIOUR.hasSkyLight();
+        return true;
     }
 
     public static WorldProvider byDimension(int i) {
-        return WORLD_PROVIDER_BEHAVIOUR.byDimension(i);
+        return i == -1 ? new WorldProviderHell() : (i == 0 ? new WorldProviderNormal() : (i == 1 ? new WorldProviderSky() : null));
     }
 }

@@ -1,19 +1,16 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-
 /**
  * Canonical inventory contract bridged by legacy inventory wrappers.
  */
 public interface InventoryContract {
     int getSize();
 
-    ItemStack getItem(int slot);
+    Object getItem(int slot);
 
-    ItemStack splitStack(int slot, int amount);
+    Object splitStack(int slot, int amount);
 
-    void setItem(int slot, ItemStack stack);
+    void setItem(int slot, Object stack);
 
     String getName();
 
@@ -21,7 +18,7 @@ public interface InventoryContract {
 
     void update();
 
-    boolean canPlayerUse(EntityHuman player);
+    boolean canPlayerUse(Object player);
 
-    ItemStack[] getContents();
+    Object[] getContents();
 }

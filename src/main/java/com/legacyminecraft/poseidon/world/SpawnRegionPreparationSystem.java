@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.WorldServer;
 
 /**
  * Canonical spawn-region preparation loop and progress policy.

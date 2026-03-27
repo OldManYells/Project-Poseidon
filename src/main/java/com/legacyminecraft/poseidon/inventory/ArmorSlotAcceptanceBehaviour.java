@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.ItemArmor;
-import net.minecraft.server.ItemStack;
 
 public final class ArmorSlotAcceptanceBehaviour {
     private static final ArmorSlotAcceptanceBehaviour INSTANCE = new ArmorSlotAcceptanceBehaviour();

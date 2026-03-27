@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.MathHelper;
 
 /**
  * Canonical geometry and placement rules for legacy stair block wrappers.

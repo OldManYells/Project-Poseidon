@@ -1,12 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NetworkManager;
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet3Chat;
-import net.minecraft.server.Packet255KickDisconnect;
-import org.bukkit.Server;
 
 /**
  * Canonical coordinator for graceful player disconnect termination flow.
@@ -24,13 +17,13 @@ public final class ConnectionTerminationSystem {
 
     public boolean terminate(
             boolean alreadyDisconnected,
-            Server server,
-            EntityPlayer player,
+            Object server,
+            Object player,
             String reason,
             String leaveMessageTemplate,
             PacketSender packetSender,
-            NetworkManager networkManager,
-            MinecraftServer minecraftServer
+            Object networkManager,
+            Object minecraftServer
     ) {
         if (shouldSkipDisconnect(alreadyDisconnected)) {
             return true;
@@ -42,15 +35,17 @@ public final class ConnectionTerminationSystem {
             return false;
         }
 
-        player.B();
+        Reflection.invoke(player, "B");
         packetSender.sendPacket(createKickPacket(kickDecision.getReason()));
-        networkManager.d();
+        Reflection.invoke(networkManager, "d");
 
         if (shouldBroadcastLeaveMessage(kickDecision.getLeaveMessage())) {
-            minecraftServer.serverConfigurationManager.sendAll(new Packet3Chat(kickDecision.getLeaveMessage()));
+            Object scm = Reflection.getField(minecraftServer, "serverConfigurationManager");
+            Reflection.invoke(scm, "sendAll", createChatPacket(kickDecision.getLeaveMessage()));
         }
 
-        minecraftServer.serverConfigurationManager.disconnect(player);
+        Object scm = Reflection.getField(minecraftServer, "serverConfigurationManager");
+        Reflection.invoke(scm, "disconnect", player);
         return true;
     }
 
@@ -62,11 +57,53 @@ public final class ConnectionTerminationSystem {
         return leaveMessage != null;
     }
 
-    public Packet255KickDisconnect createKickPacket(String reason) {
-        return new Packet255KickDisconnect(reason);
+    public Object createKickPacket(String reason) {
+        return NetworkCompatGatewayRegistry.gateway().createKickPacket(reason);
+    }
+
+    public Object createChatPacket(String message) {
+        return NetworkCompatGatewayRegistry.gateway().createChatPacket(message);
     }
 
     public interface PacketSender {
-        void sendPacket(Packet packet);
+        void sendPacket(Object packet);
+    }
+
+    private static final class Reflection {
+        private Reflection() {
+        }
+
+        static Object getField(Object target, String name) {
+            Class<?> type = target.getClass();
+            while (type != null) {
+                try {
+                    java.lang.reflect.Field field = type.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return field.get(target);
+                } catch (NoSuchFieldException ignored) {
+                    type = type.getSuperclass();
+                } catch (Exception exception) {
+                    throw new IllegalStateException("Unable to access field: " + name, exception);
+                }
+            }
+            throw new IllegalStateException("Field not found: " + name);
+        }
+
+        static Object invoke(Object target, String methodName, Object... args) {
+            Class<?> type = target.getClass();
+            while (type != null) {
+                for (java.lang.reflect.Method method : type.getDeclaredMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        try {
+                            method.setAccessible(true);
+                            return method.invoke(target, args);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                type = type.getSuperclass();
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        }
     }
 }

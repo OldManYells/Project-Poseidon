@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.Packet1Login;
 
 /**
  * Role-aligned canonical facade for per-tick login timeout policy.
@@ -16,7 +15,7 @@ public final class LoginTickPolicy {
         return INSTANCE;
     }
 
-    public TickDecision evaluateTick(Packet1Login deferredLoginPacket, int timeoutCounter, int timeoutTicks) {
+    public TickDecision evaluateTick(Object deferredLoginPacket, int timeoutCounter, int timeoutTicks) {
         return TickDecision.wrap(delegate.evaluateTick(deferredLoginPacket, timeoutCounter, timeoutTicks));
     }
 

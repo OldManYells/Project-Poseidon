@@ -1,11 +1,7 @@
 package com.legacyminecraft.poseidon.runtime;
 
 import com.legacyminecraft.poseidon.Poseidon;
-import org.bukkit.ChatColor;
-import org.bukkit.Server;
-import org.bukkit.command.CommandException;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import com.legacyminecraft.poseidon.network.NetworkCompatGatewayRegistry;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,23 +19,24 @@ public final class PlayerCommandProcessor {
         return INSTANCE;
     }
 
-    public void handlePlayerCommand(Server server, Player player, String command, Logger logger) {
-        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(player, command);
-        server.getPluginManager().callEvent(event);
+    public void handlePlayerCommand(Object server, Object player, String command, Logger logger) {
+        Object event = NetworkCompatGatewayRegistry.gateway().createPlayerCommandPreprocessEvent(player, command);
+        Object pluginManager = invoke(server, "getPluginManager");
+        invoke(pluginManager, "callEvent", event);
 
-        if (event.isCancelled()) {
+        if (Boolean.TRUE.equals(invoke(event, "isCancelled"))) {
             return;
         }
 
-        String commandMessage = event.getMessage();
+        String commandMessage = String.valueOf(invoke(event, "getMessage"));
 
         try {
-            if (server.dispatchCommand(player, commandMessage.substring(1))) {
-                logDispatchedCommand(logger, player.getName(), commandMessage);
+            if (Boolean.TRUE.equals(invoke(server, "dispatchCommand", player, commandMessage.substring(1)))) {
+                logDispatchedCommand(logger, String.valueOf(invoke(player, "getName")), commandMessage);
                 return;
             }
-        } catch (CommandException ex) {
-            player.sendMessage(ChatColor.RED + "An internal error occurred while attempting to perform this command");
+        } catch (Exception ex) {
+            invoke(player, "sendMessage", "An internal error occurred while attempting to perform this command");
             Logger.getLogger(PlayerCommandProcessor.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
@@ -58,4 +55,19 @@ public final class PlayerCommandProcessor {
     public boolean shouldRedactCommand(String commandName) {
         return Poseidon.getServer() != null && Poseidon.getServer().isCommandHidden(commandName);
     }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
 }

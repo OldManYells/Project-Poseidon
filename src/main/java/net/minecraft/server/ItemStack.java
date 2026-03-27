@@ -49,7 +49,7 @@ public final class ItemStack {
     }
 
     public ItemStack a(int i) {
-        return ITEM_STACK_STATE_BEHAVIOUR.splitStack(this, i);
+        return (ItemStack) (Object) ITEM_STACK_STATE_BEHAVIOUR.splitStack((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, i);
     }
 
     public Item getItem() {
@@ -57,7 +57,7 @@ public final class ItemStack {
     }
 
     public boolean placeItem(EntityHuman entityhuman, World world, int i, int j, int k, int l) {
-        return ITEM_STACK_INTERACTION_BEHAVIOUR.placeItem(this, entityhuman, world, i, j, k, l);
+        return ITEM_STACK_INTERACTION_BEHAVIOUR.placeItem((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.entity.EntityHuman) (Object) entityhuman, (com.legacyminecraft.poseidon.entity.World) (Object) world, i, j, k, l);
     }
 
     public float a(Block block) {
@@ -65,15 +65,15 @@ public final class ItemStack {
     }
 
     public ItemStack a(World world, EntityHuman entityhuman) {
-        return ITEM_STACK_INTERACTION_BEHAVIOUR.useItem(this, world, entityhuman);
+        return (ItemStack) (Object) ITEM_STACK_INTERACTION_BEHAVIOUR.useItem((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.entity.World) (Object) world, (com.legacyminecraft.poseidon.entity.EntityHuman) (Object) entityhuman);
     }
 
     public NBTTagCompound a(NBTTagCompound nbttagcompound) {
-        return ITEM_STACK_STATE_BEHAVIOUR.writeToNbt(this, nbttagcompound);
+        return (NBTTagCompound) (Object) ITEM_STACK_STATE_BEHAVIOUR.writeToNbt((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.nbt.NBTTagCompound) (Object) nbttagcompound);
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        ITEM_STACK_STATE_BEHAVIOUR.readFromNbt(this, nbttagcompound);
+        ITEM_STACK_STATE_BEHAVIOUR.readFromNbt((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.nbt.NBTTagCompound) (Object) nbttagcompound);
     }
 
     public int getMaxStackSize() {
@@ -81,7 +81,7 @@ public final class ItemStack {
     }
 
     public boolean isStackable() {
-        return ITEM_STACK_STATE_BEHAVIOUR.isStackable(this);
+        return ITEM_STACK_STATE_BEHAVIOUR.isStackable((com.legacyminecraft.poseidon.item.ItemStack) (Object) this);
     }
 
     public boolean d() {
@@ -93,7 +93,7 @@ public final class ItemStack {
     }
 
     public boolean f() {
-        return ITEM_STACK_STATE_BEHAVIOUR.isDamaged(this);
+        return ITEM_STACK_STATE_BEHAVIOUR.isDamaged((com.legacyminecraft.poseidon.item.ItemStack) (Object) this);
     }
 
     public int g() {
@@ -109,73 +109,77 @@ public final class ItemStack {
     }
 
     public int i() {
-        return ITEM_STACK_STATE_BEHAVIOUR.maxDurability(this);
+        return ITEM_STACK_STATE_BEHAVIOUR.maxDurability((com.legacyminecraft.poseidon.item.ItemStack) (Object) this);
     }
 
     @SuppressWarnings("deprecation")
     public void damage(int i, Entity entity) {
-        ITEM_STACK_INTERACTION_BEHAVIOUR.damage(this, i, entity);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.damage((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, i, (com.legacyminecraft.poseidon.world.Entity) (Object) entity);
     }
 
     public void a(EntityLiving entityliving, EntityHuman entityhuman) {
-        ITEM_STACK_INTERACTION_BEHAVIOUR.onHitEntity(this, entityliving, entityhuman);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onHitEntity((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.item.EntityLiving) (Object) entityliving, (com.legacyminecraft.poseidon.entity.EntityHuman) (Object) entityhuman);
     }
 
     public void a(int i, int j, int k, int l, EntityHuman entityhuman) {
-        ITEM_STACK_INTERACTION_BEHAVIOUR.onDestroyBlock(this, i, j, k, l, entityhuman);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onDestroyBlock((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, i, j, k, l, (com.legacyminecraft.poseidon.entity.EntityHuman) (Object) entityhuman);
     }
 
     public int a(Entity entity) {
-        return ITEM_STACK_INTERACTION_BEHAVIOUR.attackDamage(this, entity);
+        return ITEM_STACK_INTERACTION_BEHAVIOUR.attackDamage((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.world.Entity) (Object) entity);
     }
 
     public boolean b(Block block) {
-        return ITEM_STACK_INTERACTION_BEHAVIOUR.canHarvest(this, block);
+        Item item = this.getItem();
+        return item != null && item.a(block);
     }
 
     public void a(EntityHuman entityhuman) {}
 
     public void a(EntityLiving entityliving) {
-        ITEM_STACK_INTERACTION_BEHAVIOUR.useOnLiving(this, entityliving);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.useOnLiving((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.item.EntityLiving) (Object) entityliving);
     }
 
     public ItemStack cloneItemStack() {
-        return ITEM_STACK_STATE_BEHAVIOUR.cloneStack(this);
+        return (ItemStack) (Object) ITEM_STACK_STATE_BEHAVIOUR.cloneStack((com.legacyminecraft.poseidon.item.ItemStack) (Object) this);
     }
 
     public static boolean equals(ItemStack itemstack, ItemStack itemstack1) {
-        return ITEM_STACK_STATE_BEHAVIOUR.stackEqualsNullable(itemstack, itemstack1);
+        return ITEM_STACK_STATE_BEHAVIOUR.stackEqualsNullable((com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack, (com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack1);
     }
 
     private boolean d(ItemStack itemstack) {
-        return ITEM_STACK_STATE_BEHAVIOUR.countIdDamageEquals(this, itemstack);
+        return ITEM_STACK_STATE_BEHAVIOUR.countIdDamageEquals((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack);
     }
 
     public boolean countIdDamageEquals(ItemStack itemstack) {
-        return ITEM_STACK_STATE_BEHAVIOUR.countIdDamageEquals(this, itemstack);
+        return ITEM_STACK_STATE_BEHAVIOUR.countIdDamageEquals((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack);
     }
 
     public boolean doMaterialsMatch(ItemStack itemstack) {
-        return ITEM_STACK_STATE_BEHAVIOUR.materialsMatch(this, itemstack);
+        return ITEM_STACK_STATE_BEHAVIOUR.materialsMatch((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack);
     }
 
     public static ItemStack b(ItemStack itemstack) {
-        return ITEM_STACK_STATE_BEHAVIOUR.cloneOrNull(itemstack);
+        return (ItemStack) (Object) ITEM_STACK_STATE_BEHAVIOUR.cloneOrNull((com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack);
     }
 
     public String toString() {
-        return ITEM_STACK_STATE_BEHAVIOUR.stringify(this); // Project Poseidon: Fixes ArrayIndexOutOfBoundsException
+        return ITEM_STACK_STATE_BEHAVIOUR.stringify((com.legacyminecraft.poseidon.item.ItemStack) (Object) this); // Project Poseidon: Fixes ArrayIndexOutOfBoundsException
     }
 
     public void a(World world, Entity entity, int i, boolean flag) {
-        ITEM_STACK_INTERACTION_BEHAVIOUR.onInventoryTick(this, world, entity, i, flag);
+        Item item = this.getItem();
+        if (item != null) {
+            item.a(this, world, entity, i, flag);
+        }
     }
 
     public void b(World world, EntityHuman entityhuman) {
-        ITEM_STACK_INTERACTION_BEHAVIOUR.onCrafted(this, world, entityhuman);
+        ITEM_STACK_INTERACTION_BEHAVIOUR.onCrafted((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.entity.World) (Object) world, (com.legacyminecraft.poseidon.entity.EntityHuman) (Object) entityhuman);
     }
 
     public boolean c(ItemStack itemstack) {
-        return ITEM_STACK_STATE_BEHAVIOUR.strictEquals(this, itemstack);
+        return ITEM_STACK_STATE_BEHAVIOUR.strictEquals((com.legacyminecraft.poseidon.item.ItemStack) (Object) this, (com.legacyminecraft.poseidon.item.ItemStack) (Object) itemstack);
     }
 }

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.ChunkFile;
 
 import java.io.File;
 import java.util.regex.Matcher;

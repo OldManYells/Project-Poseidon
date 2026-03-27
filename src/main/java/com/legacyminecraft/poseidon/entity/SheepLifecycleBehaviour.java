@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.EntitySheep;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,22 +45,22 @@ public final class SheepLifecycleBehaviour {
         return (byte) 0;
     }
 
-    public List<org.bukkit.inventory.ItemStack> createDeathDrops(boolean sheared, int colorId) {
-        List<org.bukkit.inventory.ItemStack> drops = new ArrayList<org.bukkit.inventory.ItemStack>();
+    public List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> createDeathDrops(boolean sheared, int colorId) {
+        List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> drops = new ArrayList<com.legacyminecraft.compat.bukkit.inventory.ItemStack>();
         if (!sheared) {
-            drops.add(new org.bukkit.inventory.ItemStack(org.bukkit.Material.WOOL, 1, (short) 0, (byte) colorId));
+            drops.add(new com.legacyminecraft.compat.bukkit.inventory.ItemStack(com.legacyminecraft.compat.bukkit.Material.WOOL, 1, (short) 0, (byte) colorId));
         }
         return drops;
     }
 
     public void dropDeathLoot(EntitySheep sheep) {
-        List<org.bukkit.inventory.ItemStack> drops = createDeathDrops(sheep.isSheared(), sheep.getColor());
-        org.bukkit.World bukkitWorld = sheep.world.getWorld();
-        org.bukkit.entity.Entity bukkitEntity = sheep.getBukkitEntity();
-        org.bukkit.event.entity.EntityDeathEvent event = new org.bukkit.event.entity.EntityDeathEvent(bukkitEntity, drops);
+        List<com.legacyminecraft.compat.bukkit.inventory.ItemStack> drops = createDeathDrops(sheep.isSheared(), sheep.getColor());
+        com.legacyminecraft.compat.bukkit.World bukkitWorld = sheep.world.getWorld();
+        com.legacyminecraft.compat.bukkit.entity.Entity bukkitEntity = sheep.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.event.entity.EntityDeathEvent event = new com.legacyminecraft.compat.bukkit.event.entity.EntityDeathEvent(bukkitEntity, drops);
         sheep.world.getServer().getPluginManager().callEvent(event);
 
-        for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
+        for (com.legacyminecraft.compat.bukkit.inventory.ItemStack stack : event.getDrops()) {
             bukkitWorld.dropItemNaturally(bukkitEntity.getLocation(), stack);
         }
     }

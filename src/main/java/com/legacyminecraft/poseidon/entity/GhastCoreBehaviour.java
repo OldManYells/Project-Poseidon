@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Item;
 
 public final class GhastCoreBehaviour {
     private static final GhastCoreBehaviour INSTANCE = new GhastCoreBehaviour();

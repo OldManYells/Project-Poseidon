@@ -5,6 +5,10 @@ package com.legacyminecraft.poseidon.network;
  */
 public final class NetworkMasterThreadSystem {
     private static final NetworkMasterThreadSystem INSTANCE = new NetworkMasterThreadSystem();
+    private final NetworkMasterThreadShutdownPolicy networkMasterThreadShutdownPolicy =
+            NetworkMasterThreadShutdownPolicy.getInstance();
+    private final NetworkSocketCloseSuppressionPolicy networkSocketCloseSuppressionPolicy =
+            NetworkSocketCloseSuppressionPolicy.getInstance();
 
     private NetworkMasterThreadSystem() {
     }
@@ -15,23 +19,23 @@ public final class NetworkMasterThreadSystem {
 
     public void stopLingeringNetworkThreads(Thread readerThread, Thread writerThread) {
         try {
-            Thread.sleep(5000L);
+            Thread.sleep(networkMasterThreadShutdownPolicy.shutdownWaitMillis());
             stopIfAlive(readerThread);
             stopIfAlive(writerThread);
         } catch (InterruptedException interruptedexception) {
-            interruptedexception.printStackTrace();
+            Thread.currentThread().interrupt();
         }
     }
 
     private void stopIfAlive(Thread thread) {
-        if (!thread.isAlive()) {
+        if (!networkMasterThreadShutdownPolicy.shouldForceStop(thread)) {
             return;
         }
 
         try {
             thread.stop();
         } catch (Throwable throwable) {
-            ;
+            networkSocketCloseSuppressionPolicy.suppress(throwable);
         }
     }
 }

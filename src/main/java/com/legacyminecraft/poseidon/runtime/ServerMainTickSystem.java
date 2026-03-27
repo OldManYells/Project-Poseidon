@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.MinecraftServer;
 
 import java.util.List;
 import java.util.Map;

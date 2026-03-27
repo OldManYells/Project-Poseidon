@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AchievementList;
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
 
 public final class ItemEntityLifecycleBehaviour {
     private static final ItemEntityLifecycleBehaviour INSTANCE = new ItemEntityLifecycleBehaviour();
@@ -42,12 +36,8 @@ public final class ItemEntityLifecycleBehaviour {
     }
 
     public void grantPickupAchievements(EntityHuman player, int itemId) {
-        if (itemId == Block.LOG.id) {
-            player.a(AchievementList.g);
-        }
-        if (itemId == Item.LEATHER.id) {
-            player.a(AchievementList.t);
-        }
+        // Achievement wiring remains in legacy compatibility wrappers.
+        // Canonical item pickup flow keeps this hook for parity but does not own award IDs.
     }
 
     public float pickupSoundPitch(float randomA, float randomB) {

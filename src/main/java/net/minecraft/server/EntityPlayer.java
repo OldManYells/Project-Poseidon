@@ -1,38 +1,20 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.inventory.PlayerContainerSyncBehaviour;
-import com.legacyminecraft.poseidon.api.uuid.PoseidonUUID;
-import com.legacyminecraft.poseidon.inventory.PlayerWindowLifecycleBehaviour;
-import com.legacyminecraft.poseidon.world.player.PlayerAttachmentSyncSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerChunkSyncCoordinator;
-import com.legacyminecraft.poseidon.world.player.PlayerCollectionPacketSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerDamagePolicySystem;
-import com.legacyminecraft.poseidon.world.player.PlayerDeathHandlingSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerEquipmentSyncSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerSessionTickSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerSleepSynchronizationSystem;
-import com.legacyminecraft.poseidon.world.player.PlayerStatisticPacketSystem;
+import com.projectposeidon.api.PoseidonUUID;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.ChunkCompressionThread;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.inventory.ChestOpenedEvent;
+import org.bukkit.event.poseidon.PlayerDeathEvent;
 
 import java.util.*;
 
 // CraftBukkit start
 
 public class EntityPlayer extends EntityHuman implements ICrafting {
-    private static final PlayerChunkSyncCoordinator chunkSyncCoordinator = PlayerChunkSyncCoordinator.getInstance();
-    private static final PlayerCollectionPacketSystem playerCollectionPacketService = PlayerCollectionPacketSystem.getInstance();
-    private static final PlayerDamagePolicySystem playerDamagePolicyService = PlayerDamagePolicySystem.getInstance();
-    private static final PlayerDeathHandlingSystem playerDeathHandlingService = PlayerDeathHandlingSystem.getInstance();
-    private static final PlayerEquipmentSyncSystem playerEquipmentSyncService = PlayerEquipmentSyncSystem.getInstance();
-    private static final PlayerAttachmentSyncSystem playerAttachmentSyncService = PlayerAttachmentSyncSystem.getInstance();
-    private static final PlayerContainerSyncBehaviour playerContainerSyncService = PlayerContainerSyncBehaviour.getInstance();
-    private static final PlayerSessionTickSystem playerSessionTickService = PlayerSessionTickSystem.getInstance();
-    private static final PlayerSleepSynchronizationSystem playerSleepSynchronizationService = PlayerSleepSynchronizationSystem.getInstance();
-    private static final PlayerStatisticPacketSystem playerStatisticPacketService = PlayerStatisticPacketSystem.getInstance();
-    private static final PlayerWindowLifecycleBehaviour playerWindowLifecycleService = PlayerWindowLifecycleBehaviour.getInstance();
 
     public NetServerHandler netServerHandler;
     public MinecraftServer b;
@@ -129,7 +111,15 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         this.itemInWorldManager.a();
         --this.bM;
         this.activeContainer.a();
-        playerEquipmentSyncService.syncTrackedEquipment(this, this.bN);
+
+        for (int i = 0; i < 5; ++i) {
+            ItemStack itemstack = this.c_(i);
+
+            if (itemstack != this.bN[i]) {
+                this.b.getTracker(this.dimension).a(this, new Packet5EntityEquipment(this.id, i, itemstack));
+                this.bN[i] = itemstack;
+            }
+        }
     }
 
     public ItemStack c_(int i) {
@@ -137,22 +127,73 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     public void die(Entity entity) {
-        playerDeathHandlingService.handleDeath(this);
+        // CraftBukkit start
+        java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
+
+        for (int i = 0; i < this.inventory.items.length; ++i) {
+            if (this.inventory.items[i] != null) {
+                loot.add(new CraftItemStack(this.inventory.items[i]));
+            }
+        }
+
+        for (int i = 0; i < this.inventory.armor.length; ++i) {
+            if (this.inventory.armor[i] != null) {
+                loot.add(new CraftItemStack(this.inventory.armor[i]));
+            }
+        }
+
+        org.bukkit.entity.Entity bukkitEntity = this.getBukkitEntity();
+        CraftWorld bworld = this.world.getWorld();
+
+        PlayerDeathEvent event = new PlayerDeathEvent(bukkitEntity, loot);
+        this.world.getServer().getPluginManager().callEvent(event);
+
+        if(event.getDeathMessage() != null && !event.getDeathMessage().trim().isEmpty()) {
+            this.b.serverConfigurationManager.sendAll(new Packet3Chat(event.getDeathMessage()));
+        }
+
+        // CraftBukkit - we clean the player's inventory after the EntityDeathEvent is called so plugins can get the exact state of the inventory.
+
+        //Poseidon - Only clear inventory if keep inventory is false
+        if(!event.getKeepInventory()) {
+            for (int i = 0; i < this.inventory.items.length; ++i) {
+                this.inventory.items[i] = null;
+            }
+
+            for (int i = 0; i < this.inventory.armor.length; ++i) {
+                this.inventory.armor[i] = null;
+            }
+        }
+
+        for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
+            bworld.dropItemNaturally(bukkitEntity.getLocation(), stack);
+        }
+
+        this.y();
+        // CraftBukkit end
     }
 
     public boolean damageEntity(Entity entity, int i) {
-        boolean attackerIsHuman = entity instanceof EntityHuman;
-        boolean arrowShotByHuman = false;
-        if (entity instanceof EntityArrow) {
-            EntityArrow entityarrow = (EntityArrow) entity;
-            arrowShotByHuman = entityarrow.shooter instanceof EntityHuman;
-        }
-
-        if (!playerDamagePolicyService.shouldApplyDamage(this.bM, this.world.pvpMode, attackerIsHuman, arrowShotByHuman)) {
+        if (this.bM > 0) {
             return false;
-        }
+        } else {
+            // CraftBukkit - this.b.pvpMode -> this.world.pvpMode
+            if (!this.world.pvpMode) {
+                if (entity instanceof EntityHuman) {
+                    return false;
+                }
 
-        return super.damageEntity(entity, i);
+                if (entity instanceof EntityArrow) {
+                    EntityArrow entityarrow = (EntityArrow) entity;
+
+                    if (entityarrow.shooter instanceof EntityHuman) {
+                        return false;
+                    }
+                }
+            }
+
+            return super.damageEntity(entity, i);
+        }
     }
 
     protected boolean j_() {
@@ -169,36 +210,151 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     
     public void a(boolean flag) {
         super.m_();
-        chunkSyncCoordinator.flushEntityRemovalQueue(this);
-        chunkSyncCoordinator.sendMapUpdatePackets(this);
-        chunkSyncCoordinator.processChunkSendQueue(this, flag);
+        
+        // Poseidon start
+        while (!this.removeQueue.isEmpty()) {
+            int i = Math.min(this.removeQueue.size(), 127);
+            int[] aint = new int[i];
+            Iterator iterator = this.removeQueue.iterator();
+            int j = 0;
 
-        PlayerSessionTickSystem.PortalTickDecision portalTickDecision =
-                playerSessionTickService.evaluatePortalTick(
-                        this.E,
-                        this.F,
-                        this.D,
-                        this.vehicle != null,
-                        this.activeContainer != this.defaultContainer
-                );
-        if (portalTickDecision.shouldCloseContainer()) {
-            this.y();
-        }
-        if (portalTickDecision.shouldRemountVehicle()) {
-            this.mount(this.vehicle);
-        }
-        if (portalTickDecision.shouldTriggerWorldTransfer()) {
-            this.b.serverConfigurationManager.f(this);
-        }
-        this.E = portalTickDecision.isPortalTriggered();
-        this.F = portalTickDecision.getPortalProgress();
-        this.D = portalTickDecision.getPortalCooldown();
+            while (iterator.hasNext() && j < i) {
+                aint[j++] = ((Integer) iterator.next()).intValue();
+                iterator.remove();
+            }
 
-        PlayerSessionTickSystem.HealthSyncDecision healthSyncDecision =
-                playerSessionTickService.evaluateHealthSync(this.health, this.bL);
-        if (healthSyncDecision.shouldSendHealthPacket()) {
+            for (int k = 0; k < aint.length; k++) { // cant use array since not supported in b1.7.3
+                this.netServerHandler.sendPacket(new Packet29DestroyEntity(aint[k]));
+            }
+        }
+        // poseidon end
+
+        for (int i = 0; i < this.inventory.getSize(); ++i) {
+            ItemStack itemstack = this.inventory.getItem(i);
+
+            if (itemstack != null && Item.byId[itemstack.id].b() && this.netServerHandler.b() <= 2) {
+                Packet packet = ((ItemWorldMapBase) Item.byId[itemstack.id]).b(itemstack, this.world, this);
+
+                if (packet != null) {
+                    this.netServerHandler.sendPacket(packet);
+                }
+            }
+        }
+
+        // Poseidon start
+        if (flag && !this.chunkCoordIntPairQueue.isEmpty()) {
+            if (PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true)) {
+                ArrayList arraylist = new ArrayList();
+                Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
+                ArrayList arraylist1 = new ArrayList();
+    
+                while (iterator1.hasNext() && arraylist.size() < 5) {
+                    ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
+    
+                    iterator1.remove();
+                    if (chunkcoordintpair != null && this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
+                        // CraftBukkit start - Get tile entities directly from the chunk instead of the world
+                        Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+                        arraylist.add(chunk);
+                        arraylist1.addAll(chunk.tileEntities.values());
+                        // CraftBukkit end
+                    }
+                }
+    
+                if (!arraylist.isEmpty()) {
+                    Iterator iterator2 = arraylist.iterator();
+    
+                    while (iterator2.hasNext()) {
+                        Chunk chunk = (Chunk) iterator2.next();
+                        
+                        this.netServerHandler.sendPacket(new Packet51MapChunk(chunk.x * 16, 0, chunk.z * 16, 16, 128, 16, this.getWorldServer()));
+                        this.getWorldServer().tracker.a(this, chunk);
+                    }
+                    
+                    iterator2 = arraylist1.iterator();
+    
+                    while (iterator2.hasNext()) {
+                        TileEntity tileentity = (TileEntity) iterator2.next();
+    
+                        this.a(tileentity);
+                    }
+                }
+            } else {
+                ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) this.chunkCoordIntPairQueue.get(0);
+                
+                if (chunkcoordintpair != null) {
+                    boolean flag1 = false;
+    
+                    if (this.netServerHandler.b() + ChunkCompressionThread.getPlayerQueueSize(this) < 4) { // CraftBukkit - Add check against Chunk Packets in the ChunkCompressionThread.
+                        flag1 = true;
+                    }
+    
+                    if (flag1) {
+                        WorldServer worldserver = this.b.getWorldServer(this.dimension);
+    
+                        this.chunkCoordIntPairQueue.remove(chunkcoordintpair);
+                        this.netServerHandler.sendPacket(new Packet51MapChunk(chunkcoordintpair.x * 16, 0, chunkcoordintpair.z * 16, 16, 128, 16, worldserver));
+                        
+                        Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+                        this.getWorldServer().tracker.a(this, chunk);
+                        
+                        List list = worldserver.getTileEntities(chunkcoordintpair.x * 16, 0, chunkcoordintpair.z * 16, chunkcoordintpair.x * 16 + 16, 128, chunkcoordintpair.z * 16 + 16);
+    
+                        for (int j = 0; j < list.size(); ++j) {
+                            this.a((TileEntity) list.get(j));
+                        }
+                    }
+                }
+            }
+        }
+        // Poseidon end
+
+        if (this.E) {
+            //if (this.b.propertyManager.getBoolean("allow-nether", true)) { // CraftBukkit
+            if (this.activeContainer != this.defaultContainer) {
+                this.y();
+            }
+
+            if (this.vehicle != null) {
+                this.mount(this.vehicle);
+            } else {
+                this.F += 0.0125F;
+                if (this.F >= 1.0F) {
+                    this.F = 1.0F;
+                    this.D = 10;
+                    this.b.serverConfigurationManager.f(this);
+                }
+            }
+
+            this.E = false;
+            //} // CraftBukkit
+        } else {
+            if (this.F > 0.0F) {
+                this.F -= 0.05F;
+            }
+
+            if (this.F < 0.0F) {
+                this.F = 0.0F;
+            }
+        }
+
+        if (this.D > 0) {
+            --this.D;
+        }
+
+        if (this.health != this.bL) {
             this.netServerHandler.sendPacket(new Packet8UpdateHealth(this.health));
-            this.bL = healthSyncDecision.getNextReportedHealth();
+            this.bL = this.health;
+        }
+    }
+
+    private void a(TileEntity tileentity) {
+        if (tileentity != null) {
+            Packet packet = tileentity.f();
+
+            if (packet != null) {
+                this.netServerHandler.sendPacket(packet);
+            }
         }
     }
 
@@ -207,13 +363,30 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     public void receive(Entity entity, int i) {
-        playerCollectionPacketService.sendCollectPacketIfNeeded(this, entity);
+        if (!entity.dead) {
+            EntityTracker entitytracker = this.b.getTracker(this.dimension);
+
+            if (entity instanceof EntityItem) {
+                entitytracker.a(entity, new Packet22Collect(entity.id, this.id));
+            }
+
+            if (entity instanceof EntityArrow) {
+                entitytracker.a(entity, new Packet22Collect(entity.id, this.id));
+            }
+        }
+
         super.receive(entity, i);
-        playerCollectionPacketService.refreshActiveContainer(this);
+        this.activeContainer.a();
     }
 
     public void w() {
-        playerSleepSynchronizationService.sendSleepStartAnimationIfNeeded(this);
+        if (!this.p) {
+            this.q = -1;
+            this.p = true;
+            EntityTracker entitytracker = this.b.getTracker(this.dimension);
+
+            entitytracker.a(this, new Packet18ArmAnimation(this, 1));
+        }
     }
 
     public void x() {
@@ -221,14 +394,30 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
 
     public EnumBedError a(int i, int j, int k) {
         EnumBedError enumbederror = super.a(i, j, k);
-        playerSleepSynchronizationService.syncBedEnterResult(this, enumbederror, i, j, k);
+
+        if (enumbederror == EnumBedError.OK) {
+            EntityTracker entitytracker = this.b.getTracker(this.dimension);
+            Packet17 packet17 = new Packet17(this, 0, i, j, k);
+
+            entitytracker.a(this, packet17);
+            this.netServerHandler.a(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
+            this.netServerHandler.sendPacket(packet17);
+        }
+
         return enumbederror;
     }
 
     public void a(boolean flag, boolean flag1, boolean flag2) {
-        playerSleepSynchronizationService.sendWakeAnimationIfSleeping(this);
+        if (this.isSleeping()) {
+            EntityTracker entitytracker = this.b.getTracker(this.dimension);
+
+            entitytracker.sendPacketToEntity(this, new Packet18ArmAnimation(this, 3));
+        }
+
         super.a(flag, flag1, flag2);
-        playerSleepSynchronizationService.syncPositionIfConnected(this);
+        if (this.netServerHandler != null) {
+            this.netServerHandler.a(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
+        }
     }
 
     public void mount(Entity entity) {
@@ -243,7 +432,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         super.setPassengerOf(entity);
         // CraftBukkit end
 
-        playerAttachmentSyncService.syncPassengerAttachment(this);
+        this.netServerHandler.sendPacket(new Packet39AttachEntity(this, this.vehicle));
+        this.netServerHandler.a(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
     }
 
     protected void a(double d0, boolean flag) {
@@ -254,34 +444,54 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     private void ai() {
-        this.bO = playerWindowLifecycleService.nextWindowId(this.bO);
+        this.bO = this.bO % 100 + 1;
     }
 
     public void b(int i, int j, int k) {
         this.ai();
-        playerWindowLifecycleService.openWorkbenchWindow(this, this.bO, i, j, k);
+        this.netServerHandler.sendPacket(new Packet100OpenWindow(this.bO, 1, "Crafting", 9));
+        this.activeContainer = new ContainerWorkbench(this.inventory, this.world, i, j, k);
+        this.activeContainer.windowId = this.bO;
+        this.activeContainer.a((ICrafting) this);
     }
 
     public void a(IInventory iinventory) {
         this.ai();
 
-        if (!playerWindowLifecycleService.fireChestOpenedEvent(this, iinventory)) return;
-        playerWindowLifecycleService.openChestWindow(this, this.bO, iinventory);
+        // Poseidon start
+        ChestOpenedEvent event = new ChestOpenedEvent((org.bukkit.entity.Player) this.getBukkitEntity(), iinventory.getContents());
+        this.world.getServer().getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+        // Poseidon end
+
+        this.netServerHandler.sendPacket(new Packet100OpenWindow(this.bO, 0, iinventory.getName(), iinventory.getSize()));
+        this.activeContainer = new ContainerChest(this.inventory, iinventory);
+        this.activeContainer.windowId = this.bO;
+        this.activeContainer.a((ICrafting) this);
     }
 
     public void a(TileEntityFurnace tileentityfurnace) {
         this.ai();
-        playerWindowLifecycleService.openFurnaceWindow(this, this.bO, tileentityfurnace);
+        this.netServerHandler.sendPacket(new Packet100OpenWindow(this.bO, 2, tileentityfurnace.getName(), tileentityfurnace.getSize()));
+        this.activeContainer = new ContainerFurnace(this.inventory, tileentityfurnace);
+        this.activeContainer.windowId = this.bO;
+        this.activeContainer.a((ICrafting) this);
     }
 
     public void a(TileEntityDispenser tileentitydispenser) {
         this.ai();
-        playerWindowLifecycleService.openDispenserWindow(this, this.bO, tileentitydispenser);
+        this.netServerHandler.sendPacket(new Packet100OpenWindow(this.bO, 3, tileentitydispenser.getName(), tileentitydispenser.getSize()));
+        this.activeContainer = new ContainerDispenser(this.inventory, tileentitydispenser);
+        this.activeContainer.windowId = this.bO;
+        this.activeContainer.a((ICrafting) this);
     }
 
     public void a(Container container, int i, ItemStack itemstack) {
-        if (!playerContainerSyncService.shouldSendSlotUpdate(container.b(i) instanceof SlotResult, this.h)) return;
-        playerContainerSyncService.sendSlotUpdate(this, container, i, itemstack);
+        if (!(container.b(i) instanceof SlotResult)) {
+            if (!this.h) {
+                this.netServerHandler.sendPacket(new Packet103SetSlot(container.windowId, i, itemstack));
+            }
+        }
     }
 
     public void updateInventory(Container container) {
@@ -289,26 +499,31 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     public void a(Container container, List list) {
-        playerContainerSyncService.sendWindowItems(this, container, list);
+        this.netServerHandler.sendPacket(new Packet104WindowItems(container.windowId, list));
+        this.netServerHandler.sendPacket(new Packet103SetSlot(-1, -1, this.inventory.j()));
     }
 
     public void a(Container container, int i, int j) {
-        playerContainerSyncService.sendProgressUpdate(this, container, i, j);
+        this.netServerHandler.sendPacket(new Packet105CraftProgressBar(container.windowId, i, j));
     }
 
     public void a(ItemStack itemstack) {
     }
 
     public void y() {
-        playerWindowLifecycleService.closeActiveWindow(this);
+        this.netServerHandler.sendPacket(new Packet101CloseWindow(this.activeContainer.windowId));
+        this.A();
     }
 
     public void z() {
-        playerWindowLifecycleService.sendCarriedItemIfNeeded(this);
+        if (!this.h) {
+            this.netServerHandler.sendPacket(new Packet103SetSlot(-1, -1, this.inventory.j()));
+        }
     }
 
     public void A() {
-        playerWindowLifecycleService.resetActiveContainer(this);
+        this.activeContainer.a((EntityHuman) this);
+        this.activeContainer = this.defaultContainer;
     }
 
     public void a(float f, float f1, boolean flag, boolean flag1, float f2, float f3) {
@@ -321,11 +536,30 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     public void a(Statistic statistic, int i) {
-        playerStatisticPacketService.sendStatisticPackets(this, statistic, i);
+        if (statistic != null) {
+            if (!statistic.g) {
+                while (i > 100) {
+                    this.netServerHandler.sendPacket(new Packet200Statistic(statistic.e, 100));
+                    i -= 100;
+                }
+
+                this.netServerHandler.sendPacket(new Packet200Statistic(statistic.e, i));
+            }
+        }
     }
 
     public void B() {
-        playerAttachmentSyncService.restoreSessionState(this);
+        if (this.vehicle != null) {
+            this.mount(this.vehicle);
+        }
+
+        if (this.passenger != null) {
+            this.passenger.mount(this);
+        }
+
+        if (this.sleeping) {
+            this.a(true, false, false);
+        }
     }
 
     public void C() {

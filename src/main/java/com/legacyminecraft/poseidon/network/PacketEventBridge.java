@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
-import org.bukkit.Server;
 
 /**
  * Canonical bridge for packet receive/send event dispatch.

@@ -1,6 +1,12 @@
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.LongHashBucketIndexBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashBucketIndexBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashsetAddBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashsetContainsKeyBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashsetKeyProjectionBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashsetLockingBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashsetPopFirstBehaviour;
+import com.legacyminecraft.compat.bukkit.LongHashsetRemovalBehaviour;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -11,6 +17,18 @@ import static org.bukkit.craftbukkit.util.Java15Compat.Arrays_copyOf;
 public class LongHashset extends LongHash {
     private static final LongHashBucketIndexBehaviour LONG_HASH_BUCKET_INDEX_BEHAVIOUR =
             LongHashBucketIndexBehaviour.getInstance();
+    private static final LongHashsetKeyProjectionBehaviour LONG_HASHSET_KEY_PROJECTION_BEHAVIOUR =
+            LongHashsetKeyProjectionBehaviour.getInstance();
+    private static final LongHashsetContainsKeyBehaviour LONG_HASHSET_CONTAINS_KEY_BEHAVIOUR =
+            LongHashsetContainsKeyBehaviour.getInstance();
+    private static final LongHashsetAddBehaviour LONG_HASHSET_ADD_BEHAVIOUR =
+            LongHashsetAddBehaviour.getInstance();
+    private static final LongHashsetPopFirstBehaviour LONG_HASHSET_POP_FIRST_BEHAVIOUR =
+            LongHashsetPopFirstBehaviour.getInstance();
+    private static final LongHashsetRemovalBehaviour LONG_HASHSET_REMOVAL_BEHAVIOUR =
+            LongHashsetRemovalBehaviour.getInstance();
+    private static final LongHashsetLockingBehaviour LONG_HASHSET_LOCKING_BEHAVIOUR =
+            LongHashsetLockingBehaviour.getInstance();
     long[][][] values = new long[256][][];
     int count = 0;
     ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
@@ -18,12 +36,12 @@ public class LongHashset extends LongHash {
     WriteLock wl = rwl.writeLock();
 
     public boolean isEmpty() {
-        rl.lock();
-        try {
-            return this.count == 0;
-        } finally {
-            rl.unlock();
-        }
+        return LONG_HASHSET_LOCKING_BEHAVIOUR.withReadLock(rl, new LongHashsetLockingBehaviour.ValueOperation<Boolean>() {
+            @Override
+            public Boolean execute() {
+                return count == 0;
+            }
+        });
     }
 
     public void add(int msw, int lsw) {
@@ -31,125 +49,101 @@ public class LongHashset extends LongHash {
     }
 
     public void add(long key) {
-        wl.lock();
-        try {
-            int mainIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key);
-            long outer[][] = this.values[mainIdx];
-            if (outer == null) this.values[mainIdx] = outer = new long[256][];
+        LONG_HASHSET_LOCKING_BEHAVIOUR.withWriteLock(wl, new LongHashsetLockingBehaviour.ValueOperation<Void>() {
+            @Override
+            public Void execute() {
+                LongHashsetAddBehaviour.AddResult result = LONG_HASHSET_ADD_BEHAVIOUR.add(
+                        values,
+                        count,
+                        LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key),
+                        LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key),
+                        key,
+                        new LongHashsetAddBehaviour.AddCallbacks() {
+                            @Override
+                            public long[][] createOuterBuckets() {
+                                return new long[256][];
+                            }
 
-            int outerIdx = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
-            long inner[] = outer[outerIdx];
+                            @Override
+                            public long[] createInnerBucket() {
+                                return new long[1];
+                            }
 
-            if (inner == null) {
-                synchronized (this) {
-                    outer[outerIdx] = inner = new long[1];
-                    inner[0] = key;
-                    this.count++;
-                }
-            } else {
-                int i;
-                for (i = 0; i < inner.length; i++) {
-                    if (inner[i] == key) {
-                        return;
-                    }
-                }
-                inner = Arrays_copyOf(inner, i + 1);
-                outer[outerIdx] = inner;
-                inner[i] = key;
-                this.count++;
+                            @Override
+                            public long[] copyOf(long[] source, int newLength) {
+                                return Arrays_copyOf(source, newLength);
+                            }
+                        }
+                );
+                count = result.updatedCount();
+                return null;
             }
-        } finally {
-            wl.unlock();
-        }
+        });
     }
 
     public boolean containsKey(long key) {
-        rl.lock();
-        try {
-            long[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
-            if (outer == null) return false;
-
-            long[] inner = outer[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key)];
-            if (inner == null) return false;
-
-            for (long entry: inner) {
-                if (entry == key) return true;
+        return LONG_HASHSET_LOCKING_BEHAVIOUR.withReadLock(rl, new LongHashsetLockingBehaviour.ValueOperation<Boolean>() {
+            @Override
+            public Boolean execute() {
+                return LONG_HASHSET_CONTAINS_KEY_BEHAVIOUR.containsKey(
+                        values,
+                        LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key),
+                        LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key),
+                        key
+                );
             }
-            return false;
-        } finally {
-            rl.unlock();
-        }
+        });
     }
 
     public void remove(long key) {
-        wl.lock();
-        try {
-            int outerIndex = LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key);
-            long[][] outer = this.values[LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key)];
-            if (outer == null) return;
-
-            long[] inner = outer[outerIndex];
-            if (inner == null) return;
-
-            int max = inner.length - 1;
-            for (int i = 0; i <= max; i++) {
-                if (inner[i] == key) {
-                    this.count--;
-                    if (i != max) {
-                        inner[i] = inner[max];
-                    }
-
-                    outer[outerIndex] = (max == 0 ? null : Arrays_copyOf(inner, max));
-                    return;
-                }
+        LONG_HASHSET_LOCKING_BEHAVIOUR.withWriteLock(wl, new LongHashsetLockingBehaviour.ValueOperation<Void>() {
+            @Override
+            public Void execute() {
+                LongHashsetRemovalBehaviour.RemovalResult result = LONG_HASHSET_REMOVAL_BEHAVIOUR.remove(
+                        values,
+                        count,
+                        LONG_HASH_BUCKET_INDEX_BEHAVIOUR.mainIndex(key),
+                        LONG_HASH_BUCKET_INDEX_BEHAVIOUR.outerIndex(key),
+                        key,
+                        new LongHashsetRemovalBehaviour.RemovalCallbacks() {
+                            @Override
+                            public long[] copyOf(long[] source, int newLength) {
+                                return Arrays_copyOf(source, newLength);
+                            }
+                        }
+                );
+                count = result.updatedCount();
+                return null;
             }
-        } finally {
-            wl.unlock();
-        }
+        });
     }
 
     public long popFirst() {
-        wl.lock();
-        try {
-            for (long[][] outer: this.values) {
-                if (outer == null) continue;
-
-                for (int i = 0; i < outer.length; i++) {
-                    long[] inner = outer[i];
-                    if (inner == null || inner.length == 0) continue;
-
-                    this.count--;
-                    long ret = inner[inner.length - 1];
-                    outer[i] = Arrays_copyOf(inner, inner.length - 1);
-
-                    return ret;
-                }
+        return LONG_HASHSET_LOCKING_BEHAVIOUR.withWriteLock(wl, new LongHashsetLockingBehaviour.ValueOperation<Long>() {
+            @Override
+            public Long execute() {
+                LongHashsetPopFirstBehaviour.PopFirstResult result = LONG_HASHSET_POP_FIRST_BEHAVIOUR.popFirst(
+                        values,
+                        count,
+                        new LongHashsetPopFirstBehaviour.PopFirstCallbacks() {
+                            @Override
+                            public long[] copyOf(long[] source, int newLength) {
+                                return Arrays_copyOf(source, newLength);
+                            }
+                        }
+                );
+                count = result.updatedCount();
+                return result.poppedValue();
             }
-        } finally {
-            wl.unlock();
-        }
-        return 0;
+        });
     }
 
     public long[] keys() {
-        int index = 0;
-        rl.lock();
-        try {
-            long[] ret = new long[this.count];
-            for (long[][] outer: this.values) {
-                if (outer == null) continue;
-
-                for (long[] inner: outer) {
-                    if (inner == null) continue;
-
-                    for (long entry: inner) {
-                        ret[index++] = entry;
-                    }
-                }
+        return LONG_HASHSET_LOCKING_BEHAVIOUR.withReadLock(rl, new LongHashsetLockingBehaviour.ValueOperation<long[]>() {
+            @Override
+            public long[] execute() {
+                return LONG_HASHSET_KEY_PROJECTION_BEHAVIOUR.keys(values, count);
             }
-            return ret;
-        } finally {
-            rl.unlock();
-        }
+        });
     }
 }

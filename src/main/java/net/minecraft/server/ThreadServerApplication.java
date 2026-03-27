@@ -13,6 +13,6 @@ public final class ThreadServerApplication extends Thread {
     }
 
     public void run() {
-        serverRunInvocationSystem.runServer(this.a);
+        serverRunInvocationSystem.runServerRaw(this.a);
     }
 }

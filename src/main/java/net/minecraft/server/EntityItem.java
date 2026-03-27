@@ -19,14 +19,16 @@ public class EntityItem extends Entity {
 
     public EntityItem(World world, double d0, double d1, double d2, ItemStack itemstack) {
         super(world);
-        ITEM_ENTITY_STATE_BEHAVIOUR.initializeDefaultBounds(this);
+        ITEM_ENTITY_STATE_BEHAVIOUR.initializeDefaultBounds((com.legacyminecraft.poseidon.entity.EntityItem) (Object) this);
         this.setPosition(d0, d1, d2);
-        this.itemStack = ITEM_ENTITY_STATE_BEHAVIOUR.sanitizeInitialItemStack(itemstack);
+        com.legacyminecraft.poseidon.entity.ItemStack sanitizedItemStack = ITEM_ENTITY_STATE_BEHAVIOUR.sanitizeInitialItemStack((com.legacyminecraft.poseidon.entity.ItemStack) (Object) itemstack);
+        this.itemStack = new ItemStack(sanitizedItemStack.id, sanitizedItemStack.count, sanitizedItemStack.damage);
         // CraftBukkit start - infinite item fix
-        this.itemStack = ITEM_ENTITY_STATE_BEHAVIOUR.sanitizeInitialItemStack(this.itemStack);
+        com.legacyminecraft.poseidon.entity.ItemStack resanitizedItemStack = ITEM_ENTITY_STATE_BEHAVIOUR.sanitizeInitialItemStack((com.legacyminecraft.poseidon.entity.ItemStack) (Object) this.itemStack);
+        this.itemStack = new ItemStack(resanitizedItemStack.id, resanitizedItemStack.count, resanitizedItemStack.damage);
         // CraftBukkit end
-        ItemEntityStateBehaviour.InitializationState initializationState = ITEM_ENTITY_STATE_BEHAVIOUR.initializeFromItemStack(this.itemStack, Item.byId.length);
-        this.itemStack = initializationState.itemStack;
+        ItemEntityStateBehaviour.InitializationState initializationState = ITEM_ENTITY_STATE_BEHAVIOUR.initializeFromItemStack((com.legacyminecraft.poseidon.entity.ItemStack) (Object) this.itemStack, Item.byId.length);
+        this.itemStack = new ItemStack(initializationState.itemStack.id, initializationState.itemStack.count, initializationState.itemStack.damage);
         if (initializationState.shouldDie) {
             this.die();
         }
@@ -43,7 +45,7 @@ public class EntityItem extends Entity {
 
     public EntityItem(World world) {
         super(world);
-        ITEM_ENTITY_STATE_BEHAVIOUR.initializeDefaultBounds(this);
+        ITEM_ENTITY_STATE_BEHAVIOUR.initializeDefaultBounds((com.legacyminecraft.poseidon.entity.EntityItem) (Object) this);
     }
 
     protected void b() {}
@@ -56,7 +58,7 @@ public class EntityItem extends Entity {
         this.pickupDelay = tickClockState.pickupDelay;
         this.lastTick = tickClockState.lastTick;
         // CraftBukkit end
-        if (ITEM_ENTITY_STATE_BEHAVIOUR.isInvalidItemStack(this.itemStack, Item.byId.length)) {
+        if (ITEM_ENTITY_STATE_BEHAVIOUR.isInvalidItemStack((com.legacyminecraft.poseidon.entity.ItemStack) (Object) this.itemStack, Item.byId.length)) {
             this.b = ITEM_ENTITY_STATE_BEHAVIOUR.invalidItemSentinelAge(); //TODO: Configurable lifetime of the EntityItem
             this.die();
         }
@@ -66,7 +68,7 @@ public class EntityItem extends Entity {
         this.lastZ = this.locZ;
         this.motY -= 0.03999999910593033D;
         if (this.world.getMaterial(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ)) == Material.LAVA) {
-            ITEM_ENTITY_STATE_BEHAVIOUR.applyLavaBounce(this, this.random.nextFloat(), this.random.nextFloat(), this.random.nextFloat());
+            ITEM_ENTITY_STATE_BEHAVIOUR.applyLavaBounce((com.legacyminecraft.poseidon.entity.EntityItem) (Object) this, this.random.nextFloat(), this.random.nextFloat(), this.random.nextFloat());
         }
 
         this.g(this.locX, (this.boundingBox.b + this.boundingBox.e) / 2.0D, this.locZ);
@@ -113,14 +115,14 @@ public class EntityItem extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        ITEM_ENTITY_STATE_BEHAVIOUR.writeNbt(nbttagcompound, this.f, this.b, this.itemStack);
+        ITEM_ENTITY_STATE_BEHAVIOUR.writeNbt((com.legacyminecraft.poseidon.entity.NBTTagCompound) (Object) nbttagcompound, this.f, this.b, (com.legacyminecraft.poseidon.entity.ItemStack) (Object) this.itemStack);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        ItemEntityStateBehaviour.LoadedNbtState loadedNbtState = ITEM_ENTITY_STATE_BEHAVIOUR.readNbt(nbttagcompound);
+        ItemEntityStateBehaviour.LoadedNbtState loadedNbtState = ITEM_ENTITY_STATE_BEHAVIOUR.readNbt((com.legacyminecraft.poseidon.entity.NBTTagCompound) (Object) nbttagcompound);
         this.f = loadedNbtState.health;
         this.b = loadedNbtState.age;
-        this.itemStack = loadedNbtState.itemStack;
+        this.itemStack = new ItemStack(loadedNbtState.itemStack.id, loadedNbtState.itemStack.count, loadedNbtState.itemStack.damage);
     }
 
     public void b(EntityHuman entityhuman) {
@@ -146,10 +148,10 @@ public class EntityItem extends Entity {
             // CraftBukkit end
 
             if (ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.shouldTryInventoryPickup(this.pickupDelay) && entityhuman.inventory.pickup(this.itemStack)) {
-                ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.grantPickupAchievements(entityhuman, this.itemStack.id);
+                ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.grantPickupAchievements((com.legacyminecraft.poseidon.entity.EntityHuman) (Object) entityhuman, this.itemStack.id);
                 this.world.makeSound(this, "random.pop", 0.2F, ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.pickupSoundPitch(this.random.nextFloat(), this.random.nextFloat()));
                 entityhuman.receive(this, i);
-                if (ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.shouldDieAfterPickup(this.itemStack)) {
+                if (ITEM_ENTITY_LIFECYCLE_BEHAVIOUR.shouldDieAfterPickup((com.legacyminecraft.poseidon.entity.ItemStack) (Object) this.itemStack)) {
                     this.die();
                 }
             }

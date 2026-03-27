@@ -20,6 +20,12 @@ public class CanonicalWorldCompatBridgeBoundaryTest {
             Paths.get("src/main/java/com/legacyminecraft/poseidon/compat/bukkit/WorldChunkGeneratorBridgeBehaviour.java");
     private static final Path WORLD_MAP_RENDER_BRIDGE_BEHAVIOUR_PATH =
             Paths.get("src/main/java/com/legacyminecraft/poseidon/compat/bukkit/WorldMapRenderBridgeBehaviour.java");
+    private static final Path WORLD_HANDLE_BRIDGE_BEHAVIOUR_PATH =
+            Paths.get("src/main/java/com/legacyminecraft/poseidon/compat/bukkit/WorldHandleBridgeBehaviour.java");
+    private static final Path PLAYER_WRAPPER_PROJECTION_BRIDGE_BEHAVIOUR_PATH =
+            Paths.get("src/main/java/com/legacyminecraft/poseidon/compat/bukkit/PlayerWrapperProjectionBridgeBehaviour.java");
+    private static final Path MAP_VIEW_RENDER_PROJECTION_BEHAVIOUR_PATH =
+            Paths.get("src/main/java/com/legacyminecraft/poseidon/compat/bukkit/MapViewRenderProjectionBehaviour.java");
     private static final Path PORTAL_TRAVEL_AGENT_BRIDGE_BEHAVIOUR_PATH =
             Paths.get("src/main/java/com/legacyminecraft/poseidon/compat/bukkit/PortalTravelAgentBridgeBehaviour.java");
 
@@ -40,10 +46,21 @@ public class CanonicalWorldCompatBridgeBoundaryTest {
 
         String worldChunkGeneratorBridgeText = read(WORLD_CHUNK_GENERATOR_BRIDGE_BEHAVIOUR_PATH);
         String worldMapRenderBridgeText = read(WORLD_MAP_RENDER_BRIDGE_BEHAVIOUR_PATH);
+        String worldHandleBridgeText = read(WORLD_HANDLE_BRIDGE_BEHAVIOUR_PATH);
+        String playerWrapperProjectionBridgeText = read(PLAYER_WRAPPER_PROJECTION_BRIDGE_BEHAVIOUR_PATH);
+        String mapViewRenderProjectionText = read(MAP_VIEW_RENDER_PROJECTION_BEHAVIOUR_PATH);
         String portalTravelAgentBridgeText = read(PORTAL_TRAVEL_AGENT_BRIDGE_BEHAVIOUR_PATH);
 
         Assert.assertTrue(worldChunkGeneratorBridgeText.contains("import org.bukkit.craftbukkit.generator."));
-        Assert.assertTrue(worldMapRenderBridgeText.contains("import org.bukkit.craftbukkit.entity.CraftPlayer;"));
+        Assert.assertTrue(worldMapRenderBridgeText.contains("PlayerWrapperProjectionBridgeBehaviour"));
+        Assert.assertTrue(worldHandleBridgeText.contains("WorldWrapperProjectionBridgeBehaviour"));
+        Assert.assertTrue(worldHandleBridgeText.contains("WORLD_WRAPPER_PROJECTION_BRIDGE_BEHAVIOUR.resolveCraftWorld(world)"));
+        Assert.assertFalse(worldHandleBridgeText.contains("((CraftWorld) world).getHandle()"));
+        Assert.assertFalse(worldHandleBridgeText.contains("return (CraftWorld) world;"));
+        Assert.assertTrue(playerWrapperProjectionBridgeText.contains("import org.bukkit.craftbukkit.entity.CraftPlayer;"));
+        Assert.assertTrue(mapViewRenderProjectionText.contains("MapViewWrapperProjectionBridgeBehaviour"));
+        Assert.assertTrue(mapViewRenderProjectionText.contains("MAP_VIEW_WRAPPER_PROJECTION_BRIDGE_BEHAVIOUR.resolveCraftMapView(map)"));
+        Assert.assertFalse(mapViewRenderProjectionText.contains("((CraftMapView) map).render("));
         Assert.assertTrue(portalTravelAgentBridgeText.contains("new org.bukkit.craftbukkit.PortalTravelAgent()"));
     }
 

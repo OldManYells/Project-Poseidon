@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IWorldAccess;
-import net.minecraft.server.TileEntity;
 
 import java.util.List;
 

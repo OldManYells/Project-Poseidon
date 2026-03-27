@@ -22,7 +22,10 @@ public class LegacyCraftExplosiveAndItemWrapperThinnessTest {
         String text = new String(Files.readAllBytes(CRAFT_TNT_PRIMED_PATH), StandardCharsets.UTF_8);
 
         Assert.assertTrue(text.contains("PrimedTntPropertyBehaviour"));
+        Assert.assertTrue(text.contains("EntityTypedHandleCastBehaviour"));
         Assert.assertTrue(text.contains("PRIMED_TNT_PROPERTY_BEHAVIOUR"));
+        Assert.assertTrue(text.contains("ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR"));
+        Assert.assertTrue(text.contains("castHandle(super.getHandle(), EntityTNTPrimed.class)"));
         Assert.assertTrue(text.contains("getYield(getHandle())"));
         Assert.assertTrue(text.contains("isIncendiary(getHandle())"));
         Assert.assertTrue(text.contains("setIncendiary(getHandle(), isIncendiary)"));
@@ -32,6 +35,7 @@ public class LegacyCraftExplosiveAndItemWrapperThinnessTest {
         Assert.assertFalse(text.contains("getHandle().yield"));
         Assert.assertFalse(text.contains("getHandle().isIncendiary"));
         Assert.assertFalse(text.contains("getHandle().fuseTicks"));
+        Assert.assertFalse(text.contains("return (EntityTNTPrimed) super.getHandle();"));
     }
 
     @Test
@@ -51,9 +55,12 @@ public class LegacyCraftExplosiveAndItemWrapperThinnessTest {
         String text = new String(Files.readAllBytes(CRAFT_LIGHTNING_STRIKE_PATH), StandardCharsets.UTF_8);
 
         Assert.assertTrue(text.contains("LightningStrikePropertyBehaviour"));
+        Assert.assertTrue(text.contains("EntityTypedHandleCastBehaviour"));
         Assert.assertTrue(text.contains("LIGHTNING_STRIKE_PROPERTY_BEHAVIOUR"));
+        Assert.assertTrue(text.contains("ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR"));
+        Assert.assertTrue(text.contains("castHandle(super.getHandle(), EntityWeatherStorm.class)"));
         Assert.assertTrue(text.contains("isEffect(getHandle())"));
+        Assert.assertFalse(text.contains("return (EntityWeatherStorm) super.getHandle();"));
         Assert.assertFalse(text.contains("((EntityWeatherStorm) super.getHandle()).isEffect"));
     }
 }
-

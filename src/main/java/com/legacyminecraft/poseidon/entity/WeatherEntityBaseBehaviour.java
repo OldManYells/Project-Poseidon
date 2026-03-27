@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.EntityWeather;
-import net.minecraft.server.World;
 
 /**
  * Canonical base hook for weather-entity wrappers.

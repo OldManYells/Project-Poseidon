@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.AxisAlignedBB;
 
 /**
  * Canonical behaviour for applying entity position to axis-aligned bounds.

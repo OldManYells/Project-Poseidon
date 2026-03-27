@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.ItemStack;
 
 /**
  * Canonical single-slot crafting-result inventory operations.

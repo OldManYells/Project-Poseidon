@@ -1,8 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.types.CreatureTypeContract;
-
-public enum EnumCreatureType implements CreatureTypeContract {
+public enum EnumCreatureType {
 
     MONSTER(IMonster.class, 70, Material.AIR, false),
     CREATURE(EntityAnimal.class, 15, Material.AIR, true),

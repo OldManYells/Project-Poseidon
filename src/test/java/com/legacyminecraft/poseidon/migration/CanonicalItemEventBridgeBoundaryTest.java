@@ -57,10 +57,16 @@ public class CanonicalItemEventBridgeBoundaryTest {
         String blockPlaceBridgeText = read(BLOCK_PLACE_EVENT_BRIDGE_BEHAVIOUR_PATH);
         String bucketBridgeText = read(BUCKET_EVENT_BRIDGE_BEHAVIOUR_PATH);
 
-        Assert.assertTrue(playerInteractBridgeText.contains("CraftEventFactory.callPlayerInteractEvent"));
-        Assert.assertTrue(blockPlaceBridgeText.contains("CraftEventFactory.callBlockPlaceEvent"));
-        Assert.assertTrue(bucketBridgeText.contains("CraftEventFactory.callPlayerBucketFillEvent"));
-        Assert.assertTrue(bucketBridgeText.contains("CraftEventFactory.callPlayerBucketEmptyEvent"));
+        Assert.assertTrue(playerInteractBridgeText.contains("EventFactoryInteractionSystem"));
+        Assert.assertTrue(playerInteractBridgeText.contains("EVENT_FACTORY_INTERACTION_SYSTEM.callPlayerInteractEvent"));
+        Assert.assertTrue(blockPlaceBridgeText.contains("EventFactoryInteractionSystem"));
+        Assert.assertTrue(blockPlaceBridgeText.contains("EVENT_FACTORY_INTERACTION_SYSTEM.callBlockPlaceEvent"));
+        Assert.assertTrue(bucketBridgeText.contains("EventFactoryInteractionSystem"));
+        Assert.assertTrue(bucketBridgeText.contains("EVENT_FACTORY_INTERACTION_SYSTEM.callPlayerBucketFillEvent"));
+        Assert.assertTrue(bucketBridgeText.contains("EVENT_FACTORY_INTERACTION_SYSTEM.callPlayerBucketEmptyEvent"));
+        Assert.assertFalse(playerInteractBridgeText.contains("org.bukkit.craftbukkit.event.CraftEventFactory"));
+        Assert.assertFalse(blockPlaceBridgeText.contains("org.bukkit.craftbukkit.event.CraftEventFactory"));
+        Assert.assertFalse(bucketBridgeText.contains("org.bukkit.craftbukkit.event.CraftEventFactory"));
     }
 
     private static void assertNoDirectCraftBukkitEventImports(String text) {

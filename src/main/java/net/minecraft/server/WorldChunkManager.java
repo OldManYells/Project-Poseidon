@@ -1,7 +1,5 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.biome.WorldChunkClimateBehaviour;
-
 public class WorldChunkManager {
 
     private NoiseGeneratorOctaves2 e;
@@ -11,14 +9,12 @@ public class WorldChunkManager {
     public double[] rain;
     public double[] c;
     public BiomeBase[] d;
-    private static final WorldChunkClimateBehaviour WORLD_CHUNK_CLIMATE_BEHAVIOUR = WorldChunkClimateBehaviour.getInstance();
-
     protected WorldChunkManager() {}
 
     public WorldChunkManager(World world) {
-        this.e = WORLD_CHUNK_CLIMATE_BEHAVIOUR.createTemperatureNoise(world.getSeed());
-        this.f = WORLD_CHUNK_CLIMATE_BEHAVIOUR.createHumidityNoise(world.getSeed());
-        this.g = WORLD_CHUNK_CLIMATE_BEHAVIOUR.createBlendNoise(world.getSeed());
+        this.e = new NoiseGeneratorOctaves2(new java.util.Random(world.getSeed() * 9871L), 4);
+        this.f = new NoiseGeneratorOctaves2(new java.util.Random(world.getSeed() * 39811L), 4);
+        this.g = new NoiseGeneratorOctaves2(new java.util.Random(world.getSeed() * 543321L), 2);
     }
 
     public BiomeBase a(ChunkCoordIntPair chunkcoordintpair) {
@@ -35,43 +31,56 @@ public class WorldChunkManager {
     }
 
     public double[] a(double[] adouble, int i, int j, int k, int l) {
-        WorldChunkClimateBehaviour.TemperatureState temperatureState = WORLD_CHUNK_CLIMATE_BEHAVIOUR.sampleTemperatureMap(
-                adouble,
-                this.c,
-                this.e,
-                this.g,
-                i,
-                j,
-                k,
-                l
-        );
-        this.c = temperatureState.getBlend();
-        return temperatureState.getTemperatures();
+        if (adouble == null || adouble.length < k * l) {
+            adouble = new double[k * l];
+        }
+        this.c = this.g.a(this.c, (double) i, (double) j, k, l, 0.25D, 0.25D, 0.5882352941176471D);
+        return this.e.a(adouble, (double) i, (double) j, k, l, 0.025D, 0.025D, 0.25D);
     }
 
     public BiomeBase[] a(BiomeBase[] abiomebase, int i, int j, int k, int l) {
-        WorldChunkClimateBehaviour.BiomeClimateState biomeClimateState = WORLD_CHUNK_CLIMATE_BEHAVIOUR.sampleBiomeClimate(
-                abiomebase,
-                this.temperature,
-                this.rain,
-                this.c,
-                this.e,
-                this.f,
-                this.g,
-                i,
-                j,
-                k,
-                l
-        );
-        this.temperature = biomeClimateState.getTemperatures();
-        this.rain = biomeClimateState.getRain();
-        this.c = biomeClimateState.getBlend();
-        return biomeClimateState.getBiomes();
+        if (abiomebase == null || abiomebase.length < k * l) {
+            abiomebase = new BiomeBase[k * l];
+        }
+
+        this.temperature = this.e.a(this.temperature, (double) i, (double) j, k, l, 0.025D, 0.025D, 0.25D);
+        this.rain = this.f.a(this.rain, (double) i, (double) j, k, l, 0.05D, 0.05D, 0.3333333333333333D);
+        this.c = this.g.a(this.c, (double) i, (double) j, k, l, 0.25D, 0.25D, 0.5882352941176471D);
+
+        int index = 0;
+        for (int x = 0; x < k; ++x) {
+            for (int z = 0; z < l; ++z) {
+                double blend = this.c[index] * 1.1D + 0.5D;
+                double temperatureSample = (this.temperature[index] * 0.15D + 0.7D) * 0.99D + blend * 0.01D;
+                double rainSample = (this.rain[index] * 0.15D + 0.5D) * 0.998D + blend * 0.002D;
+                if (temperatureSample < 0.0D) {
+                    temperatureSample = 0.0D;
+                }
+                if (rainSample < 0.0D) {
+                    rainSample = 0.0D;
+                }
+                if (temperatureSample > 1.0D) {
+                    temperatureSample = 1.0D;
+                }
+                if (rainSample > 1.0D) {
+                    rainSample = 1.0D;
+                }
+                this.temperature[index] = temperatureSample;
+                this.rain[index] = rainSample;
+                abiomebase[index] = BiomeBase.a(temperatureSample, rainSample);
+                ++index;
+            }
+        }
+        return abiomebase;
     }
 
     // CraftBukkit start
     public double getHumidity(int x, int z) {
-        return WORLD_CHUNK_CLIMATE_BEHAVIOUR.sampleHumidity(this.f, this.rain, x, z);
+        if (this.rain == null || this.rain.length < 1) {
+            this.rain = new double[1];
+        }
+        this.rain = this.f.a(this.rain, (double) x, (double) z, 1, 1, 0.05D, 0.05D, 0.3333333333333333D);
+        return this.rain[0];
     }
     // CraftBukkit end
 }

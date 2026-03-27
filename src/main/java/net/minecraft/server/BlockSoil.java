@@ -21,7 +21,7 @@ public class BlockSoil extends Block {
     }
 
     public AxisAlignedBB e(World world, int i, int j, int k) {
-        return farmlandStateService.resolveCollisionBox(i, j, k);
+        return AxisAlignedBB.b((double) i, (double) j, (double) k, (double) (i + 1), (double) (j + 1), (double) (k + 1));
     }
 
     public boolean a() {
@@ -82,7 +82,7 @@ public class BlockSoil extends Block {
 
     private boolean h(World world, int i, int j, int k) {
         return farmlandStateService.hasNearbyWater(new FarmlandStateBehaviour.MaterialQuery() {
-            public Material getMaterial(int x, int y, int z) {
+            public Object getMaterial(int x, int y, int z) {
                 return world.getMaterial(x, y, z);
             }
         }, i, j, k);

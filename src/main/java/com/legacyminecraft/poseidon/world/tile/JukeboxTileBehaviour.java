@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.tile;
 
-import net.minecraft.server.NBTTagCompound;
 
 public final class JukeboxTileBehaviour {
     private static final JukeboxTileBehaviour INSTANCE = new JukeboxTileBehaviour();

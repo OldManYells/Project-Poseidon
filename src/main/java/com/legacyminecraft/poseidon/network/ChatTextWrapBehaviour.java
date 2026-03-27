@@ -27,7 +27,7 @@ public final class ChatTextWrapBehaviour {
     public static final char COLOR_CHAR = '\u00A7';
     public static final int CHAT_WINDOW_WIDTH = 320;
     public static final int CHAT_STRING_LENGTH = 119;
-    public static final String ALLOWED_CHARACTERS = net.minecraft.server.FontAllowedCharacters.allowedCharacters;
+    public static final String ALLOWED_CHARACTERS = com.legacyminecraft.compat.bukkit.FontAllowedCharacters.allowedCharacters;
 
     private ChatTextWrapBehaviour() {
     }

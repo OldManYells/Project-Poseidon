@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.ChunkCoordIntPair;
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.PathPoint;
 
 public final class CoordinateMathBehaviour {
     private static final CoordinateMathBehaviour INSTANCE = new CoordinateMathBehaviour();
@@ -75,8 +71,24 @@ public final class CoordinateMathBehaviour {
         return (i < 0 ? Integer.MIN_VALUE : 0) | (i & 32767) << 16 | (j < 0 ? '\u8000' : 0) | j & 32767;
     }
 
-    public boolean equals(ChunkCoordIntPair left, Object object) {
-        ChunkCoordIntPair right = (ChunkCoordIntPair) object;
-        return right.x == left.x && right.z == left.z;
+    public boolean equals(Object left, Object object) {
+        if (left == null || object == null || !left.getClass().isInstance(object)) {
+            return false;
+        }
+        int leftX = ((Number) readField(left, "x")).intValue();
+        int leftZ = ((Number) readField(left, "z")).intValue();
+        int rightX = ((Number) readField(object, "x")).intValue();
+        int rightZ = ((Number) readField(object, "z")).intValue();
+        return rightX == leftX && rightZ == leftZ;
+    }
+
+    private static Object readField(Object target, String fieldName) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

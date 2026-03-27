@@ -1,8 +1,6 @@
 package com.legacyminecraft.poseidon.runtime;
 
 import joptsimple.OptionSet;
-import net.minecraft.server.PropertyManager;
-import org.bukkit.Server;
 
 import java.util.logging.Logger;
 

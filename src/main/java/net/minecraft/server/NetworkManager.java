@@ -5,13 +5,22 @@ import com.legacyminecraft.poseidon.network.InboundQueueReadSystem;
 import com.legacyminecraft.poseidon.network.NetworkCloseMonitorStartSystem;
 import com.legacyminecraft.poseidon.network.NetworkDisconnectLifecycleSystem;
 import com.legacyminecraft.poseidon.network.NetworkManagerTickSystem;
+import com.legacyminecraft.poseidon.network.NetworkManagerConsoleLogBehaviour;
 import com.legacyminecraft.poseidon.network.NetworkSocketSystem;
+import com.legacyminecraft.poseidon.network.NetworkSocketInitializationFailureBehaviour;
 import com.legacyminecraft.poseidon.network.NetworkTickFinalizationSystem;
 import com.legacyminecraft.poseidon.network.InboundQueueReadExecutionSystem;
 import com.legacyminecraft.poseidon.network.OutboundQueueDrainExecutionSystem;
 import com.legacyminecraft.poseidon.network.OutboundQueueEnqueueExecutionSystem;
 import com.legacyminecraft.poseidon.network.OutboundQueueSystem;
+import com.legacyminecraft.poseidon.network.NetworkTransportConfigPolicy;
+import com.legacyminecraft.poseidon.network.OutboundQueueDelayPolicy;
 import com.legacyminecraft.poseidon.network.NetworkExceptionDisconnectSystem;
+import com.legacyminecraft.poseidon.network.NetworkExceptionLogBehaviour;
+import com.legacyminecraft.poseidon.network.NetworkDisconnectArgumentPolicy;
+import com.legacyminecraft.poseidon.network.NetworkDisconnectKeyPolicy;
+import com.legacyminecraft.poseidon.network.PacketEventConfigPolicy;
+import com.legacyminecraft.poseidon.network.PacketSpamDetectionConfigPolicy;
 import com.legacyminecraft.poseidon.network.NetworkThreadInterruptSystem;
 
 import java.io.DataInputStream;
@@ -20,8 +29,10 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class NetworkManager {
+    private static final Logger LOGGER = Logger.getLogger(NetworkManager.class.getName());
 
     public static final Object a = new Object();
     public static int b;
@@ -47,13 +58,20 @@ public class NetworkManager {
     public static int[] d = new int[256];
     public static int[] e = new int[256];
     public int f = 0;
-    private int lowPriorityQueueDelay = 50;
+    private final OutboundQueueDelayPolicy outboundQueueDelayPolicy = OutboundQueueDelayPolicy.getInstance();
+    private final PacketEventConfigPolicy packetEventConfigPolicy = PacketEventConfigPolicy.getInstance();
+    private final PacketSpamDetectionConfigPolicy packetSpamDetectionConfigPolicy =
+            PacketSpamDetectionConfigPolicy.getInstance();
+    private final NetworkTransportConfigPolicy networkTransportConfigPolicy = NetworkTransportConfigPolicy.getInstance();
+    private int lowPriorityQueueDelay = outboundQueueDelayPolicy.initialLowPriorityQueueDelay();
     private final boolean firePacketEvents;
 
     private final boolean spamDetection;
 
     private final int threshold;
     private final NetworkManagerTickSystem networkManagerTickSystem = NetworkManagerTickSystem.getInstance();
+    private final NetworkManagerConsoleLogBehaviour networkManagerConsoleLogBehaviour =
+            NetworkManagerConsoleLogBehaviour.getInstance();
     private final InboundQueueReadSystem inboundQueueReadSystem = InboundQueueReadSystem.getInstance();
     private final InboundQueueReadExecutionSystem inboundQueueReadExecutionSystem = InboundQueueReadExecutionSystem.getInstance();
     private final OutboundQueueSystem outboundQueueSystem = OutboundQueueSystem.getInstance();
@@ -64,9 +82,16 @@ public class NetworkManager {
     private final NetworkThreadInterruptSystem networkThreadInterruptSystem = NetworkThreadInterruptSystem.getInstance();
     private final NetworkExceptionDisconnectSystem networkExceptionDisconnectSystem =
             NetworkExceptionDisconnectSystem.getInstance();
+    private final NetworkExceptionLogBehaviour networkExceptionLogBehaviour =
+            NetworkExceptionLogBehaviour.getInstance();
     private final NetworkDisconnectLifecycleSystem networkDisconnectLifecycleSystem = NetworkDisconnectLifecycleSystem.getInstance();
     private final NetworkCloseMonitorStartSystem networkCloseMonitorStartSystem = NetworkCloseMonitorStartSystem.getInstance();
     private final NetworkSocketSystem networkSocketSystem = NetworkSocketSystem.getInstance();
+    private final NetworkSocketInitializationFailureBehaviour networkSocketInitializationFailureBehaviour =
+            NetworkSocketInitializationFailureBehaviour.getInstance();
+    private final NetworkDisconnectKeyPolicy networkDisconnectKeyPolicy = NetworkDisconnectKeyPolicy.getInstance();
+    private final NetworkDisconnectArgumentPolicy networkDisconnectArgumentPolicy =
+            NetworkDisconnectArgumentPolicy.getInstance();
     private final NetworkTickFinalizationSystem networkTickFinalizationSystem = NetworkTickFinalizationSystem.getInstance();
     private final NetworkDisconnectLifecycleSystem.DisconnectActions disconnectActions =
             new NetworkDisconnectLifecycleSystem.DisconnectActions() {
@@ -86,7 +111,7 @@ public class NetworkManager {
     private final NetworkManagerTickSystem.TickActions tickActions = new NetworkManagerTickSystem.TickActions() {
         @Override
         public void disconnect(String key) {
-            NetworkManager.this.a(key, new Object[0]);
+            NetworkManager.this.a(key, networkDisconnectArgumentPolicy.emptyArgs());
         }
 
         @Override
@@ -99,7 +124,7 @@ public class NetworkManager {
 
         @Override
         public void log(String message) {
-            System.out.println(message);
+            networkManagerConsoleLogBehaviour.log(LOGGER, message);
         }
     };
     private final NetworkTickFinalizationSystem.TickFinalizationActions tickFinalizationActions =
@@ -118,7 +143,10 @@ public class NetworkManager {
             new InboundQueueReadExecutionSystem.InboundReadActions() {
                 @Override
                 public void disconnectEndOfStream() {
-                    NetworkManager.this.a("disconnect.endOfStream", new Object[0]);
+                    NetworkManager.this.a(
+                            networkDisconnectKeyPolicy.endOfStream(),
+                            networkDisconnectArgumentPolicy.emptyArgs()
+                    );
                 }
 
                 @Override
@@ -128,6 +156,12 @@ public class NetworkManager {
                     }
                 }
             };
+    private final InboundQueueReadSystem.PacketReader inboundPacketReader = new InboundQueueReadSystem.PacketReader() {
+        @Override
+        public Object read(DataInputStream input, Object handler) throws java.io.IOException {
+            return Packet.a(input, ((NetHandler) handler).c());
+        }
+    };
     private final OutboundQueueDrainExecutionSystem.OutboundDrainActions outboundDrainActions =
             new OutboundQueueDrainExecutionSystem.OutboundDrainActions() {
                 @Override
@@ -163,24 +197,37 @@ public class NetworkManager {
             new NetworkExceptionDisconnectSystem.ExceptionActions() {
                 @Override
                 public void printStackTrace(Exception exception) {
-                    exception.printStackTrace();
+                    networkExceptionLogBehaviour.logUnexpectedException(LOGGER, exception);
                 }
 
                 @Override
                 public void disconnectWithGenericReason(String reason) {
-                    NetworkManager.this.a("disconnect.genericReason", new Object[]{reason});
+                    NetworkManager.this.a(
+                            networkDisconnectKeyPolicy.genericReason(),
+                            networkDisconnectArgumentPolicy.genericReasonArgs(reason)
+                    );
                 }
             };
 
     public NetworkManager(Socket socket, String s, NetHandler nethandler) {
+        PoseidonNetworkCompatGatewayBootstrap.ensureInstalled();
         this.socket = socket;
         this.i = socket.getRemoteSocketAddress();
         this.p = nethandler;
 
         //Poseidon
-        this.firePacketEvents = PoseidonConfig.getInstance().getBoolean("settings.packet-events.enabled", false);
-        this.spamDetection = PoseidonConfig.getInstance().getBoolean("settings.packet-spam-detection.enabled", true);
-        this.threshold = PoseidonConfig.getInstance().getInt("settings.packet-spam-detection.threshold", 1000);
+        this.firePacketEvents = PoseidonConfig.getInstance().getBoolean(
+                packetEventConfigPolicy.packetEventsEnabledKey(),
+                packetEventConfigPolicy.packetEventsEnabledDefault()
+        );
+        this.spamDetection = PoseidonConfig.getInstance().getBoolean(
+                packetSpamDetectionConfigPolicy.spamDetectionEnabledKey(),
+                packetSpamDetectionConfigPolicy.spamDetectionEnabledDefault()
+        );
+        this.threshold = PoseidonConfig.getInstance().getInt(
+                packetSpamDetectionConfigPolicy.spamDetectionThresholdKey(),
+                packetSpamDetectionConfigPolicy.spamDetectionThresholdDefault()
+        );
 
         //Debug for packet spam detection
 //        System.out.println("[Poseidon] Packet spam detection is " + (this.spamDetection ? "enabled" : "disabled") + " with a threshold of " + this.threshold + " packets");
@@ -189,13 +236,16 @@ public class NetworkManager {
         try {
             NetworkSocketSystem.StreamPair streamPair = networkSocketSystem.openConfiguredStreams(
                     socket,
-                    PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)
+                    PoseidonConfig.getInstance().getBoolean(
+                            networkTransportConfigPolicy.tcpNoDelayKey(),
+                            networkTransportConfigPolicy.tcpNoDelayDefault()
+                    )
             );
             this.input = streamPair.getInput();
             this.output = streamPair.getOutput();
         } catch (java.io.IOException socketexception) {
             // CraftBukkit end
-            System.err.println(socketexception.getMessage());
+            networkSocketInitializationFailureBehaviour.logInitializationFailure(LOGGER, socketexception);
         }
         this.s = new NetworkReaderThread(this, s + " read thread");
         this.r = new NetworkWriterThread(this, s + " write thread");
@@ -262,6 +312,7 @@ public class NetworkManager {
                 d,
                 this.m,
                 inboundQueueReadSystem,
+                this.inboundPacketReader,
                 this.inboundReadActions
         );
         return readStepResult.isPacketQueued();
@@ -288,7 +339,10 @@ public class NetworkManager {
     }
 
     public void b() {
-        boolean fastPacketsEnabled = PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true);
+        boolean fastPacketsEnabled = PoseidonConfig.getInstance().getBoolean(
+                networkTransportConfigPolicy.fasterPacketsEnabledKey(),
+                networkTransportConfigPolicy.fasterPacketsEnabledDefault()
+        );
         String playerUsername = resolvePlayerUsername();
 
         NetworkManagerTickSystem.TickState tickState = networkManagerTickSystem.tick(

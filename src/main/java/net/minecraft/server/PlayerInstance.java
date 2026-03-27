@@ -169,7 +169,7 @@ class PlayerInstance {
     }
 
     private void sendTileEntity(TileEntity tileentity) {
-        Packet packet = PLAYER_CHUNK_TILE_ENTITY_PACKET_BEHAVIOUR.extractUpdatePacket(tileentity);
+        Packet packet = (Packet) PLAYER_CHUNK_TILE_ENTITY_PACKET_BEHAVIOUR.extractUpdatePacket(tileentity);
         if (packet != null) {
             this.sendAll(packet);
         }

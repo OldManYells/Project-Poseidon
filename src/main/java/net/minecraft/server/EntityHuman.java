@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.entity.CombatFixConfigPolicy;
 import com.legacyminecraft.poseidon.runtime.math.TrigAtanBehaviour;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.entity.Player;
@@ -21,6 +22,7 @@ import java.util.List;
 
 public abstract class EntityHuman extends EntityLiving {
     private static final TrigAtanBehaviour TRIG_ATAN_BEHAVIOUR = TrigAtanBehaviour.getInstance();
+    private static final CombatFixConfigPolicy COMBAT_FIX_CONFIG_POLICY = CombatFixConfigPolicy.getInstance();
 
     public InventoryPlayer inventory = new InventoryPlayer(this);
     public Container defaultContainer;
@@ -573,7 +575,10 @@ public abstract class EntityHuman extends EntityLiving {
                 return;
             }
             
-            if (entity instanceof EntityPlayer && entity.velocityChanged && PoseidonConfig.getInstance().getBoolean("settings.player-knockback-fix.enabled", true)) {
+            if (entity instanceof EntityPlayer && entity.velocityChanged && PoseidonConfig.getInstance().getBoolean(
+                    COMBAT_FIX_CONFIG_POLICY.playerKnockbackFixKey(),
+                    COMBAT_FIX_CONFIG_POLICY.playerKnockbackFixDefault()
+            )) {
                 boolean cancelled = false;
                 org.bukkit.entity.Player player = (org.bukkit.entity.Player) entity.getBukkitEntity();
                 org.bukkit.util.Vector velocity = new org.bukkit.util.Vector(d0, d1, d2);

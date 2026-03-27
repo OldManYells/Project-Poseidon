@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.Vec3D;
 
 import java.util.List;
 

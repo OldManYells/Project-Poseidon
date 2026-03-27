@@ -23,14 +23,13 @@ public class Packet24MobSpawn extends Packet {
     public Packet24MobSpawn() {}
 
     public Packet24MobSpawn(EntityLiving entityliving) {
-        PacketDataCodec.Packet24Data packetData = packetDataCodec.packet24FromMobEntity(entityliving);
-        this.a = packetData.getEntityId();
-        this.b = (byte) packetData.getEntityType();
-        this.c = packetData.getX();
-        this.d = packetData.getY();
-        this.e = packetData.getZ();
-        this.f = packetData.getYaw();
-        this.g = packetData.getPitch();
+        this.a = entityliving.id;
+        this.b = (byte) EntityTypes.a(entityliving);
+        this.c = (int) (entityliving.locX * 32.0D);
+        this.d = (int) (entityliving.locY * 32.0D);
+        this.e = (int) (entityliving.locZ * 32.0D);
+        this.f = (byte) ((int) (entityliving.yaw * 256.0F / 360.0F));
+        this.g = (byte) ((int) (entityliving.pitch * 256.0F / 360.0F));
         this.h = entityliving.aa();
     }
 

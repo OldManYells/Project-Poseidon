@@ -1,10 +1,17 @@
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.compat.bukkit.CraftChunkAccessBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.CraftChunkHandleResolutionBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.ChunkSnapshotCaptureBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkEmptySnapshotBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkEmptySnapshotFactoryBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkHandleResolutionBehaviour;
+import com.legacyminecraft.compat.bukkit.ChunkSnapshotCaptureBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkLifecycleBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkInitializationBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkIdentityBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkWeakLinkBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkSnapshotModeBehaviour;
+import com.legacyminecraft.compat.bukkit.CraftChunkSnapshotSystem;
 import com.google.common.collect.MapMaker;
-import net.minecraft.server.BiomeBase;
 import net.minecraft.server.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
@@ -21,8 +28,22 @@ public class CraftChunk implements Chunk {
             CraftChunkAccessBehaviour.getInstance();
     private static final CraftChunkHandleResolutionBehaviour CRAFT_CHUNK_HANDLE_RESOLUTION_BEHAVIOUR =
             CraftChunkHandleResolutionBehaviour.getInstance();
-    private static final ChunkSnapshotCaptureBehaviour CHUNK_SNAPSHOT_CAPTURE_BEHAVIOUR =
-            ChunkSnapshotCaptureBehaviour.getInstance();
+    private static final CraftChunkEmptySnapshotBehaviour CRAFT_CHUNK_EMPTY_SNAPSHOT_BEHAVIOUR =
+            CraftChunkEmptySnapshotBehaviour.getInstance();
+    private static final CraftChunkEmptySnapshotFactoryBehaviour CRAFT_CHUNK_EMPTY_SNAPSHOT_FACTORY_BEHAVIOUR =
+            CraftChunkEmptySnapshotFactoryBehaviour.getInstance();
+    private static final CraftChunkLifecycleBehaviour CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR =
+            CraftChunkLifecycleBehaviour.getInstance();
+    private static final CraftChunkInitializationBehaviour CRAFT_CHUNK_INITIALIZATION_BEHAVIOUR =
+            CraftChunkInitializationBehaviour.getInstance();
+    private static final CraftChunkIdentityBehaviour CRAFT_CHUNK_IDENTITY_BEHAVIOUR =
+            CraftChunkIdentityBehaviour.getInstance();
+    private static final CraftChunkWeakLinkBehaviour CRAFT_CHUNK_WEAK_LINK_BEHAVIOUR =
+            CraftChunkWeakLinkBehaviour.getInstance();
+    private static final CraftChunkSnapshotModeBehaviour CRAFT_CHUNK_SNAPSHOT_MODE_BEHAVIOUR =
+            CraftChunkSnapshotModeBehaviour.getInstance();
+    private static final CraftChunkSnapshotSystem CRAFT_CHUNK_SNAPSHOT_SYSTEM =
+            CraftChunkSnapshotSystem.getInstance();
     private WeakReference<net.minecraft.server.Chunk> weakChunk;
     private final ConcurrentMap<Integer, Block> cache = new MapMaker().softValues().makeMap();
     private WorldServer worldServer;
@@ -31,13 +52,15 @@ public class CraftChunk implements Chunk {
 
     public CraftChunk(net.minecraft.server.Chunk chunk) {
         this.weakChunk = new WeakReference<net.minecraft.server.Chunk>(chunk);
-        worldServer = (WorldServer) getHandle().world;
-        x = getHandle().x;
-        z = getHandle().z;
+        CraftChunkInitializationBehaviour.InitializationState initializationState =
+                CRAFT_CHUNK_INITIALIZATION_BEHAVIOUR.initialize(getHandle());
+        worldServer = initializationState.getWorldServer();
+        x = initializationState.getX();
+        z = initializationState.getZ();
     }
 
     public World getWorld() {
-        return worldServer.getWorld();
+        return CRAFT_CHUNK_IDENTITY_BEHAVIOUR.getWorld(worldServer);
     }
 
     public net.minecraft.server.Chunk getHandle() {
@@ -48,20 +71,20 @@ public class CraftChunk implements Chunk {
     }
 
     void breakLink() {
-        weakChunk.clear();
+        CRAFT_CHUNK_WEAK_LINK_BEHAVIOUR.breakLink(weakChunk);
     }
 
     public int getX() {
-        return x;
+        return CRAFT_CHUNK_IDENTITY_BEHAVIOUR.getX(x);
     }
 
     public int getZ() {
-        return z;
+        return CRAFT_CHUNK_IDENTITY_BEHAVIOUR.getZ(z);
     }
 
     @Override
     public String toString() {
-        return "CraftChunk{" + "x=" + getX() + "z=" + getZ() + '}';
+        return CRAFT_CHUNK_IDENTITY_BEHAVIOUR.toString(getX(), getZ());
     }
 
     public Block getBlock(int x, int y, int z) {
@@ -77,102 +100,61 @@ public class CraftChunk implements Chunk {
     }
 
     public boolean isLoaded() {
-        return getWorld().isChunkLoaded(this);
+        return CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR.isLoaded(getWorld(), getX(), getZ());
     }
 
     public boolean load() {
-        return getWorld().loadChunk(getX(), getZ(), true);
+        return CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR.load(getWorld(), getX(), getZ(), true);
     }
 
     public boolean load(boolean generate) {
-        return getWorld().loadChunk(getX(), getZ(), generate);
+        return CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR.load(getWorld(), getX(), getZ(), generate);
     }
 
     public boolean unload() {
-        return getWorld().unloadChunk(getX(), getZ());
+        return CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR.unload(getWorld(), getX(), getZ());
     }
 
     public boolean unload(boolean save) {
-        return getWorld().unloadChunk(getX(), getZ(), save);
+        return CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR.unload(getWorld(), getX(), getZ(), save);
     }
 
     public boolean unload(boolean save, boolean safe) {
-        return getWorld().unloadChunk(getX(), getZ(), save, safe);
+        return CRAFT_CHUNK_LIFECYCLE_BEHAVIOUR.unload(getWorld(), getX(), getZ(), save, safe);
     }
 
     public ChunkSnapshot getChunkSnapshot() {
-        return getChunkSnapshot(true, false, false);
+        return getChunkSnapshot(
+                CRAFT_CHUNK_SNAPSHOT_MODE_BEHAVIOUR.includeMaxBlockYByDefault(),
+                CRAFT_CHUNK_SNAPSHOT_MODE_BEHAVIOUR.includeBiomeByDefault(),
+                CRAFT_CHUNK_SNAPSHOT_MODE_BEHAVIOUR.includeBiomeClimateByDefault()
+        );
     }
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain) {
-        net.minecraft.server.Chunk chunk = getHandle();
-        ChunkSnapshotCaptureBehaviour.SnapshotData snapshotData = CHUNK_SNAPSHOT_CAPTURE_BEHAVIOUR.captureFromChunk(
-                chunk,
-                getX(),
-                getZ(),
+        return CRAFT_CHUNK_SNAPSHOT_SYSTEM.createSnapshot(
+                this,
                 includeMaxblocky,
                 includeBiome,
                 includeBiomeTempRain
         );
-        World world = getWorld();
-        return new CraftChunkSnapshot(
-                getX(),
-                getZ(),
-                world.getName(),
-                world.getFullTime(),
-                snapshotData.getChunkBuffer(),
-                snapshotData.getHeightMap(),
-                snapshotData.getBiomes(),
-                snapshotData.getTemperatures(),
-                snapshotData.getRainfall()
-        );
     }
 
-    /**
-     * Empty chunk snapshot - nothing but air blocks, but can include valid biome data
-     */
-    private static class EmptyChunkSnapshot extends CraftChunkSnapshot {
-        EmptyChunkSnapshot(int x, int z, String worldName, long time, BiomeBase[] biome, double[] biomeTemp, double[] biomeRain) {
-            super(x, z, worldName, time, null, null, biome, biomeTemp, biomeRain);
-        }
-
-        public final int getBlockTypeId(int x, int y, int z) {
-            return 0;
-        }
-
-        public final int getBlockData(int x, int y, int z) {
-            return 0;
-        }
-
-        public final int getBlockSkyLight(int x, int y, int z) {
-            return 15;
-        }
-
-        public final int getBlockEmittedLight(int x, int y, int z) {
-            return 0;
-        }
-
-        public final int getHighestBlockYAt(int x, int z) {
-            return 0;
-        }
+    public static ChunkSnapshot createEmptyChunkSnapshot(
+            int x,
+            int z,
+            CraftWorld world,
+            ChunkSnapshotCaptureBehaviour.SnapshotData snapshotData
+    ) {
+        return CRAFT_CHUNK_EMPTY_SNAPSHOT_FACTORY_BEHAVIOUR.createEmptyChunkSnapshot(
+                x,
+                z,
+                world,
+                snapshotData
+        );
     }
 
     public static ChunkSnapshot getEmptyChunkSnapshot(int x, int z, CraftWorld world, boolean includeBiome, boolean includeBiomeTempRain) {
-        ChunkSnapshotCaptureBehaviour.SnapshotData snapshotData = CHUNK_SNAPSHOT_CAPTURE_BEHAVIOUR.captureEmpty(
-                world.getHandle().getWorldChunkManager(),
-                x,
-                z,
-                includeBiome,
-                includeBiomeTempRain
-        );
-        return new EmptyChunkSnapshot(
-                x,
-                z,
-                world.getName(),
-                world.getFullTime(),
-                snapshotData.getBiomes(),
-                snapshotData.getTemperatures(),
-                snapshotData.getRainfall()
-        );
+        return CRAFT_CHUNK_EMPTY_SNAPSHOT_BEHAVIOUR.createEmptySnapshot(world, x, z, includeBiome, includeBiomeTempRain);
     }
 }

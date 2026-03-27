@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Material;
-import net.minecraft.server.TileEntity;
 
 /**
  * Canonical block/world read contract bridged by legacy wrappers.

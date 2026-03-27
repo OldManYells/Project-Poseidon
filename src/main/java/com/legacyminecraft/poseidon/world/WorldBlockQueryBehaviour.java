@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.World;
-import net.minecraft.server.Block;
-import net.minecraft.server.Chunk;
-import net.minecraft.server.Material;
 
 /**
  * Canonical behaviour for world block query bounds and chunk-local lookup.

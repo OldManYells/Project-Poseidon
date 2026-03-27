@@ -1,11 +1,16 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.network.ConnectionMonitorSystem;
+import com.legacyminecraft.poseidon.network.NetworkDisconnectArgumentPolicy;
+import com.legacyminecraft.poseidon.network.NetworkDisconnectKeyPolicy;
 
 class ThreadMonitorConnection extends Thread {
 
     final NetworkManager a;
     private final ConnectionMonitorSystem connectionMonitorSystem = ConnectionMonitorSystem.getInstance();
+    private final NetworkDisconnectKeyPolicy networkDisconnectKeyPolicy = NetworkDisconnectKeyPolicy.getInstance();
+    private final NetworkDisconnectArgumentPolicy networkDisconnectArgumentPolicy =
+            NetworkDisconnectArgumentPolicy.getInstance();
     private final ConnectionMonitorSystem.ConnectionState connectionState =
             new ConnectionMonitorSystem.ConnectionState() {
                 @Override
@@ -22,7 +27,10 @@ class ThreadMonitorConnection extends Thread {
     private final Runnable disconnectAction = new Runnable() {
         @Override
         public void run() {
-            ThreadMonitorConnection.this.a.a("disconnect.closed", new Object[0]);
+            ThreadMonitorConnection.this.a.a(
+                    networkDisconnectKeyPolicy.closed(),
+                    networkDisconnectArgumentPolicy.emptyArgs()
+            );
         }
     };
 

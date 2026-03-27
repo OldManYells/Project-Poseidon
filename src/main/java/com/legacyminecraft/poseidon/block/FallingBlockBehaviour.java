@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Material;
 
 /**
  * Canonical falling-block motion and support policy for legacy wrappers.

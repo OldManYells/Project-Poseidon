@@ -7,9 +7,11 @@ import com.legacyminecraft.poseidon.PoseidonConfig;
  */
 public final class MovementSpeedCheckSystem {
     private static final MovementSpeedCheckSystem INSTANCE = new MovementSpeedCheckSystem();
-    private static final String DEFAULT_KICK_MESSAGE = "You moved too quickly :( (Hacking?)";
 
     private final MovementPacketPolicy movementPacketPolicy = MovementPacketPolicy.getInstance();
+    private final MovementSpeedKickMessagePolicy movementSpeedKickMessagePolicy =
+            MovementSpeedKickMessagePolicy.getInstance();
+    private final MovementSpeedConfigPolicy movementSpeedConfigPolicy = MovementSpeedConfigPolicy.getInstance();
 
     private MovementSpeedCheckSystem() {
     }
@@ -25,11 +27,20 @@ public final class MovementSpeedCheckSystem {
     ) {
         PoseidonConfig config = PoseidonConfig.getInstance();
         boolean speedHackCheckEnabled =
-                (boolean) config.getConfigOption("world.settings.speed-hack-check.enabled", true);
+                (boolean) config.getConfigOption(
+                        movementSpeedConfigPolicy.speedCheckEnabledKey(),
+                        movementSpeedConfigPolicy.speedCheckEnabledDefault()
+                );
         double speedHackThreshold =
-                (double) config.getConfigOption("world.settings.speed-hack-check.distance", 100.0D);
+                (double) config.getConfigOption(
+                        movementSpeedConfigPolicy.speedCheckDistanceKey(),
+                        movementSpeedConfigPolicy.speedCheckDistanceDefault()
+                );
         boolean shouldTeleportOnViolation =
-                (boolean) config.getConfigOption("world.settings.speed-hack-check.teleport", true);
+                (boolean) config.getConfigOption(
+                        movementSpeedConfigPolicy.speedCheckTeleportKey(),
+                        movementSpeedConfigPolicy.speedCheckTeleportDefault()
+                );
 
         return evaluateWithOptions(
                 speedHackCheckEnabled,
@@ -63,7 +74,7 @@ public final class MovementSpeedCheckSystem {
         if (shouldTeleportOnViolation) {
             return SpeedCheckDecision.teleportBack();
         }
-        return SpeedCheckDecision.disconnect(DEFAULT_KICK_MESSAGE);
+        return SpeedCheckDecision.disconnect(movementSpeedKickMessagePolicy.speedViolationKickMessage());
     }
 
     public String createSpeedViolationLogMessage(String playerName, double deltaX, double deltaY, double deltaZ) {

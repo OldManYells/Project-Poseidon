@@ -1,54 +1,61 @@
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.compat.bukkit.OfflinePlayerAccessBehaviour;
+import com.legacyminecraft.compat.bukkit.OfflinePlayerIdentityBehaviour;
+import com.legacyminecraft.compat.bukkit.OfflinePlayerModerationBehaviour;
+import com.legacyminecraft.compat.bukkit.OfflinePlayerSnapshotCaptureBehaviour;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 
 public class CraftOfflinePlayer implements OfflinePlayer {
-    private static final OfflinePlayerAccessBehaviour OFFLINE_PLAYER_ACCESS_BEHAVIOUR =
-            OfflinePlayerAccessBehaviour.getInstance();
+    private static final OfflinePlayerIdentityBehaviour OFFLINE_PLAYER_IDENTITY_BEHAVIOUR =
+            OfflinePlayerIdentityBehaviour.getInstance();
+    private static final OfflinePlayerModerationBehaviour OFFLINE_PLAYER_MODERATION_BEHAVIOUR =
+            OfflinePlayerModerationBehaviour.getInstance();
+    private static final OfflinePlayerSnapshotCaptureBehaviour OFFLINE_PLAYER_SNAPSHOT_CAPTURE_BEHAVIOUR =
+            OfflinePlayerSnapshotCaptureBehaviour.getInstance();
     private final String name;
     private final CraftServer server;
 
     protected CraftOfflinePlayer(CraftServer server, String name) {
-        this.server = server;
-        this.name = name;
+        OfflinePlayerSnapshotCaptureBehaviour.Snapshot snapshot =
+                OFFLINE_PLAYER_SNAPSHOT_CAPTURE_BEHAVIOUR.capture(server, name);
+        this.server = snapshot.getServer();
+        this.name = snapshot.getName();
     }
 
     public boolean isOnline() {
-        return false;
+        return OFFLINE_PLAYER_IDENTITY_BEHAVIOUR.isOnline();
     }
 
     public String getName() {
-        return name;
+        return OFFLINE_PLAYER_IDENTITY_BEHAVIOUR.getName(name);
     }
 
     public Server getServer() {
-        return server;
+        return OFFLINE_PLAYER_IDENTITY_BEHAVIOUR.getServer(server);
     }
 
     public boolean isOp() {
-        return OFFLINE_PLAYER_ACCESS_BEHAVIOUR.isOperator(server, getName());
+        return OFFLINE_PLAYER_MODERATION_BEHAVIOUR.isOp(server, name, getName());
     }
 
     public void setOp(boolean value) {
-        if (value == isOp()) return;
-        OFFLINE_PLAYER_ACCESS_BEHAVIOUR.setOperator(server, getName(), value);
+        OFFLINE_PLAYER_MODERATION_BEHAVIOUR.setOp(server, name, getName(), value);
     }
 
     public boolean isBanned() {
-        return OFFLINE_PLAYER_ACCESS_BEHAVIOUR.isBanned(server, name);
+        return OFFLINE_PLAYER_MODERATION_BEHAVIOUR.isBanned(server, name, getName());
     }
 
     public void setBanned(boolean value) {
-        OFFLINE_PLAYER_ACCESS_BEHAVIOUR.setBanned(server, name, value);
+        OFFLINE_PLAYER_MODERATION_BEHAVIOUR.setBanned(server, name, getName(), value);
     }
 
     public boolean isWhitelisted() {
-        return OFFLINE_PLAYER_ACCESS_BEHAVIOUR.isWhitelisted(server, name);
+        return OFFLINE_PLAYER_MODERATION_BEHAVIOUR.isWhitelisted(server, name, getName());
     }
 
     public void setWhitelisted(boolean value) {
-        OFFLINE_PLAYER_ACCESS_BEHAVIOUR.setWhitelisted(server, name, value);
+        OFFLINE_PLAYER_MODERATION_BEHAVIOUR.setWhitelisted(server, name, getName(), value);
     }
 }

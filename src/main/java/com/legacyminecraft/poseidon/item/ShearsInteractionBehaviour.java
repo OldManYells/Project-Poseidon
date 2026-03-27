@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Block;
+import com.legacyminecraft.poseidon.block.Block;
 
 public final class ShearsInteractionBehaviour {
     private static final ShearsInteractionBehaviour INSTANCE = new ShearsInteractionBehaviour();

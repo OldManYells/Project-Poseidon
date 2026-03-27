@@ -19,6 +19,7 @@ public class LegacyMinecartTrackLogicWrapperThinnessTest {
         Assert.assertTrue(text.contains("MinecartTrackConnectionLayoutBehaviour"));
         Assert.assertTrue(text.contains("MinecartTrackPropagationBehaviour"));
         Assert.assertTrue(text.contains("MinecartTrackShapeSelectionBehaviour"));
+        Assert.assertTrue(text.contains("MinecartTrackStateUpdateBehaviour"));
         Assert.assertTrue(text.contains("MINECART_TRACK_CONNECTION_LAYOUT_BEHAVIOUR.populateConnections"));
         Assert.assertTrue(text.contains("MINECART_TRACK_CONNECTION_LAYOUT_BEHAVIOUR.hasAdjacentTrack"));
         Assert.assertTrue(text.contains("MINECART_TRACK_CONNECTION_LAYOUT_BEHAVIOUR.countAdjacentTracks"));
@@ -28,8 +29,8 @@ public class LegacyMinecartTrackLogicWrapperThinnessTest {
         Assert.assertTrue(text.contains("MINECART_TRACK_CONNECTION_LAYOUT_BEHAVIOUR.pruneDisconnectedConnections"));
         Assert.assertTrue(text.contains("MINECART_TRACK_PROPAGATION_BEHAVIOUR.resolvePropagationShape"));
         Assert.assertTrue(text.contains("MINECART_TRACK_PROPAGATION_BEHAVIOUR.resolvePlacementShape"));
-        Assert.assertTrue(text.contains("MINECART_TRACK_PROPAGATION_BEHAVIOUR.forEachConnection"));
         Assert.assertTrue(text.contains("MINECART_TRACK_PROPAGATION_BEHAVIOUR.appendConnection"));
+        Assert.assertTrue(text.contains("MINECART_TRACK_STATE_UPDATE_BEHAVIOUR.writeAndPropagate("));
         Assert.assertFalse(text.contains("this.g.clear();"));
         Assert.assertFalse(text.contains("if (i == 0) {"));
         Assert.assertFalse(text.contains("return BlockMinecartTrack.g(this.b, chunkposition.x, chunkposition.y, chunkposition.z) ?"));
@@ -38,5 +39,6 @@ public class LegacyMinecartTrackLogicWrapperThinnessTest {
         Assert.assertFalse(text.contains("MinecartTrackLogic minecarttracklogic = this.a((ChunkPosition) this.g.get(j));"));
         Assert.assertFalse(text.contains("if (flag3 && flag5 && !flag2 && !flag4)"));
         Assert.assertFalse(text.contains("if (flag || flag1)"));
+        Assert.assertFalse(text.contains("MINECART_TRACK_DATA_WRITE_BEHAVIOUR.shouldWriteData(flag1, this.b, this.c, this.d, this.e, composedData)"));
     }
 }

@@ -5,7 +5,7 @@ import com.legacyminecraft.poseidon.inventory.ChestTileInventoryBehaviour;
 public class TileEntityChest extends TileEntity implements IInventory {
     private static final ChestTileInventoryBehaviour CHEST_TILE_INVENTORY_BEHAVIOUR = ChestTileInventoryBehaviour.getInstance();
 
-    private ItemStack[] items = CHEST_TILE_INVENTORY_BEHAVIOUR.createStorage(); // CraftBukkit
+    private ItemStack[] items = new ItemStack[CHEST_TILE_INVENTORY_BEHAVIOUR.getSize()]; // CraftBukkit
 
     // CraftBukkit start
     public ItemStack[] getContents() {
@@ -20,11 +20,11 @@ public class TileEntityChest extends TileEntity implements IInventory {
     }
 
     public ItemStack getItem(int i) {
-        return CHEST_TILE_INVENTORY_BEHAVIOUR.getItem(this.items, i);
+        return (ItemStack) CHEST_TILE_INVENTORY_BEHAVIOUR.getItem(this.items, i);
     }
 
     public ItemStack splitStack(int i, int j) {
-        ItemStack split = CHEST_TILE_INVENTORY_BEHAVIOUR.splitStack(this.items, i, j);
+        ItemStack split = (ItemStack) CHEST_TILE_INVENTORY_BEHAVIOUR.splitStack(this.items, i, j);
         if (split != null) {
             this.update();
         }
@@ -32,7 +32,7 @@ public class TileEntityChest extends TileEntity implements IInventory {
     }
 
     public void setItem(int i, ItemStack itemstack) {
-        this.items[i] = CHEST_TILE_INVENTORY_BEHAVIOUR.clampStackSize(itemstack);
+        this.items[i] = (ItemStack) CHEST_TILE_INVENTORY_BEHAVIOUR.clampStackSize(itemstack);
         this.update();
     }
 
@@ -42,7 +42,7 @@ public class TileEntityChest extends TileEntity implements IInventory {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.items = CHEST_TILE_INVENTORY_BEHAVIOUR.readItems(nbttagcompound, this.getSize());
+        this.items = (ItemStack[]) CHEST_TILE_INVENTORY_BEHAVIOUR.readItems(nbttagcompound, new ItemStack[this.getSize()]);
     }
 
     public void b(NBTTagCompound nbttagcompound) {

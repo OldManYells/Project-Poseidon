@@ -1,9 +1,7 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.BlockPistonMoving;
-import net.minecraft.server.PistonBlockTextures;
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.ChunkPosition;
+import com.legacyminecraft.poseidon.world.World;
 
 /**
  * Canonical behaviour for piston push-length checks and moving-block chain shifts.

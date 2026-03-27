@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.NBTTagCompound;
-
 /**
  * Canonical NBT serialization behaviour for piston tile-entity state.
  */
@@ -15,26 +13,26 @@ public final class PistonTileNbtBehaviour {
         return INSTANCE;
     }
 
-    public PistonTileState readState(NBTTagCompound nbt) {
-        int movedBlockId = nbt.e("blockId");
-        int movedBlockData = nbt.e("blockData");
-        int facing = nbt.e("facing");
-        float progress = nbt.g("progress");
-        boolean extending = nbt.m("extending");
+    public PistonTileState readState(Object nbt) {
+        int movedBlockId = ((Number) Reflection.invoke(nbt, "e", "blockId")).intValue();
+        int movedBlockData = ((Number) Reflection.invoke(nbt, "e", "blockData")).intValue();
+        int facing = ((Number) Reflection.invoke(nbt, "e", "facing")).intValue();
+        float progress = ((Number) Reflection.invoke(nbt, "g", "progress")).floatValue();
+        boolean extending = (Boolean) Reflection.invoke(nbt, "m", "extending");
         return new PistonTileState(movedBlockId, movedBlockData, facing, progress, extending);
     }
 
-    public void writeState(NBTTagCompound nbt,
+    public void writeState(Object nbt,
                            int movedBlockId,
                            int movedBlockData,
                            int facing,
                            float progress,
                            boolean extending) {
-        nbt.a("blockId", movedBlockId);
-        nbt.a("blockData", movedBlockData);
-        nbt.a("facing", facing);
-        nbt.a("progress", progress);
-        nbt.a("extending", extending);
+        Reflection.invoke(nbt, "a", "blockId", movedBlockId);
+        Reflection.invoke(nbt, "a", "blockData", movedBlockData);
+        Reflection.invoke(nbt, "a", "facing", facing);
+        Reflection.invoke(nbt, "a", "progress", progress);
+        Reflection.invoke(nbt, "a", "extending", extending);
     }
 
     public static final class PistonTileState {
@@ -70,6 +68,25 @@ public final class PistonTileNbtBehaviour {
 
         public boolean isExtending() {
             return extending;
+        }
+    }
+
+    private static final class Reflection {
+        private Reflection() {
+        }
+
+        static Object invoke(Object target, String methodName, Object... args) {
+            try {
+                for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        method.setAccessible(true);
+                        return method.invoke(target, args);
+                    }
+                }
+                throw new IllegalStateException("Method not found: " + methodName);
+            } catch (Exception exception) {
+                throw new IllegalStateException("Unable to invoke method: " + methodName, exception);
+            }
         }
     }
 }

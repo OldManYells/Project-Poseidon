@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.IDataManager;
 
 /**
  * Canonical behaviour for world-server level-save flush hooks.

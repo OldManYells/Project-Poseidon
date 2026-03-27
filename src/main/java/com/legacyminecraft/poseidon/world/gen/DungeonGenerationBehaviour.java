@@ -1,12 +1,5 @@
 package com.legacyminecraft.poseidon.world.gen;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Material;
-import net.minecraft.server.TileEntityChest;
-import net.minecraft.server.TileEntityMobSpawner;
-import net.minecraft.server.World;
 
 import java.util.Random;
 
@@ -112,6 +105,13 @@ public final class DungeonGenerationBehaviour {
         world.setTypeId(x, y, z, Block.MOB_SPAWNER.id);
         TileEntityMobSpawner spawner = (TileEntityMobSpawner) world.getTileEntity(x, y, z);
         spawner.a(selectSpawnerMob(random));
+        return true;
+    }
+
+    public boolean generate(Object world, Random random, int x, int y, int z) {
+        if (world instanceof World) {
+            return generate((World) world, random, x, y, z);
+        }
         return true;
     }
 

@@ -31,22 +31,36 @@ public class EntityWeatherStorm extends EntityWeather {
         this.cworld = world.getWorld();
         // CraftBukkit end
 
-        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.initialize(this, world, d0, d1, d2, isEffect, this.cworld);
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.initialize(
+                (com.legacyminecraft.poseidon.entity.EntityWeatherStorm) (Object) this,
+                (com.legacyminecraft.poseidon.entity.World) (Object) world,
+                d0,
+                d1,
+                d2,
+                isEffect,
+                (com.legacyminecraft.compat.bukkit.World) (Object) this.cworld
+        );
     }
 
     public void m_() {
         super.m_();
-        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.tick(this);
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.tick((com.legacyminecraft.poseidon.entity.EntityWeatherStorm) (Object) this);
     }
 
     protected void b() {}
 
     protected void a(NBTTagCompound nbttagcompound) {
-        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.readFromNbt(this, nbttagcompound);
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.readFromNbt(
+                (com.legacyminecraft.poseidon.entity.EntityWeatherStorm) (Object) this,
+                (com.legacyminecraft.poseidon.entity.NBTTagCompound) (Object) nbttagcompound
+        );
     }
 
     protected void b(NBTTagCompound nbttagcompound) {
-        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.writeToNbt(this, nbttagcompound);
+        LIGHTNING_STORM_LIFECYCLE_BEHAVIOUR.writeToNbt(
+                (com.legacyminecraft.poseidon.entity.EntityWeatherStorm) (Object) this,
+                (com.legacyminecraft.poseidon.entity.NBTTagCompound) (Object) nbttagcompound
+        );
     }
 
     public int poseidonGetLifeTicks() {

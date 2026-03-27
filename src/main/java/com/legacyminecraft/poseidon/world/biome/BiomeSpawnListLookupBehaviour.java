@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.EnumCreatureType;
 
 import java.util.List;
 

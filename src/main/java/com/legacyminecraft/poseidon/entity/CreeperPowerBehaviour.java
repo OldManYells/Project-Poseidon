@@ -1,13 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityCreeper;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntitySkeleton;
-import net.minecraft.server.EntityWeatherStorm;
-import net.minecraft.server.Item;
-import org.bukkit.event.entity.CreeperPowerEvent;
 
 import java.util.Random;
 

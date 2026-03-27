@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
-import com.legacyminecraft.poseidon.compat.bukkit.JavaArrayCopyBehaviour;
+import com.legacyminecraft.compat.bukkit.JavaArrayCopyBehaviour;
 
 public class Java15Compat {
     private static final JavaArrayCopyBehaviour JAVA_ARRAY_COPY_BEHAVIOUR = JavaArrayCopyBehaviour.getInstance();

@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.NoiseGeneratorOctaves2;
 
 import java.util.Random;
 

@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import org.bukkit.Server;
-import org.bukkit.event.player.PlayerLoginEvent;
 
 /**
  * Canonical bridge between admission-policy decisions and Bukkit PlayerLoginEvent outcomes.

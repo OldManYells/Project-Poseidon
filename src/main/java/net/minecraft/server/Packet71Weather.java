@@ -18,12 +18,11 @@ public class Packet71Weather extends Packet {
     public Packet71Weather() {}
 
     public Packet71Weather(Entity entity) {
-        PacketDataCodec.Packet71WeatherData packetData = packetDataCodec.packet71FromWeatherEntity(entity);
-        this.a = packetData.getEntityId();
-        this.e = packetData.getWeatherType();
-        this.b = packetData.getX();
-        this.c = packetData.getY();
-        this.d = packetData.getZ();
+        this.a = entity.id;
+        this.e = entity instanceof EntityWeatherStorm ? 1 : 0;
+        this.b = MathHelper.floor(entity.locX * 32.0D);
+        this.c = MathHelper.floor(entity.locY * 32.0D);
+        this.d = MathHelper.floor(entity.locZ * 32.0D);
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

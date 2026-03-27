@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityBoat;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 
 public final class BoatCollisionBehaviour {
     private static final BoatCollisionBehaviour INSTANCE = new BoatCollisionBehaviour();
@@ -16,7 +12,7 @@ public final class BoatCollisionBehaviour {
     }
 
     public void collide(EntityBoat boat, Entity other) {
-        org.bukkit.entity.Entity hitEntity = other == null ? null : other.getBukkitEntity();
+        com.legacyminecraft.compat.bukkit.entity.Entity hitEntity = other == null ? null : other.getBukkitEntity();
         VehicleEntityCollisionEvent event = new VehicleEntityCollisionEvent((Vehicle) boat.getBukkitEntity(), hitEntity);
         boat.world.getServer().getPluginManager().callEvent(event);
         if (!event.isCancelled()) {

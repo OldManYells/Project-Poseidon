@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import org.bukkit.Location;
 
 /**
  * Canonical execution flow for resolved teleport requests.
@@ -20,10 +19,10 @@ public final class PlayerTeleportRequestExecutionSystem {
     }
 
     public interface TeleportDestinationResolver {
-        Location resolveDestination();
+        Object resolveDestination();
     }
 
     public interface TeleportActions {
-        void teleport(Location destination);
+        void teleport(Object destination);
     }
 }

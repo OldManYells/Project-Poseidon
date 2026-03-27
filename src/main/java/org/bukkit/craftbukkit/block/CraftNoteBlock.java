@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacyminecraft.poseidon.compat.bukkit.NoteBlockPlaybackBehaviour;
+import com.legacyminecraft.compat.bukkit.NoteBlockPlaybackBehaviour;
+import com.legacyminecraft.compat.bukkit.TileEntityLookupBehaviour;
 import net.minecraft.server.TileEntityNote;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
@@ -11,14 +12,16 @@ import org.bukkit.craftbukkit.CraftWorld;
 public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
     private static final NoteBlockPlaybackBehaviour NOTE_BLOCK_PLAYBACK_BEHAVIOUR =
             NoteBlockPlaybackBehaviour.getInstance();
+    private static final TileEntityLookupBehaviour TILE_ENTITY_LOOKUP_BEHAVIOUR =
+            TileEntityLookupBehaviour.getInstance();
     private final CraftWorld world;
     private final TileEntityNote note;
 
     public CraftNoteBlock(final Block block) {
         super(block);
 
-        world = (CraftWorld) block.getWorld();
-        note = (TileEntityNote) world.getTileEntityAt(getX(), getY(), getZ());
+        world = TILE_ENTITY_LOOKUP_BEHAVIOUR.resolveWorld(block);
+        note = TILE_ENTITY_LOOKUP_BEHAVIOUR.resolveNote(block, getX(), getY(), getZ());
     }
 
     public Note getNote() {

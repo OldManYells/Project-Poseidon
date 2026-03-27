@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityPig;
-import net.minecraft.server.ItemStack;
 
 public final class SaddleUseBehaviour {
     private static final SaddleUseBehaviour INSTANCE = new SaddleUseBehaviour();

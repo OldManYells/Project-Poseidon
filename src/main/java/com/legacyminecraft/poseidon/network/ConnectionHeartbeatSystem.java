@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.Packet0KeepAlive;
 
 /**
  * Canonical keep-alive heartbeat timing logic for active player connections.

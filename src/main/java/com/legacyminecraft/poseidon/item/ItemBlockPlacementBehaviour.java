@@ -1,17 +1,15 @@
 package com.legacyminecraft.poseidon.item;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.compat.bukkit.BlockPlaceEventBridgeBehaviour;
-import net.minecraft.server.Block;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
-import org.bukkit.block.BlockState;
-import org.bukkit.event.block.BlockPlaceEvent;
+import com.legacyminecraft.compat.bukkit.BlockPlaceEvent;
+import com.legacyminecraft.compat.bukkit.BlockPlaceEventBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.BlockState;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 
 public final class ItemBlockPlacementBehaviour {
     private static final ItemBlockPlacementBehaviour INSTANCE = new ItemBlockPlacementBehaviour();
     private static final BlockPlaceEventBridgeBehaviour BLOCK_PLACE_EVENT_BRIDGE = BlockPlaceEventBridgeBehaviour.getInstance();
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     private ItemBlockPlacementBehaviour() {
     }
@@ -60,13 +58,13 @@ public final class ItemBlockPlacementBehaviour {
         }
 
         Block block = Block.byId[blockId];
-        BlockState replacedBlockState = BLOCK_PLACE_EVENT_BRIDGE.captureBlockState(world, blockX, blockY, blockZ);
+        BlockState replacedBlockState = BLOCK_PLACE_EVENT_BRIDGE.captureBlockState(world.toCompatWorldServer(), blockX, blockY, blockZ);
         BlockState blockStateBelow = null;
         boolean eventUseBlockBelow = false;
 
         if ((world.getTypeId(blockX, blockY - 1, blockZ) == Block.STEP.id || world.getTypeId(blockX, blockY - 1, blockZ) == Block.DOUBLE_STEP.id)
                 && (itemstack.id == Block.DOUBLE_STEP.id || itemstack.id == Block.STEP.id)) {
-            blockStateBelow = BLOCK_PLACE_EVENT_BRIDGE.captureBlockState(world, blockX, blockY - 1, blockZ);
+            blockStateBelow = BLOCK_PLACE_EVENT_BRIDGE.captureBlockState(world.toCompatWorldServer(), blockX, blockY - 1, blockZ);
             eventUseBlockBelow = itemstack.id == Block.STEP.id && blockStateBelow.getTypeId() == Block.STEP.id;
         }
 
@@ -75,13 +73,13 @@ public final class ItemBlockPlacementBehaviour {
         }
 
         BlockPlaceEvent event = BLOCK_PLACE_EVENT_BRIDGE.callBlockPlaceEvent(
-                world,
+                world.toCompatWorldServer(),
                 entityhuman,
                 eventUseBlockBelow ? blockStateBelow : replacedBlockState,
                 clickedX,
                 clickedY,
                 clickedZ,
-                block
+                block.id
         );
 
         if (event.isCancelled() || !event.canBuild()) {
@@ -100,12 +98,35 @@ public final class ItemBlockPlacementBehaviour {
         return PlacementResult.handledWithPlacement(blockX, blockY, blockZ, face, block);
     }
 
+    public PlacementResult place(
+            Object itemstack,
+            Object entityhuman,
+            Object world,
+            int blockX,
+            int blockY,
+            int blockZ,
+            int face,
+            int blockId,
+            int filteredData
+    ) {
+        if (itemstack instanceof ItemStack && entityhuman instanceof EntityHuman && world instanceof World) {
+            return place((ItemStack) itemstack, (EntityHuman) entityhuman, (World) world, blockX, blockY, blockZ, face, blockId, filteredData);
+        }
+        return PlacementResult.notHandled();
+    }
+
     public String resolveTranslationKey(int blockId) {
-        return Block.byId[blockId].l();
+        if (blockId >= 0 && blockId < Block.byId.length && Block.byId[blockId] != null) {
+            return Block.byId[blockId].l();
+        }
+        return "tile.unknown";
     }
 
     public boolean usePistonPostPlaceOrderingFix(int blockId) {
-        return PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true)
+        return PoseidonConfig.getInstance().getConfigBoolean(
+                WORLD_FEATURE_CONFIG_POLICY.pistonOtherFixesEnabledKey(),
+                WORLD_FEATURE_CONFIG_POLICY.pistonOtherFixesEnabledDefault()
+        )
                 && (blockId == 29 || blockId == 33);
     }
 

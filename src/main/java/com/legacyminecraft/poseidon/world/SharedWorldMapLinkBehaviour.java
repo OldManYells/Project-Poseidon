@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.WorldServer;
 
 /**
  * Canonical behaviour for sharing map collections between primary and secondary worlds.

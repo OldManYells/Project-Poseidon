@@ -1,9 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.World;
 
 public final class FoodItemConsumptionBehaviour {
     private static final FoodItemConsumptionBehaviour INSTANCE = new FoodItemConsumptionBehaviour();

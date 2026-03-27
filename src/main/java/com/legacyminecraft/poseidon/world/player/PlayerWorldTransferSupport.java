@@ -1,20 +1,7 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import com.legacyminecraft.poseidon.compat.bukkit.PortalTravelAgentBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.WorldDimensionBridgeBehaviour;
-import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Packet70Bed;
-import net.minecraft.server.WorldServer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.TravelAgent;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import com.legacyminecraft.compat.bukkit.PortalTravelAgentBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.WorldDimensionBridgeBehaviour;
 
 /**
  * Canonical world-transfer helpers for respawn and portal movement flows.
@@ -39,12 +26,12 @@ public final class PlayerWorldTransferSupport {
             Location requestedLocation
     ) {
         ChunkCoordinates bedCoordinates = entityPlayer.getBed();
-        org.bukkit.World sourceWorld = entityPlayer.getBukkitEntity().getWorld();
+        com.legacyminecraft.compat.bukkit.World sourceWorld = entityPlayer.getBukkitEntity().getWorld();
         Location location = requestedLocation;
 
         if (location == null) {
             boolean isBedSpawn = false;
-            org.bukkit.World spawnWorld = minecraftServer.server.getWorld(entityPlayer.spawnWorld);
+            com.legacyminecraft.compat.bukkit.World spawnWorld = minecraftServer.server.getWorld(entityPlayer.spawnWorld);
             WorldServer spawnWorldHandle = WORLD_DIMENSION_BRIDGE.resolveWorldHandle(spawnWorld, null);
             if (spawnWorld != null && spawnWorldHandle != null && bedCoordinates != null) {
                 ChunkCoordinates bedSpawn = EntityHuman.getBed(spawnWorldHandle, bedCoordinates);
@@ -57,7 +44,7 @@ public final class PlayerWorldTransferSupport {
             }
 
             if (location == null) {
-                org.bukkit.World primaryWorld = (org.bukkit.World) minecraftServer.server.getWorlds().get(0);
+                com.legacyminecraft.compat.bukkit.World primaryWorld = (com.legacyminecraft.compat.bukkit.World) minecraftServer.server.getWorlds().get(0);
                 WorldServer primaryWorldHandle = WORLD_DIMENSION_BRIDGE.resolveWorldHandle(primaryWorld, null);
                 if (primaryWorldHandle != null) {
                     ChunkCoordinates worldSpawn = primaryWorldHandle.getSpawn();
@@ -123,11 +110,11 @@ public final class PlayerWorldTransferSupport {
 
     public static final class RespawnResolution {
         private final EntityPlayer entityPlayer;
-        private final org.bukkit.World sourceWorld;
+        private final com.legacyminecraft.compat.bukkit.World sourceWorld;
         private final Location respawnLocation;
         private final WorldServer destinationWorld;
 
-        RespawnResolution(EntityPlayer entityPlayer, org.bukkit.World sourceWorld, Location respawnLocation, WorldServer destinationWorld) {
+        RespawnResolution(EntityPlayer entityPlayer, com.legacyminecraft.compat.bukkit.World sourceWorld, Location respawnLocation, WorldServer destinationWorld) {
             this.entityPlayer = entityPlayer;
             this.sourceWorld = sourceWorld;
             this.respawnLocation = respawnLocation;
@@ -138,7 +125,7 @@ public final class PlayerWorldTransferSupport {
             return entityPlayer;
         }
 
-        public org.bukkit.World getSourceWorld() {
+        public com.legacyminecraft.compat.bukkit.World getSourceWorld() {
             return sourceWorld;
         }
 
@@ -162,7 +149,7 @@ public final class PlayerWorldTransferSupport {
          * @deprecated Use {@link #getSourceWorld()}.
          */
         @Deprecated
-        public org.bukkit.World getFromWorld() {
+        public com.legacyminecraft.compat.bukkit.World getFromWorld() {
             return getSourceWorld();
         }
 

@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.BiomeMeta;
-import net.minecraft.server.EntityChicken;
-import net.minecraft.server.EntityGhast;
-import net.minecraft.server.EntityPigZombie;
-import net.minecraft.server.EntityWolf;
 
 import java.util.List;
 

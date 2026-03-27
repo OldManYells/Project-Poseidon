@@ -1,28 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityArrow;
-import net.minecraft.server.EntityBoat;
-import net.minecraft.server.EntityEgg;
-import net.minecraft.server.EntityFallingSand;
-import net.minecraft.server.EntityFireball;
-import net.minecraft.server.EntityFish;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.EntityItem;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.EntityPainting;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.EntitySnowball;
-import net.minecraft.server.EntityTNTPrimed;
-import net.minecraft.server.IAnimal;
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet20NamedEntitySpawn;
-import net.minecraft.server.Packet21PickupSpawn;
-import net.minecraft.server.Packet23VehicleSpawn;
-import net.minecraft.server.Packet24MobSpawn;
-import net.minecraft.server.Packet25EntityPainting;
 
 /**
  * Canonical spawn packet resolver for tracked entities.

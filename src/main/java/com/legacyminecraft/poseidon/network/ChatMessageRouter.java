@@ -1,15 +1,12 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.MinecraftServer;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerChatEvent;
 
 /**
  * Canonical router for player chat message flow.
  */
 public final class ChatMessageRouter {
     private static final ChatMessageRouter INSTANCE = new ChatMessageRouter();
+    private final ChatCommandPrefixPolicy chatCommandPrefixPolicy = ChatCommandPrefixPolicy.getInstance();
 
     private ChatMessageRouter() {
     }
@@ -19,22 +16,58 @@ public final class ChatMessageRouter {
     }
 
     public boolean isCommandMessage(String message) {
-        return message.startsWith("/");
+        return chatCommandPrefixPolicy.isCommand(message);
     }
 
-    public boolean handleNonCommandChat(Server server, MinecraftServer minecraftServer, Player player, String message) {
-        PlayerChatEvent event = new PlayerChatEvent(player, message);
-        server.getPluginManager().callEvent(event);
+    public boolean handleNonCommandChat(Object server, Object minecraftServer, Object player, String message) {
+        Object event = NetworkCompatGatewayRegistry.gateway().createPlayerChatEvent(player, message);
+        Object pluginManager = invoke(server, "getPluginManager");
+        invoke(pluginManager, "callEvent", event);
 
-        if (event.isCancelled()) {
+        if (Boolean.TRUE.equals(invoke(event, "isCancelled"))) {
             return true;
         }
 
-        String formatted = String.format(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
-        minecraftServer.console.sendMessage(formatted);
-        for (Player recipient : event.getRecipients()) {
-            recipient.sendMessage(formatted);
+        String format = String.valueOf(invoke(event, "getFormat"));
+        Object eventPlayer = invoke(event, "getPlayer");
+        String displayName = String.valueOf(invoke(eventPlayer, "getDisplayName"));
+        String eventMessage = String.valueOf(invoke(event, "getMessage"));
+        String formatted = String.format(format, displayName, eventMessage);
+        Object console = getField(minecraftServer, "console");
+        invoke(console, "sendMessage", formatted);
+        Iterable recipients = cast(invoke(event, "getRecipients"));
+        for (Object recipient : recipients) {
+            invoke(recipient, "sendMessage", formatted);
         }
         return false;
+    }
+
+    private Object getField(Object target, String name) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T cast(Object value) {
+        return (T) value;
     }
 }

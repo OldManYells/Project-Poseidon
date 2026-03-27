@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet10Flying;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
  * Canonical dispatcher for PlayerMoveEvent construction and outcome resolution.
@@ -22,25 +16,30 @@ public final class PlayerMoveEventDispatchSystem {
     }
 
     public MoveEventResult processMoveEvent(
-            Server server,
-            EntityPlayer entityPlayer,
-            Player player,
-            Packet10Flying packet10flying,
+            Object server,
+            Object entityPlayer,
+            Object player,
+            Object packet10flying,
             MovementEventState state,
             boolean checkMovement
     ) {
-        Location from = new Location(player.getWorld(), state.getLastPosX(), state.getLastPosY(), state.getLastPosZ(), state.getLastYaw(), state.getLastPitch());
-        Location to = player.getLocation().clone();
+        Object playerWorld = invoke(player, "getWorld");
+        Location from = new Location(playerWorld, state.getLastPosX(), state.getLastPosY(), state.getLastPosZ(), state.getLastYaw(), state.getLastPitch());
+        Object playerLocation = invoke(player, "getLocation");
+        Location to = toLocation(playerLocation).clone();
 
-        if (playerMoveEventPolicy.shouldApplyPositionFromPacket(packet10flying.h, packet10flying.y, packet10flying.stance)) {
-            to.setX(packet10flying.x);
-            to.setY(packet10flying.y);
-            to.setZ(packet10flying.z);
+        boolean hasPosition = asBoolean(getField(packet10flying, "h"));
+        double packetY = asDouble(getField(packet10flying, "y"));
+        double packetStance = asDouble(getField(packet10flying, "stance"));
+        if (playerMoveEventPolicy.shouldApplyPositionFromPacket(hasPosition, packetY, packetStance)) {
+            to.setX(asDouble(getField(packet10flying, "x")));
+            to.setY(packetY);
+            to.setZ(asDouble(getField(packet10flying, "z")));
         }
 
-        if (packet10flying.hasLook) {
-            to.setYaw(packet10flying.yaw);
-            to.setPitch(packet10flying.pitch);
+        if (asBoolean(getField(packet10flying, "hasLook"))) {
+            to.setYaw(asFloat(getField(packet10flying, "yaw")));
+            to.setPitch(asFloat(getField(packet10flying, "pitch")));
         }
 
         boolean significantMoveEventDelta = playerMoveEventPolicy.hasSignificantMoveEventDelta(
@@ -51,7 +50,7 @@ public final class PlayerMoveEventDispatchSystem {
                 state.getLastPitch(),
                 to
         );
-        if (!playerMoveEventPolicy.shouldProcessMoveEvent(significantMoveEventDelta, checkMovement, entityPlayer.dead)) {
+        if (!playerMoveEventPolicy.shouldProcessMoveEvent(significantMoveEventDelta, checkMovement, asBoolean(getField(entityPlayer, "dead")))) {
             return MoveEventResult.continueProcessing();
         }
 
@@ -65,18 +64,21 @@ public final class PlayerMoveEventDispatchSystem {
             return MoveEventResult.continueProcessing();
         }
 
-        PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
-        server.getPluginManager().callEvent(event);
+        Object event = NetworkCompatGatewayRegistry.gateway().createPlayerMoveEvent(player, from, to);
+        Object pluginManager = invoke(server, "getPluginManager");
+        invoke(pluginManager, "callEvent", event);
 
-        if (event.isCancelled()) {
+        if (asBoolean(invoke(event, "isCancelled"))) {
             return MoveEventResult.cancelAndRollback(from);
         }
 
-        if (!to.equals(event.getTo())) {
-            return MoveEventResult.teleportToEventDestination(event.getTo());
+        Location eventTo = toLocation(invoke(event, "getTo"));
+        if (!to.equals(eventTo)) {
+            return MoveEventResult.teleportToEventDestination(eventTo);
         }
 
-        if (playerMoveEventPolicy.shouldAbortAfterPluginTeleport(from, player.getLocation(), state.isJustTeleported())) {
+        Location currentLocation = toLocation(invoke(player, "getLocation"));
+        if (playerMoveEventPolicy.shouldAbortAfterPluginTeleport(from, currentLocation, state.isJustTeleported())) {
             state.setJustTeleported(false);
             return MoveEventResult.abortAfterPluginTeleport();
         }
@@ -202,5 +204,54 @@ public final class PlayerMoveEventDispatchSystem {
         public Location getTeleportDestination() {
             return teleportDestination;
         }
+    }
+
+    private Object getField(Object target, String name) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getField(name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private Location toLocation(Object location) {
+        if (location instanceof Location) {
+            return (Location) location;
+        }
+        Object world = invoke(location, "getWorld");
+        double x = asDouble(invoke(location, "getX"));
+        double y = asDouble(invoke(location, "getY"));
+        double z = asDouble(invoke(location, "getZ"));
+        float yaw = asFloat(invoke(location, "getYaw"));
+        float pitch = asFloat(invoke(location, "getPitch"));
+        return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    private boolean asBoolean(Object value) {
+        return Boolean.TRUE.equals(value);
+    }
+
+    private double asDouble(Object value) {
+        return ((Number) value).doubleValue();
+    }
+
+    private float asFloat(Object value) {
+        return ((Number) value).floatValue();
     }
 }

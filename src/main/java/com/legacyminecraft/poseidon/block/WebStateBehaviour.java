@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.block;
 
-import net.minecraft.server.Entity;
+import com.legacyminecraft.poseidon.entity.Entity;
 
 /**
  * Canonical entity interaction and drop policy for legacy web wrappers.

@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world.biome;
 
-import net.minecraft.server.BiomeMeta;
 
 /**
  * Canonical compatibility behaviour for legacy biome spawn entries.

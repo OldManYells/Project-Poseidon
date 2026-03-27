@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.MinecraftException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

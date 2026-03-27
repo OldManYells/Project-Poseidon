@@ -28,7 +28,7 @@ public class Slot {
     }
 
     public ItemStack getItem() {
-        return SLOT_INTERACTION_BEHAVIOUR.getItem(this.inventory, this.index);
+        return (ItemStack) (Object) SLOT_INTERACTION_BEHAVIOUR.getItem(this.inventory, this.index);
     }
 
     public boolean b() {
@@ -49,7 +49,7 @@ public class Slot {
     }
 
     public ItemStack a(int i) {
-        return SLOT_INTERACTION_BEHAVIOUR.splitStack(this.inventory, this.index, i);
+        return (ItemStack) (Object) SLOT_INTERACTION_BEHAVIOUR.splitStack(this.inventory, this.index, i);
     }
 
     public boolean a(IInventory iinventory, int i) {

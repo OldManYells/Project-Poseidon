@@ -1,23 +1,23 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.legacyminecraft.compat.bukkit.ProjectileBounceBehaviour;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Projectile;
 
 public abstract class AbstractProjectile extends CraftEntity implements Projectile {
-
-    private boolean doesBounce;
+    private static final ProjectileBounceBehaviour PROJECTILE_BOUNCE_BEHAVIOUR =
+            ProjectileBounceBehaviour.getInstance();
 
     public AbstractProjectile(CraftServer server, net.minecraft.server.Entity entity) {
         super(server, entity);
-        doesBounce = false;
     }
 
     public boolean doesBounce() {
-        return doesBounce;
+        return PROJECTILE_BOUNCE_BEHAVIOUR.doesBounce(this);
     }
 
     public void setBounce(boolean doesBounce) {
-        this.doesBounce = doesBounce;
+        PROJECTILE_BOUNCE_BEHAVIOUR.setBounce(this, doesBounce);
     }
 
 }

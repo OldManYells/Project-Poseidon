@@ -1,11 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.Container;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Packet103SetSlot;
-import net.minecraft.server.Packet104WindowItems;
-import net.minecraft.server.Packet105CraftProgressBar;
 
 import java.util.List;
 

@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.inventory;
 
-import net.minecraft.server.InventoryCrafting;
-import net.minecraft.server.ItemStack;
 
 public final class ShapedRecipeMatchingBehaviour {
     private static final ShapedRecipeMatchingBehaviour INSTANCE = new ShapedRecipeMatchingBehaviour();

@@ -18,8 +18,11 @@ public final class ServerEntryPointSystem {
         return INSTANCE;
     }
 
-    public void launch(OptionSet options, Logger logger) {
-        delegate.launch(options, logger);
+    public void launch(
+            OptionSet options,
+            Logger logger,
+            ServerEntryPointService.ServerRunnableFactory serverRunnableFactory
+    ) {
+        delegate.launch(options, logger, serverRunnableFactory);
     }
 }
-

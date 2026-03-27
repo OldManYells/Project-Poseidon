@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemFood;
-import net.minecraft.server.ItemStack;
 
 public final class WolfStateBehaviour {
     private static final WolfStateBehaviour INSTANCE = new WolfStateBehaviour();

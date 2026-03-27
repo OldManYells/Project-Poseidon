@@ -1,20 +1,31 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.world.WorldFeatureConfigPolicy;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import java.util.List;
 
 public class TileEntityMobSpawner extends TileEntity {
+    private static final WorldFeatureConfigPolicy WORLD_FEATURE_CONFIG_POLICY = WorldFeatureConfigPolicy.getInstance();
 
     public int spawnDelay = -1;
     public String mobName = "Pig"; // CraftBukkit - private -> public
     public double b;
     public double c = 0.0D;
 
-    private static boolean poseidonAreaLimit = PoseidonConfig.getInstance().getConfigBoolean("world.settings.mob-spawner-area-limit.enable");
-    private static int poseidonAreaLimitRadius = PoseidonConfig.getInstance().getConfigInteger("world.settings.mob-spawner-area-limit.limit");
-    private static int poseidonChunkRadius = PoseidonConfig.getInstance().getConfigInteger("world.settings.mob-spawner-area-limit.chunk-radius");
+    private static boolean poseidonAreaLimit = PoseidonConfig.getInstance().getBoolean(
+            WORLD_FEATURE_CONFIG_POLICY.mobSpawnerAreaLimitEnabledKey(),
+            WORLD_FEATURE_CONFIG_POLICY.mobSpawnerAreaLimitEnabledDefault()
+    );
+    private static int poseidonAreaLimitRadius = PoseidonConfig.getInstance().getInt(
+            WORLD_FEATURE_CONFIG_POLICY.mobSpawnerAreaLimitKey(),
+            WORLD_FEATURE_CONFIG_POLICY.mobSpawnerAreaLimitDefault()
+    );
+    private static int poseidonChunkRadius = PoseidonConfig.getInstance().getInt(
+            WORLD_FEATURE_CONFIG_POLICY.mobSpawnerChunkRadiusKey(),
+            WORLD_FEATURE_CONFIG_POLICY.mobSpawnerChunkRadiusDefault()
+    );
 
     public TileEntityMobSpawner() {
         this.spawnDelay = 20;

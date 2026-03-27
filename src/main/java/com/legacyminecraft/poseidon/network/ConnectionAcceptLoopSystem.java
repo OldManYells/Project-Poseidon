@@ -11,9 +11,10 @@ import java.util.Map;
  */
 public final class ConnectionAcceptLoopSystem {
     private static final ConnectionAcceptLoopSystem INSTANCE = new ConnectionAcceptLoopSystem();
-    private static final long DEFAULT_THROTTLE_MILLIS = 5000L;
 
     private final ConnectionAttemptThrottleSystem connectionAttemptThrottleSystem = ConnectionAttemptThrottleSystem.getInstance();
+    private final ConnectionAcceptThrottlePolicy connectionAcceptThrottlePolicy =
+            ConnectionAcceptThrottlePolicy.getInstance();
 
     private ConnectionAcceptLoopSystem() {
     }
@@ -37,14 +38,14 @@ public final class ConnectionAcceptLoopSystem {
                         connectionAttemptsByAddress,
                         inetaddress,
                         operations.currentTimeMillis(),
-                        DEFAULT_THROTTLE_MILLIS
+                        connectionAcceptThrottlePolicy.defaultThrottleMillis()
                 )) {
                     socket.close();
                 } else {
                     operations.onAccepted(socket);
                 }
-            } catch (IOException ioexception) {
-                operations.onAcceptError(ioexception);
+            } catch (Exception exception) {
+                operations.onAcceptError(exception);
             }
         }
     }
@@ -56,8 +57,8 @@ public final class ConnectionAcceptLoopSystem {
 
         long currentTimeMillis();
 
-        void onAccepted(Socket socket) throws IOException;
+        void onAccepted(Socket socket) throws Exception;
 
-        void onAcceptError(IOException ioexception);
+        void onAcceptError(Exception exception);
     }
 }

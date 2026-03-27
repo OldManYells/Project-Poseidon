@@ -1,10 +1,6 @@
 package com.legacyminecraft.poseidon.auth.login;
 
 import com.legacyminecraft.poseidon.api.network.ConnectionType;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.Packet1Login;
-import org.bukkit.Server;
 
 /**
  * Role-aligned canonical facade for login-to-session transition orchestration.
@@ -21,19 +17,19 @@ public final class LoginTransitionSystem {
     }
 
     public void startLoginFlow(
-            NetLoginHandler loginHandler,
-            Packet1Login loginPacket,
-            MinecraftServer minecraftServer,
-            Server bukkitServer,
+            Object loginHandler,
+            Object loginPacket,
+            Object minecraftServer,
+            Object bukkitServer,
             String shutdownKickMessage
     ) {
         delegate.startLoginFlow(loginHandler, loginPacket, minecraftServer, bukkitServer, shutdownKickMessage);
     }
 
     public CompletionResult completeAuthenticatedSession(
-            NetLoginHandler loginHandler,
-            Packet1Login loginPacket,
-            MinecraftServer minecraftServer,
+            Object loginHandler,
+            Object loginPacket,
+            Object minecraftServer,
             boolean usingReleaseToBeta,
             ConnectionType connectionType,
             int rawConnectionType,

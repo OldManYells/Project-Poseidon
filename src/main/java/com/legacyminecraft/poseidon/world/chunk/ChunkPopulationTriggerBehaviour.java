@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.world.chunk;
 
-import net.minecraft.server.Chunk;
+import com.legacyminecraft.compat.bukkit.Chunk;
 
 /**
  * Canonical behaviour for deciding when neighboring chunks should be populated.

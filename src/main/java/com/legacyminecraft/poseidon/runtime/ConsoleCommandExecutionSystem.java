@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.ICommandListener;
-import net.minecraft.server.MinecraftServer;
 
 import java.util.logging.Logger;
 

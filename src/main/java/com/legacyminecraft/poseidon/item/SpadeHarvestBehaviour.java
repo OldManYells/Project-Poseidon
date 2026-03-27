@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.item;
 
-import net.minecraft.server.Block;
 
 public final class SpadeHarvestBehaviour {
     private static final SpadeHarvestBehaviour INSTANCE = new SpadeHarvestBehaviour();

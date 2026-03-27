@@ -1,8 +1,6 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.TileEntity;
+import com.legacyminecraft.poseidon.entity.EntityHuman;
 
 /**
  * Canonical world access callback contract bridged by legacy wrappers.

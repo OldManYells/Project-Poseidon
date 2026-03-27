@@ -1,8 +1,5 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet10Flying;
-import net.minecraft.server.WorldServer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,9 +23,9 @@ public final class PlayerGroundMovementSystem {
     }
 
     public GroundMovementDecision processGroundMovement(
-            EntityPlayer player,
-            WorldServer worldserver,
-            Packet10Flying packet10flying,
+            Object playerRaw,
+            Object worldserverRaw,
+            Object packet10flyingRaw,
             double anchorX,
             double anchorY,
             double anchorZ,
@@ -36,6 +33,9 @@ public final class PlayerGroundMovementSystem {
             boolean allowFlight,
             int floatingTicks
     ) {
+        EntityPlayer player = (EntityPlayer) (Object) playerRaw;
+        WorldServer worldserver = (WorldServer) (Object) worldserverRaw;
+        Packet10Flying packet10flying = (Packet10Flying) (Object) packet10flyingRaw;
         List<String> warningLogs = new ArrayList<String>();
         List<String> consoleLogs = new ArrayList<String>();
         double previousY = player.locY;
@@ -86,7 +86,7 @@ public final class PlayerGroundMovementSystem {
         GroundMovementResolutionSystem.GroundMovementResult groundMovementResult =
                 groundMovementResolutionSystem.resolveGroundMovement(
                         player,
-                        worldserver,
+                        (com.legacyminecraft.poseidon.world.WorldServer) (Object) worldserver,
                         targetX,
                         targetY,
                         targetZ,

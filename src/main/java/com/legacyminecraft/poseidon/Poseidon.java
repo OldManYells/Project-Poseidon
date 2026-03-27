@@ -1,9 +1,7 @@
 package com.legacyminecraft.poseidon;
 
-import com.legacyminecraft.poseidon.compat.bukkit.ServerDiagnosticsBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.ServerDiagnosticsBridgeBehaviour;
 import com.legacyminecraft.poseidon.kernel.PoseidonKernel;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
 
 import java.util.LinkedList;
 

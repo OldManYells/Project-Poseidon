@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.nbt;
 
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
 
 import java.io.DataInput;
 import java.io.DataInputStream;

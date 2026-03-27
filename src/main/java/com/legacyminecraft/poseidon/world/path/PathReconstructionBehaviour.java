@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.world.path;
 
-import net.minecraft.server.PathEntity;
-import net.minecraft.server.PathPoint;
+import com.legacyminecraft.poseidon.entity.PathEntity;
+import com.legacyminecraft.poseidon.world.PathPoint;
 
 public final class PathReconstructionBehaviour {
     private static final PathReconstructionBehaviour INSTANCE = new PathReconstructionBehaviour();

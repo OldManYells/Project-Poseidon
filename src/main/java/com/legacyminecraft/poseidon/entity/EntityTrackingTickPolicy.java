@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.Entity;
 
 /**
  * Canonical policy for deciding when tracker membership and movement frames should be refreshed.

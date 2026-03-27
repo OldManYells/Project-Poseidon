@@ -1,13 +1,14 @@
 package com.legacyminecraft.poseidon.network;
 
-import net.minecraft.server.NetworkManager;
 
 /**
  * Canonical handler for client-initiated disconnect packets.
  */
 public final class ClientDisconnectPacketHandler {
     private static final ClientDisconnectPacketHandler INSTANCE = new ClientDisconnectPacketHandler();
-    private static final String DISCONNECT_REASON = "disconnect.quitting";
+    private final NetworkDisconnectKeyPolicy networkDisconnectKeyPolicy = NetworkDisconnectKeyPolicy.getInstance();
+    private final NetworkDisconnectArgumentPolicy networkDisconnectArgumentPolicy =
+            NetworkDisconnectArgumentPolicy.getInstance();
 
     private ClientDisconnectPacketHandler() {
     }
@@ -16,11 +17,28 @@ public final class ClientDisconnectPacketHandler {
         return INSTANCE;
     }
 
-    public void handleClientDisconnect(NetworkManager networkManager) {
-        networkManager.a(DISCONNECT_REASON, new Object[0]);
+    public void handleClientDisconnect(Object networkManager) {
+        invoke(networkManager, "a",
+                networkDisconnectKeyPolicy.quitting(),
+                networkDisconnectArgumentPolicy.emptyArgs()
+        );
     }
 
     public String getDisconnectReasonKey() {
-        return DISCONNECT_REASON;
+        return networkDisconnectKeyPolicy.quitting();
+    }
+
+    private Object invoke(Object target, String methodName, Object... args) {
+        try {
+            for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                    method.setAccessible(true);
+                    return method.invoke(target, args);
+                }
+            }
+            throw new IllegalStateException("Method not found: " + methodName);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

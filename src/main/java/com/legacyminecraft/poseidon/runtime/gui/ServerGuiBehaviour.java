@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.runtime.gui;
 
-import net.minecraft.server.GuiLogOutputHandler;
-import net.minecraft.server.GuiStatsComponent;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerListBox;
-import net.minecraft.server.ServerGUI;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;

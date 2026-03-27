@@ -1,12 +1,14 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.entity.CombatFixConfigPolicy;
 import com.legacyminecraft.poseidon.entity.SkeletonLifecycleBehaviour;
 // CraftBukkit start
 // CraftBukkit end
 
 public class EntitySkeleton extends EntityMonster {
     private static final SkeletonLifecycleBehaviour SKELETON_LIFECYCLE_BEHAVIOUR = SkeletonLifecycleBehaviour.getInstance();
+    private static final CombatFixConfigPolicy COMBAT_FIX_CONFIG_POLICY = CombatFixConfigPolicy.getInstance();
 
     private static final ItemStack a = new ItemStack(Item.BOW, 1);
 
@@ -37,7 +39,10 @@ public class EntitySkeleton extends EntityMonster {
                 this,
                 entity,
                 f,
-                (boolean) PoseidonConfig.getInstance().getConfigOption("world.settings.skeleton-shooting-sound-fix.enabled", true),
+                (boolean) PoseidonConfig.getInstance().getConfigOption(
+                        COMBAT_FIX_CONFIG_POLICY.skeletonShootingSoundFixKey(),
+                        COMBAT_FIX_CONFIG_POLICY.skeletonShootingSoundFixDefault()
+                ),
                 this.random
         );
     }

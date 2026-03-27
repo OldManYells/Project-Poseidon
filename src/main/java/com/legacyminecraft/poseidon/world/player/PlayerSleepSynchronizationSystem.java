@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.world.player;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.EntityTracker;
-import net.minecraft.server.EnumBedError;
-import net.minecraft.server.Packet17;
-import net.minecraft.server.Packet18ArmAnimation;
 
 /**
  * Canonical bed/sleep packet synchronization for legacy EntityPlayer wrappers.

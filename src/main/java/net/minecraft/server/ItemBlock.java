@@ -33,13 +33,14 @@ public class ItemBlock extends Item {
             Block.byId[this.id].postPlace(world, result.x, result.y, result.z, entityhuman);
         }
 
+        Block placedBlock = Block.byId[this.id];
         world.makeSound((double) ((float) result.x + 0.5F), (double) ((float) result.y + 0.5F), (double) ((float) result.z + 0.5F),
-                result.block.stepSound.getName(), (result.block.stepSound.getVolume1() + 1.0F) / 2.0F, result.block.stepSound.getVolume2() * 0.8F);
+                placedBlock.stepSound.getName(), (placedBlock.stepSound.getVolume1() + 1.0F) / 2.0F, placedBlock.stepSound.getVolume2() * 0.8F);
         --itemstack.count;
         return true;
     }
 
     public String a() {
-        return ITEM_BLOCK_PLACEMENT_BEHAVIOUR.resolveTranslationKey(this.id);
+        return Block.byId[this.id] == null ? "tile.unknown" : Block.byId[this.id].l();
     }
 }

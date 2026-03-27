@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.EntityList;
-import net.minecraft.server.EntityListEntry;
 
 public final class EntityListEntryBehaviour {
     private static final EntityListEntryBehaviour INSTANCE = new EntityListEntryBehaviour();

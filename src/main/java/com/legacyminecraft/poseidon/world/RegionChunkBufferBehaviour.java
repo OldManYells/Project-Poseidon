@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.world;
 
-import net.minecraft.server.RegionFile;
 
 public final class RegionChunkBufferBehaviour {
     private static final RegionChunkBufferBehaviour INSTANCE = new RegionChunkBufferBehaviour();

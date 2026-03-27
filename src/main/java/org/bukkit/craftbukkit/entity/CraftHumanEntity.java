@@ -1,8 +1,11 @@
 
 package org.bukkit.craftbukkit.entity;
 
-import com.legacyminecraft.poseidon.compat.bukkit.HumanInventoryBridgeBehaviour;
-import com.legacyminecraft.poseidon.compat.bukkit.HumanPermissionBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.HumanInventoryBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.HumanPermissionBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.HumanStateBridgeBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityTypedHandleCastBehaviour;
+import com.legacyminecraft.compat.bukkit.EntityHandleMutationBehaviour;
 import net.minecraft.server.EntityHuman;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
@@ -24,6 +27,12 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
             HumanInventoryBridgeBehaviour.getInstance();
     private static final HumanPermissionBridgeBehaviour HUMAN_PERMISSION_BRIDGE_BEHAVIOUR =
             HumanPermissionBridgeBehaviour.getInstance();
+    private static final HumanStateBridgeBehaviour HUMAN_STATE_BRIDGE_BEHAVIOUR =
+            HumanStateBridgeBehaviour.getInstance();
+    private static final EntityTypedHandleCastBehaviour ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR =
+            EntityTypedHandleCastBehaviour.getInstance();
+    private static final EntityHandleMutationBehaviour ENTITY_HANDLE_MUTATION_BEHAVIOUR =
+            EntityHandleMutationBehaviour.getInstance();
     private CraftInventoryPlayer inventory;
     protected final PermissibleBase perm = new PermissibleBase(this);
     private boolean op;
@@ -34,22 +43,37 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     public String getName() {
-        return getHandle().name;
+        return HUMAN_STATE_BRIDGE_BEHAVIOUR.getName(getHandle());
     }
 
     @Override
     public EntityHuman getHandle() {
-        return (EntityHuman) entity;
+        return ENTITY_TYPED_HANDLE_CAST_BEHAVIOUR.castHandle(entity, EntityHuman.class);
     }
 
     public void setHandle(final EntityHuman entity) {
-        super.setHandle((EntityHuman) entity);
-        this.entity = entity;
-        this.inventory = HUMAN_INVENTORY_BRIDGE_BEHAVIOUR.createInventory(entity);
+        ENTITY_HANDLE_MUTATION_BEHAVIOUR.applyHandle(entity, new EntityHandleMutationBehaviour.HandleMutationCallbacks() {
+            @Override
+            public void setSuperHandle(Object updatedHandle) {
+                CraftHumanEntity.super.setHandle((EntityHuman) updatedHandle);
+            }
+
+            @Override
+            public void assignHandleField(Object updatedHandle) {
+                CraftHumanEntity.this.entity = (EntityHuman) updatedHandle;
+            }
+
+            @Override
+            public void afterHandleAssignment(Object updatedHandle) {
+                CraftHumanEntity.this.inventory = HUMAN_INVENTORY_BRIDGE_BEHAVIOUR.createInventory(
+                        (EntityHuman) updatedHandle
+                );
+            }
+        });
     }
 
     public PlayerInventory getInventory() {
-        return inventory;
+        return HUMAN_INVENTORY_BRIDGE_BEHAVIOUR.toInventory(inventory);
     }
 
     public ItemStack getItemInHand() {
@@ -62,19 +86,19 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
 
     @Override
     public String toString() {
-        return "CraftHumanEntity{" + "id=" + getEntityId() + "name=" + getName() + '}';
+        return HUMAN_STATE_BRIDGE_BEHAVIOUR.toString(getEntityId(), getName());
     }
 
     public boolean isSleeping() {
-        return getHandle().sleeping;
+        return HUMAN_STATE_BRIDGE_BEHAVIOUR.isSleeping(getHandle());
     }
 
     public int getSleepTicks() {
-        return getHandle().sleepTicks;
+        return HUMAN_STATE_BRIDGE_BEHAVIOUR.getSleepTicks(getHandle());
     }
 
     public boolean isOp() {
-        return op;
+        return HUMAN_STATE_BRIDGE_BEHAVIOUR.isOperator(op);
     }
 
     public boolean isPermissionSet(String name) {

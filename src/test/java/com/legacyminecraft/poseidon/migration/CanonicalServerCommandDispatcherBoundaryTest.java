@@ -18,6 +18,7 @@ public class CanonicalServerCommandDispatcherBoundaryTest {
         String text = new String(Files.readAllBytes(SERVER_COMMAND_DISPATCHER_PATH), StandardCharsets.UTF_8);
 
         Assert.assertTrue(text.contains("ServerCommandEnvelopeBehaviour"));
+        Assert.assertTrue(text.contains("ServerCommandDispatchPolicy"));
         Assert.assertTrue(text.contains("import org.bukkit.Server;"));
         Assert.assertTrue(text.contains("import org.bukkit.command.ConsoleCommandSender;"));
         Assert.assertTrue(text.contains("drainQueuedCommands("));

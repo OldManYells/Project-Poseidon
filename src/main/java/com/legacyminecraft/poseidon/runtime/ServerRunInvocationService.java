@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.MinecraftServer;
 
 /**
  * Canonical launcher bridge for invoking MinecraftServer.run from legacy thread wrappers.
@@ -17,5 +16,16 @@ public final class ServerRunInvocationService {
 
     public void runServer(MinecraftServer server) {
         server.run();
+    }
+
+    public void runServerRaw(Object server) {
+        if (server == null) {
+            return;
+        }
+        try {
+            server.getClass().getMethod("run").invoke(server);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Unable to invoke server run() entrypoint", e);
+        }
     }
 }

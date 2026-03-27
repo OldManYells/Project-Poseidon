@@ -23,17 +23,16 @@ public class Packet21PickupSpawn extends Packet {
     public Packet21PickupSpawn() {}
 
     public Packet21PickupSpawn(EntityItem entityitem) {
-        PacketDataCodec.Packet21Data packetData = packetDataCodec.packet21FromPickupEntity(entityitem);
-        this.a = packetData.getEntityId();
-        this.h = packetData.getItemId();
-        this.i = packetData.getItemCount();
-        this.l = packetData.getItemData();
-        this.b = packetData.getX();
-        this.c = packetData.getY();
-        this.d = packetData.getZ();
-        this.e = packetData.getVelocityX();
-        this.f = packetData.getVelocityY();
-        this.g = packetData.getVelocityZ();
+        this.a = entityitem.id;
+        this.h = entityitem.itemStack.id;
+        this.i = entityitem.itemStack.count;
+        this.l = entityitem.itemStack.getData();
+        this.b = (int) (entityitem.locX * 32.0D);
+        this.c = (int) (entityitem.locY * 32.0D);
+        this.d = (int) (entityitem.locZ * 32.0D);
+        this.e = (byte) ((int) (entityitem.motX * 128.0D));
+        this.f = (byte) ((int) (entityitem.motY * 128.0D));
+        this.g = (byte) ((int) (entityitem.motZ * 128.0D));
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

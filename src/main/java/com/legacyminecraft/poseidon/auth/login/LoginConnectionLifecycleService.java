@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.auth.login;
 
-import net.minecraft.server.NetworkManager;
-import net.minecraft.server.Packet255KickDisconnect;
+
+import com.legacyminecraft.poseidon.network.NetworkCompatGatewayRegistry;
 
 import java.util.logging.Logger;
 
@@ -19,11 +19,12 @@ public final class LoginConnectionLifecycleService {
         return INSTANCE;
     }
 
-    public void disconnect(NetworkManager networkManager, Logger logger, String identity, String reason) {
+    public void disconnect(Object networkManager, Logger logger, String identity, String reason) {
         try {
             logger.info(createDisconnectLogMessage(identity, reason));
-            networkManager.queue(new Packet255KickDisconnect(reason));
-            networkManager.d();
+            Object disconnectPacket = Bridge.newKickPacket(reason);
+            Bridge.invoke(networkManager, "queue", disconnectPacket);
+            Bridge.invoke(networkManager, "d");
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -43,5 +44,25 @@ public final class LoginConnectionLifecycleService {
 
     public String getProtocolErrorMessage() {
         return PROTOCOL_ERROR_MESSAGE;
+    }
+
+    private static final class Bridge {
+        private static Object newKickPacket(String reason) {
+            return NetworkCompatGatewayRegistry.gateway().createKickPacket(reason);
+        }
+
+        private static Object invoke(Object target, String methodName, Object... args) {
+            try {
+                for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        method.setAccessible(true);
+                        return method.invoke(target, args);
+                    }
+                }
+                throw new IllegalStateException("Method not found: " + methodName);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
     }
 }

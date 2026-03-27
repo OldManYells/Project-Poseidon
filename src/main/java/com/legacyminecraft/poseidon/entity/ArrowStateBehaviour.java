@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.MathHelper;
-import net.minecraft.server.NBTTagCompound;
 
 public final class ArrowStateBehaviour {
     private static final ArrowStateBehaviour INSTANCE = new ArrowStateBehaviour();

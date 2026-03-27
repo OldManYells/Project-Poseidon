@@ -1,7 +1,5 @@
 package com.legacyminecraft.poseidon.runtime;
 
-import net.minecraft.server.WorldServer;
-import org.bukkit.Server;
 
 import java.util.List;
 import java.util.logging.Logger;

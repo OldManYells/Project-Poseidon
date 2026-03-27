@@ -2,9 +2,6 @@ package com.legacyminecraft.poseidon.network;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.api.network.ConnectionType;
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.Packet1Login;
-import org.bukkit.ChatColor;
 
 import java.net.InetSocketAddress;
 
@@ -14,19 +11,25 @@ import static com.legacyminecraft.poseidon.util.Release2Beta.deserializeAddress;
  * Canonical proxy/IP-forwarding policy for login requests.
  */
 public final class LoginProxySupport {
+    private static final LoginProxyConfigPolicy LOGIN_PROXY_CONFIG_POLICY = LoginProxyConfigPolicy.getInstance();
+
     private LoginProxySupport() {
     }
 
-    public static ProxyHandlingResult handleProxy(NetLoginHandler loginHandler, Packet1Login loginPacket) {
-        ConnectionType connectionType = resolveConnectionType(loginPacket.d);
-        int rawConnectionType = loginPacket.d;
+    public static ProxyHandlingResult handleProxy(Object loginHandler, Object loginPacket) {
+        byte rawConnectionTypeByte = ((Number) Bridge.readField(loginPacket, "d")).byteValue();
+        ConnectionType connectionType = resolveConnectionType(rawConnectionTypeByte);
+        int rawConnectionType = rawConnectionTypeByte;
         boolean usingReleaseToBeta = false;
 
-        if ((Boolean) PoseidonConfig.getInstance().getConfigOption("settings.bungeecord.bungee-mode.enable")
+        if ((Boolean) PoseidonConfig.getInstance().getConfigOption(LOGIN_PROXY_CONFIG_POLICY.bungeeModeEnabledKey())
                 && !connectionType.equals(ConnectionType.BUNGEECORD_OFFLINE_MODE_IP_FORWARDING)
                 && !connectionType.equals(ConnectionType.BUNGEECORD_ONLINE_MODE_IP_FORWARDING)) {
-            NetLoginHandler.a.info(loginPacket.name + " is not using BungeeCord, kicking the player.");
-            loginHandler.disconnect((String) PoseidonConfig.getInstance().getConfigOption("settings.bungeecord.bungee-mode.kick-message"));
+            String username = String.valueOf(Bridge.readField(loginPacket, "name"));
+            Bridge.logInfo(loginHandler, username + " is not using BungeeCord, kicking the player.");
+            Bridge.invoke(loginHandler, "disconnect", (String) PoseidonConfig.getInstance().getConfigOption(
+                    LOGIN_PROXY_CONFIG_POLICY.bungeeModeKickMessageKey()
+            ));
             return ProxyHandlingResult.rejected(connectionType, rawConnectionType, usingReleaseToBeta);
         }
 
@@ -34,21 +37,32 @@ public final class LoginProxySupport {
                 || connectionType.equals(ConnectionType.RELEASE2BETA_ONLINE_MODE_IP_FORWARDING)
                 || connectionType.equals(ConnectionType.BUNGEECORD_OFFLINE_MODE_IP_FORWARDING)
                 || connectionType.equals(ConnectionType.BUNGEECORD_ONLINE_MODE_IP_FORWARDING)) {
-            if ((Boolean) PoseidonConfig.getInstance().getConfigOption("settings.release2beta.enable-ip-pass-through")) {
-                if (loginHandler.getSocket().getInetAddress().getHostAddress()
-                        .equalsIgnoreCase(String.valueOf(PoseidonConfig.getInstance().getConfigOption("settings.release2beta.proxy-ip", "127.0.0.1")))) {
-                    InetSocketAddress address = deserializeAddress(loginPacket.c);
-                    NetLoginHandler.a.info(loginPacket.name + " has been detected using Release2Beta, using the IP passed through: " + address.getAddress().getHostAddress());
-                    loginHandler.networkManager.setSocketAddress(address);
+            if ((Boolean) PoseidonConfig.getInstance().getConfigOption(
+                    LOGIN_PROXY_CONFIG_POLICY.release2BetaIpForwardingEnabledKey()
+            )) {
+                Object socket = Bridge.invoke(loginHandler, "getSocket");
+                String remoteAddress = String.valueOf(Bridge.invoke(Bridge.invoke(socket, "getInetAddress"), "getHostAddress"));
+                if (remoteAddress
+                        .equalsIgnoreCase(String.valueOf(PoseidonConfig.getInstance().getConfigOption(
+                                LOGIN_PROXY_CONFIG_POLICY.release2BetaProxyIpKey(),
+                                LOGIN_PROXY_CONFIG_POLICY.release2BetaProxyIpDefault()
+                        )))) {
+                    InetSocketAddress address = deserializeAddress(((Number) Bridge.readField(loginPacket, "c")).longValue());
+                    String username = String.valueOf(Bridge.readField(loginPacket, "name"));
+                    Bridge.logInfo(loginHandler, username + " has been detected using Release2Beta, using the IP passed through: " + address.getAddress().getHostAddress());
+                    Object networkManager = Bridge.readField(loginHandler, "networkManager");
+                    Bridge.invoke(networkManager, "setSocketAddress", address);
                     usingReleaseToBeta = true;
                 } else {
-                    NetLoginHandler.a.info(loginPacket.name + " is attempting to use a unauthorized Release2Beta server, kicking the player.");
-                    loginHandler.disconnect(ChatColor.RED + "The Release2Beta server you are connecting through is unauthorized.");
+                    String username = String.valueOf(Bridge.readField(loginPacket, "name"));
+                    Bridge.logInfo(loginHandler, username + " is attempting to use a unauthorized Release2Beta server, kicking the player.");
+                    Bridge.invoke(loginHandler, "disconnect", ChatColor.RED + "The Release2Beta server you are connecting through is unauthorized.");
                     return ProxyHandlingResult.rejected(connectionType, rawConnectionType, usingReleaseToBeta);
                 }
             } else {
-                NetLoginHandler.a.info(loginPacket.name + " is trying to connect through R2B with IP Forwarding enabled, however, it is disabled in Poseidon. Kicking player!");
-                loginHandler.disconnect(ChatColor.RED + "IP Forwarding is disabled in Poseidon. Please disable in Release2Beta.");
+                String username = String.valueOf(Bridge.readField(loginPacket, "name"));
+                Bridge.logInfo(loginHandler, username + " is trying to connect through R2B with IP Forwarding enabled, however, it is disabled in Poseidon. Kicking player!");
+                Bridge.invoke(loginHandler, "disconnect", ChatColor.RED + "IP Forwarding is disabled in Poseidon. Please disable in Release2Beta.");
                 return ProxyHandlingResult.rejected(connectionType, rawConnectionType, usingReleaseToBeta);
             }
         }
@@ -104,6 +118,41 @@ public final class LoginProxySupport {
 
         public boolean isUsingReleaseToBeta() {
             return usingReleaseToBeta;
+        }
+    }
+
+    private static final class Bridge {
+        private static Object readField(Object target, String fieldName) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getField(fieldName);
+                field.setAccessible(true);
+                return field.get(target);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        private static Object invoke(Object target, String methodName, Object... args) {
+            try {
+                for (java.lang.reflect.Method method : target.getClass().getMethods()) {
+                    if (method.getName().equals(methodName) && method.getParameterTypes().length == args.length) {
+                        method.setAccessible(true);
+                        return method.invoke(target, args);
+                    }
+                }
+                throw new IllegalStateException("Method not found: " + methodName);
+            } catch (Exception exception) {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        private static void logInfo(Object loginHandler, String message) {
+            try {
+                java.lang.reflect.Field loggerField = loginHandler.getClass().getField("a");
+                Object logger = loggerField.get(null);
+                invoke(logger, "info", message);
+            } catch (Exception ignored) {
+            }
         }
     }
 }

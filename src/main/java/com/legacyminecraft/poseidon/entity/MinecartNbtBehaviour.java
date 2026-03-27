@@ -1,10 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.EntityMinecart;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
 
 public final class MinecartNbtBehaviour {
     private static final MinecartNbtBehaviour INSTANCE = new MinecartNbtBehaviour();

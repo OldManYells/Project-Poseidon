@@ -1,6 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.MathHelper;
 
 /**
  * Canonical behaviour for translating movement input into horizontal motion deltas.

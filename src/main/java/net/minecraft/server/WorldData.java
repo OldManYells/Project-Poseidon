@@ -1,12 +1,8 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.world.WorldDataStateBehaviour;
-
 import java.util.List;
 
 public class WorldData {
-    private static final WorldDataStateBehaviour WORLD_DATA_STATE_BEHAVIOUR = WorldDataStateBehaviour.getInstance();
-
     private long a;
     private int b;
     private int c;
@@ -26,7 +22,23 @@ public class WorldData {
     private int o;
 
     public WorldData(NBTTagCompound nbttagcompound) {
-        WORLD_DATA_STATE_BEHAVIOUR.readFromTag(this, nbttagcompound);
+        this.a = nbttagcompound.e("RandomSeed");
+        this.b = nbttagcompound.d("SpawnX");
+        this.c = nbttagcompound.d("SpawnY");
+        this.d = nbttagcompound.d("SpawnZ");
+        this.e = nbttagcompound.e("Time");
+        this.f = nbttagcompound.e("LastPlayed");
+        this.g = nbttagcompound.e("SizeOnDisk");
+        this.name = nbttagcompound.getString("LevelName");
+        this.k = nbttagcompound.d("version");
+        this.m = nbttagcompound.d("rainTime");
+        this.l = nbttagcompound.m("raining");
+        this.o = nbttagcompound.d("thunderTime");
+        this.n = nbttagcompound.m("thundering");
+        if (nbttagcompound.hasKey("Player")) {
+            this.h = nbttagcompound.k("Player");
+            this.i = this.h.d("Dimension");
+        }
     }
 
     public WorldData(long i, String s) {
@@ -55,11 +67,31 @@ public class WorldData {
     }
 
     public NBTTagCompound a() {
-        return WORLD_DATA_STATE_BEHAVIOUR.createSaveTag(this);
+        return this.a((List) null);
     }
 
     public NBTTagCompound a(List list) {
-        return WORLD_DATA_STATE_BEHAVIOUR.createSaveTagWithFirstPlayer(this, list);
+        NBTTagCompound worldTag = new NBTTagCompound();
+        worldTag.a("RandomSeed", this.a);
+        worldTag.a("SpawnX", this.b);
+        worldTag.a("SpawnY", this.c);
+        worldTag.a("SpawnZ", this.d);
+        worldTag.a("Time", this.e);
+        worldTag.a("SizeOnDisk", this.g);
+        worldTag.a("LastPlayed", this.f);
+        worldTag.setString("LevelName", this.name);
+        worldTag.a("version", this.k);
+        worldTag.a("rainTime", this.m);
+        worldTag.a("raining", this.l);
+        worldTag.a("thunderTime", this.o);
+        worldTag.a("thundering", this.n);
+        if (this.h != null) {
+            worldTag.a("Player", (NBTBase) this.h);
+        }
+
+        NBTTagCompound root = new NBTTagCompound();
+        root.a("Data", (NBTBase) worldTag);
+        return root;
     }
 
     public long getSeed() {

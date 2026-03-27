@@ -1,15 +1,5 @@
 package com.legacyminecraft.poseidon.entity;
 
-import net.minecraft.server.DataWatcher;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet28EntityVelocity;
-import net.minecraft.server.Packet31RelEntityMove;
-import net.minecraft.server.Packet32EntityLook;
-import net.minecraft.server.Packet33RelEntityMoveLook;
-import net.minecraft.server.Packet34EntityTeleport;
-import net.minecraft.server.Packet40EntityMetadata;
 
 import java.util.Set;
 
