@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 // CraftBukkit start
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.entity.EntityCow;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;

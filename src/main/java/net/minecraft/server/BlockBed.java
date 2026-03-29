@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.Iterator;

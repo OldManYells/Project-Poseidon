@@ -1,5 +1,9 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.network.Packet103SetSlot;
+
 public class ContainerWorkbench extends Container {
 
     public InventoryCrafting craftInventory = new InventoryCrafting(this, 3, 3);

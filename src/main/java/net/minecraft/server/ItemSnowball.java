@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntitySnowball;
+
 public class ItemSnowball extends Item {
 
     public ItemSnowball(int i) {

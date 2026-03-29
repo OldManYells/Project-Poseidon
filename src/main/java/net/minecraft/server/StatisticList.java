@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 import java.util.*;
 
 public class StatisticList {

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 public class ItemFood extends Item {
 
     private int a;

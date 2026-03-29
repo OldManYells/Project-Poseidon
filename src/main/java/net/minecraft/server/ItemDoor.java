@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 // CraftBukkit start
 import org.bukkit.craftbukkit.block.CraftBlockState;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
 // CraftBukkit end
@@ -23,15 +24,15 @@ public class ItemDoor extends Item {
             int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
 
             ++j;
-            Block block;
+            Block baseBlock;
 
             if (this.a == Material.WOOD) {
-                block = Block.WOODEN_DOOR;
+                baseBlock = Block.WOODEN_DOOR;
             } else {
-                block = Block.IRON_DOOR_BLOCK;
+                baseBlock = Block.IRON_DOOR_BLOCK;
             }
 
-            if (!block.canPlace(world, i, j, k)) {
+            if (!baseBlock.canPlace(world, i, j, k)) {
                 return false;
             } else {
                 int i1 = MathHelper.floor((double) ((entityhuman.yaw + 180.0F) * 4.0F / 360.0F) - 0.5D) & 3;
@@ -56,8 +57,8 @@ public class ItemDoor extends Item {
 
                 int j1 = (world.e(i - b0, j, k - b1) ? 1 : 0) + (world.e(i - b0, j + 1, k - b1) ? 1 : 0);
                 int k1 = (world.e(i + b0, j, k + b1) ? 1 : 0) + (world.e(i + b0, j + 1, k + b1) ? 1 : 0);
-                boolean flag = world.getTypeId(i - b0, j, k - b1) == block.id || world.getTypeId(i - b0, j + 1, k - b1) == block.id;
-                boolean flag1 = world.getTypeId(i + b0, j, k + b1) == block.id || world.getTypeId(i + b0, j + 1, k + b1) == block.id;
+                boolean flag = world.getTypeId(i - b0, j, k - b1) == baseBlock.id || world.getTypeId(i - b0, j + 1, k - b1) == baseBlock.id;
+                boolean flag1 = world.getTypeId(i + b0, j, k + b1) == baseBlock.id || world.getTypeId(i + b0, j + 1, k + b1) == baseBlock.id;
                 boolean flag2 = false;
 
                 if (flag && !flag1) {
@@ -74,12 +75,12 @@ public class ItemDoor extends Item {
                 CraftBlockState blockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
 
                 world.suppressPhysics = true;
-                world.setTypeIdAndData(i, j, k, block.id, i1);
+                world.setTypeIdAndData(i, j, k, baseBlock.id, i1);
 
                 // CraftBukkit start - bed
                 world.suppressPhysics = false;
                 world.applyPhysics(i, j, k, Block.REDSTONE_WIRE.id);
-                BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, block);
+                BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, baseBlock);
 
                 if (event.isCancelled() || !event.canBuild()) {
                     event.getBlockPlaced().setTypeIdAndData(blockState.getTypeId(), blockState.getRawData(), false);
@@ -88,7 +89,7 @@ public class ItemDoor extends Item {
 
                 world.suppressPhysics = true;
                 // CraftBukkit end
-                world.setTypeIdAndData(i, j + 1, k, block.id, i1 + 8);
+                world.setTypeIdAndData(i, j + 1, k, baseBlock.id, i1 + 8);
                 world.suppressPhysics = false;
                 // world.applyPhysics(i, j, k, block.id); // CraftBukkit - moved up
                 world.applyPhysics(i, j + 1, k, Block.REDSTONE_WIRE.id);

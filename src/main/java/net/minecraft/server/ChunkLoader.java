@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityTypes;
+
 import java.io.*;
 import java.util.Iterator;
 

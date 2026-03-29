@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class RecipesTools {
 
     private String[][] a = new String[][] { { "XXX", " # ", " # "}, { "X", "#", "#"}, { "XX", "X#", " #"}, { "XX", " #", " #"}};

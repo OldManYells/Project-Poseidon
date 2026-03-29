@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.network.*;
+
 import java.util.ArrayList;
 import java.util.List;
 

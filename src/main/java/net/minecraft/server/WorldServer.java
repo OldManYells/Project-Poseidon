@@ -1,7 +1,13 @@
 package net.minecraft.server;
 
 import org.bukkit.BlockChangeDelegate;
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityList;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.entity.EntityTracker;
 import org.bukkit.craftbukkit.generator.*;
+import org.bukkit.craftbukkit.network.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.generator.ChunkGenerator;

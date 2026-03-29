@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 public class TileEntityChest extends TileEntity implements IInventory {
 
     private ItemStack[] items = new ItemStack[27]; // CraftBukkit

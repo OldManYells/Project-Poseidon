@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.network.*;
+
 public abstract class NetHandler {
 
     public NetHandler() {}

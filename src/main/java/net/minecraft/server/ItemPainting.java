@@ -3,6 +3,8 @@ package net.minecraft.server;
 // CraftBukkit start
 
 import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityPainting;
 import org.bukkit.entity.Player;
 import org.bukkit.event.painting.PaintingPlaceEvent;
 // CraftBukkit end

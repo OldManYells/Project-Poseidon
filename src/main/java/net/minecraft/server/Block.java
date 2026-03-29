@@ -1,6 +1,10 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityItem;
+import org.bukkit.craftbukkit.entity.EntityLiving;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +109,7 @@ public class Block {
     public static final Block STONE_BUTTON = (new BlockButton(77, STONE.textureId)).c(0.5F).a(h).a("button").g();
     public static final Block SNOW = (new BlockSnow(78, 66)).c(0.1F).a(k).a("snow");
     public static final Block ICE = (new BlockIce(79, 67)).c(0.5F).f(3).a(j).a("ice");
-    public static final Block SNOW_BLOCK = (new BlockSnowBlock(80, 66)).c(0.2F).a(k).a("snow");
+    public static final Block SNOW_BLOCK = (new BlockSnow(80, 66)).c(0.2F).a(k).a("snow");
     public static final Block CACTUS = (new BlockCactus(81, 70)).c(0.4F).a(k).a("cactus");
     public static final Block CLAY = (new BlockClay(82, 72)).c(0.6F).a(f).a("clay");
     public static final Block SUGAR_CANE_BLOCK = (new BlockReed(83, 73)).c(0.0F).a(g).a("reeds").n();

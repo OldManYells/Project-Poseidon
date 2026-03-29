@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockFormEvent;
@@ -449,9 +450,9 @@ public class World implements IBlockAccess {
 
     private void k(int i, int j, int k, int l) {
         if (!this.suppressPhysics && !this.isStatic) {
-            Block block = Block.byId[this.getTypeId(i, j, k)];
+            Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
 
-            if (block != null) {
+            if (baseBlock != null) {
                 // CraftBukkit start
                 CraftWorld world = ((WorldServer) this).getWorld();
                 if (world != null) {
@@ -464,7 +465,7 @@ public class World implements IBlockAccess {
                 }
                 // CraftBukkit end
 
-                block.doPhysics(this, i, j, k, l);
+                baseBlock.doPhysics(this, i, j, k, l);
             }
         }
     }
@@ -665,10 +666,10 @@ public class World implements IBlockAccess {
                 int j1 = MathHelper.floor(vec3d.c);
                 int k1 = this.getTypeId(l, i1, j1);
                 int l1 = this.getData(l, i1, j1);
-                Block block = Block.byId[k1];
+                Block baseBlock = Block.byId[k1];
 
-                if ((!flag1 || block == null || block.e(this, l, i1, j1) != null) && k1 > 0 && block.a(l1, flag)) {
-                    MovingObjectPosition movingobjectposition = block.a(this, l, i1, j1, vec3d, vec3d1);
+                if ((!flag1 || baseBlock == null || baseBlock.e(this, l, i1, j1) != null) && k1 > 0 && baseBlock.a(l1, flag)) {
+                    MovingObjectPosition movingobjectposition = baseBlock.a(this, l, i1, j1, vec3d, vec3d1);
 
                     if (movingobjectposition != null) {
                         return movingobjectposition;
@@ -793,10 +794,10 @@ public class World implements IBlockAccess {
 
                     int i2 = this.getTypeId(l, i1, j1);
                     int j2 = this.getData(l, i1, j1);
-                    Block block1 = Block.byId[i2];
+                    Block baseBlock1 = Block.byId[i2];
 
-                    if ((!flag1 || block1 == null || block1.e(this, l, i1, j1) != null) && i2 > 0 && block1.a(j2, flag)) {
-                        MovingObjectPosition movingobjectposition1 = block1.a(this, l, i1, j1, vec3d, vec3d1);
+                    if ((!flag1 || baseBlock1 == null || baseBlock1.e(this, l, i1, j1) != null) && i2 > 0 && baseBlock1.a(j2, flag)) {
+                        MovingObjectPosition movingobjectposition1 = baseBlock1.a(this, l, i1, j1, vec3d, vec3d1);
 
                         if (movingobjectposition1 != null) {
                             return movingobjectposition1;
@@ -953,10 +954,10 @@ public class World implements IBlockAccess {
             for (int l1 = i1; l1 < j1; ++l1) {
                 if (this.isLoaded(k1, 64, l1)) {
                     for (int i2 = k - 1; i2 < l; ++i2) {
-                        Block block = Block.byId[this.getTypeId(k1, i2, l1)];
+                        Block baseBlock = Block.byId[this.getTypeId(k1, i2, l1)];
 
-                        if (block != null) {
-                            block.a(this, k1, i2, l1, axisalignedbb, this.K);
+                        if (baseBlock != null) {
+                            baseBlock.a(this, k1, i2, l1, axisalignedbb, this.K);
                         }
                     }
                 }
@@ -1306,9 +1307,9 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
 
-                    if (block != null) {
+                    if (baseBlock != null) {
                         return true;
                     }
                 }
@@ -1341,9 +1342,9 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
 
-                    if (block != null && block.material.isLiquid()) {
+                    if (baseBlock != null && baseBlock.material.isLiquid()) {
                         return true;
                     }
                 }
@@ -1395,14 +1396,14 @@ public class World implements IBlockAccess {
             for (int k1 = i; k1 < j; ++k1) {
                 for (int l1 = k; l1 < l; ++l1) {
                     for (int i2 = i1; i2 < j1; ++i2) {
-                        Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+                        Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
 
-                        if (block != null && block.material == material) {
+                        if (baseBlock != null && baseBlock.material == material) {
                             double d0 = (double) ((float) (l1 + 1) - BlockFluids.c(this.getData(k1, l1, i2)));
 
                             if ((double) l >= d0) {
                                 flag = true;
-                                block.a(this, k1, l1, i2, entity, vec3d);
+                                baseBlock.a(this, k1, l1, i2, entity, vec3d);
                             }
                         }
                     }
@@ -1433,9 +1434,9 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
 
-                    if (block != null && block.material == material) {
+                    if (baseBlock != null && baseBlock.material == material) {
                         return true;
                     }
                 }
@@ -1456,9 +1457,9 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
 
-                    if (block != null && block.material == material) {
+                    if (baseBlock != null && baseBlock.material == material) {
                         int j2 = this.getData(k1, l1, i2);
                         double d0 = (double) (l1 + 1);
 
@@ -1604,15 +1605,15 @@ public class World implements IBlockAccess {
     }
 
     public boolean p(int i, int j, int k) {
-        Block block = Block.byId[this.getTypeId(i, j, k)];
+        Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
 
-        return block == null ? false : block.a();
+        return baseBlock == null ? false : baseBlock.a();
     }
 
     public boolean e(int i, int j, int k) {
-        Block block = Block.byId[this.getTypeId(i, j, k)];
+        Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
 
-        return block == null ? false : block.material.h() && block.b();
+        return baseBlock == null ? false : baseBlock.material.h() && baseBlock.b();
     }
 
     public boolean doLighting() {
@@ -2105,9 +2106,9 @@ public class World implements IBlockAccess {
 
     public boolean a(int i, int j, int k, int l, boolean flag, int i1) {
         int j1 = this.getTypeId(j, k, l);
-        Block block = Block.byId[j1];
-        Block block1 = Block.byId[i];
-        AxisAlignedBB axisalignedbb = block1.e(this, j, k, l);
+        Block baseBlock = Block.byId[j1];
+        Block baseBlock1 = Block.byId[i];
+        AxisAlignedBB axisalignedbb = baseBlock1.e(this, j, k, l);
 
         if (flag) {
             axisalignedbb = null;
@@ -2118,11 +2119,11 @@ public class World implements IBlockAccess {
         if (axisalignedbb != null && !this.containsEntity(axisalignedbb)) {
             defaultReturn = false; // CraftBukkit
         } else {
-            if (block == Block.WATER || block == Block.STATIONARY_WATER || block == Block.LAVA || block == Block.STATIONARY_LAVA || block == Block.FIRE || block == Block.SNOW) {
-                block = null;
+            if (baseBlock == Block.WATER || baseBlock == Block.STATIONARY_WATER || baseBlock == Block.LAVA || baseBlock == Block.STATIONARY_LAVA || baseBlock == Block.FIRE || baseBlock == Block.SNOW) {
+                baseBlock = null;
             }
 
-            defaultReturn = i > 0 && block == null && block1.canPlace(this, j, k, l, i1); // CraftBukkit
+            defaultReturn = i > 0 && baseBlock == null && baseBlock1.canPlace(this, j, k, l, i1); // CraftBukkit
         }
 
         // CraftBukkit start

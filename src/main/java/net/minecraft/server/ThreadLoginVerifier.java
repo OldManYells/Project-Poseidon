@@ -1,7 +1,8 @@
 package net.minecraft.server;
 
-import com.projectposeidon.johnymuffin.LoginProcessHandler;
-import com.legacyminecraft.poseidon.util.SessionAPI;
+import org.bukkit.craftbukkit.network.Packet1Login;
+import org.bukkit.network.LoginProcessHandler;
+import org.bukkit.util.SessionAPI;
 import org.bukkit.craftbukkit.CraftServer;
 
 import java.net.InetSocketAddress;

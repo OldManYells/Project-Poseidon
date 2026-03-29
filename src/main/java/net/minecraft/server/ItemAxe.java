@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class ItemAxe extends ItemTool {
 
     private static Block[] bk = new Block[] { Block.WOOD, Block.BOOKSHELF, Block.LOG, Block.CHEST};

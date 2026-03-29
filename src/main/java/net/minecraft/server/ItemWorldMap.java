@@ -2,6 +2,9 @@ package net.minecraft.server;
 
 // CraftBukkit start
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.network.Packet131;
 import org.bukkit.event.server.MapInitializeEvent;
 // CraftBukkit end
 

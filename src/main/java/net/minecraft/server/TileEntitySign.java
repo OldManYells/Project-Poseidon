@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.network.Packet130UpdateSign;
+
 public class TileEntitySign extends TileEntity {
 
     public String[] lines = new String[] { "", "", "", ""};

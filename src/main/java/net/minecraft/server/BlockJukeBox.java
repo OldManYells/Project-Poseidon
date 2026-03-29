@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityItem;
+
 public class BlockJukeBox extends BlockContainer {
 
     protected BlockJukeBox(int i, int j) {

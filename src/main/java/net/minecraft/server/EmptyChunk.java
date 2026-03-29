@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;

@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityTNTPrimed;
+
 import java.util.Random;
 
 public class BlockTNT extends Block {

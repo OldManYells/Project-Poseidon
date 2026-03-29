@@ -1,7 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntitySnowball;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Snowball;

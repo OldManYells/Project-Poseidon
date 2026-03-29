@@ -1,7 +1,7 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.event.PlayerReceivePacketEvent;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.event.player.PlayerReceivePacketEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 

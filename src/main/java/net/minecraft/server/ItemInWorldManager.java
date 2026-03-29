@@ -2,7 +2,10 @@ package net.minecraft.server;
 
 // CraftBukkit start
 
-import com.legacyminecraft.poseidon.packets.ArtificialPacket53BlockChange;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.network.Packet53BlockChange;
+import org.bukkit.event.packet.ArtificialPacket53BlockChange;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
@@ -38,8 +41,8 @@ public class ItemInWorldManager {
             int j = this.world.getTypeId(this.j, this.k, this.l);
 
             if (j != 0) {
-                Block block = Block.byId[j];
-                float f = block.getDamage(this.player) * (float) (i + 1);
+                Block baseBlock = Block.byId[j];
+                float f = baseBlock.getDamage(this.player) * (float) (i + 1);
 
                 if (f >= 1.0F) {
                     this.i = false;
@@ -116,8 +119,8 @@ public class ItemInWorldManager {
             int i1 = this.world.getTypeId(i, j, k);
 
             if (i1 != 0) {
-                Block block = Block.byId[i1];
-                float f = block.getDamage(this.player) * (float) (l + 1);
+                Block baseBlock = Block.byId[i1];
+                float f = baseBlock.getDamage(this.player) * (float) (l + 1);
 
                 if (f >= 0.7F) {
                     this.c(i, j, k);
@@ -139,12 +142,12 @@ public class ItemInWorldManager {
     }
 
     public boolean b(int i, int j, int k) {
-        Block block = Block.byId[this.world.getTypeId(i, j, k)];
+        Block baseBlock = Block.byId[this.world.getTypeId(i, j, k)];
         int l = this.world.getData(i, j, k);
         boolean flag = this.world.setTypeId(i, j, k, 0);
 
-        if (block != null && flag) {
-            block.postBreak(this.world, i, j, k, l);
+        if (baseBlock != null && flag) {
+            baseBlock.postBreak(this.world, i, j, k, l);
         }
 
         return flag;

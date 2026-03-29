@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class ChunkCache implements IBlockAccess {
 
     private int a;
@@ -69,8 +70,8 @@ public class ChunkCache implements IBlockAccess {
     }
 
     public boolean e(int i, int j, int k) {
-        Block block = Block.byId[this.getTypeId(i, j, k)];
+        Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
 
-        return block == null ? false : block.material.isSolid() && block.b();
+        return baseBlock == null ? false : baseBlock.material.isSolid() && baseBlock.b();
     }
 }

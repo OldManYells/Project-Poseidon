@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.Random;

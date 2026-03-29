@@ -1,7 +1,8 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.packets.ArtificialPacket53BlockChange;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.network.*;
+import org.bukkit.event.packet.ArtificialPacket53BlockChange;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

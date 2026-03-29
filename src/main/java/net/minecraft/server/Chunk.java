@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.block.*;
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
 
 import java.util.*;
 

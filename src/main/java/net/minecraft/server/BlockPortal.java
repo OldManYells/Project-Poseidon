@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 

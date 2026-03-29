@@ -1,10 +1,7 @@
 package org.bukkit.command;
 
 //Poseidon start
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.commands.PoseidonCommand;
-import com.legacyminecraft.poseidon.commands.ResolveCommand;
-import com.legacyminecraft.poseidon.commands.TPSCommand;
+import org.bukkit.PoseidonConfig;
 //Poseidon end
 import org.bukkit.Server;
 import org.bukkit.command.defaults.*;

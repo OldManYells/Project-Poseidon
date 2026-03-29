@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 public class SlotResult2 extends Slot {
 
     private EntityHuman d;

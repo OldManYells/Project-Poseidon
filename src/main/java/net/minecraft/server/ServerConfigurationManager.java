@@ -1,12 +1,15 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.Poseidon;
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.Poseidon;
+import org.bukkit.PoseidonConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.command.ColouredConsoleSender;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.network.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
 

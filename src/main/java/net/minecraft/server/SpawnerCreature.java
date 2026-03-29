@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import java.util.HashSet;

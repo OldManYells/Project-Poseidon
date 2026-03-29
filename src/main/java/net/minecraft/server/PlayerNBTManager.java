@@ -1,7 +1,8 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.projectposeidon.johnymuffin.UUIDManager;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.uuid.UUIDManager;
 
 import java.io.*;
 import java.util.List;

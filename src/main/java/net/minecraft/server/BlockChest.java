@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityItem;
+
 import java.util.Random;
 
 public class BlockChest extends BlockContainer {

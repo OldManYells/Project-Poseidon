@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecart;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Minecart;
 import org.bukkit.util.Vector;

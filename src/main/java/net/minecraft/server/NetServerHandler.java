@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.Poseidon;
-import com.legacyminecraft.poseidon.PoseidonServer;
-import com.legacyminecraft.poseidon.event.PlayerSendPacketEvent;
-import com.projectposeidon.ConnectionType;
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.Poseidon;
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.network.*;
+import org.bukkit.event.player.PlayerSendPacketEvent;
+import org.bukkit.network.ConnectionType;
+import org.bukkit.PoseidonConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

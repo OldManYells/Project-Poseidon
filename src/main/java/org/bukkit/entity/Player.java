@@ -1,6 +1,6 @@
 package org.bukkit.entity;
 
-import com.projectposeidon.ConnectionType;
+import org.bukkit.network.ConnectionType;
 import net.minecraft.server.Packet;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;

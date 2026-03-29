@@ -1,8 +1,10 @@
 package net.minecraft.server;
 
-import com.projectposeidon.ConnectionType;
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.projectposeidon.johnymuffin.LoginProcessHandler;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.network.*;
+import org.bukkit.network.ConnectionType;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.network.LoginProcessHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;
@@ -12,7 +14,7 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import static com.legacyminecraft.poseidon.util.Release2Beta.deserializeAddress;
+import static org.bukkit.util.Release2Beta.deserializeAddress;
 
 public class NetLoginHandler extends NetHandler {
 
@@ -208,9 +210,9 @@ public class NetLoginHandler extends NetHandler {
             netserverhandler.sendPacket(new Packet4UpdateTime(entityplayer.getPlayerTime())); // CraftBukkit - add support for player specific time
             entityplayer.syncInventory();
             // poseidon start
-            if (PoseidonConfig.getInstance().getBoolean("settings.support.modloader.enable", false)) {
-                net.minecraft.server.ModLoaderMp.HandleAllLogins(entityplayer);
-            }
+            //if (PoseidonConfig.getInstance().getBoolean("settings.support.modloader.enable", false)) {
+            //    net.minecraft.server.ModLoaderMp.HandleAllLogins(entityplayer);
+            //}
             // poseidon end
         }
 

@@ -1,16 +1,15 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.Poseidon;
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.PoseidonPlugin;
-import com.legacyminecraft.poseidon.util.ServerLogRotator;
-import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
-import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
-import com.projectposeidon.johnymuffin.UUIDManager;
-import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
+import org.bukkit.Poseidon;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.entity.EntityTracker;
+import org.bukkit.craftbukkit.network.Packet4UpdateTime;
+import org.bukkit.util.ServerLogRotator;
+import org.bukkit.utility.PerformanceStatistic;
+import org.bukkit.watchdog.WatchDogThread;
 import jline.ConsoleReader;
 import joptsimple.OptionSet;
-import org.bukkit.Bukkit;
 import org.bukkit.World.Environment;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.LoggerOutputStream;
@@ -696,7 +695,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
         // CraftBukkit end
     }
 
-    public EntityTracker getTracker(int i) {
+    public org.bukkit.craftbukkit.entity.EntityTracker getTracker(int i) {
         return this.getWorldServer(i).tracker; // CraftBukkit
     }
 

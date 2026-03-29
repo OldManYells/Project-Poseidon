@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit;
 
-import com.google.common.collect.MapMaker;
 import net.minecraft.server.*;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -8,6 +7,8 @@ import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.*;
+import org.bukkit.craftbukkit.network.Packet4UpdateTime;
+import org.bukkit.craftbukkit.network.Packet61;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
 
 public class CraftWorld implements World {
     private final WorldServer world;
@@ -526,8 +526,8 @@ public class CraftWorld implements World {
         List<Entity> list = new ArrayList<Entity>();
 
         for (Object o: world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof org.bukkit.craftbukkit.entity.Entity) {
+                org.bukkit.craftbukkit.entity.Entity mcEnt = (org.bukkit.craftbukkit.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -544,8 +544,8 @@ public class CraftWorld implements World {
         List<LivingEntity> list = new ArrayList<LivingEntity>();
 
         for (Object o: world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof org.bukkit.craftbukkit.entity.Entity) {
+                org.bukkit.craftbukkit.entity.Entity mcEnt = (org.bukkit.craftbukkit.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -562,8 +562,8 @@ public class CraftWorld implements World {
         List<Player> list = new ArrayList<Player>();
 
         for (Object o : world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof org.bukkit.craftbukkit.entity.Entity) {
+                org.bukkit.craftbukkit.entity.Entity mcEnt = (org.bukkit.craftbukkit.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 if ((bukkitEntity != null) && (bukkitEntity instanceof Player)) {
@@ -688,7 +688,7 @@ public class CraftWorld implements World {
             throw new IllegalArgumentException("Location or entity class cannot be null");
         }
 
-        net.minecraft.server.Entity entity = null;
+        org.bukkit.craftbukkit.entity.Entity entity = null;
 
         double x = location.getX();
         double y = location.getY();

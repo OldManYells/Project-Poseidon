@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityLiving;
+
 public class ItemTool extends Item {
 
     private Block[] bk;
@@ -17,9 +20,9 @@ public class ItemTool extends Item {
         this.bm = j + enumtoolmaterial.c();
     }
 
-    public float a(ItemStack itemstack, Block block) {
+    public float a(ItemStack itemstack, Block baseBlock) {
         for (int i = 0; i < this.bk.length; ++i) {
-            if (this.bk[i] == block) {
+            if (this.bk[i] == baseBlock) {
                 return this.bl;
             }
         }

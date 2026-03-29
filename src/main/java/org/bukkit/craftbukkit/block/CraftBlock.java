@@ -127,13 +127,13 @@ public class CraftBlock implements Block {
         return getRelative(face.getModX() * distance, face.getModY() * distance, face.getModZ() * distance);
     }
 
-    public BlockFace getFace(final Block block) {
+    public BlockFace getFace(final Block baseBlock) {
         BlockFace[] values = BlockFace.values();
 
         for (BlockFace face : values) {
-            if ((this.getX() + face.getModX() == block.getX()) &&
-                (this.getY() + face.getModY() == block.getY()) &&
-                (this.getZ() + face.getModZ() == block.getZ())
+            if ((this.getX() + face.getModX() == baseBlock.getX()) &&
+                (this.getY() + face.getModY() == baseBlock.getY()) &&
+                (this.getZ() + face.getModZ() == baseBlock.getZ())
             ) {
                 return face;
             }

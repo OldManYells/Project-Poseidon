@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 public class InventoryPlayer implements IInventory {
 
     public ItemStack[] items = new ItemStack[36];
@@ -198,11 +201,11 @@ public class InventoryPlayer implements IInventory {
         aitemstack[i] = itemstack;
     }
 
-    public float a(Block block) {
+    public float a(Block baseBlock) {
         float f = 1.0F;
 
         if (this.items[this.itemInHandIndex] != null) {
-            f *= this.items[this.itemInHandIndex].a(block);
+            f *= this.items[this.itemInHandIndex].a(baseBlock);
         }
 
         return f;
@@ -283,13 +286,13 @@ public class InventoryPlayer implements IInventory {
         return itemstack != null ? itemstack.a(entity) : 1;
     }
 
-    public boolean b(Block block) {
-        if (block.material.i()) {
+    public boolean b(Block baseBlock) {
+        if (baseBlock.material.i()) {
             return true;
         } else {
             ItemStack itemstack = this.getItem(this.itemInHandIndex);
 
-            return itemstack != null ? itemstack.b(block) : false;
+            return itemstack != null ? itemstack.b(baseBlock) : false;
         }
     }
 

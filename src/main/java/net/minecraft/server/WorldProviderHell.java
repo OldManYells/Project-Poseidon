@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class WorldProviderHell extends WorldProvider {
 
     public WorldProviderHell() {}

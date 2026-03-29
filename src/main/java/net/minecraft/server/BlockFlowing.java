@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.BlockFromToEvent;
 

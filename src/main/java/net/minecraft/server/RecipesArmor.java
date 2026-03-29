@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class RecipesArmor {
 
     private String[][] a = new String[][] { { "XXX", "X X"}, { "X X", "XXX", "XXX"}, { "XXX", "X X", "X X"}, { "X X", "X X"}};

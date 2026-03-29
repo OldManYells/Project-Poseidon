@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.entity.EntityPig;
+
 public class ItemSaddle extends Item {
 
     public ItemSaddle(int i) {

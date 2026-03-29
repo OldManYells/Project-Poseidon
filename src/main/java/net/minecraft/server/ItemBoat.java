@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 // CraftBukkit start
+import org.bukkit.craftbukkit.entity.EntityBoat;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;

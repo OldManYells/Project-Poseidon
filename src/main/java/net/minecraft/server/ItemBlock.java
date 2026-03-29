@@ -1,8 +1,9 @@
 package net.minecraft.server;
 
 // CraftBukkit start
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.block.CraftBlockState;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
 // CraftBukkit end
@@ -53,7 +54,7 @@ public class ItemBlock extends Item {
         } else if (j == 127 && Block.byId[this.id].material.isBuildable()) {
             return false;
         } else if (world.a(this.id, i, j, k, false, l)) {
-            Block block = Block.byId[this.id];
+            Block baseBlock = Block.byId[this.id];
 
             // CraftBukkit start - This executes the placement of the block
             CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k);
@@ -83,7 +84,7 @@ public class ItemBlock extends Item {
             * replace this with.
             */
             if (world.setRawTypeIdAndData(i, j, k, this.id, this.filterData(itemstack.getData()))) { // <-- world.setTypeIdAndData does this to place the block
-                BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, eventUseBlockBelow ? blockStateBelow : replacedBlockState, clickedX, clickedY, clickedZ, block);
+                BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, eventUseBlockBelow ? blockStateBelow : replacedBlockState, clickedX, clickedY, clickedZ, baseBlock);
 
                 if (event.isCancelled() || !event.canBuild()) {
                     if (blockStateBelow != null) { // Used for steps
@@ -114,7 +115,7 @@ public class ItemBlock extends Item {
                     Block.byId[this.id].postPlace(world, i, j, k, entityhuman);
                 }
 
-                world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), block.stepSound.getName(), (block.stepSound.getVolume1() + 1.0F) / 2.0F, block.stepSound.getVolume2() * 0.8F);
+                world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), baseBlock.stepSound.getName(), (baseBlock.stepSound.getVolume1() + 1.0F) / 2.0F, baseBlock.stepSound.getVolume2() * 0.8F);
                 --itemstack.count;
             }
 

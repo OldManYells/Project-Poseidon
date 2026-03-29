@@ -1,5 +1,9 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityLiving;
+
 import java.util.Random;
 
 public class Item {
@@ -149,7 +153,7 @@ public class Item {
         return false;
     }
 
-    public float a(ItemStack itemstack, Block block) {
+    public float a(ItemStack itemstack, Block baseBlock) {
         return 1.0F;
     }
 
@@ -199,7 +203,7 @@ public class Item {
         return 1;
     }
 
-    public boolean a(Block block) {
+    public boolean a(Block baseBlock) {
         return false;
     }
 

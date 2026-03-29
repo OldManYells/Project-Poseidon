@@ -1,5 +1,9 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityItem;
+import org.bukkit.craftbukkit.entity.EntityLiving;
+
 import java.util.Random;
 
 public class BlockFurnace extends BlockContainer {

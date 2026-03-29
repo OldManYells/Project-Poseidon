@@ -1,7 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.bukkit.craftbukkit.CraftChunk;
+import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.util.LongHashset;
 import org.bukkit.craftbukkit.util.LongHashtable;
 import org.bukkit.event.world.ChunkLoadEvent;

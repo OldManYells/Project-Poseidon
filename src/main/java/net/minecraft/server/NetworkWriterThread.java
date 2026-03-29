@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
 import java.io.IOException;
 
 class NetworkWriterThread extends Thread {

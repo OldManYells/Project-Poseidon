@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import com.legacyminecraft.poseidon.Poseidon;
-import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
+import org.bukkit.Poseidon;
+import org.bukkit.utility.PerformanceStatistic;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;

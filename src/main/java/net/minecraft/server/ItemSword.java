@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityLiving;
+
 public class ItemSword extends Item {
 
     private int a;
@@ -11,8 +14,8 @@ public class ItemSword extends Item {
         this.a = 4 + enumtoolmaterial.c() * 2;
     }
 
-    public float a(ItemStack itemstack, Block block) {
-        return block.id == Block.WEB.id ? 15.0F : 1.5F;
+    public float a(ItemStack itemstack, Block baseBlock) {
+        return baseBlock.id == Block.WEB.id ? 15.0F : 1.5F;
     }
 
     public boolean a(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
@@ -29,7 +32,7 @@ public class ItemSword extends Item {
         return this.a;
     }
 
-    public boolean a(Block block) {
-        return block.id == Block.WEB.id;
+    public boolean a(Block baseBlock) {
+        return baseBlock.id == Block.WEB.id;
     }
 }

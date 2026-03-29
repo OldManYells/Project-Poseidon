@@ -1,11 +1,7 @@
 package org.bukkit.plugin.java;
 
-import com.legacyminecraft.poseidon.event.PoseidonCustomListener;
 import org.bukkit.Server;
-import org.bukkit.event.CustomEventListener;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.FurnaceBurnEvent;

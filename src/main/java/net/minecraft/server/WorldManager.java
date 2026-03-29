@@ -1,5 +1,9 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.network.Packet61;
+
 public class WorldManager implements IWorldAccess {
 
     private MinecraftServer server;

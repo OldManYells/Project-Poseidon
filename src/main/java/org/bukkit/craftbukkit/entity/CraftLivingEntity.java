@@ -1,7 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.*;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftServer;

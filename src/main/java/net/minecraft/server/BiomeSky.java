@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityChicken;
+
 public class BiomeSky extends BiomeBase {
 
     public BiomeSky() {

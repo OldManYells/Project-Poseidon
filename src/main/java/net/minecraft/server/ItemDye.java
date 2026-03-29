@@ -1,5 +1,10 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.block.*;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.entity.EntitySheep;
+
 public class ItemDye extends Item {
 
     public static final String[] a = new String[] { "black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "lightBlue", "magenta", "orange", "white"};

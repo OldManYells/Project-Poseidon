@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityLiving;
+
 public class ItemShears extends Item {
 
     public ItemShears(int i) {
@@ -16,11 +18,11 @@ public class ItemShears extends Item {
         return super.a(itemstack, i, j, k, l, entityliving);
     }
 
-    public boolean a(Block block) {
-        return block.id == Block.WEB.id;
+    public boolean a(Block baseBlock) {
+        return baseBlock.id == Block.WEB.id;
     }
 
-    public float a(ItemStack itemstack, Block block) {
-        return block.id != Block.WEB.id && block.id != Block.LEAVES.id ? (block.id == Block.WOOL.id ? 5.0F : super.a(itemstack, block)) : 15.0F;
+    public float a(ItemStack itemstack, Block baseBlock) {
+        return baseBlock.id != Block.WEB.id && baseBlock.id != Block.LEAVES.id ? (baseBlock.id == Block.WOOL.id ? 5.0F : super.a(itemstack, baseBlock)) : 15.0F;
     }
 }

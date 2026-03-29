@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 import java.util.Random;
 
 public class WorldGenDungeons extends WorldGenerator {

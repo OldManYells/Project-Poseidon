@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.util.Vector;

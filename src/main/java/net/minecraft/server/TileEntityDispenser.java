@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 import java.util.Random;
 
 public class TileEntityDispenser extends TileEntity implements IInventory {

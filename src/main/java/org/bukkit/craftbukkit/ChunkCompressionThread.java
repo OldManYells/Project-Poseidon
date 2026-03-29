@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.EntityPlayer;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
 import net.minecraft.server.Packet;
-import net.minecraft.server.Packet51MapChunk;
+import org.bukkit.craftbukkit.network.Packet51MapChunk;
 
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;

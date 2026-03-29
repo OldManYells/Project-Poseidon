@@ -1,7 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFish;
-import net.minecraft.server.EntityHuman;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Fish;
 import org.bukkit.entity.LivingEntity;

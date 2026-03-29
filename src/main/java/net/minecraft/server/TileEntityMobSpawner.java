@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import java.util.List;

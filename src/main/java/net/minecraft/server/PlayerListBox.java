@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityPlayer;
+
 import javax.swing.*;
 import java.util.Vector;
 

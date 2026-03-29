@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityGhast;
+import org.bukkit.craftbukkit.entity.EntityPigZombie;
+
 public class BiomeHell extends BiomeBase {
 
     public BiomeHell() {

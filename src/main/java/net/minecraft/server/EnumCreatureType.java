@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityAnimal;
+import org.bukkit.craftbukkit.entity.EntityWaterAnimal;
+
 public enum EnumCreatureType {
 
     MONSTER(IMonster.class, 70, Material.AIR, false),

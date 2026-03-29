@@ -9,6 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.CreatureType;

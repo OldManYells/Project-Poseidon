@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import net.minecraft.server.EntityPlayer;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;

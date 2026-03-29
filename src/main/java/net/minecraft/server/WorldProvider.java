@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public abstract class WorldProvider {
 
     public World a;

@@ -1,7 +1,7 @@
 package org.bukkit.event.player;
 
-import com.projectposeidon.johnymuffin.ConnectionPause;
-import com.projectposeidon.johnymuffin.LoginProcessHandler;
+import org.bukkit.network.ConnectionPause;
+import org.bukkit.network.LoginProcessHandler;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 

@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class Achievement extends Statistic {
 
     public final int a;
@@ -13,8 +14,8 @@ public class Achievement extends Statistic {
         this(i, s, j, k, new ItemStack(item), achievement);
     }
 
-    public Achievement(int i, String s, int j, int k, Block block, Achievement achievement) {
-        this(i, s, j, k, new ItemStack(block), achievement);
+    public Achievement(int i, String s, int j, int k, Block baseBlock, Achievement achievement) {
+        this(i, s, j, k, new ItemStack(baseBlock), achievement);
     }
 
     public Achievement(int i, String s, int j, int k, ItemStack itemstack, Achievement achievement) {

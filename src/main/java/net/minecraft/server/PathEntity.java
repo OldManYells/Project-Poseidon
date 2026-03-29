@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+
 public class PathEntity {
 
     private final PathPoint[] b;

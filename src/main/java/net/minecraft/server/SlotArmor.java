@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 class SlotArmor extends Slot {
 
     final int d;

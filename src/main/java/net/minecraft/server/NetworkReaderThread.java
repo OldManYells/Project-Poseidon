@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
 
 class NetworkReaderThread extends Thread {
     private boolean fast; // Poseidon

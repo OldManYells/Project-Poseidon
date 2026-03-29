@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.entity.EntityArrow;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 
 public class ItemBow extends Item {
 

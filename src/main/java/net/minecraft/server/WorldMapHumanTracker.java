@@ -3,6 +3,7 @@ package net.minecraft.server;
 // CraftBukkit start
 
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.map.RenderData;
 import org.bukkit.map.MapCursor;
 // CraftBukkit end

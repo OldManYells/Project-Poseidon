@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+
 public class RecipeIngots {
 
     private Object[][] a;
@@ -10,11 +11,11 @@ public class RecipeIngots {
 
     public void a(CraftingManager craftingmanager) {
         for (int i = 0; i < this.a.length; ++i) {
-            Block block = (Block) this.a[i][0];
+            Block baseBlock = (Block) this.a[i][0];
             ItemStack itemstack = (ItemStack) this.a[i][1];
 
-            craftingmanager.registerShapedRecipe(new ItemStack(block), new Object[] { "###", "###", "###", Character.valueOf('#'), itemstack});
-            craftingmanager.registerShapedRecipe(itemstack, new Object[] { "#", Character.valueOf('#'), block});
+            craftingmanager.registerShapedRecipe(new ItemStack(baseBlock), new Object[] { "###", "###", "###", Character.valueOf('#'), itemstack});
+            craftingmanager.registerShapedRecipe(itemstack, new Object[] { "#", Character.valueOf('#'), baseBlock});
         }
     }
 }

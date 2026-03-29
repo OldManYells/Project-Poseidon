@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityEgg;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 public class ItemEgg extends Item {
 
     public ItemEgg(int i) {

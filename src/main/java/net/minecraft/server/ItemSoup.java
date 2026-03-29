@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityHuman;
+
 public class ItemSoup extends ItemFood {
 
     public ItemSoup(int i, int j) {

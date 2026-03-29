@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
 
 public class BlockSponge extends Block {
     protected BlockSponge(int i) {

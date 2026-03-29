@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityItem;
+
 import java.util.Random;
 
 public class BlockCrops extends BlockFlower {

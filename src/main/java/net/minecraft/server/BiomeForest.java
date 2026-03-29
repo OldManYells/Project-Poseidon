@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.EntityWolf;
+
 import java.util.Random;
 
 public class BiomeForest extends BiomeBase {

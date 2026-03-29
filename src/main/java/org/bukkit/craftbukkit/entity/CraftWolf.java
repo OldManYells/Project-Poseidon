@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityWolf;
 import net.minecraft.server.PathEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;

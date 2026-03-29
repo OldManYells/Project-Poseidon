@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.entity.EntityFallingSand;
 
 import java.util.Random;
 

@@ -1,5 +1,9 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -11,16 +15,16 @@ public final class ItemStack {
     public int id;
     public int damage; // CraftBukkit - private -> public
 
-    public ItemStack(Block block) {
-        this(block, 1);
+    public ItemStack(Block baseBlock) {
+        this(baseBlock, 1);
     }
 
-    public ItemStack(Block block, int i) {
-        this(block.id, i, 0);
+    public ItemStack(Block baseBlock, int i) {
+        this(baseBlock.id, i, 0);
     }
 
-    public ItemStack(Block block, int i, int j) {
-        this(block.id, i, j);
+    public ItemStack(Block baseBlock, int i, int j) {
+        this(baseBlock.id, i, j);
     }
 
     public ItemStack(Item item) {
@@ -66,8 +70,8 @@ public final class ItemStack {
         return flag;
     }
 
-    public float a(Block block) {
-        return this.getItem().a(this, block);
+    public float a(Block baseBlock) {
+        return this.getItem().a(this, baseBlock);
     }
 
     public ItemStack a(World world, EntityHuman entityhuman) {
@@ -171,8 +175,8 @@ public final class ItemStack {
         return Item.byId[this.id].a(entity);
     }
 
-    public boolean b(Block block) {
-        return Item.byId[this.id].a(block);
+    public boolean b(Block baseBlock) {
+        return Item.byId[this.id].a(baseBlock);
     }
 
     public void a(EntityHuman entityhuman) {}
