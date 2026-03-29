@@ -20,11 +20,11 @@ public class SlotResult extends Slot {
 
     public void a(ItemStack itemstack) {
         itemstack.b(this.e.world, this.e);
-        if (itemstack.id == Block.WORKBENCH.id) {
+        if (itemstack.id == CraftBlock.WORKBENCH.id) {
             this.e.a(AchievementList.h, 1);
         } else if (itemstack.id == Item.WOOD_PICKAXE.id) {
             this.e.a(AchievementList.i, 1);
-        } else if (itemstack.id == Block.FURNACE.id) {
+        } else if (itemstack.id == CraftBlock.FURNACE.id) {
             this.e.a(AchievementList.j, 1);
         } else if (itemstack.id == Item.WOOD_HOE.id) {
             this.e.a(AchievementList.l, 1);

@@ -33,7 +33,7 @@ public class EntityItem extends Entity {
             this.die();
             MinecraftException e = new MinecraftException("Unknown item id " + this.itemStack.id);
             Bukkit.getLogger().log(Level.WARNING, "Created the EntityItem object with an unknown item: " + this.itemStack, e);
-            this.itemStack = new ItemStack(Block.STONE); // Workaround for the EntityTracker
+            this.itemStack = new ItemStack(CraftBlock.STONE); // Workaround for the EntityTracker
         }
         // Project Poseidon end
         this.yaw = (float) (Math.random() * 360.0D);
@@ -88,7 +88,7 @@ public class EntityItem extends Entity {
             int i = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
 
             if (i > 0) {
-                f = Block.byId[i].frictionFactor * 0.98F;
+                f = CraftBlock.byId[i].frictionFactor * 0.98F;
             }
         }
 
@@ -167,7 +167,7 @@ public class EntityItem extends Entity {
             // CraftBukkit end
 
             if (this.pickupDelay == 0 && entityhuman.inventory.pickup(this.itemStack)) {
-                if (this.itemStack.id == Block.LOG.id) {
+                if (this.itemStack.id == CraftBlock.LOG.id) {
                     entityhuman.a((Statistic) AchievementList.g);
                 }
 

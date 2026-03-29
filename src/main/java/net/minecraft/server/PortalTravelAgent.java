@@ -40,8 +40,8 @@ public class PortalTravelAgent {
                 double d3 = (double) k1 + 0.5D - entity.locZ;
 
                 for (int l1 = 127; l1 >= 0; --l1) {
-                    if (world.getTypeId(j1, l1, k1) == Block.PORTAL.id) {
-                        while (world.getTypeId(j1, l1 - 1, k1) == Block.PORTAL.id) {
+                    if (world.getTypeId(j1, l1, k1) == CraftBlock.PORTAL.id) {
+                        while (world.getTypeId(j1, l1 - 1, k1) == CraftBlock.PORTAL.id) {
                             --l1;
                         }
 
@@ -64,19 +64,19 @@ public class PortalTravelAgent {
             double d6 = (double) j + 0.5D;
 
             d1 = (double) k + 0.5D;
-            if (world.getTypeId(i - 1, j, k) == Block.PORTAL.id) {
+            if (world.getTypeId(i - 1, j, k) == CraftBlock.PORTAL.id) {
                 d5 -= 0.5D;
             }
 
-            if (world.getTypeId(i + 1, j, k) == Block.PORTAL.id) {
+            if (world.getTypeId(i + 1, j, k) == CraftBlock.PORTAL.id) {
                 d5 += 0.5D;
             }
 
-            if (world.getTypeId(i, j, k - 1) == Block.PORTAL.id) {
+            if (world.getTypeId(i, j, k - 1) == CraftBlock.PORTAL.id) {
                 d1 -= 0.5D;
             }
 
-            if (world.getTypeId(i, j, k + 1) == Block.PORTAL.id) {
+            if (world.getTypeId(i, j, k + 1) == CraftBlock.PORTAL.id) {
                 d1 += 0.5D;
             }
 
@@ -290,7 +290,7 @@ public class PortalTravelAgent {
                         l3 = j5 + j3;
                         k3 = j2 + (k2 - 1) * l5 - l2 * k5;
                         flag = j3 < 0;
-                        world.setTypeId(i3, l3, k3, flag ? Block.OBSIDIAN.id : 0);
+                        world.setTypeId(i3, l3, k3, flag ? CraftBlock.OBSIDIAN.id : 0);
                     }
                 }
             }
@@ -305,7 +305,7 @@ public class PortalTravelAgent {
                     l3 = j5 + j3;
                     k3 = j2 + (k2 - 1) * l5;
                     flag = k2 == 0 || k2 == 3 || j3 == -1 || j3 == 3;
-                    world.setTypeId(i3, l3, k3, flag ? Block.OBSIDIAN.id : Block.PORTAL.id);
+                    world.setTypeId(i3, l3, k3, flag ? CraftBlock.OBSIDIAN.id : CraftBlock.PORTAL.id);
                 }
             }
 

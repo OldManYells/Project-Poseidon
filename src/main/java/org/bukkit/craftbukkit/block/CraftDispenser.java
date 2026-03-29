@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockDispenser;
+import net.minecraft.server.CraftBlock;
 import net.minecraft.server.TileEntityDispenser;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -31,7 +31,7 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
 
         synchronized (block) {
             if (block.getType() == Material.DISPENSER) {
-                BlockDispenser dispense = (BlockDispenser) net.minecraft.server.Block.DISPENSER;
+                BlockDispenser dispense = (BlockDispenser) CraftBlock.DISPENSER;
 
                 dispense.dispense(world.getHandle(), getX(), getY(), getZ(), new Random());
                 return true;

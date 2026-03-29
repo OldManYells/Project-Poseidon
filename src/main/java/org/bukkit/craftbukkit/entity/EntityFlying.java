@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Block;
+import net.minecraft.server.CraftBlock;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.World;
 
@@ -33,7 +33,7 @@ public class EntityFlying extends EntityLiving {
                 int i = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
 
                 if (i > 0) {
-                    f2 = Block.byId[i].frictionFactor * 0.91F;
+                    f2 = CraftBlock.byId[i].frictionFactor * 0.91F;
                 }
             }
 
@@ -46,7 +46,7 @@ public class EntityFlying extends EntityLiving {
                 int j = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
 
                 if (j > 0) {
-                    f2 = Block.byId[j].frictionFactor * 0.91F;
+                    f2 = CraftBlock.byId[j].frictionFactor * 0.91F;
                 }
             }
 

@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.TrigMath;
+import org.bukkit.craftbukkit.block.BlockBed;
 import org.bukkit.craftbukkit.network.Packet28EntityVelocity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -313,7 +314,7 @@ public abstract class EntityHuman extends EntityLiving {
         this.world.addEntity(entityitem);
     }
 
-    public float a(Block baseBlock) {
+    public float a(CraftBlock baseBlock) {
         float f = this.inventory.a(baseBlock);
 
         if (this.a(Material.WATER)) {
@@ -327,7 +328,7 @@ public abstract class EntityHuman extends EntityLiving {
         return f;
     }
 
-    public boolean b(Block baseBlock) {
+    public boolean b(CraftBlock baseBlock) {
         return this.inventory.b(baseBlock);
     }
 
@@ -735,7 +736,7 @@ public abstract class EntityHuman extends EntityLiving {
         ChunkCoordinates chunkcoordinates = this.A;
         ChunkCoordinates chunkcoordinates1 = this.A;
 
-        if (chunkcoordinates != null && this.world.getTypeId(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z) == Block.BED.id) {
+        if (chunkcoordinates != null && this.world.getTypeId(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z) == CraftBlock.BED.id) {
             BlockBed.a(this.world, chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z, false);
             chunkcoordinates1 = BlockBed.f(this.world, chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z, 0);
             if (chunkcoordinates1 == null) {
@@ -778,7 +779,7 @@ public abstract class EntityHuman extends EntityLiving {
     }
 
     private boolean o() {
-        return this.world.getTypeId(this.A.x, this.A.y, this.A.z) == Block.BED.id;
+        return this.world.getTypeId(this.A.x, this.A.y, this.A.z) == CraftBlock.BED.id;
     }
 
     public static ChunkCoordinates getBed(World world, ChunkCoordinates chunkcoordinates) {
@@ -788,7 +789,7 @@ public abstract class EntityHuman extends EntityLiving {
         ichunkprovider.getChunkAt(chunkcoordinates.x + 3 >> 4, chunkcoordinates.z - 3 >> 4);
         ichunkprovider.getChunkAt(chunkcoordinates.x - 3 >> 4, chunkcoordinates.z + 3 >> 4);
         ichunkprovider.getChunkAt(chunkcoordinates.x + 3 >> 4, chunkcoordinates.z + 3 >> 4);
-        if (world.getTypeId(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z) != Block.BED.id) {
+        if (world.getTypeId(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z) != CraftBlock.BED.id) {
             return null;
         } else {
             ChunkCoordinates chunkcoordinates1 = BlockBed.f(world, chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z, 0);

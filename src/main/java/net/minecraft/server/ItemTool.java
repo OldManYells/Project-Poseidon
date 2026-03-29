@@ -5,12 +5,12 @@ import org.bukkit.craftbukkit.entity.EntityLiving;
 
 public class ItemTool extends Item {
 
-    private Block[] bk;
+    private CraftBlock[] bk;
     private float bl = 4.0F;
     private int bm;
     protected EnumToolMaterial a;
 
-    protected ItemTool(int i, int j, EnumToolMaterial enumtoolmaterial, Block[] ablock) {
+    protected ItemTool(int i, int j, EnumToolMaterial enumtoolmaterial, CraftBlock[] ablock) {
         super(i);
         this.a = enumtoolmaterial;
         this.bk = ablock;
@@ -20,7 +20,7 @@ public class ItemTool extends Item {
         this.bm = j + enumtoolmaterial.c();
     }
 
-    public float a(ItemStack itemstack, Block baseBlock) {
+    public float a(ItemStack itemstack, CraftBlock baseBlock) {
         for (int i = 0; i < this.bk.length; ++i) {
             if (this.bk[i] == baseBlock) {
                 return this.bl;

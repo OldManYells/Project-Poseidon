@@ -11,7 +11,7 @@ public class ItemReed extends Item {
 
     private int id;
 
-    public ItemReed(int i, Block baseBlock) {
+    public ItemReed(int i, CraftBlock baseBlock) {
         super(i);
         this.id = baseBlock.id;
     }
@@ -19,7 +19,7 @@ public class ItemReed extends Item {
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
         int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
 
-        if (world.getTypeId(i, j, k) == Block.SNOW.id) {
+        if (world.getTypeId(i, j, k) == CraftBlock.SNOW.id) {
             l = 0;
         } else {
             if (l == 0) {
@@ -51,7 +51,7 @@ public class ItemReed extends Item {
             return false;
         } else {
             if (world.a(this.id, i, j, k, false, l)) {
-                Block baseBlock = Block.byId[this.id];
+                CraftBlock baseBlock = CraftBlock.byId[this.id];
 
                 // CraftBukkit start - This executes the placement of the block
                 CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
@@ -78,8 +78,8 @@ public class ItemReed extends Item {
                     world.update(i, j, k, this.id); // <-- world.setTypeId does this on success (tell the world)
                     // CraftBukkit end
 
-                    Block.byId[this.id].postPlace(world, i, j, k, l);
-                    Block.byId[this.id].postPlace(world, i, j, k, entityhuman);
+                    CraftBlock.byId[this.id].postPlace(world, i, j, k, l);
+                    CraftBlock.byId[this.id].postPlace(world, i, j, k, entityhuman);
                     world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), baseBlock.stepSound.getName(), (baseBlock.stepSound.getVolume1() + 1.0F) / 2.0F, baseBlock.stepSound.getVolume2() * 0.8F);
                     --itemstack.count;
                 }

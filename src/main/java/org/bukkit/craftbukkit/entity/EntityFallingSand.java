@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.BlockSand;
+import org.bukkit.craftbukkit.block.BlockSand;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.World;

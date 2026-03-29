@@ -1,0 +1,49 @@
+package org.bukkit.craftbukkit.block;
+
+import net.minecraft.server.CraftBlock;
+import net.minecraft.server.EnumSkyBlock;
+import net.minecraft.server.Material;
+import net.minecraft.server.World;
+import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.event.CraftEventFactory;
+
+import java.util.Random;
+
+public class BlockIce extends BlockBreakable {
+
+    public BlockIce(int i, int j) {
+        super(i, j, Material.ICE, false);
+        this.frictionFactor = 0.98F;
+        this.a(true);
+    }
+
+    public void a(World world, EntityHuman entityhuman, int i, int j, int k, int l) {
+        super.a(world, entityhuman, i, j, k, l);
+        Material material = world.getMaterial(i, j - 1, k);
+
+        if (material.isSolid() || material.isLiquid()) {
+            world.setTypeId(i, j, k, net.minecraft.server.CraftBlock.WATER.id);
+        }
+    }
+
+    public int a(Random random) {
+        return 0;
+    }
+
+    public void a(World world, int i, int j, int k, Random random) {
+        if (world.a(EnumSkyBlock.BLOCK, i, j, k) > 11 - net.minecraft.server.CraftBlock.q[this.id]) {
+            // CraftBukkit start
+            if (CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(i, j, k), net.minecraft.server.CraftBlock.STATIONARY_WATER.id).isCancelled()) {
+                return;
+            }
+            // CraftBukkit end
+
+            this.g(world, i, j, k, world.getData(i, j, k));
+            world.setTypeId(i, j, k, CraftBlock.STATIONARY_WATER.id);
+        }
+    }
+
+    public int e() {
+        return 0;
+    }
+}

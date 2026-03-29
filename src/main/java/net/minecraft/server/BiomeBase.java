@@ -34,8 +34,8 @@ public class BiomeBase {
     private static BiomeBase[] x = new BiomeBase[4096];
 
     protected BiomeBase() {
-        this.p = (byte) Block.GRASS.id;
-        this.q = (byte) Block.DIRT.id;
+        this.p = (byte) CraftBlock.GRASS.id;
+        this.q = (byte) CraftBlock.DIRT.id;
         this.r = 5169201;
         this.s = new ArrayList();
         this.t = new ArrayList();
@@ -65,8 +65,8 @@ public class BiomeBase {
             }
         }
 
-        DESERT.p = DESERT.q = (byte) Block.SAND.id;
-        ICE_DESERT.p = ICE_DESERT.q = (byte) Block.SAND.id;
+        DESERT.p = DESERT.q = (byte) CraftBlock.SAND.id;
+        ICE_DESERT.p = ICE_DESERT.q = (byte) CraftBlock.SAND.id;
     }
 
     public WorldGenerator a(Random random) {

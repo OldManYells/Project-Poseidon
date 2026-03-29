@@ -49,7 +49,7 @@ public class Item {
     public static Item IRON_HOE = (new ItemHoe(36, EnumToolMaterial.IRON)).a(2, 8).a("hoeIron");
     public static Item DIAMOND_HOE = (new ItemHoe(37, EnumToolMaterial.DIAMOND)).a(3, 8).a("hoeDiamond");
     public static Item GOLD_HOE = (new ItemHoe(38, EnumToolMaterial.GOLD)).a(4, 8).a("hoeGold");
-    public static Item SEEDS = (new ItemSeeds(39, Block.CROPS.id)).a(9, 0).a("seeds");
+    public static Item SEEDS = (new ItemSeeds(39, CraftBlock.CROPS.id)).a(9, 0).a("seeds");
     public static Item WHEAT = (new Item(40)).a(9, 1).a("wheat");
     public static Item BREAD = (new ItemFood(41, 5, false)).a(9, 2).a("bread");
     public static Item LEATHER_HELMET = (new ItemArmor(42, 0, 0, 0)).a(0, 0).a("helmetCloth");
@@ -80,8 +80,8 @@ public class Item {
     public static Item SIGN = (new ItemSign(67)).a(10, 2).a("sign");
     public static Item WOOD_DOOR = (new ItemDoor(68, Material.WOOD)).a(11, 2).a("doorWood");
     public static Item BUCKET = (new ItemBucket(69, 0)).a(10, 4).a("bucket");
-    public static Item WATER_BUCKET = (new ItemBucket(70, Block.WATER.id)).a(11, 4).a("bucketWater").a(BUCKET);
-    public static Item LAVA_BUCKET = (new ItemBucket(71, Block.LAVA.id)).a(12, 4).a("bucketLava").a(BUCKET);
+    public static Item WATER_BUCKET = (new ItemBucket(70, CraftBlock.WATER.id)).a(11, 4).a("bucketWater").a(BUCKET);
+    public static Item LAVA_BUCKET = (new ItemBucket(71, CraftBlock.LAVA.id)).a(12, 4).a("bucketLava").a(BUCKET);
     public static Item MINECART = (new ItemMinecart(72, 0)).a(7, 8).a("minecart");
     public static Item SADDLE = (new ItemSaddle(73)).a(8, 6).a("saddle");
     public static Item IRON_DOOR = (new ItemDoor(74, Material.ORE)).a(12, 2).a("doorIron");
@@ -92,7 +92,7 @@ public class Item {
     public static Item MILK_BUCKET = (new ItemBucket(79, -1)).a(13, 4).a("milk").a(BUCKET);
     public static Item CLAY_BRICK = (new Item(80)).a(6, 1).a("brick");
     public static Item CLAY_BALL = (new Item(81)).a(9, 3).a("clay");
-    public static Item SUGAR_CANE = (new ItemReed(82, Block.SUGAR_CANE_BLOCK)).a(11, 1).a("reeds");
+    public static Item SUGAR_CANE = (new ItemReed(82, CraftBlock.SUGAR_CANE_BLOCK)).a(11, 1).a("reeds");
     public static Item PAPER = (new Item(83)).a(10, 3).a("paper");
     public static Item BOOK = (new Item(84)).a(11, 3).a("book");
     public static Item SLIME_BALL = (new Item(85)).a(14, 1).a("slimeball");
@@ -108,9 +108,9 @@ public class Item {
     public static Item INK_SACK = (new ItemDye(95)).a(14, 4).a("dyePowder");
     public static Item BONE = (new Item(96)).a(12, 1).a("bone").g();
     public static Item SUGAR = (new Item(97)).a(13, 0).a("sugar").g();
-    public static Item CAKE = (new ItemReed(98, Block.CAKE_BLOCK)).c(1).a(13, 1).a("cake");
+    public static Item CAKE = (new ItemReed(98, CraftBlock.CAKE_BLOCK)).c(1).a(13, 1).a("cake");
     public static Item BED = (new ItemBed(99)).c(1).a(13, 2).a("bed");
-    public static Item DIODE = (new ItemReed(100, Block.DIODE_OFF)).a(6, 5).a("diode");
+    public static Item DIODE = (new ItemReed(100, CraftBlock.DIODE_OFF)).a(6, 5).a("diode");
     public static Item COOKIE = (new ItemCookie(101, 1, false, 8)).a(12, 5).a("cookie");
     public static ItemWorldMap MAP = (ItemWorldMap) (new ItemWorldMap(102)).a(12, 3).a("map");
     public static ItemShears SHEARS = (ItemShears) (new ItemShears(103)).a(13, 5).a("shears");
@@ -153,7 +153,7 @@ public class Item {
         return false;
     }
 
-    public float a(ItemStack itemstack, Block baseBlock) {
+    public float a(ItemStack itemstack, CraftBlock baseBlock) {
         return 1.0F;
     }
 
@@ -203,7 +203,7 @@ public class Item {
         return 1;
     }
 
-    public boolean a(Block baseBlock) {
+    public boolean a(CraftBlock baseBlock) {
         return false;
     }
 

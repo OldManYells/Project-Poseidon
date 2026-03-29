@@ -7,7 +7,7 @@ public class RecipesWeapons {
     private Object[][] b;
 
     public RecipesWeapons() {
-        this.b = new Object[][] { { Block.WOOD, Block.COBBLESTONE, Item.IRON_INGOT, Item.DIAMOND, Item.GOLD_INGOT}, { Item.WOOD_SWORD, Item.STONE_SWORD, Item.IRON_SWORD, Item.DIAMOND_SWORD, Item.GOLD_SWORD}};
+        this.b = new Object[][] { { CraftBlock.WOOD, CraftBlock.COBBLESTONE, Item.IRON_INGOT, Item.DIAMOND, Item.GOLD_INGOT}, { Item.WOOD_SWORD, Item.STONE_SWORD, Item.IRON_SWORD, Item.DIAMOND_SWORD, Item.GOLD_SWORD}};
     }
 
     public void a(CraftingManager craftingmanager) {

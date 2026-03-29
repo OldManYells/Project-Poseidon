@@ -1,17 +1,19 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.block.BlockCloth;
+
 public class RecipesDyes {
 
     public RecipesDyes() {}
 
     public void a(CraftingManager craftingmanager) {
         for (int i = 0; i < 16; ++i) {
-            craftingmanager.registerShapelessRecipe(new ItemStack(Block.WOOL, 1, BlockCloth.d(i)), new Object[] { new ItemStack(Item.INK_SACK, 1, i), new ItemStack(Item.byId[Block.WOOL.id], 1, 0)});
+            craftingmanager.registerShapelessRecipe(new ItemStack(CraftBlock.WOOL, 1, BlockCloth.d(i)), new Object[] { new ItemStack(Item.INK_SACK, 1, i), new ItemStack(Item.byId[CraftBlock.WOOL.id], 1, 0)});
         }
 
-        craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 2, 11), new Object[] { Block.YELLOW_FLOWER});
-        craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 2, 1), new Object[] { Block.RED_ROSE});
+        craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 2, 11), new Object[] { CraftBlock.YELLOW_FLOWER});
+        craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 2, 1), new Object[] { CraftBlock.RED_ROSE});
         craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 3, 15), new Object[] { Item.BONE});
         craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 2, 9), new Object[] { new ItemStack(Item.INK_SACK, 1, 1), new ItemStack(Item.INK_SACK, 1, 15)});
         craftingmanager.registerShapelessRecipe(new ItemStack(Item.INK_SACK, 2, 14), new Object[] { new ItemStack(Item.INK_SACK, 1, 1), new ItemStack(Item.INK_SACK, 1, 11)});

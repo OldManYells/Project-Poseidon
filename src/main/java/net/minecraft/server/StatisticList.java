@@ -45,15 +45,15 @@ public class StatisticList {
     public static void a() {}
 
     public static void b() {
-        E = a(E, "stat.useItem", 16908288, 0, Block.byId.length);
-        F = b(F, "stat.breakItem", 16973824, 0, Block.byId.length);
+        E = a(E, "stat.useItem", 16908288, 0, CraftBlock.byId.length);
+        F = b(F, "stat.breakItem", 16973824, 0, CraftBlock.byId.length);
         G = true;
         d();
     }
 
     public static void c() {
-        E = a(E, "stat.useItem", 16908288, Block.byId.length, 32000);
-        F = b(F, "stat.breakItem", 16973824, Block.byId.length, 32000);
+        E = a(E, "stat.useItem", 16908288, CraftBlock.byId.length, 32000);
+        F = b(F, "stat.breakItem", 16973824, CraftBlock.byId.length, 32000);
         H = true;
         d();
     }
@@ -98,8 +98,8 @@ public class StatisticList {
         Statistic[] astatistic = new Statistic[256];
 
         for (int j = 0; j < 256; ++j) {
-            if (Block.byId[j] != null && Block.byId[j].m()) {
-                String s1 = StatisticCollector.a(s, new Object[] { Block.byId[j].k()});
+            if (CraftBlock.byId[j] != null && CraftBlock.byId[j].m()) {
+                String s1 = StatisticCollector.a(s, new Object[] { CraftBlock.byId[j].k()});
 
                 astatistic[j] = (new CraftingStatistic(i + j, s1, j)).d();
                 e.add((CraftingStatistic) astatistic[j]);
@@ -120,7 +120,7 @@ public class StatisticList {
                 String s1 = StatisticCollector.a(s, new Object[] { Item.byId[l].j()});
 
                 astatistic[l] = (new CraftingStatistic(i + l, s1, l)).d();
-                if (l >= Block.byId.length) {
+                if (l >= CraftBlock.byId.length) {
                     d.add((CraftingStatistic) astatistic[l]);
                 }
             }
@@ -148,17 +148,17 @@ public class StatisticList {
     }
 
     private static void a(Statistic[] astatistic) {
-        a(astatistic, Block.STATIONARY_WATER.id, Block.WATER.id);
-        a(astatistic, Block.STATIONARY_LAVA.id, Block.STATIONARY_LAVA.id);
-        a(astatistic, Block.JACK_O_LANTERN.id, Block.PUMPKIN.id);
-        a(astatistic, Block.BURNING_FURNACE.id, Block.FURNACE.id);
-        a(astatistic, Block.GLOWING_REDSTONE_ORE.id, Block.REDSTONE_ORE.id);
-        a(astatistic, Block.DIODE_ON.id, Block.DIODE_OFF.id);
-        a(astatistic, Block.REDSTONE_TORCH_ON.id, Block.REDSTONE_TORCH_OFF.id);
-        a(astatistic, Block.RED_MUSHROOM.id, Block.BROWN_MUSHROOM.id);
-        a(astatistic, Block.DOUBLE_STEP.id, Block.STEP.id);
-        a(astatistic, Block.GRASS.id, Block.DIRT.id);
-        a(astatistic, Block.SOIL.id, Block.DIRT.id);
+        a(astatistic, CraftBlock.STATIONARY_WATER.id, CraftBlock.WATER.id);
+        a(astatistic, CraftBlock.STATIONARY_LAVA.id, CraftBlock.STATIONARY_LAVA.id);
+        a(astatistic, CraftBlock.JACK_O_LANTERN.id, CraftBlock.PUMPKIN.id);
+        a(astatistic, CraftBlock.BURNING_FURNACE.id, CraftBlock.FURNACE.id);
+        a(astatistic, CraftBlock.GLOWING_REDSTONE_ORE.id, CraftBlock.REDSTONE_ORE.id);
+        a(astatistic, CraftBlock.DIODE_ON.id, CraftBlock.DIODE_OFF.id);
+        a(astatistic, CraftBlock.REDSTONE_TORCH_ON.id, CraftBlock.REDSTONE_TORCH_OFF.id);
+        a(astatistic, CraftBlock.RED_MUSHROOM.id, CraftBlock.BROWN_MUSHROOM.id);
+        a(astatistic, CraftBlock.DOUBLE_STEP.id, CraftBlock.STEP.id);
+        a(astatistic, CraftBlock.GRASS.id, CraftBlock.DIRT.id);
+        a(astatistic, CraftBlock.SOIL.id, CraftBlock.DIRT.id);
     }
 
     private static void a(Statistic[] astatistic, int i, int j) {

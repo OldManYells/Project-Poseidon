@@ -3,13 +3,13 @@ package net.minecraft.server;
 
 public class ItemPickaxe extends ItemTool {
 
-    private static Block[] bk = new Block[] { Block.COBBLESTONE, Block.DOUBLE_STEP, Block.STEP, Block.STONE, Block.SANDSTONE, Block.MOSSY_COBBLESTONE, Block.IRON_ORE, Block.IRON_BLOCK, Block.COAL_ORE, Block.GOLD_BLOCK, Block.GOLD_ORE, Block.DIAMOND_ORE, Block.DIAMOND_BLOCK, Block.ICE, Block.NETHERRACK, Block.LAPIS_ORE, Block.LAPIS_BLOCK};
+    private static CraftBlock[] bk = new CraftBlock[] { CraftBlock.COBBLESTONE, CraftBlock.DOUBLE_STEP, CraftBlock.STEP, CraftBlock.STONE, CraftBlock.SANDSTONE, CraftBlock.MOSSY_COBBLESTONE, CraftBlock.IRON_ORE, CraftBlock.IRON_BLOCK, CraftBlock.COAL_ORE, CraftBlock.GOLD_BLOCK, CraftBlock.GOLD_ORE, CraftBlock.DIAMOND_ORE, CraftBlock.DIAMOND_BLOCK, CraftBlock.ICE, CraftBlock.NETHERRACK, CraftBlock.LAPIS_ORE, CraftBlock.LAPIS_BLOCK};
 
     protected ItemPickaxe(int i, EnumToolMaterial enumtoolmaterial) {
         super(i, 2, enumtoolmaterial, bk);
     }
 
-    public boolean a(Block baseBlock) {
-        return baseBlock == Block.OBSIDIAN ? this.a.d() == 3 : (baseBlock != Block.DIAMOND_BLOCK && baseBlock != Block.DIAMOND_ORE ? (baseBlock != Block.GOLD_BLOCK && baseBlock != Block.GOLD_ORE ? (baseBlock != Block.IRON_BLOCK && baseBlock != Block.IRON_ORE ? (baseBlock != Block.LAPIS_BLOCK && baseBlock != Block.LAPIS_ORE ? (baseBlock != Block.REDSTONE_ORE && baseBlock != Block.GLOWING_REDSTONE_ORE ? (baseBlock.material == Material.STONE ? true : baseBlock.material == Material.ORE) : this.a.d() >= 2) : this.a.d() >= 1) : this.a.d() >= 1) : this.a.d() >= 2) : this.a.d() >= 2);
+    public boolean a(CraftBlock baseBlock) {
+        return baseBlock == CraftBlock.OBSIDIAN ? this.a.d() == 3 : (baseBlock != CraftBlock.DIAMOND_BLOCK && baseBlock != CraftBlock.DIAMOND_ORE ? (baseBlock != CraftBlock.GOLD_BLOCK && baseBlock != CraftBlock.GOLD_ORE ? (baseBlock != CraftBlock.IRON_BLOCK && baseBlock != CraftBlock.IRON_ORE ? (baseBlock != CraftBlock.LAPIS_BLOCK && baseBlock != CraftBlock.LAPIS_ORE ? (baseBlock != CraftBlock.REDSTONE_ORE && baseBlock != CraftBlock.GLOWING_REDSTONE_ORE ? (baseBlock.material == Material.STONE ? true : baseBlock.material == Material.ORE) : this.a.d() >= 2) : this.a.d() >= 1) : this.a.d() >= 1) : this.a.d() >= 2) : this.a.d() >= 2);
     }
 }

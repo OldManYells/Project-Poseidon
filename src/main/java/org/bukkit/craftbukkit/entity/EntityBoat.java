@@ -123,7 +123,7 @@ public class EntityBoat extends Entity {
                 int j;
 
                 for (j = 0; j < 3; ++j) {
-                    this.a(Block.WOOD.id, 1, 0.0F);
+                    this.a(CraftBlock.WOOD.id, 1, 0.0F);
                 }
 
                 for (j = 0; j < 2; ++j) {
@@ -288,7 +288,7 @@ public class EntityBoat extends Entity {
                     int k;
 
                     for (k = 0; k < 3; ++k) {
-                        this.a(Block.WOOD.id, 1, 0.0F);
+                        this.a(CraftBlock.WOOD.id, 1, 0.0F);
                     }
 
                     for (k = 0; k < 2; ++k) {
@@ -365,7 +365,7 @@ public class EntityBoat extends Entity {
                 int j1 = MathHelper.floor(this.locY);
                 int k1 = MathHelper.floor(this.locZ + ((double) (l / 2) - 0.5D) * 0.8D);
 
-                if (this.world.getTypeId(i1, j1, k1) == Block.SNOW.id) {
+                if (this.world.getTypeId(i1, j1, k1) == CraftBlock.SNOW.id) {
                     this.world.setTypeId(i1, j1, k1, 0);
                 }
             }

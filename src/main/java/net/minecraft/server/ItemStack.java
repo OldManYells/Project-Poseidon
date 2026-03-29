@@ -15,15 +15,15 @@ public final class ItemStack {
     public int id;
     public int damage; // CraftBukkit - private -> public
 
-    public ItemStack(Block baseBlock) {
+    public ItemStack(CraftBlock baseBlock) {
         this(baseBlock, 1);
     }
 
-    public ItemStack(Block baseBlock, int i) {
+    public ItemStack(CraftBlock baseBlock, int i) {
         this(baseBlock.id, i, 0);
     }
 
-    public ItemStack(Block baseBlock, int i, int j) {
+    public ItemStack(CraftBlock baseBlock, int i, int j) {
         this(baseBlock.id, i, j);
     }
 
@@ -70,7 +70,7 @@ public final class ItemStack {
         return flag;
     }
 
-    public float a(Block baseBlock) {
+    public float a(CraftBlock baseBlock) {
         return this.getItem().a(this, baseBlock);
     }
 
@@ -175,7 +175,7 @@ public final class ItemStack {
         return Item.byId[this.id].a(entity);
     }
 
-    public boolean b(Block baseBlock) {
+    public boolean b(CraftBlock baseBlock) {
         return Item.byId[this.id].a(baseBlock);
     }
 

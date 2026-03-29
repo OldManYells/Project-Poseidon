@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.block.BlockSand;
+
 import java.util.Random;
 
 public class ChunkProviderHell implements IChunkProvider {
@@ -77,11 +79,11 @@ public class ChunkProviderHell implements IChunkProvider {
                                 int l2 = 0;
 
                                 if (k1 * 8 + l1 < b1) {
-                                    l2 = Block.STATIONARY_LAVA.id;
+                                    l2 = CraftBlock.STATIONARY_LAVA.id;
                                 }
 
                                 if (d15 > 0.0D) {
-                                    l2 = Block.NETHERRACK.id;
+                                    l2 = CraftBlock.NETHERRACK.id;
                                 }
 
                                 abyte[j2] = (byte) l2;
@@ -117,48 +119,48 @@ public class ChunkProviderHell implements IChunkProvider {
                 boolean flag1 = this.q[k + l * 16] + this.h.nextDouble() * 0.2D > 0.0D;
                 int i1 = (int) (this.r[k + l * 16] / 3.0D + 3.0D + this.h.nextDouble() * 0.25D);
                 int j1 = -1;
-                byte b1 = (byte) Block.NETHERRACK.id;
-                byte b2 = (byte) Block.NETHERRACK.id;
+                byte b1 = (byte) CraftBlock.NETHERRACK.id;
+                byte b2 = (byte) CraftBlock.NETHERRACK.id;
 
                 for (int k1 = 127; k1 >= 0; --k1) {
                     int l1 = (l * 16 + k) * 128 + k1;
 
                     if (k1 >= 127 - this.h.nextInt(5)) {
-                        abyte[l1] = (byte) Block.BEDROCK.id;
+                        abyte[l1] = (byte) CraftBlock.BEDROCK.id;
                     } else if (k1 <= 0 + this.h.nextInt(5)) {
-                        abyte[l1] = (byte) Block.BEDROCK.id;
+                        abyte[l1] = (byte) CraftBlock.BEDROCK.id;
                     } else {
                         byte b3 = abyte[l1];
 
                         if (b3 == 0) {
                             j1 = -1;
-                        } else if (b3 == Block.NETHERRACK.id) {
+                        } else if (b3 == CraftBlock.NETHERRACK.id) {
                             if (j1 == -1) {
                                 if (i1 <= 0) {
                                     b1 = 0;
-                                    b2 = (byte) Block.NETHERRACK.id;
+                                    b2 = (byte) CraftBlock.NETHERRACK.id;
                                 } else if (k1 >= b0 - 4 && k1 <= b0 + 1) {
-                                    b1 = (byte) Block.NETHERRACK.id;
-                                    b2 = (byte) Block.NETHERRACK.id;
+                                    b1 = (byte) CraftBlock.NETHERRACK.id;
+                                    b2 = (byte) CraftBlock.NETHERRACK.id;
                                     if (flag1) {
-                                        b1 = (byte) Block.GRAVEL.id;
+                                        b1 = (byte) CraftBlock.GRAVEL.id;
                                     }
 
                                     if (flag1) {
-                                        b2 = (byte) Block.NETHERRACK.id;
+                                        b2 = (byte) CraftBlock.NETHERRACK.id;
                                     }
 
                                     if (flag) {
-                                        b1 = (byte) Block.SOUL_SAND.id;
+                                        b1 = (byte) CraftBlock.SOUL_SAND.id;
                                     }
 
                                     if (flag) {
-                                        b2 = (byte) Block.SOUL_SAND.id;
+                                        b2 = (byte) CraftBlock.SOUL_SAND.id;
                                     }
                                 }
 
                                 if (k1 < b0 && b1 == 0) {
-                                    b1 = (byte) Block.STATIONARY_LAVA.id;
+                                    b1 = (byte) CraftBlock.STATIONARY_LAVA.id;
                                 }
 
                                 j1 = i1;
@@ -327,7 +329,7 @@ public class ChunkProviderHell implements IChunkProvider {
             j1 = k + this.h.nextInt(16) + 8;
             k1 = this.h.nextInt(120) + 4;
             l1 = l + this.h.nextInt(16) + 8;
-            (new WorldGenHellLava(Block.LAVA.id)).a(this.n, this.h, j1, k1, l1);
+            (new WorldGenHellLava(CraftBlock.LAVA.id)).a(this.n, this.h, j1, k1, l1);
         }
 
         i1 = this.h.nextInt(this.h.nextInt(10) + 1) + 1;
@@ -361,14 +363,14 @@ public class ChunkProviderHell implements IChunkProvider {
             j1 = k + this.h.nextInt(16) + 8;
             k1 = this.h.nextInt(128);
             l1 = l + this.h.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.BROWN_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
+            (new WorldGenFlowers(CraftBlock.BROWN_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
         }
 
         if (this.h.nextInt(1) == 0) {
             j1 = k + this.h.nextInt(16) + 8;
             k1 = this.h.nextInt(128);
             l1 = l + this.h.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.RED_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
+            (new WorldGenFlowers(CraftBlock.RED_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
         }
 
         BlockSand.instaFall = false;

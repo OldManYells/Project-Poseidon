@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.block.BlockDoor;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityList;
 
@@ -167,8 +168,8 @@ public class Pathfinder {
                     int k1 = this.a.getTypeId(l, i1, j1);
 
                     if (k1 > 0) {
-                        if (k1 != Block.IRON_DOOR_BLOCK.id && k1 != Block.WOODEN_DOOR.id) {
-                            Material material = Block.byId[k1].material;
+                        if (k1 != CraftBlock.IRON_DOOR_BLOCK.id && k1 != CraftBlock.WOODEN_DOOR.id) {
+                            Material material = CraftBlock.byId[k1].material;
 
                             if (material.isSolid()) {
                                 return 0;

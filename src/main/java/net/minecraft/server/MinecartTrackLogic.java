@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.block.BlockMinecartTrack;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class MinecartTrackLogic {
+public class MinecartTrackLogic {
 
     private World b;
     private int c;
@@ -25,7 +27,7 @@ class MinecartTrackLogic {
         int l = world.getTypeId(i, j, k);
         int i1 = world.getData(i, j, k);
 
-        if (BlockMinecartTrack.a((BlockMinecartTrack) Block.byId[l])) {
+        if (((BlockMinecartTrack) CraftBlock.byId[l]).b()) {
             this.f = true;
             i1 &= -9;
         } else {
@@ -114,7 +116,7 @@ class MinecartTrackLogic {
         return false;
     }
 
-    private int b() {
+    public int b() {
         int i = 0;
 
         if (this.a(this.c, this.d, this.e - 1)) {
@@ -352,9 +354,5 @@ class MinecartTrackLogic {
                 }
             }
         }
-    }
-
-    static int a(MinecartTrackLogic minecarttracklogic) {
-        return minecarttracklogic.b();
     }
 }

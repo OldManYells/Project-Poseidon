@@ -82,7 +82,7 @@ public class Chunk {
 
                 int i1;
 
-                for (i1 = j << 11 | k << 7; l > 0 && Block.q[this.b[i1 + l - 1] & 255] == 0; --l) {
+                for (i1 = j << 11 | k << 7; l > 0 && CraftBlock.q[this.b[i1 + l - 1] & 255] == 0; --l) {
                     ;
                 }
 
@@ -96,7 +96,7 @@ public class Chunk {
                     int k1 = 127;
 
                     do {
-                        j1 -= Block.q[this.b[i1 + k1] & 255];
+                        j1 -= CraftBlock.q[this.b[i1 + k1] & 255];
                         if (j1 > 0) {
                             this.f.a(j, k1, k, j1);
                         }
@@ -151,7 +151,7 @@ public class Chunk {
             i1 = j;
         }
 
-        for (int j1 = i << 11 | k << 7; i1 > 0 && Block.q[this.b[j1 + i1 - 1] & 255] == 0; --i1) {
+        for (int j1 = i << 11 | k << 7; i1 > 0 && CraftBlock.q[this.b[j1 + i1 - 1] & 255] == 0; --i1) {
             ;
         }
 
@@ -198,7 +198,7 @@ public class Chunk {
 
             for (j2 = i1; i1 > 0 && i2 > 0; this.f.a(i, i1, k, i2)) {
                 --i1;
-                int k2 = Block.q[this.getTypeId(i, i1, k)];
+                int k2 = CraftBlock.q[this.getTypeId(i, i1, k)];
 
                 if (k2 == 0) {
                     k2 = 1;
@@ -210,7 +210,7 @@ public class Chunk {
                 }
             }
 
-            while (i1 > 0 && Block.q[this.getTypeId(i, i1 - 1, k)] == 0) {
+            while (i1 > 0 && CraftBlock.q[this.getTypeId(i, i1 - 1, k)] == 0) {
                 --i1;
             }
 
@@ -241,17 +241,17 @@ public class Chunk {
             if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.transmutation-fix.enabled", true)) {
                 this.e.a(i, j, k, i1);
                 if (k1 != 0 && !this.world.isStatic) {
-                    Block.byId[k1].remove(this.world, l1, j, i2);
+                    CraftBlock.byId[k1].remove(this.world, l1, j, i2);
                 }
             } else {
                 if (k1 != 0 && !this.world.isStatic) {
-                    Block.byId[k1].remove(this.world, l1, j, i2);
+                    CraftBlock.byId[k1].remove(this.world, l1, j, i2);
                 }
                 this.e.a(i, j, k, i1);
             }
 
             if (!this.world.worldProvider.e) {
-                if (Block.q[b0 & 255] != 0) {
+                if (CraftBlock.q[b0 & 255] != 0) {
                     if (j >= j1) {
                         this.g(i, j + 1, k);
                     }
@@ -265,7 +265,7 @@ public class Chunk {
             this.world.a(EnumSkyBlock.BLOCK, l1, j, i2, l1, j, i2);
             this.c(i, k);
             if (l != 0) {
-                Block.byId[l].c(this.world, l1, j, i2);
+                CraftBlock.byId[l].c(this.world, l1, j, i2);
             }
 
             this.o = true;
@@ -286,11 +286,11 @@ public class Chunk {
 
             this.b[i << 11 | k << 7 | j] = (byte) (b0 & 255);
             if (j1 != 0) {
-                Block.byId[j1].remove(this.world, k1, j, l1);
+                CraftBlock.byId[j1].remove(this.world, k1, j, l1);
             }
 
             this.e.a(i, j, k, 0);
-            if (Block.q[b0 & 255] != 0) {
+            if (CraftBlock.q[b0 & 255] != 0) {
                 if (j >= i1) {
                     this.g(i, j + 1, k);
                 }
@@ -302,7 +302,7 @@ public class Chunk {
             this.world.a(EnumSkyBlock.BLOCK, k1, j, l1, k1, j, l1);
             this.c(i, k);
             if (l != 0 && !this.world.isStatic) {
-                Block.byId[l].c(this.world, k1, j, l1);
+                CraftBlock.byId[l].c(this.world, k1, j, l1);
             }
 
             this.o = true;
@@ -409,11 +409,11 @@ public class Chunk {
         if (tileentity == null) {
             int l = this.getTypeId(i, j, k);
 
-            if (!Block.isTileEntity[l]) {
+            if (!CraftBlock.isTileEntity[l]) {
                 return null;
             }
 
-            BlockContainer blockcontainer = (BlockContainer) Block.byId[l];
+            BlockContainer blockcontainer = (BlockContainer) CraftBlock.byId[l];
 
             blockcontainer.c(this.world, this.x * 16 + i, j, this.z * 16 + k);
             tileentity = (TileEntity) this.tileEntities.get(chunkposition);
@@ -445,11 +445,11 @@ public class Chunk {
         tileentity.x = this.x * 16 + i;
         tileentity.y = j;
         tileentity.z = this.z * 16 + k;
-        if (this.getTypeId(i, j, k) != 0 && Block.byId[this.getTypeId(i, j, k)] instanceof BlockContainer) {
+        if (this.getTypeId(i, j, k) != 0 && CraftBlock.byId[this.getTypeId(i, j, k)] instanceof BlockContainer) {
             tileentity.j();
             this.tileEntities.put(chunkposition, tileentity);
             // Poseidon start - Backport of 0021-Remove-invalid-mob-spawner-tile-entities.patch from PaperSpigot
-        } else if (tileentity instanceof TileEntityMobSpawner && !(Block.byId[this.getTypeId(i, j, k)] instanceof BlockMobSpawner)) {
+        } else if (tileentity instanceof TileEntityMobSpawner && !(CraftBlock.byId[this.getTypeId(i, j, k)] instanceof BlockMobSpawner)) {
             this.tileEntities.remove(chunkposition);
             // Poseidon end
         } else {

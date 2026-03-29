@@ -89,9 +89,9 @@ public class ItemWorldMap extends ItemWorldMapBase {
                                 l4 = i3 + j3 * 231871;
                                 l4 = l4 * l4 * 31287121 + l4 * 11;
                                 if ((l4 >> 20 & 1) == 0) {
-                                    aint[Block.DIRT.id] += 10;
+                                    aint[CraftBlock.DIRT.id] += 10;
                                 } else {
-                                    aint[Block.STONE.id] += 10;
+                                    aint[CraftBlock.STONE.id] += 10;
                                 }
 
                                 d1 = 100.0D;
@@ -109,7 +109,7 @@ public class ItemWorldMap extends ItemWorldMapBase {
                                                 j5 = chunk.getTypeId(l4 + k3, k4 - 1, j4 + l3);
                                                 if (j5 == 0) {
                                                     flag1 = false;
-                                                } else if (k4 > 0 && j5 > 0 && Block.byId[j5].material.C == MaterialMapColor.b) {
+                                                } else if (k4 > 0 && j5 > 0 && CraftBlock.byId[j5].material.C == MaterialMapColor.b) {
                                                     flag1 = false;
                                                 }
 
@@ -120,7 +120,7 @@ public class ItemWorldMap extends ItemWorldMapBase {
                                                 }
                                             } while (!flag1);
 
-                                            if (j5 != 0 && Block.byId[j5].material.isLiquid()) {
+                                            if (j5 != 0 && CraftBlock.byId[j5].material.isLiquid()) {
                                                 i5 = k4 - 1;
                                                 boolean flag2 = false;
 
@@ -129,7 +129,7 @@ public class ItemWorldMap extends ItemWorldMapBase {
                                                 do {
                                                     k5 = chunk.getTypeId(l4 + k3, i5--, j4 + l3);
                                                     ++i4;
-                                                } while (i5 > 0 && k5 != 0 && Block.byId[k5].material.isLiquid());
+                                                } while (i5 > 0 && k5 != 0 && CraftBlock.byId[k5].material.isLiquid());
                                             }
                                         }
 
@@ -167,7 +167,7 @@ public class ItemWorldMap extends ItemWorldMapBase {
 
                             i5 = 0;
                             if (j4 > 0) {
-                                MaterialMapColor materialmapcolor = Block.byId[j4].material.C;
+                                MaterialMapColor materialmapcolor = CraftBlock.byId[j4].material.C;
 
                                 if (materialmapcolor == MaterialMapColor.n) {
                                     d2 = (double) i4 * 0.1D + (double) (k1 + j2 & 1) * 0.2D;

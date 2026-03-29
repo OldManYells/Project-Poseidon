@@ -58,7 +58,7 @@ public class TileEntityPiston extends TileEntity {
             f = 1.0F - f;
         }
 
-        AxisAlignedBB axisalignedbb = Block.PISTON_MOVING.a(this.world, this.x, this.y, this.z, this.a, f, this.c);
+        AxisAlignedBB axisalignedbb = CraftBlock.PISTON_MOVING.a(this.world, this.x, this.y, this.z, this.a, f, this.c);
 
         if (axisalignedbb != null) {
             List list = this.world.b((Entity) null, axisalignedbb);
@@ -83,7 +83,7 @@ public class TileEntityPiston extends TileEntity {
             this.l = this.k = 1.0F;
             this.world.o(this.x, this.y, this.z);
             this.h();
-            if (this.world.getTypeId(this.x, this.y, this.z) == Block.PISTON_MOVING.id) {
+            if (this.world.getTypeId(this.x, this.y, this.z) == CraftBlock.PISTON_MOVING.id) {
                 this.world.setTypeIdAndData(this.x, this.y, this.z, this.a, this.b);
             }
         }
@@ -97,7 +97,7 @@ public class TileEntityPiston extends TileEntity {
             this.a(1.0F, 0.25F);
             this.world.o(this.x, this.y, this.z);
             this.h();
-            if (this.world.getTypeId(this.x, this.y, this.z) == Block.PISTON_MOVING.id) {
+            if (this.world.getTypeId(this.x, this.y, this.z) == CraftBlock.PISTON_MOVING.id) {
                 this.world.setTypeIdAndData(this.x, this.y, this.z, this.a, this.b);
             }
         } else {

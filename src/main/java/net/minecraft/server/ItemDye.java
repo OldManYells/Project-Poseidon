@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
-import org.bukkit.craftbukkit.block.*;
+import org.bukkit.craftbukkit.block.BlockCloth;
+import org.bukkit.craftbukkit.block.BlockCrops;
+import org.bukkit.craftbukkit.block.BlockSapling;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.entity.EntitySheep;
@@ -20,25 +22,25 @@ public class ItemDye extends Item {
         if (itemstack.getData() == 15) {
             int i1 = world.getTypeId(i, j, k);
 
-            if (i1 == Block.SAPLING.id) {
+            if (i1 == CraftBlock.SAPLING.id) {
                 if (!world.isStatic) {
-                    ((BlockSapling) Block.SAPLING).b(world, i, j, k, world.random);
+                    ((BlockSapling) CraftBlock.SAPLING).b(world, i, j, k, world.random);
                     --itemstack.count;
                 }
 
                 return true;
             }
 
-            if (i1 == Block.CROPS.id) {
+            if (i1 == CraftBlock.CROPS.id) {
                 if (!world.isStatic) {
-                    ((BlockCrops) Block.CROPS).d_(world, i, j, k);
+                    ((BlockCrops) CraftBlock.CROPS).d_(world, i, j, k);
                     --itemstack.count;
                 }
 
                 return true;
             }
 
-            if (i1 == Block.GRASS.id) {
+            if (i1 == CraftBlock.GRASS.id) {
                 if (!world.isStatic) {
                     --itemstack.count;
 
@@ -52,18 +54,18 @@ public class ItemDye extends Item {
                             k1 += b.nextInt(3) - 1;
                             l1 += (b.nextInt(3) - 1) * b.nextInt(3) / 2;
                             i2 += b.nextInt(3) - 1;
-                            if (world.getTypeId(k1, l1 - 1, i2) != Block.GRASS.id || world.e(k1, l1, i2)) {
+                            if (world.getTypeId(k1, l1 - 1, i2) != CraftBlock.GRASS.id || world.e(k1, l1, i2)) {
                                 continue label53;
                             }
                         }
 
                         if (world.getTypeId(k1, l1, i2) == 0) {
                             if (b.nextInt(10) != 0) {
-                                world.setTypeIdAndData(k1, l1, i2, Block.LONG_GRASS.id, 1);
+                                world.setTypeIdAndData(k1, l1, i2, CraftBlock.LONG_GRASS.id, 1);
                             } else if (b.nextInt(3) != 0) {
-                                world.setTypeId(k1, l1, i2, Block.YELLOW_FLOWER.id);
+                                world.setTypeId(k1, l1, i2, CraftBlock.YELLOW_FLOWER.id);
                             } else {
-                                world.setTypeId(k1, l1, i2, Block.RED_ROSE.id);
+                                world.setTypeId(k1, l1, i2, CraftBlock.RED_ROSE.id);
                             }
                         }
                     }

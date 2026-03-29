@@ -46,7 +46,7 @@ public class WorldGenTaiga1 extends WorldGenerator {
                     for (j2 = k - l2; j2 <= k + l2 && flag; ++j2) {
                         if (l1 >= 0 && l1 < 128) {
                             k2 = world.getTypeId(i2, l1, j2);
-                            if (k2 != 0 && k2 != Block.LEAVES.id) {
+                            if (k2 != 0 && k2 != CraftBlock.LEAVES.id) {
                                 flag = false;
                             }
                         } else {
@@ -60,8 +60,8 @@ public class WorldGenTaiga1 extends WorldGenerator {
                 return false;
             } else {
                 l1 = world.getTypeId(i, j - 1, k);
-                if ((l1 == Block.GRASS.id || l1 == Block.DIRT.id) && j < 128 - l - 1) {
-                    world.setRawTypeId(i, j - 1, k, Block.DIRT.id);
+                if ((l1 == CraftBlock.GRASS.id || l1 == CraftBlock.DIRT.id) && j < 128 - l - 1) {
+                    world.setRawTypeId(i, j - 1, k, CraftBlock.DIRT.id);
                     l2 = 0;
 
                     for (i2 = j + l; i2 >= j + i1; --i2) {
@@ -71,8 +71,8 @@ public class WorldGenTaiga1 extends WorldGenerator {
                             for (int i3 = k - l2; i3 <= k + l2; ++i3) {
                                 int j3 = i3 - k;
 
-                                if ((Math.abs(k2) != l2 || Math.abs(j3) != l2 || l2 <= 0) && !Block.o[world.getTypeId(j2, i2, i3)] && !Block.leafDecayBlacklist.contains(world.getTypeId(l1, i2, k2))) {
-                                    world.setRawTypeIdAndData(j2, i2, i3, Block.LEAVES.id, 1);
+                                if ((Math.abs(k2) != l2 || Math.abs(j3) != l2 || l2 <= 0) && !CraftBlock.o[world.getTypeId(j2, i2, i3)] && !CraftBlock.leafDecayBlacklist.contains(world.getTypeId(l1, i2, k2))) {
+                                    world.setRawTypeIdAndData(j2, i2, i3, CraftBlock.LEAVES.id, 1);
                                 }
                             }
                         }
@@ -86,8 +86,8 @@ public class WorldGenTaiga1 extends WorldGenerator {
 
                     for (i2 = 0; i2 < l - 1; ++i2) {
                         j2 = world.getTypeId(i, j + i2, k);
-                        if (j2 == 0 || j2 == Block.LEAVES.id) {
-                            world.setRawTypeIdAndData(i, j + i2, k, Block.LOG.id, 1);
+                        if (j2 == 0 || j2 == CraftBlock.LEAVES.id) {
+                            world.setRawTypeIdAndData(i, j + i2, k, CraftBlock.LOG.id, 1);
                         }
                     }
 

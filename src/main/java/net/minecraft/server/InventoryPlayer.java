@@ -201,7 +201,7 @@ public class InventoryPlayer implements IInventory {
         aitemstack[i] = itemstack;
     }
 
-    public float a(Block baseBlock) {
+    public float a(CraftBlock baseBlock) {
         float f = 1.0F;
 
         if (this.items[this.itemInHandIndex] != null) {
@@ -286,7 +286,7 @@ public class InventoryPlayer implements IInventory {
         return itemstack != null ? itemstack.a(entity) : 1;
     }
 
-    public boolean b(Block baseBlock) {
+    public boolean b(CraftBlock baseBlock) {
         if (baseBlock.material.i()) {
             return true;
         } else {

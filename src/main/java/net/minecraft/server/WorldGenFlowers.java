@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.block.BlockFlower;
+
 import java.util.Random;
 
 public class WorldGenFlowers extends WorldGenerator {
@@ -17,7 +19,7 @@ public class WorldGenFlowers extends WorldGenerator {
             int j1 = j + random.nextInt(4) - random.nextInt(4);
             int k1 = k + random.nextInt(8) - random.nextInt(8);
 
-            if (world.isEmpty(i1, j1, k1) && ((BlockFlower) Block.byId[this.a]).f(world, i1, j1, k1)) {
+            if (world.isEmpty(i1, j1, k1) && ((BlockFlower) CraftBlock.byId[this.a]).f(world, i1, j1, k1)) {
                 world.setRawTypeId(i1, j1, k1, this.a);
             }
         }

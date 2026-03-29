@@ -9,7 +9,7 @@ public class WorldGenClay extends WorldGenerator {
     private int b;
 
     public WorldGenClay(int i) {
-        this.a = Block.CLAY.id;
+        this.a = CraftBlock.CLAY.id;
         this.b = i;
     }
 
@@ -49,7 +49,7 @@ public class WorldGenClay extends WorldGenerator {
                             if (d12 * d12 + d13 * d13 + d14 * d14 < 1.0D) {
                                 int j3 = world.getTypeId(k2, l2, i3);
 
-                                if (j3 == Block.SAND.id) {
+                                if (j3 == CraftBlock.SAND.id) {
                                     world.setRawTypeId(k2, l2, i3, this.a);
                                 }
                             }

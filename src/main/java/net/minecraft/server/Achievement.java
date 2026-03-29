@@ -14,7 +14,7 @@ public class Achievement extends Statistic {
         this(i, s, j, k, new ItemStack(item), achievement);
     }
 
-    public Achievement(int i, String s, int j, int k, Block baseBlock, Achievement achievement) {
+    public Achievement(int i, String s, int j, int k, CraftBlock baseBlock, Achievement achievement) {
         this(i, s, j, k, new ItemStack(baseBlock), achievement);
     }
 

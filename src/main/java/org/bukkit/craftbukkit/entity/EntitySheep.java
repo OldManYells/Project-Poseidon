@@ -44,7 +44,7 @@ public class EntitySheep extends EntityAnimal {
     }
 
     protected int j() {
-        return Block.WOOL.id;
+        return CraftBlock.WOOL.id;
     }
 
     public boolean a(EntityHuman entityhuman) {
@@ -56,7 +56,7 @@ public class EntitySheep extends EntityAnimal {
                 int i = 2 + this.random.nextInt(3);
 
                 for (int j = 0; j < i; ++j) {
-                    EntityItem entityitem = this.a(new ItemStack(Block.WOOL.id, 1, this.getColor()), 1.0F);
+                    EntityItem entityitem = this.a(new ItemStack(CraftBlock.WOOL.id, 1, this.getColor()), 1.0F);
 
                     entityitem.motY += (double) (this.random.nextFloat() * 0.05F);
                     entityitem.motX += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);

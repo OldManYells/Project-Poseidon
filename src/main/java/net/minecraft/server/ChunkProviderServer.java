@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.block.BlockSand;
 import org.bukkit.craftbukkit.util.LongHashset;
 import org.bukkit.craftbukkit.util.LongHashtable;
 import org.bukkit.event.world.ChunkLoadEvent;

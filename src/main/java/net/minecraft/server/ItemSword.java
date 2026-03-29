@@ -14,8 +14,8 @@ public class ItemSword extends Item {
         this.a = 4 + enumtoolmaterial.c() * 2;
     }
 
-    public float a(ItemStack itemstack, Block baseBlock) {
-        return baseBlock.id == Block.WEB.id ? 15.0F : 1.5F;
+    public float a(ItemStack itemstack, CraftBlock baseBlock) {
+        return baseBlock.id == CraftBlock.WEB.id ? 15.0F : 1.5F;
     }
 
     public boolean a(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
@@ -32,7 +32,7 @@ public class ItemSword extends Item {
         return this.a;
     }
 
-    public boolean a(Block baseBlock) {
-        return baseBlock.id == Block.WEB.id;
+    public boolean a(CraftBlock baseBlock) {
+        return baseBlock.id == CraftBlock.WEB.id;
     }
 }

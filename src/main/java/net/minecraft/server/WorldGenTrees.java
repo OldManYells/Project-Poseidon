@@ -43,7 +43,7 @@ public class WorldGenTrees extends WorldGenerator {
                     for (k1 = k - b0; k1 <= k + b0 && flag; ++k1) {
                         if (i1 >= 0 && i1 < 128) {
                             l1 = world.getTypeId(j1, i1, k1);
-                            if (l1 != 0 && l1 != Block.LEAVES.id) {
+                            if (l1 != 0 && l1 != CraftBlock.LEAVES.id) {
                                 flag = false;
                             }
                         } else {
@@ -57,8 +57,8 @@ public class WorldGenTrees extends WorldGenerator {
                 return false;
             } else {
                 i1 = world.getTypeId(i, j - 1, k);
-                if ((i1 == Block.GRASS.id || i1 == Block.DIRT.id) && j < 128 - l - 1) {
-                    world.setRawTypeId(i, j - 1, k, Block.DIRT.id);
+                if ((i1 == CraftBlock.GRASS.id || i1 == CraftBlock.DIRT.id) && j < 128 - l - 1) {
+                    world.setRawTypeId(i, j - 1, k, CraftBlock.DIRT.id);
 
                     int i2;
 
@@ -72,8 +72,8 @@ public class WorldGenTrees extends WorldGenerator {
                             for (int k2 = k - k1; k2 <= k + k1; ++k2) {
                                 int l2 = k2 - k;
 
-                                if ((Math.abs(j2) != k1 || Math.abs(l2) != k1 || random.nextInt(2) != 0 && j1 != 0) && !Block.o[world.getTypeId(l1, i2, k2)] && !Block.leafDecayBlacklist.contains(world.getTypeId(l1, i2, k2))) {
-                                    world.setRawTypeId(l1, i2, k2, Block.LEAVES.id);
+                                if ((Math.abs(j2) != k1 || Math.abs(l2) != k1 || random.nextInt(2) != 0 && j1 != 0) && !CraftBlock.o[world.getTypeId(l1, i2, k2)] && !CraftBlock.leafDecayBlacklist.contains(world.getTypeId(l1, i2, k2))) {
+                                    world.setRawTypeId(l1, i2, k2, CraftBlock.LEAVES.id);
                                 }
                             }
                         }
@@ -81,8 +81,8 @@ public class WorldGenTrees extends WorldGenerator {
 
                     for (i2 = 0; i2 < l; ++i2) {
                         j1 = world.getTypeId(i, j + i2, k);
-                        if (j1 == 0 || j1 == Block.LEAVES.id) {
-                            world.setRawTypeId(i, j + i2, k, Block.LOG.id);
+                        if (j1 == 0 || j1 == CraftBlock.LEAVES.id) {
+                            world.setRawTypeId(i, j + i2, k, CraftBlock.LOG.id);
                         }
                     }
 

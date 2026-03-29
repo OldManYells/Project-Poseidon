@@ -15,13 +15,13 @@ public class ItemBlock extends Item {
     public ItemBlock(int i) {
         super(i);
         this.id = i + 256;
-        this.b(Block.byId[i + 256].a(2));
+        this.b(CraftBlock.byId[i + 256].a(2));
     }
 
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
         int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
 
-        if (world.getTypeId(i, j, k) == Block.SNOW.id) {
+        if (world.getTypeId(i, j, k) == CraftBlock.SNOW.id) {
             l = 0;
         } else {
             if (l == 0) {
@@ -51,10 +51,10 @@ public class ItemBlock extends Item {
 
         if (itemstack.count == 0) {
             return false;
-        } else if (j == 127 && Block.byId[this.id].material.isBuildable()) {
+        } else if (j == 127 && CraftBlock.byId[this.id].material.isBuildable()) {
             return false;
         } else if (world.a(this.id, i, j, k, false, l)) {
-            Block baseBlock = Block.byId[this.id];
+            CraftBlock baseBlock = CraftBlock.byId[this.id];
 
             // CraftBukkit start - This executes the placement of the block
             CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k);
@@ -66,11 +66,11 @@ public class ItemBlock extends Item {
             CraftBlockState blockStateBelow = null;
             // Toggles whether the normal or the block below is used for the place event 
             boolean eventUseBlockBelow = false;
-            if ((world.getTypeId(i, j - 1, k) == Block.STEP.id || world.getTypeId(i, j - 1, k) == Block.DOUBLE_STEP.id)
-                    && (itemstack.id == Block.DOUBLE_STEP.id || itemstack.id == Block.STEP.id)) {
+            if ((world.getTypeId(i, j - 1, k) == CraftBlock.STEP.id || world.getTypeId(i, j - 1, k) == CraftBlock.DOUBLE_STEP.id)
+                    && (itemstack.id == CraftBlock.DOUBLE_STEP.id || itemstack.id == CraftBlock.STEP.id)) {
                 blockStateBelow = CraftBlockState.getBlockState(world, i, j - 1, k);
                 // Step is placed on step, forms a doublestep replacing the original step, so we need the lower block
-                eventUseBlockBelow = itemstack.id == Block.STEP.id && blockStateBelow.getTypeId() == Block.STEP.id;
+                eventUseBlockBelow = itemstack.id == CraftBlock.STEP.id && blockStateBelow.getTypeId() == CraftBlock.STEP.id;
             }
 
             /**
@@ -93,7 +93,7 @@ public class ItemBlock extends Item {
 
                     } else {
 
-                        if (this.id == Block.ICE.id) {
+                        if (this.id == CraftBlock.ICE.id) {
                             // Ice will explode if we set straight to 0
                             world.setTypeId(i, j, k, 20);
                         }
@@ -106,13 +106,13 @@ public class ItemBlock extends Item {
                 // CraftBukkit end
 
                 if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true) && (this.id == 29 || this.id == 33)) {
-                    Block.byId[this.id].postPlace(world, i, j, k, l);
-                    Block.byId[this.id].postPlace(world, i, j, k, entityhuman);
+                    CraftBlock.byId[this.id].postPlace(world, i, j, k, l);
+                    CraftBlock.byId[this.id].postPlace(world, i, j, k, entityhuman);
                     world.update(i, j, k, this.id); // <-- world.setTypeIdAndData does this on success (tell the world)
                 } else {
                     world.update(i, j, k, this.id);
-                    Block.byId[this.id].postPlace(world, i, j, k, l);
-                    Block.byId[this.id].postPlace(world, i, j, k, entityhuman);
+                    CraftBlock.byId[this.id].postPlace(world, i, j, k, l);
+                    CraftBlock.byId[this.id].postPlace(world, i, j, k, entityhuman);
                 }
 
                 world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), baseBlock.stepSound.getName(), (baseBlock.stepSound.getVolume1() + 1.0F) / 2.0F, baseBlock.stepSound.getVolume2() * 0.8F);
@@ -126,6 +126,6 @@ public class ItemBlock extends Item {
     }
 
     public String a() {
-        return Block.byId[this.id].l();
+        return CraftBlock.byId[this.id].l();
     }
 }

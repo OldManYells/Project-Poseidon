@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.BlockFluids;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockCanBuildEvent;
@@ -329,7 +330,7 @@ public class World implements IBlockAccess {
     public Material getMaterial(int i, int j, int k) {
         int l = this.getTypeId(i, j, k);
 
-        return l == 0 ? Material.AIR : Block.byId[l].material;
+        return l == 0 ? Material.AIR : CraftBlock.byId[l].material;
     }
 
     public int getData(int i, int j, int k) {
@@ -354,7 +355,7 @@ public class World implements IBlockAccess {
         if (this.setRawData(i, j, k, l)) {
             int i1 = this.getTypeId(i, j, k);
 
-            if (Block.t[i1 & 255]) {
+            if (CraftBlock.t[i1 & 255]) {
                 this.update(i, j, k, i1);
             } else {
                 this.applyPhysics(i, j, k, i1);
@@ -450,7 +451,7 @@ public class World implements IBlockAccess {
 
     private void k(int i, int j, int k, int l) {
         if (!this.suppressPhysics && !this.isStatic) {
-            Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
+            CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(i, j, k)];
 
             if (baseBlock != null) {
                 // CraftBukkit start
@@ -495,7 +496,7 @@ public class World implements IBlockAccess {
             if (flag) {
                 int l = this.getTypeId(i, j, k);
 
-                if (l == Block.STEP.id || l == Block.SOIL.id || l == Block.COBBLESTONE_STAIRS.id || l == Block.WOOD_STAIRS.id) {
+                if (l == CraftBlock.STEP.id || l == CraftBlock.SOIL.id || l == CraftBlock.COBBLESTONE_STAIRS.id || l == CraftBlock.WOOD_STAIRS.id) {
                     int i1 = this.a(i, j + 1, k, false);
                     int j1 = this.a(i + 1, j, k, false);
                     int k1 = this.a(i - 1, j, k, false);
@@ -584,8 +585,8 @@ public class World implements IBlockAccess {
                 } else if (enumskyblock == EnumSkyBlock.BLOCK) {
                     int i1 = this.getTypeId(i, j, k);
 
-                    if (Block.s[i1] > l) {
-                        l = Block.s[i1];
+                    if (CraftBlock.s[i1] > l) {
+                        l = CraftBlock.s[i1];
                     }
                 }
 
@@ -666,7 +667,7 @@ public class World implements IBlockAccess {
                 int j1 = MathHelper.floor(vec3d.c);
                 int k1 = this.getTypeId(l, i1, j1);
                 int l1 = this.getData(l, i1, j1);
-                Block baseBlock = Block.byId[k1];
+                CraftBlock baseBlock = CraftBlock.byId[k1];
 
                 if ((!flag1 || baseBlock == null || baseBlock.e(this, l, i1, j1) != null) && k1 > 0 && baseBlock.a(l1, flag)) {
                     MovingObjectPosition movingobjectposition = baseBlock.a(this, l, i1, j1, vec3d, vec3d1);
@@ -794,7 +795,7 @@ public class World implements IBlockAccess {
 
                     int i2 = this.getTypeId(l, i1, j1);
                     int j2 = this.getData(l, i1, j1);
-                    Block baseBlock1 = Block.byId[i2];
+                    CraftBlock baseBlock1 = CraftBlock.byId[i2];
 
                     if ((!flag1 || baseBlock1 == null || baseBlock1.e(this, l, i1, j1) != null) && i2 > 0 && baseBlock1.a(j2, flag)) {
                         MovingObjectPosition movingobjectposition1 = baseBlock1.a(this, l, i1, j1, vec3d, vec3d1);
@@ -954,7 +955,7 @@ public class World implements IBlockAccess {
             for (int l1 = i1; l1 < j1; ++l1) {
                 if (this.isLoaded(k1, 64, l1)) {
                     for (int i2 = k - 1; i2 < l; ++i2) {
-                        Block baseBlock = Block.byId[this.getTypeId(k1, i2, l1)];
+                        CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(k1, i2, l1)];
 
                         if (baseBlock != null) {
                             baseBlock.a(this, k1, i2, l1, axisalignedbb, this.K);
@@ -1014,7 +1015,7 @@ public class World implements IBlockAccess {
 
         for (j &= 15; k > 0; --k) {
             int l = chunk.getTypeId(i, k, j);
-            Material material = l == 0 ? Material.AIR : Block.byId[l].material;
+            Material material = l == 0 ? Material.AIR : CraftBlock.byId[l].material;
 
             if (material.isSolid() || material.isLiquid()) {
                 return k + 1;
@@ -1033,7 +1034,7 @@ public class World implements IBlockAccess {
         for (j &= 15; k > 0; --k) {
             int l = chunk.getTypeId(i, k, j);
 
-            if (l != 0 && Block.byId[l].material.isSolid()) {
+            if (l != 0 && CraftBlock.byId[l].material.isSolid()) {
                 return k + 1;
             }
         }
@@ -1050,7 +1051,7 @@ public class World implements IBlockAccess {
                 int j1 = this.getTypeId(nextticklistentry.a, nextticklistentry.b, nextticklistentry.c);
 
                 if (j1 == nextticklistentry.d && j1 > 0) {
-                    Block.byId[j1].a(this, nextticklistentry.a, nextticklistentry.b, nextticklistentry.c, this.random);
+                    CraftBlock.byId[j1].a(this, nextticklistentry.a, nextticklistentry.b, nextticklistentry.c, this.random);
                 }
             }
         } else {
@@ -1307,7 +1308,7 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
+                    CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(k1, l1, i2)];
 
                     if (baseBlock != null) {
                         return true;
@@ -1342,7 +1343,7 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
+                    CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(k1, l1, i2)];
 
                     if (baseBlock != null && baseBlock.material.isLiquid()) {
                         return true;
@@ -1368,7 +1369,7 @@ public class World implements IBlockAccess {
                     for (int i2 = i1; i2 < j1; ++i2) {
                         int j2 = this.getTypeId(k1, l1, i2);
 
-                        if (j2 == Block.FIRE.id || j2 == Block.LAVA.id || j2 == Block.STATIONARY_LAVA.id) {
+                        if (j2 == CraftBlock.FIRE.id || j2 == CraftBlock.LAVA.id || j2 == CraftBlock.STATIONARY_LAVA.id) {
                             return true;
                         }
                     }
@@ -1396,7 +1397,7 @@ public class World implements IBlockAccess {
             for (int k1 = i; k1 < j; ++k1) {
                 for (int l1 = k; l1 < l; ++l1) {
                     for (int i2 = i1; i2 < j1; ++i2) {
-                        Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
+                        CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(k1, l1, i2)];
 
                         if (baseBlock != null && baseBlock.material == material) {
                             double d0 = (double) ((float) (l1 + 1) - BlockFluids.c(this.getData(k1, l1, i2)));
@@ -1434,7 +1435,7 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
+                    CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(k1, l1, i2)];
 
                     if (baseBlock != null && baseBlock.material == material) {
                         return true;
@@ -1457,7 +1458,7 @@ public class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    Block baseBlock = Block.byId[this.getTypeId(k1, l1, i2)];
+                    CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(k1, l1, i2)];
 
                     if (baseBlock != null && baseBlock.material == material) {
                         int j2 = this.getData(k1, l1, i2);
@@ -1554,7 +1555,7 @@ public class World implements IBlockAccess {
             ++i;
         }
 
-        if (this.getTypeId(i, j, k) == Block.FIRE.id) {
+        if (this.getTypeId(i, j, k) == CraftBlock.FIRE.id) {
             this.a(entityhuman, 1004, i, j, k, 0);
             this.setTypeId(i, j, k, 0);
         }
@@ -1605,13 +1606,13 @@ public class World implements IBlockAccess {
     }
 
     public boolean p(int i, int j, int k) {
-        Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
+        CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(i, j, k)];
 
         return baseBlock == null ? false : baseBlock.a();
     }
 
     public boolean e(int i, int j, int k) {
-        Block baseBlock = Block.byId[this.getTypeId(i, j, k)];
+        CraftBlock baseBlock = CraftBlock.byId[this.getTypeId(i, j, k)];
 
         return baseBlock == null ? false : baseBlock.material.h() && baseBlock.b();
     }
@@ -1948,10 +1949,10 @@ public class World implements IBlockAccess {
                 if (this.getWorldChunkManager().getBiome(l + i, j1 + j).c() && k1 >= 0 && k1 < 128 && chunk.a(EnumSkyBlock.BLOCK, l, k1, j1) < 10) {
                     l1 = chunk.getTypeId(l, k1 - 1, j1);
                     i2 = chunk.getTypeId(l, k1, j1);
-                    if (this.v() && i2 == 0 && Block.SNOW.canPlace(this, l + i, k1, j1 + j) && l1 != 0 && l1 != Block.ICE.id && Block.byId[l1].material.isSolid()) {
+                    if (this.v() && i2 == 0 && CraftBlock.SNOW.canPlace(this, l + i, k1, j1 + j) && l1 != 0 && l1 != CraftBlock.ICE.id && CraftBlock.byId[l1].material.isSolid()) {
                         // CraftBukkit start
                         BlockState blockState = this.getWorld().getBlockAt(l + i, k1, j1 + j).getState();
-                        blockState.setTypeId(Block.SNOW.id);
+                        blockState.setTypeId(CraftBlock.SNOW.id);
 
                         BlockFormEvent snow = new BlockFormEvent(blockState.getBlock(), blockState);
                         this.getServer().getPluginManager().callEvent(snow);
@@ -1962,9 +1963,9 @@ public class World implements IBlockAccess {
                     }
 
                     // CraftBukkit start
-                        if (l1 == Block.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
+                        if (l1 == CraftBlock.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
                             BlockState blockState = this.getWorld().getBlockAt(l + i, k1 - 1, j1 + j).getState();
-                            blockState.setTypeId(Block.ICE.id);
+                            blockState.setTypeId(CraftBlock.ICE.id);
 
                             BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
                             this.getServer().getPluginManager().callEvent(iceBlockForm);
@@ -1983,8 +1984,8 @@ public class World implements IBlockAccess {
                 k1 = l >> 8 & 15;
                 l1 = l >> 16 & 127;
                 i2 = chunk.b[j1 << 11 | k1 << 7 | l1] & 255;
-                if (Block.n[i2]) {
-                    Block.byId[i2].a(this, j1 + i, l1, k1 + j, this.random);
+                if (CraftBlock.n[i2]) {
+                    CraftBlock.byId[i2].a(this, j1 + i, l1, k1 + j, this.random);
                 }
             }
         }
@@ -2015,7 +2016,7 @@ public class World implements IBlockAccess {
                     int k = this.getTypeId(nextticklistentry.a, nextticklistentry.b, nextticklistentry.c);
 
                     if (k == nextticklistentry.d && k > 0) {
-                        Block.byId[k].a(this, nextticklistentry.a, nextticklistentry.b, nextticklistentry.c, this.random);
+                        CraftBlock.byId[k].a(this, nextticklistentry.a, nextticklistentry.b, nextticklistentry.c, this.random);
                     }
                 }
             }
@@ -2106,8 +2107,8 @@ public class World implements IBlockAccess {
 
     public boolean a(int i, int j, int k, int l, boolean flag, int i1) {
         int j1 = this.getTypeId(j, k, l);
-        Block baseBlock = Block.byId[j1];
-        Block baseBlock1 = Block.byId[i];
+        CraftBlock baseBlock = CraftBlock.byId[j1];
+        CraftBlock baseBlock1 = CraftBlock.byId[i];
         AxisAlignedBB axisalignedbb = baseBlock1.e(this, j, k, l);
 
         if (flag) {
@@ -2119,7 +2120,7 @@ public class World implements IBlockAccess {
         if (axisalignedbb != null && !this.containsEntity(axisalignedbb)) {
             defaultReturn = false; // CraftBukkit
         } else {
-            if (baseBlock == Block.WATER || baseBlock == Block.STATIONARY_WATER || baseBlock == Block.LAVA || baseBlock == Block.STATIONARY_LAVA || baseBlock == Block.FIRE || baseBlock == Block.SNOW) {
+            if (baseBlock == CraftBlock.WATER || baseBlock == CraftBlock.STATIONARY_WATER || baseBlock == CraftBlock.LAVA || baseBlock == CraftBlock.STATIONARY_LAVA || baseBlock == CraftBlock.FIRE || baseBlock == CraftBlock.SNOW) {
                 baseBlock = null;
             }
 
@@ -2169,7 +2170,7 @@ public class World implements IBlockAccess {
     public boolean isBlockFacePowered(int i, int j, int k, int l) {
         int i1 = this.getTypeId(i, j, k);
 
-        return i1 == 0 ? false : Block.byId[i1].d(this, i, j, k, l);
+        return i1 == 0 ? false : CraftBlock.byId[i1].d(this, i, j, k, l);
     }
 
     public boolean isBlockPowered(int i, int j, int k) {
@@ -2182,7 +2183,7 @@ public class World implements IBlockAccess {
         } else {
             int i1 = this.getTypeId(i, j, k);
 
-            return i1 == 0 ? false : Block.byId[i1].a(this, i, j, k, l);
+            return i1 == 0 ? false : CraftBlock.byId[i1].a(this, i, j, k, l);
         }
     }
 
@@ -2321,7 +2322,7 @@ public class World implements IBlockAccess {
         int j1 = this.getTypeId(i, j, k);
 
         if (j1 > 0) {
-            Block.byId[j1].a(this, i, j, k, l, i1);
+            CraftBlock.byId[j1].a(this, i, j, k, l, i1);
         }
     }
 

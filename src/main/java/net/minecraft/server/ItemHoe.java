@@ -19,10 +19,10 @@ public class ItemHoe extends Item {
         int i1 = world.getTypeId(i, j, k);
         int j1 = world.getTypeId(i, j + 1, k);
 
-        if ((l == 0 || j1 != 0 || i1 != Block.GRASS.id) && i1 != Block.DIRT.id) {
+        if ((l == 0 || j1 != 0 || i1 != CraftBlock.GRASS.id) && i1 != CraftBlock.DIRT.id) {
             return false;
         } else {
-            Block baseBlock = Block.SOIL;
+            CraftBlock baseBlock = CraftBlock.SOIL;
 
             world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), baseBlock.stepSound.getName(), (baseBlock.stepSound.getVolume1() + 1.0F) / 2.0F, baseBlock.stepSound.getVolume2() * 0.8F);
             if (world.isStatic) {

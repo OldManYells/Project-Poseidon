@@ -139,7 +139,7 @@ class PlayerInstance {
                 j = this.j;
                 k = this.chunkZ * 16 + this.l;
                 this.sendAll(new Packet53BlockChange(i, j, k, worldserver));
-                if (Block.isTileEntity[worldserver.getTypeId(i, j, k)]) {
+                if (CraftBlock.isTileEntity[worldserver.getTypeId(i, j, k)]) {
                     this.sendTileEntity(worldserver.getTileEntity(i, j, k));
                 }
             } else {
@@ -171,7 +171,7 @@ class PlayerInstance {
                         l = this.chunkZ * 16 + (this.dirtyBlocks[i] >> 8 & 15);
                         // CraftBukkit end
 
-                        if (Block.isTileEntity[worldserver.getTypeId(j, k, l)]) {
+                        if (CraftBlock.isTileEntity[worldserver.getTypeId(j, k, l)]) {
                             // System.out.println("Sending!"); // CraftBukkit
                             this.sendTileEntity(worldserver.getTileEntity(j, k, l));
                         }

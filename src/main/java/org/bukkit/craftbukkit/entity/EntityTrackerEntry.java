@@ -379,11 +379,11 @@ public class EntityTrackerEntry {
                 if (this.tracker instanceof EntityFallingSand) {
                     EntityFallingSand entityfallingsand = (EntityFallingSand) this.tracker;
 
-                    if (entityfallingsand.a == Block.SAND.id) {
+                    if (entityfallingsand.a == CraftBlock.SAND.id) {
                         return new Packet23VehicleSpawn(this.tracker, 70);
                     }
 
-                    if (entityfallingsand.a == Block.GRAVEL.id) {
+                    if (entityfallingsand.a == CraftBlock.GRAVEL.id) {
                         return new Packet23VehicleSpawn(this.tracker, 71);
                     }
                 }

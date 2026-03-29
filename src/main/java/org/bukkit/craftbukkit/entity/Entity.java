@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.block.BlockFluids;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -570,22 +571,22 @@ public abstract class Entity {
                 i1 = MathHelper.floor(this.locY - 0.20000000298023224D - (double) this.height);
                 j1 = MathHelper.floor(this.locZ);
                 k = this.world.getTypeId(l, i1, j1);
-                if (this.world.getTypeId(l, i1 - 1, j1) == Block.FENCE.id) {
+                if (this.world.getTypeId(l, i1 - 1, j1) == CraftBlock.FENCE.id) {
                     k = this.world.getTypeId(l, i1 - 1, j1);
                 }
 
                 if (this.bm > (float) this.b && k > 0) {
                     ++this.b;
-                    StepSound stepsound = Block.byId[k].stepSound;
+                    StepSound stepsound = CraftBlock.byId[k].stepSound;
 
-                    if (this.world.getTypeId(l, i1 + 1, j1) == Block.SNOW.id) {
-                        stepsound = Block.SNOW.stepSound;
+                    if (this.world.getTypeId(l, i1 + 1, j1) == CraftBlock.SNOW.id) {
+                        stepsound = CraftBlock.SNOW.stepSound;
                         this.world.makeSound(this, stepsound.getName(), stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-                    } else if (!Block.byId[k].material.isLiquid()) {
+                    } else if (!CraftBlock.byId[k].material.isLiquid()) {
                         this.world.makeSound(this, stepsound.getName(), stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
                     }
 
-                    Block.byId[k].b(this.world, l, i1, j1, this);
+                    CraftBlock.byId[k].b(this.world, l, i1, j1, this);
                 }
             }
 
@@ -603,7 +604,7 @@ public abstract class Entity {
                             int l2 = this.world.getTypeId(i2, j2, k2);
 
                             if (l2 > 0) {
-                                Block.byId[l2].a(this.world, i2, j2, k2, this);
+                                CraftBlock.byId[l2].a(this.world, i2, j2, k2, this);
                             }
                         }
                     }
@@ -702,7 +703,7 @@ public abstract class Entity {
         int k = MathHelper.floor(this.locZ);
         int l = this.world.getTypeId(i, j, k);
 
-        if (l != 0 && Block.byId[l].material == material) {
+        if (l != 0 && CraftBlock.byId[l].material == material) {
             float f = BlockFluids.c(this.world.getData(i, j, k)) - 0.11111111F;
             float f1 = (float) (j + 1) - f;
 

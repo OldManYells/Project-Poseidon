@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.block.BlockMinecartTrack;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
 
@@ -160,9 +161,9 @@ public class EntityMinecart extends Entity implements IInventory {
                         }
                     }
 
-                    this.a(Block.CHEST.id, 1, 0.0F);
+                    this.a(CraftBlock.CHEST.id, 1, 0.0F);
                 } else if (this.type == 2) {
-                    this.a(Block.FURNACE.id, 1, 0.0F);
+                    this.a(CraftBlock.FURNACE.id, 1, 0.0F);
                 }
             }
 
@@ -277,12 +278,12 @@ public class EntityMinecart extends Entity implements IInventory {
                 boolean flag1 = false;
                 boolean flag2 = false;
 
-                if (l == Block.GOLDEN_RAIL.id) {
+                if (l == CraftBlock.GOLDEN_RAIL.id) {
                     flag1 = (i1 & 8) != 0;
                     flag2 = !flag1;
                 }
 
-                if (((BlockMinecartTrack) Block.byId[l]).f()) {
+                if (((BlockMinecartTrack) CraftBlock.byId[l]).f()) {
                     i1 &= 7;
                 }
 
@@ -605,7 +606,7 @@ public class EntityMinecart extends Entity implements IInventory {
             int i1 = this.world.getData(i, j, k);
 
             d1 = (double) j;
-            if (((BlockMinecartTrack) Block.byId[l]).f()) {
+            if (((BlockMinecartTrack) CraftBlock.byId[l]).f()) {
                 i1 &= 7;
             }
 

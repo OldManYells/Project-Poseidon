@@ -9,7 +9,7 @@ public abstract class EntityAnimal extends EntityCreature implements IAnimal {
     }
 
     protected float a(int i, int j, int k) {
-        return this.world.getTypeId(i, j - 1, k) == Block.GRASS.id ? 10.0F : this.world.n(i, j, k) - 0.5F;
+        return this.world.getTypeId(i, j - 1, k) == CraftBlock.GRASS.id ? 10.0F : this.world.n(i, j, k) - 0.5F;
     }
 
     public void b(NBTTagCompound nbttagcompound) {
@@ -25,7 +25,7 @@ public abstract class EntityAnimal extends EntityCreature implements IAnimal {
         int j = MathHelper.floor(this.boundingBox.b);
         int k = MathHelper.floor(this.locZ);
 
-        return this.world.getTypeId(i, j - 1, k) == Block.GRASS.id && this.world.k(i, j, k) > 8 && super.d();
+        return this.world.getTypeId(i, j - 1, k) == CraftBlock.GRASS.id && this.world.k(i, j, k) > 8 && super.d();
     }
 
     public int e() {

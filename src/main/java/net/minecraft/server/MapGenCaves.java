@@ -112,7 +112,7 @@ public class MapGenCaves extends MapGenBase {
                             for (int l3 = j2 + 1; !flag2 && l3 >= i2 - 1; --l3) {
                                 i3 = (j3 * 16 + k3) * 128 + l3;
                                 if (l3 >= 0 && l3 < 128) {
-                                    if (abyte[i3] == Block.WATER.id || abyte[i3] == Block.STATIONARY_WATER.id) {
+                                    if (abyte[i3] == CraftBlock.WATER.id || abyte[i3] == CraftBlock.STATIONARY_WATER.id) {
                                         flag2 = true;
                                     }
 
@@ -140,17 +140,17 @@ public class MapGenCaves extends MapGenBase {
                                         if (d14 > -0.7D && d12 * d12 + d14 * d14 + d13 * d13 < 1.0D) {
                                             byte b0 = abyte[i4];
 
-                                            if (b0 == Block.GRASS.id) {
+                                            if (b0 == CraftBlock.GRASS.id) {
                                                 flag3 = true;
                                             }
 
-                                            if (b0 == Block.STONE.id || b0 == Block.DIRT.id || b0 == Block.GRASS.id) {
+                                            if (b0 == CraftBlock.STONE.id || b0 == CraftBlock.DIRT.id || b0 == CraftBlock.GRASS.id) {
                                                 if (j4 < 10) {
-                                                    abyte[i4] = (byte) Block.LAVA.id;
+                                                    abyte[i4] = (byte) CraftBlock.LAVA.id;
                                                 } else {
                                                     abyte[i4] = 0;
-                                                    if (flag3 && abyte[i4 - 1] == Block.DIRT.id) {
-                                                        abyte[i4 - 1] = (byte) Block.GRASS.id;
+                                                    if (flag3 && abyte[i4 - 1] == CraftBlock.DIRT.id) {
+                                                        abyte[i4 - 1] = (byte) CraftBlock.GRASS.id;
                                                     }
                                                 }
                                             }

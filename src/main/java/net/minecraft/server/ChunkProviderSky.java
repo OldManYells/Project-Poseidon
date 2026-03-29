@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.block.BlockSand;
+
 import java.util.Random;
 
 public class ChunkProviderSky implements IChunkProvider {
@@ -81,7 +83,7 @@ public class ChunkProviderSky implements IChunkProvider {
                                 int l2 = 0;
 
                                 if (d15 > 0.0D) {
-                                    l2 = Block.STONE.id;
+                                    l2 = CraftBlock.STONE.id;
                                 }
 
                                 abyte[j2] = (byte) l2;
@@ -124,11 +126,11 @@ public class ChunkProviderSky implements IChunkProvider {
 
                     if (b2 == 0) {
                         j1 = -1;
-                    } else if (b2 == Block.STONE.id) {
+                    } else if (b2 == CraftBlock.STONE.id) {
                         if (j1 == -1) {
                             if (i1 <= 0) {
                                 b0 = 0;
-                                b1 = (byte) Block.STONE.id;
+                                b1 = (byte) CraftBlock.STONE.id;
                             }
 
                             j1 = i1;
@@ -140,9 +142,9 @@ public class ChunkProviderSky implements IChunkProvider {
                         } else if (j1 > 0) {
                             --j1;
                             abyte[l1] = b1;
-                            if (j1 == 0 && b1 == Block.SAND.id) {
+                            if (j1 == 0 && b1 == CraftBlock.SAND.id) {
                                 j1 = this.j.nextInt(4);
-                                b1 = (byte) Block.SANDSTONE.id;
+                                b1 = (byte) CraftBlock.SANDSTONE.id;
                             }
                         }
                     }
@@ -299,7 +301,7 @@ public class ChunkProviderSky implements IChunkProvider {
             k1 = k + this.j.nextInt(16) + 8;
             l1 = this.j.nextInt(128);
             i2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLakes(Block.STATIONARY_WATER.id)).a(this.p, this.j, k1, l1, i2);
+            (new WorldGenLakes(CraftBlock.STATIONARY_WATER.id)).a(this.p, this.j, k1, l1, i2);
         }
 
         if (this.j.nextInt(8) == 0) {
@@ -307,7 +309,7 @@ public class ChunkProviderSky implements IChunkProvider {
             l1 = this.j.nextInt(this.j.nextInt(120) + 8);
             i2 = l + this.j.nextInt(16) + 8;
             if (l1 < 64 || this.j.nextInt(10) == 0) {
-                (new WorldGenLakes(Block.STATIONARY_LAVA.id)).a(this.p, this.j, k1, l1, i2);
+                (new WorldGenLakes(CraftBlock.STATIONARY_LAVA.id)).a(this.p, this.j, k1, l1, i2);
             }
         }
 
@@ -331,56 +333,56 @@ public class ChunkProviderSky implements IChunkProvider {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.DIRT.id, 32)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.DIRT.id, 32)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 10; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.GRAVEL.id, 32)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.GRAVEL.id, 32)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 20; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.COAL_ORE.id, 16)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.COAL_ORE.id, 16)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 20; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(64);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.IRON_ORE.id, 8)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.IRON_ORE.id, 8)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 2; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(32);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.GOLD_ORE.id, 8)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.GOLD_ORE.id, 8)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 8; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(16);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.REDSTONE_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.REDSTONE_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 1; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(16);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.DIAMOND_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.DIAMOND_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
         }
 
         for (k1 = 0; k1 < 1; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(16) + this.j.nextInt(16);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.LAPIS_ORE.id, 6)).a(this.p, this.j, l1, i2, j2);
+            (new WorldGenMinable(CraftBlock.LAPIS_ORE.id, 6)).a(this.p, this.j, l1, i2, j2);
         }
 
         d0 = 0.5D;
@@ -435,28 +437,28 @@ public class ChunkProviderSky implements IChunkProvider {
             j2 = k + this.j.nextInt(16) + 8;
             k2 = this.j.nextInt(128);
             l2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.YELLOW_FLOWER.id)).a(this.p, this.j, j2, k2, l2);
+            (new WorldGenFlowers(CraftBlock.YELLOW_FLOWER.id)).a(this.p, this.j, j2, k2, l2);
         }
 
         if (this.j.nextInt(2) == 0) {
             i2 = k + this.j.nextInt(16) + 8;
             j2 = this.j.nextInt(128);
             k2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.RED_ROSE.id)).a(this.p, this.j, i2, j2, k2);
+            (new WorldGenFlowers(CraftBlock.RED_ROSE.id)).a(this.p, this.j, i2, j2, k2);
         }
 
         if (this.j.nextInt(4) == 0) {
             i2 = k + this.j.nextInt(16) + 8;
             j2 = this.j.nextInt(128);
             k2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.BROWN_MUSHROOM.id)).a(this.p, this.j, i2, j2, k2);
+            (new WorldGenFlowers(CraftBlock.BROWN_MUSHROOM.id)).a(this.p, this.j, i2, j2, k2);
         }
 
         if (this.j.nextInt(8) == 0) {
             i2 = k + this.j.nextInt(16) + 8;
             j2 = this.j.nextInt(128);
             k2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.RED_MUSHROOM.id)).a(this.p, this.j, i2, j2, k2);
+            (new WorldGenFlowers(CraftBlock.RED_MUSHROOM.id)).a(this.p, this.j, i2, j2, k2);
         }
 
         for (i2 = 0; i2 < 10; ++i2) {
@@ -491,14 +493,14 @@ public class ChunkProviderSky implements IChunkProvider {
             k2 = k + this.j.nextInt(16) + 8;
             l2 = this.j.nextInt(this.j.nextInt(120) + 8);
             i3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLiquids(Block.WATER.id)).a(this.p, this.j, k2, l2, i3);
+            (new WorldGenLiquids(CraftBlock.WATER.id)).a(this.p, this.j, k2, l2, i3);
         }
 
         for (j2 = 0; j2 < 20; ++j2) {
             k2 = k + this.j.nextInt(16) + 8;
             l2 = this.j.nextInt(this.j.nextInt(this.j.nextInt(112) + 8) + 8);
             i3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLiquids(Block.LAVA.id)).a(this.p, this.j, k2, l2, i3);
+            (new WorldGenLiquids(CraftBlock.LAVA.id)).a(this.p, this.j, k2, l2, i3);
         }
 
         this.w = this.p.getWorldChunkManager().a(this.w, k + 8, l + 8, 16, 16);
@@ -511,7 +513,7 @@ public class ChunkProviderSky implements IChunkProvider {
                 double d1 = this.w[l2 * 16 + i3] - (double) (j3 - 64) / 64.0D * 0.3D;
 
                 if (d1 < 0.5D && j3 > 0 && j3 < 128 && this.p.isEmpty(j2, j3, k2) && this.p.getMaterial(j2, j3 - 1, k2).isSolid() && this.p.getMaterial(j2, j3 - 1, k2) != Material.ICE) {
-                    this.p.setTypeId(j2, j3, k2, Block.SNOW.id);
+                    this.p.setTypeId(j2, j3, k2, CraftBlock.SNOW.id);
                 }
             }
         }

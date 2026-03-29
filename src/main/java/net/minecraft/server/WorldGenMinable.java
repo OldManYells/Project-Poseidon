@@ -47,7 +47,7 @@ public class WorldGenMinable extends WorldGenerator {
                             for (int i3 = k1; i3 <= j2; ++i3) {
                                 double d14 = ((double) i3 + 0.5D - d8) / (d10 / 2.0D);
 
-                                if (d12 * d12 + d13 * d13 + d14 * d14 < 1.0D && world.getTypeId(k2, l2, i3) == Block.STONE.id) {
+                                if (d12 * d12 + d13 * d13 + d14 * d14 < 1.0D && world.getTypeId(k2, l2, i3) == CraftBlock.STONE.id) {
                                     world.setRawTypeId(k2, l2, i3, this.a);
                                 }
                             }

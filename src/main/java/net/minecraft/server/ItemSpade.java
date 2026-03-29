@@ -3,13 +3,13 @@ package net.minecraft.server;
 
 public class ItemSpade extends ItemTool {
 
-    private static Block[] bk = new Block[] { Block.GRASS, Block.DIRT, Block.SAND, Block.GRAVEL, Block.SNOW, Block.SNOW_BLOCK, Block.CLAY, Block.SOIL};
+    private static CraftBlock[] bk = new CraftBlock[] { CraftBlock.GRASS, CraftBlock.DIRT, CraftBlock.SAND, CraftBlock.GRAVEL, CraftBlock.SNOW, CraftBlock.SNOW_BLOCK, CraftBlock.CLAY, CraftBlock.SOIL};
 
     public ItemSpade(int i, EnumToolMaterial enumtoolmaterial) {
         super(i, 1, enumtoolmaterial, bk);
     }
 
-    public boolean a(Block baseBlock) {
-        return baseBlock == Block.SNOW ? true : baseBlock == Block.SNOW_BLOCK;
+    public boolean a(CraftBlock baseBlock) {
+        return baseBlock == CraftBlock.SNOW ? true : baseBlock == CraftBlock.SNOW_BLOCK;
     }
 }

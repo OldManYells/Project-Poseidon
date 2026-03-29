@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 // CraftBukkit start
+import org.bukkit.craftbukkit.block.BlockBed;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
@@ -20,7 +21,7 @@ public class ItemBed extends Item {
             int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
 
             ++j;
-            BlockBed blockbed = (BlockBed) Block.BED;
+            BlockBed blockbed = (BlockBed) CraftBlock.BED;
             int i1 = MathHelper.floor((double) (entityhuman.yaw * 4.0F / 360.0F) + 0.5D) & 3;
             byte b0 = 0;
             byte b1 = 0;

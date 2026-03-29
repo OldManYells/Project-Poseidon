@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.block.BlockFlower;
+
 import java.util.Random;
 
 public class WorldGenDeadBush extends WorldGenerator {
@@ -14,7 +16,7 @@ public class WorldGenDeadBush extends WorldGenerator {
     public boolean a(World world, Random random, int i, int j, int k) {
         int l;
 
-        for (boolean flag = false; ((l = world.getTypeId(i, j, k)) == 0 || l == Block.LEAVES.id) && j > 0; --j) {
+        for (boolean flag = false; ((l = world.getTypeId(i, j, k)) == 0 || l == CraftBlock.LEAVES.id) && j > 0; --j) {
             ;
         }
 
@@ -23,7 +25,7 @@ public class WorldGenDeadBush extends WorldGenerator {
             int k1 = j + random.nextInt(4) - random.nextInt(4);
             int l1 = k + random.nextInt(8) - random.nextInt(8);
 
-            if (world.isEmpty(j1, k1, l1) && ((BlockFlower) Block.byId[this.a]).f(world, j1, k1, l1)) {
+            if (world.isEmpty(j1, k1, l1) && ((BlockFlower) CraftBlock.byId[this.a]).f(world, j1, k1, l1)) {
                 world.setRawTypeId(j1, k1, l1, this.a);
             }
         }

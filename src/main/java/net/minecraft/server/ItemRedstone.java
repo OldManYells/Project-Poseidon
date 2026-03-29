@@ -16,7 +16,7 @@ public class ItemRedstone extends Item {
     public boolean a(ItemStack itemstack, EntityHuman entityhuman, World world, int i, int j, int k, int l) {
         int clickedX = i, clickedY = j, clickedZ = k; // CraftBukkit
 
-        if (world.getTypeId(i, j, k) != Block.SNOW.id) {
+        if (world.getTypeId(i, j, k) != CraftBlock.SNOW.id) {
             if (l == 0) {
                 --j;
             }
@@ -46,20 +46,20 @@ public class ItemRedstone extends Item {
             }
         }
 
-        if (Block.REDSTONE_WIRE.canPlace(world, i, j, k)) {
+        if (CraftBlock.REDSTONE_WIRE.canPlace(world, i, j, k)) {
             CraftBlockState blockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
 
-            world.setRawTypeId(i, j, k, Block.REDSTONE_WIRE.id); // CraftBukkit - We update after the event
+            world.setRawTypeId(i, j, k, CraftBlock.REDSTONE_WIRE.id); // CraftBukkit - We update after the event
 
             // CraftBukkit start - redstone
-            BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, Block.REDSTONE_WIRE);
+            BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, CraftBlock.REDSTONE_WIRE);
 
             if (event.isCancelled() || !event.canBuild()) {
                 event.getBlockPlaced().setTypeIdAndData(blockState.getTypeId(), blockState.getRawData(), false);
                 return false;
             }
 
-            world.update( i, j, k, Block.REDSTONE_WIRE.id); // Must take place after BlockPlaceEvent, we need to update all other blocks.
+            world.update( i, j, k, CraftBlock.REDSTONE_WIRE.id); // Must take place after BlockPlaceEvent, we need to update all other blocks.
             // CraftBukkit end
 
             --itemstack.count; // CraftBukkit - ORDER MATTERS

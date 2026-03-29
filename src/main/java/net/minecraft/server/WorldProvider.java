@@ -41,7 +41,7 @@ public abstract class WorldProvider {
     public boolean canSpawn(int i, int j) {
         int k = this.a.a(i, j);
 
-        return k == Block.SAND.id;
+        return k == CraftBlock.SAND.id;
     }
 
     public float a(long i, float f) {

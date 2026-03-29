@@ -498,7 +498,7 @@ public abstract class EntityLiving extends Entity {
             int j = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.locY - 0.20000000298023224D - (double) this.height), MathHelper.floor(this.locZ));
 
             if (j > 0) {
-                StepSound stepsound = Block.byId[j].stepSound;
+                StepSound stepsound = CraftBlock.byId[j].stepSound;
 
                 this.world.makeSound(this, stepsound.getName(), stepsound.getVolume1() * 0.5F, stepsound.getVolume2() * 0.75F);
             }
@@ -538,7 +538,7 @@ public abstract class EntityLiving extends Entity {
                 int i = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
 
                 if (i > 0) {
-                    f2 = Block.byId[i].frictionFactor * 0.91F;
+                    f2 = CraftBlock.byId[i].frictionFactor * 0.91F;
                 }
             }
 
@@ -551,7 +551,7 @@ public abstract class EntityLiving extends Entity {
                 int j = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.boundingBox.b) - 1, MathHelper.floor(this.locZ));
 
                 if (j > 0) {
-                    f2 = Block.byId[j].frictionFactor * 0.91F;
+                    f2 = CraftBlock.byId[j].frictionFactor * 0.91F;
                 }
             }
 
@@ -613,7 +613,7 @@ public abstract class EntityLiving extends Entity {
         int j = MathHelper.floor(this.boundingBox.b);
         int k = MathHelper.floor(this.locZ);
 
-        return this.world.getTypeId(i, j, k) == Block.LADDER.id;
+        return this.world.getTypeId(i, j, k) == CraftBlock.LADDER.id;
     }
 
     public void b(NBTTagCompound nbttagcompound) {

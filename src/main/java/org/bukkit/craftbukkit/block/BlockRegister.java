@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.Block;
+import net.minecraft.server.CraftBlock;
 
 public class BlockRegister {
 
@@ -19,7 +19,7 @@ public class BlockRegister {
             for (int i = 0; i < 256; ++i) {
                 byte b0 = (byte) i;
 
-                if (b0 != 0 && Block.byId[b0 & 255] == null) {
+                if (b0 != 0 && CraftBlock.byId[b0 & 255] == null) {
                     b0 = 0;
                 }
 
