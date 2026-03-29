@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 public class SlotResult extends Slot {
 
@@ -22,17 +24,17 @@ public class SlotResult extends Slot {
         itemstack.b(this.e.world, this.e);
         if (itemstack.id == CraftBlock.WORKBENCH.id) {
             this.e.a(AchievementList.h, 1);
-        } else if (itemstack.id == Item.WOOD_PICKAXE.id) {
+        } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.WOOD_PICKAXE.id) {
             this.e.a(AchievementList.i, 1);
         } else if (itemstack.id == CraftBlock.FURNACE.id) {
             this.e.a(AchievementList.j, 1);
-        } else if (itemstack.id == Item.WOOD_HOE.id) {
+        } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.WOOD_HOE.id) {
             this.e.a(AchievementList.l, 1);
-        } else if (itemstack.id == Item.BREAD.id) {
+        } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.BREAD.id) {
             this.e.a(AchievementList.m, 1);
-        } else if (itemstack.id == Item.CAKE.id) {
+        } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.CAKE.id) {
             this.e.a(AchievementList.n, 1);
-        } else if (itemstack.id == Item.STONE_PICKAXE.id) {
+        } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.STONE_PICKAXE.id) {
             this.e.a(AchievementList.o, 1);
         } else if (itemstack.id == Item.WOOD_SWORD.id) {
             this.e.a(AchievementList.r, 1);

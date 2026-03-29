@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.network;
 
-import net.minecraft.server.ItemStack;
+import org.bukkit.craftbukkit.item.ItemStack;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.NetHandler;
 import net.minecraft.server.Packet;

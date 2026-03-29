@@ -3,6 +3,8 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.block.BlockMinecartTrack;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
 
@@ -129,7 +131,7 @@ public class EntityMinecart extends Entity implements IInventory {
                 // CraftBukkit end
 
                 this.die();
-                this.a(Item.MINECART.id, 1, 0.0F);
+                this.a(org.bukkit.craftbukkit.item.Item.MINECART.id, 1, 0.0F);
                 if (this.type == 1) {
                     EntityMinecart entityminecart = this;
 

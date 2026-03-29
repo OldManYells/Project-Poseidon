@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 public class ContainerChest extends Container {
 

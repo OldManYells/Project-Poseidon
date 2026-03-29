@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.*;
 import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.Random;
@@ -191,7 +192,7 @@ public class BlockDoor extends net.minecraft.server.CraftBlock {
     }
 
     public int a(int i, Random random) {
-        return (i & 8) != 0 ? 0 : (this.material == Material.ORE ? Item.IRON_DOOR.id : Item.WOOD_DOOR.id);
+        return (i & 8) != 0 ? 0 : (this.material == Material.ORE ? org.bukkit.craftbukkit.item.Item.IRON_DOOR.id : Item.WOOD_DOOR.id);
     }
 
     public MovingObjectPosition a(World world, int i, int j, int k, Vec3D vec3d, Vec3D vec3d1) {

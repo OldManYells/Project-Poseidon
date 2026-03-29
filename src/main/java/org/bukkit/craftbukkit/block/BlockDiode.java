@@ -4,6 +4,7 @@ import net.minecraft.server.*;
 import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.item.Item;
 
 import java.util.Random;
 

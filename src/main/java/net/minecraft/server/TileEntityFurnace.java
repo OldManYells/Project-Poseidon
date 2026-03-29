@@ -4,6 +4,8 @@ package net.minecraft.server;
 import org.bukkit.craftbukkit.block.BlockFurnace;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
 // CraftBukkit end
@@ -240,7 +242,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
         } else {
             int i = itemstack.getItem().id;
 
-            return i < 256 && CraftBlock.byId[i].material == Material.WOOD ? 300 : (i == Item.STICK.id ? 100 : (i == Item.COAL.id ? 1600 : (i == Item.LAVA_BUCKET.id ? 20000 : (i == CraftBlock.SAPLING.id ? 100 : 0))));
+            return i < 256 && CraftBlock.byId[i].material == Material.WOOD ? 300 : (i == org.bukkit.craftbukkit.item.Item.STICK.id ? 100 : (i == org.bukkit.craftbukkit.item.Item.COAL.id ? 1600 : (i == Item.LAVA_BUCKET.id ? 20000 : (i == CraftBlock.SAPLING.id ? 100 : 0))));
         }
     }
 

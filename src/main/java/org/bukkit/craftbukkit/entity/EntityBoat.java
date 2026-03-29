@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
 
@@ -127,7 +128,7 @@ public class EntityBoat extends Entity {
                 }
 
                 for (j = 0; j < 2; ++j) {
-                    this.a(Item.STICK.id, 1, 0.0F);
+                    this.a(org.bukkit.craftbukkit.item.Item.STICK.id, 1, 0.0F);
                 }
 
                 this.die();

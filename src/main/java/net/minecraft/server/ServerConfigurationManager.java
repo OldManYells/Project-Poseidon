@@ -9,6 +9,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.command.ColouredConsoleSender;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.item.ItemInWorldManager;
 import org.bukkit.craftbukkit.network.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;

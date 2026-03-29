@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 public class Achievement extends Statistic {
 
     public final int a;

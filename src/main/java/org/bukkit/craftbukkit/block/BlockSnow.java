@@ -5,6 +5,8 @@ import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityItem;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 import java.util.Random;
 
@@ -58,7 +60,7 @@ public class BlockSnow extends net.minecraft.server.CraftBlock {
     }
 
     public void a(World world, EntityHuman entityhuman, int i, int j, int k, int l) {
-        int i1 = Item.SNOW_BALL.id;
+        int i1 = org.bukkit.craftbukkit.item.Item.SNOW_BALL.id;
         float f = 0.7F;
         double d0 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
         double d1 = (double) (world.random.nextFloat() * f) + (double) (1.0F - f) * 0.5D;

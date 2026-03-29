@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.item.ItemArmor;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 public class InventoryPlayer implements IInventory {
 

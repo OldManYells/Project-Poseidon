@@ -287,7 +287,7 @@ public class CraftWorld implements World {
     }
 
     public org.bukkit.entity.Item dropItem(Location loc, ItemStack item) {
-        net.minecraft.server.ItemStack stack = new net.minecraft.server.ItemStack(
+        org.bukkit.craftbukkit.item.ItemStack stack = new org.bukkit.craftbukkit.item.ItemStack(
             item.getTypeId(),
             item.getAmount(),
             item.getDurability()

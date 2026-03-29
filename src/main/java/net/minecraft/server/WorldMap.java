@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.map.CraftMapView;
 
 import java.util.*;

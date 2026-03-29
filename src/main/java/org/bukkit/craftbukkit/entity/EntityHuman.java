@@ -4,6 +4,8 @@ import net.minecraft.server.*;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.TrigMath;
 import org.bukkit.craftbukkit.block.BlockBed;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.network.Packet28EntityVelocity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;

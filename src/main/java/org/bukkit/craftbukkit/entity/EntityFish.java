@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -107,7 +109,7 @@ public class EntityFish extends Entity {
             if (!this.world.isStatic) {
                 ItemStack itemstack = this.owner.G();
 
-                if (this.owner.dead || !this.owner.T() || itemstack == null || itemstack.getItem() != Item.FISHING_ROD || this.g(this.owner) > 1024.0D) {
+                if (this.owner.dead || !this.owner.T() || itemstack == null || itemstack.getItem() != org.bukkit.craftbukkit.item.Item.FISHING_ROD || this.g(this.owner) > 1024.0D) {
                     this.die();
                     this.owner.hookedFish = null;
                     return;

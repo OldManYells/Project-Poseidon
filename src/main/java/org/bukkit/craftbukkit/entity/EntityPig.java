@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 // CraftBukkit start
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.PigZapEvent;
 // CraftBukkit end
@@ -50,7 +51,7 @@ public class EntityPig extends EntityAnimal {
     }
 
     protected int j() {
-        return this.fireTicks > 0 ? Item.GRILLED_PORK.id : Item.PORK.id;
+        return this.fireTicks > 0 ? org.bukkit.craftbukkit.item.Item.GRILLED_PORK.id : Item.PORK.id;
     }
 
     public boolean hasSaddle() {

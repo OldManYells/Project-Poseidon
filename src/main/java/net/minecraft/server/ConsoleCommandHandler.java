@@ -3,6 +3,8 @@ package net.minecraft.server;
 import org.bukkit.craftbukkit.command.ServerCommandListener;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.network.Packet3Chat;
 
 import java.util.Iterator;

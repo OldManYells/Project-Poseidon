@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;

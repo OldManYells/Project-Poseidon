@@ -5,6 +5,7 @@ import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityItem;
 import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 import java.util.Random;
 

@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityItem;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 public class BlockJukeBox extends BlockContainer {
 

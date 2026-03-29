@@ -30,12 +30,12 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
         for (MaterialData mdata : ingred) {
             int id = mdata.getItemTypeId();
             byte dmg = mdata.getData();
-            data[i] = new net.minecraft.server.ItemStack(id, 1, dmg);
+            data[i] = new org.bukkit.craftbukkit.item.ItemStack(id, 1, dmg);
             i++;
         }
         int id = this.getResult().getTypeId();
         int amount = this.getResult().getAmount();
         short durability = this.getResult().getDurability();
-        CraftingManager.getInstance().registerShapelessRecipe(new net.minecraft.server.ItemStack(id, amount, durability), data);
+        CraftingManager.getInstance().registerShapelessRecipe(new org.bukkit.craftbukkit.item.ItemStack(id, amount, durability), data);
     }
 }

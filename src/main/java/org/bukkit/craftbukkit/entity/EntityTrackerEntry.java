@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.network.*;
 import org.bukkit.entity.Player;
 

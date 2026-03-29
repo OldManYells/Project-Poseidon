@@ -2,6 +2,10 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
 import org.bukkit.PoseidonConfig;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemInWorldManager;
+import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.item.ItemWorldMapBase;
 import org.bukkit.craftbukkit.network.*;
 import org.bukkit.event.player.PlayerDeathEvent;
 import org.bukkit.api.PoseidonUUID;
@@ -234,7 +238,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             ItemStack itemstack = this.inventory.getItem(i);
 
-            if (itemstack != null && Item.byId[itemstack.id].b() && this.netServerHandler.b() <= 2) {
+            if (itemstack != null && org.bukkit.craftbukkit.item.Item.byId[itemstack.id].b() && this.netServerHandler.b() <= 2) {
                 Packet packet = ((ItemWorldMapBase) Item.byId[itemstack.id]).b(itemstack, this.world, this);
 
                 if (packet != null) {

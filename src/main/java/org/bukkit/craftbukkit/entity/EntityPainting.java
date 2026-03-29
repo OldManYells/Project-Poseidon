@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.event.painting.PaintingBreakByEntityEvent;
 import org.bukkit.event.painting.PaintingBreakByWorldEvent;
 
@@ -133,7 +135,7 @@ public class EntityPainting extends Entity {
                 // CraftBukkit end
 
                 this.die();
-                this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
+                this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(org.bukkit.craftbukkit.item.Item.PAINTING)));
             }
         }
     }
@@ -213,7 +215,7 @@ public class EntityPainting extends Entity {
 
             this.die();
             this.af();
-            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
+            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(org.bukkit.craftbukkit.item.Item.PAINTING)));
         }
 
         return true;
@@ -254,7 +256,7 @@ public class EntityPainting extends Entity {
     public void a(double d0, double d1, double d2) {
         if (!this.world.isStatic && d0 * d0 + d1 * d1 + d2 * d2 > 0.0D) {
             this.die();
-            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
+            this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(org.bukkit.craftbukkit.item.Item.PAINTING)));
         }
     }
 

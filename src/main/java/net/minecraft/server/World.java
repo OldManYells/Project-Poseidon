@@ -412,7 +412,7 @@ public class World implements IBlockAccess {
         }
     }
 
-    protected void update(int i, int j, int k, int l) {
+    public void update(int i, int j, int k, int l) {
         this.notify(i, j, k);
         this.applyPhysics(i, j, k, l);
     }

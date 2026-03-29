@@ -4,6 +4,7 @@ import net.minecraft.server.*;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.block.BlockFluids;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityCombustEvent;

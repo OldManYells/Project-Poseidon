@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.item.ItemStack;
+
 public class ShapedRecipes implements CraftingRecipe {
 
     private int b;

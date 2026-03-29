@@ -4,6 +4,8 @@ import net.minecraft.server.*;
 import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.util.Vector;
 
@@ -141,14 +143,14 @@ public class BlockDispenser extends BlockContainer {
             itemstack = new ItemStack(event.getItem().getTypeId(), event.getItem().getAmount(), event.getItem().getDurability());
             // CraftBukkit end
 
-            if (itemstack.id == Item.ARROW.id) {
+            if (itemstack.id == org.bukkit.craftbukkit.item.Item.ARROW.id) {
                 EntityArrow entityarrow = new EntityArrow(world, d0, d1, d2);
 
                 entityarrow.a((double) b0, 0.10000000149011612D, (double) b1, 1.1F, 6.0F);
                 entityarrow.fromPlayer = true;
                 world.addEntity(entityarrow);
                 world.e(1002, i, j, k, 0);
-            } else if (itemstack.id == Item.EGG.id) {
+            } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.EGG.id) {
                 EntityEgg entityegg = new EntityEgg(world, d0, d1, d2);
 
                 entityegg.a((double) b0, 0.10000000149011612D, (double) b1, 1.1F, 6.0F);

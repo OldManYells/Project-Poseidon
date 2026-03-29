@@ -7,6 +7,8 @@ import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityItem;
 import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.item.*;
+import org.bukkit.craftbukkit.item.Item;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -540,16 +542,16 @@ public class CraftBlock {
     }
 
     static {
-        Item.byId[WOOL.id] = (new ItemCloth(WOOL.id - 256)).a("cloth");
-        Item.byId[LOG.id] = (new ItemLog(LOG.id - 256)).a("log");
-        Item.byId[STEP.id] = (new ItemStep(STEP.id - 256)).a("stoneSlab");
-        Item.byId[SAPLING.id] = (new ItemSapling(SAPLING.id - 256)).a("sapling");
-        Item.byId[LEAVES.id] = (new ItemLeaves(LEAVES.id - 256)).a("leaves");
-        Item.byId[PISTON.id] = new ItemPiston(PISTON.id - 256);
-        Item.byId[PISTON_STICKY.id] = new ItemPiston(PISTON_STICKY.id - 256);
+        org.bukkit.craftbukkit.item.Item.byId[WOOL.id] = (new ItemCloth(WOOL.id - 256)).a("cloth");
+        org.bukkit.craftbukkit.item.Item.byId[LOG.id] = (new ItemLog(LOG.id - 256)).a("log");
+        org.bukkit.craftbukkit.item.Item.byId[STEP.id] = (new ItemStep(STEP.id - 256)).a("stoneSlab");
+        org.bukkit.craftbukkit.item.Item.byId[SAPLING.id] = (new ItemSapling(SAPLING.id - 256)).a("sapling");
+        org.bukkit.craftbukkit.item.Item.byId[LEAVES.id] = (new ItemLeaves(LEAVES.id - 256)).a("leaves");
+        org.bukkit.craftbukkit.item.Item.byId[PISTON.id] = new ItemPiston(PISTON.id - 256);
+        org.bukkit.craftbukkit.item.Item.byId[PISTON_STICKY.id] = new ItemPiston(PISTON_STICKY.id - 256);
 
         for (int i = 0; i < 256; ++i) {
-            if (byId[i] != null && Item.byId[i] == null) {
+            if (byId[i] != null && org.bukkit.craftbukkit.item.Item.byId[i] == null) {
                 Item.byId[i] = new ItemBlock(i - 256);
                 byId[i].h();
             }

@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 import java.util.Random;
 
 public class WorldGenDungeons extends WorldGenerator {
@@ -124,7 +127,7 @@ public class WorldGenDungeons extends WorldGenerator {
     private ItemStack a(Random random) {
         int i = random.nextInt(11);
 
-        return i == 0 ? new ItemStack(Item.SADDLE) : (i == 1 ? new ItemStack(Item.IRON_INGOT, random.nextInt(4) + 1) : (i == 2 ? new ItemStack(Item.BREAD) : (i == 3 ? new ItemStack(Item.WHEAT, random.nextInt(4) + 1) : (i == 4 ? new ItemStack(Item.SULPHUR, random.nextInt(4) + 1) : (i == 5 ? new ItemStack(Item.STRING, random.nextInt(4) + 1) : (i == 6 ? new ItemStack(Item.BUCKET) : (i == 7 && random.nextInt(100) == 0 ? new ItemStack(Item.GOLDEN_APPLE) : (i == 8 && random.nextInt(2) == 0 ? new ItemStack(Item.REDSTONE, random.nextInt(4) + 1) : (i == 9 && random.nextInt(10) == 0 ? new ItemStack(Item.byId[Item.GOLD_RECORD.id + random.nextInt(2)]) : (i == 10 ? new ItemStack(Item.INK_SACK, 1, 3) : null))))))))));
+        return i == 0 ? new ItemStack(org.bukkit.craftbukkit.item.Item.SADDLE) : (i == 1 ? new ItemStack(org.bukkit.craftbukkit.item.Item.IRON_INGOT, random.nextInt(4) + 1) : (i == 2 ? new ItemStack(org.bukkit.craftbukkit.item.Item.BREAD) : (i == 3 ? new ItemStack(org.bukkit.craftbukkit.item.Item.WHEAT, random.nextInt(4) + 1) : (i == 4 ? new ItemStack(org.bukkit.craftbukkit.item.Item.SULPHUR, random.nextInt(4) + 1) : (i == 5 ? new ItemStack(org.bukkit.craftbukkit.item.Item.STRING, random.nextInt(4) + 1) : (i == 6 ? new ItemStack(org.bukkit.craftbukkit.item.Item.BUCKET) : (i == 7 && random.nextInt(100) == 0 ? new ItemStack(org.bukkit.craftbukkit.item.Item.GOLDEN_APPLE) : (i == 8 && random.nextInt(2) == 0 ? new ItemStack(org.bukkit.craftbukkit.item.Item.REDSTONE, random.nextInt(4) + 1) : (i == 9 && random.nextInt(10) == 0 ? new ItemStack(org.bukkit.craftbukkit.item.Item.byId[org.bukkit.craftbukkit.item.Item.GOLD_RECORD.id + random.nextInt(2)]) : (i == 10 ? new ItemStack(Item.INK_SACK, 1, 3) : null))))))))));
     }
 
     private String b(Random random) {

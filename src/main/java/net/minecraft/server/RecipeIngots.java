@@ -1,12 +1,15 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 public class RecipeIngots {
 
     private Object[][] a;
 
     public RecipeIngots() {
-        this.a = new Object[][] { { CraftBlock.GOLD_BLOCK, new ItemStack(Item.GOLD_INGOT, 9)}, { CraftBlock.IRON_BLOCK, new ItemStack(Item.IRON_INGOT, 9)}, { CraftBlock.DIAMOND_BLOCK, new ItemStack(Item.DIAMOND, 9)}, { CraftBlock.LAPIS_BLOCK, new ItemStack(Item.INK_SACK, 9, 4)}};
+        this.a = new Object[][] { { CraftBlock.GOLD_BLOCK, new ItemStack(org.bukkit.craftbukkit.item.Item.GOLD_INGOT, 9)}, { CraftBlock.IRON_BLOCK, new ItemStack(org.bukkit.craftbukkit.item.Item.IRON_INGOT, 9)}, { CraftBlock.DIAMOND_BLOCK, new ItemStack(org.bukkit.craftbukkit.item.Item.DIAMOND, 9)}, { CraftBlock.LAPIS_BLOCK, new ItemStack(Item.INK_SACK, 9, 4)}};
     }
 
     public void a(CraftingManager craftingmanager) {

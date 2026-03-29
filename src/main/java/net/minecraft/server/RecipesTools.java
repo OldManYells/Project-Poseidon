@@ -1,13 +1,16 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 public class RecipesTools {
 
     private String[][] a = new String[][] { { "XXX", " # ", " # "}, { "X", "#", "#"}, { "XX", "X#", " #"}, { "XX", " #", " #"}};
     private Object[][] b;
 
     public RecipesTools() {
-        this.b = new Object[][] { { CraftBlock.WOOD, CraftBlock.COBBLESTONE, Item.IRON_INGOT, Item.DIAMOND, Item.GOLD_INGOT}, { Item.WOOD_PICKAXE, Item.STONE_PICKAXE, Item.IRON_PICKAXE, Item.DIAMOND_PICKAXE, Item.GOLD_PICKAXE}, { Item.WOOD_SPADE, Item.STONE_SPADE, Item.IRON_SPADE, Item.DIAMOND_SPADE, Item.GOLD_SPADE}, { Item.WOOD_AXE, Item.STONE_AXE, Item.IRON_AXE, Item.DIAMOND_AXE, Item.GOLD_AXE}, { Item.WOOD_HOE, Item.STONE_HOE, Item.IRON_HOE, Item.DIAMOND_HOE, Item.GOLD_HOE}};
+        this.b = new Object[][] { { CraftBlock.WOOD, CraftBlock.COBBLESTONE, org.bukkit.craftbukkit.item.Item.IRON_INGOT, org.bukkit.craftbukkit.item.Item.DIAMOND, org.bukkit.craftbukkit.item.Item.GOLD_INGOT}, { org.bukkit.craftbukkit.item.Item.WOOD_PICKAXE, org.bukkit.craftbukkit.item.Item.STONE_PICKAXE, org.bukkit.craftbukkit.item.Item.IRON_PICKAXE, org.bukkit.craftbukkit.item.Item.DIAMOND_PICKAXE, org.bukkit.craftbukkit.item.Item.GOLD_PICKAXE}, { org.bukkit.craftbukkit.item.Item.WOOD_SPADE, org.bukkit.craftbukkit.item.Item.STONE_SPADE, org.bukkit.craftbukkit.item.Item.IRON_SPADE, org.bukkit.craftbukkit.item.Item.DIAMOND_SPADE, org.bukkit.craftbukkit.item.Item.GOLD_SPADE}, { org.bukkit.craftbukkit.item.Item.WOOD_AXE, org.bukkit.craftbukkit.item.Item.STONE_AXE, org.bukkit.craftbukkit.item.Item.IRON_AXE, org.bukkit.craftbukkit.item.Item.DIAMOND_AXE, org.bukkit.craftbukkit.item.Item.GOLD_AXE}, { org.bukkit.craftbukkit.item.Item.WOOD_HOE, org.bukkit.craftbukkit.item.Item.STONE_HOE, org.bukkit.craftbukkit.item.Item.IRON_HOE, org.bukkit.craftbukkit.item.Item.DIAMOND_HOE, org.bukkit.craftbukkit.item.Item.GOLD_HOE}};
     }
 
     public void a(CraftingManager craftingmanager) {
@@ -15,12 +18,12 @@ public class RecipesTools {
             Object object = this.b[0][i];
 
             for (int j = 0; j < this.b.length - 1; ++j) {
-                Item item = (Item) this.b[j + 1][i];
+                org.bukkit.craftbukkit.item.Item item = (org.bukkit.craftbukkit.item.Item) this.b[j + 1][i];
 
-                craftingmanager.registerShapedRecipe(new ItemStack(item), new Object[] { this.a[j], Character.valueOf('#'), Item.STICK, Character.valueOf('X'), object});
+                craftingmanager.registerShapedRecipe(new ItemStack(item), new Object[] { this.a[j], Character.valueOf('#'), org.bukkit.craftbukkit.item.Item.STICK, Character.valueOf('X'), object});
             }
         }
 
-        craftingmanager.registerShapedRecipe(new ItemStack(Item.SHEARS), new Object[] { " #", "# ", Character.valueOf('#'), Item.IRON_INGOT});
+        craftingmanager.registerShapedRecipe(new ItemStack(org.bukkit.craftbukkit.item.Item.SHEARS), new Object[] { " #", "# ", Character.valueOf('#'), Item.IRON_INGOT});
     }
 }

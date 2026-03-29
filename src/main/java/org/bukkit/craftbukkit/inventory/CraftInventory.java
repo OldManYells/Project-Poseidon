@@ -34,7 +34,7 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
 
     public ItemStack[] getContents() {
         ItemStack[] items = new ItemStack[getSize()];
-        net.minecraft.server.ItemStack[] mcItems = getInventory().getContents();
+        org.bukkit.craftbukkit.item.ItemStack[] mcItems = getInventory().getContents();
 
         for (int i = 0; i < mcItems.length; i++) {
             items[i] = mcItems[i] == null ? null : new CraftItemStack(mcItems[i]);
@@ -48,20 +48,20 @@ public class CraftInventory implements org.bukkit.inventory.Inventory {
             throw new IllegalArgumentException("Invalid inventory size; expected " + getInventory().getContents().length + " and got " + items.length); // Poseidon
         }
 
-        net.minecraft.server.ItemStack[] mcItems = getInventory().getContents();
+        org.bukkit.craftbukkit.item.ItemStack[] mcItems = getInventory().getContents();
 
         for (int i = 0; i < items.length; i++) {
             ItemStack item = items[i];
             if (item == null || item.getTypeId() <= 0) {
                 mcItems[i] = null;
             } else {
-                mcItems[i] = new net.minecraft.server.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability());
+                mcItems[i] = new org.bukkit.craftbukkit.item.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability());
             }
         }
     }
 
     public void setItem(int index, ItemStack item) {
-        getInventory().setItem(index, (item == null ? null : new net.minecraft.server.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability())));
+        getInventory().setItem(index, (item == null ? null : new org.bukkit.craftbukkit.item.ItemStack(item.getTypeId(), item.getAmount(), item.getDurability())));
     }
 
     public boolean contains(int materialId) {

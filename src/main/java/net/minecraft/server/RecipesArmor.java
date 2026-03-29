@@ -1,13 +1,16 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 public class RecipesArmor {
 
     private String[][] a = new String[][] { { "XXX", "X X"}, { "X X", "XXX", "XXX"}, { "XXX", "X X", "X X"}, { "X X", "X X"}};
     private Object[][] b;
 
     public RecipesArmor() {
-        this.b = new Object[][] { { Item.LEATHER, CraftBlock.FIRE, Item.IRON_INGOT, Item.DIAMOND, Item.GOLD_INGOT}, { Item.LEATHER_HELMET, Item.CHAINMAIL_HELMET, Item.IRON_HELMET, Item.DIAMOND_HELMET, Item.GOLD_HELMET}, { Item.LEATHER_CHESTPLATE, Item.CHAINMAIL_CHESTPLATE, Item.IRON_CHESTPLATE, Item.DIAMOND_CHESTPLATE, Item.GOLD_CHESTPLATE}, { Item.LEATHER_LEGGINGS, Item.CHAINMAIL_LEGGINGS, Item.IRON_LEGGINGS, Item.DIAMOND_LEGGINGS, Item.GOLD_LEGGINGS}, { Item.LEATHER_BOOTS, Item.CHAINMAIL_BOOTS, Item.IRON_BOOTS, Item.DIAMOND_BOOTS, Item.GOLD_BOOTS}};
+        this.b = new Object[][] { { org.bukkit.craftbukkit.item.Item.LEATHER, CraftBlock.FIRE, org.bukkit.craftbukkit.item.Item.IRON_INGOT, org.bukkit.craftbukkit.item.Item.DIAMOND, org.bukkit.craftbukkit.item.Item.GOLD_INGOT}, { org.bukkit.craftbukkit.item.Item.LEATHER_HELMET, org.bukkit.craftbukkit.item.Item.CHAINMAIL_HELMET, org.bukkit.craftbukkit.item.Item.IRON_HELMET, org.bukkit.craftbukkit.item.Item.DIAMOND_HELMET, org.bukkit.craftbukkit.item.Item.GOLD_HELMET}, { org.bukkit.craftbukkit.item.Item.LEATHER_CHESTPLATE, org.bukkit.craftbukkit.item.Item.CHAINMAIL_CHESTPLATE, org.bukkit.craftbukkit.item.Item.IRON_CHESTPLATE, org.bukkit.craftbukkit.item.Item.DIAMOND_CHESTPLATE, org.bukkit.craftbukkit.item.Item.GOLD_CHESTPLATE}, { org.bukkit.craftbukkit.item.Item.LEATHER_LEGGINGS, org.bukkit.craftbukkit.item.Item.CHAINMAIL_LEGGINGS, org.bukkit.craftbukkit.item.Item.IRON_LEGGINGS, org.bukkit.craftbukkit.item.Item.DIAMOND_LEGGINGS, org.bukkit.craftbukkit.item.Item.GOLD_LEGGINGS}, { org.bukkit.craftbukkit.item.Item.LEATHER_BOOTS, org.bukkit.craftbukkit.item.Item.CHAINMAIL_BOOTS, org.bukkit.craftbukkit.item.Item.IRON_BOOTS, org.bukkit.craftbukkit.item.Item.DIAMOND_BOOTS, org.bukkit.craftbukkit.item.Item.GOLD_BOOTS}};
     }
 
     public void a(CraftingManager craftingmanager) {
@@ -15,7 +18,7 @@ public class RecipesArmor {
             Object object = this.b[0][i];
 
             for (int j = 0; j < this.b.length - 1; ++j) {
-                Item item = (Item) this.b[j + 1][i];
+                org.bukkit.craftbukkit.item.Item item = (Item) this.b[j + 1][i];
 
                 craftingmanager.registerShapedRecipe(new ItemStack(item), new Object[] { this.a[j], Character.valueOf('X'), object});
             }

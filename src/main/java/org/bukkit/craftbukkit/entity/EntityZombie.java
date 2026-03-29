@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Item;
+import org.bukkit.craftbukkit.item.Item;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.World;
 import org.bukkit.event.entity.EntityCombustEvent;

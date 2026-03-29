@@ -3,13 +3,15 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.PoseidonConfig;
 // CraftBukkit start
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 // CraftBukkit end
 
 public class EntitySkeleton extends EntityMonster {
 
-    private static final ItemStack a = new ItemStack(Item.BOW, 1);
+    private static final ItemStack a = new ItemStack(org.bukkit.craftbukkit.item.Item.BOW, 1);
 
     public EntitySkeleton(World world) {
         super(world);

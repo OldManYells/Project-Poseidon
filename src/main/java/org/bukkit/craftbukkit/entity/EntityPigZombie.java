@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Item;
-import net.minecraft.server.ItemStack;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.World;
 import org.bukkit.event.entity.EntityTargetEvent;

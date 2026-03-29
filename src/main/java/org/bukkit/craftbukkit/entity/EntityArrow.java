@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -294,7 +296,7 @@ public class EntityArrow extends Entity {
     public void b(EntityHuman entityhuman) {
         if (!this.world.isStatic) {
             // CraftBukkit start
-            ItemStack itemstack = new ItemStack(Item.ARROW, 1);
+            ItemStack itemstack = new ItemStack(org.bukkit.craftbukkit.item.Item.ARROW, 1);
             if (this.inGround && this.fromPlayer && this.shake <= 0 && entityhuman.inventory.canHold(itemstack) > 0) {
                 EntityItem item = new EntityItem(this.world, this.locX, this.locY, this.locZ, itemstack);
 

@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.Item;
+import org.bukkit.craftbukkit.item.Item;
 import net.minecraft.server.Material;
 
 import java.util.Random;

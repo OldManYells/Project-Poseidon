@@ -3,6 +3,7 @@ package net.minecraft.server;
 import org.bukkit.Poseidon;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.network.*;
 import org.bukkit.event.player.PlayerSendPacketEvent;
 import org.bukkit.network.ConnectionType;

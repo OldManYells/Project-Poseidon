@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 
 public class SlotResult2 extends Slot {
 
@@ -17,7 +19,7 @@ public class SlotResult2 extends Slot {
 
     public void a(ItemStack itemstack) {
         itemstack.b(this.d.world, this.d);
-        if (itemstack.id == Item.IRON_INGOT.id) {
+        if (itemstack.id == org.bukkit.craftbukkit.item.Item.IRON_INGOT.id) {
             this.d.a(AchievementList.k, 1);
         }
 

@@ -23,6 +23,8 @@ import org.bukkit.craftbukkit.inventory.CraftFurnaceRecipe;
 import org.bukkit.craftbukkit.inventory.CraftRecipe;
 import org.bukkit.craftbukkit.inventory.CraftShapedRecipe;
 import org.bukkit.craftbukkit.inventory.CraftShapelessRecipe;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.map.CraftMapView;
 import org.bukkit.craftbukkit.scheduler.CraftScheduler;
 import org.bukkit.entity.Player;
@@ -775,7 +777,7 @@ public final class CraftServer implements Server {
     }
 
     public CraftMapView createMap(World world) {
-        ItemStack stack = new ItemStack(Item.MAP, 1, -1);
+        ItemStack stack = new ItemStack(org.bukkit.craftbukkit.item.Item.MAP, 1, -1);
         WorldMap worldmap = Item.MAP.a(stack, ((CraftWorld) world).getHandle());
         return worldmap.mapView;
     }

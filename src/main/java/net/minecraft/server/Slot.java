@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.item.ItemStack;
+
 public class Slot {
 
     public final int index; // CraftBukkit - private -> public

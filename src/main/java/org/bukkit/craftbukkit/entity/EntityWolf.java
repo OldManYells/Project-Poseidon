@@ -2,6 +2,9 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemFood;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -141,10 +144,10 @@ public class EntityWolf extends EntityAnimal {
                 ItemStack itemstack = entityhuman.inventory.getItemInHand();
 
                 if (itemstack != null) {
-                    if (!this.isTamed() && itemstack.id == Item.BONE.id) {
+                    if (!this.isTamed() && itemstack.id == org.bukkit.craftbukkit.item.Item.BONE.id) {
                         this.a = true;
-                    } else if (this.isTamed() && Item.byId[itemstack.id] instanceof ItemFood) {
-                        this.a = ((ItemFood) Item.byId[itemstack.id]).l();
+                    } else if (this.isTamed() && org.bukkit.craftbukkit.item.Item.byId[itemstack.id] instanceof ItemFood) {
+                        this.a = ((ItemFood) org.bukkit.craftbukkit.item.Item.byId[itemstack.id]).l();
                     }
                 }
             }
@@ -352,7 +355,7 @@ public class EntityWolf extends EntityAnimal {
         ItemStack itemstack = entityhuman.inventory.getItemInHand();
 
         if (!this.isTamed()) {
-            if (itemstack != null && itemstack.id == Item.BONE.id && !this.isAngry()) {
+            if (itemstack != null && itemstack.id == org.bukkit.craftbukkit.item.Item.BONE.id && !this.isAngry()) {
                 --itemstack.count;
                 if (itemstack.count <= 0) {
                     entityhuman.inventory.setItem(entityhuman.inventory.itemInHandIndex, (ItemStack) null);
@@ -378,8 +381,8 @@ public class EntityWolf extends EntityAnimal {
                 return true;
             }
         } else {
-            if (itemstack != null && Item.byId[itemstack.id] instanceof ItemFood) {
-                ItemFood itemfood = (ItemFood) Item.byId[itemstack.id];
+            if (itemstack != null && org.bukkit.craftbukkit.item.Item.byId[itemstack.id] instanceof ItemFood) {
+                ItemFood itemfood = (ItemFood) org.bukkit.craftbukkit.item.Item.byId[itemstack.id];
 
                 if (itemfood.l() && this.datawatcher.b(18) < 20) {
                     --itemstack.count;

@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 import java.util.*;
 
 public class StatisticList {
@@ -83,8 +86,8 @@ public class StatisticList {
             while (iterator.hasNext()) {
                 Integer integer = (Integer) iterator.next();
 
-                if (Item.byId[integer.intValue()] != null) {
-                    String s = StatisticCollector.a("stat.craftItem", new Object[] { Item.byId[integer.intValue()].j()});
+                if (org.bukkit.craftbukkit.item.Item.byId[integer.intValue()] != null) {
+                    String s = StatisticCollector.a("stat.craftItem", new Object[] { org.bukkit.craftbukkit.item.Item.byId[integer.intValue()].j()});
 
                     D[integer.intValue()] = (new CraftingStatistic(16842752 + integer.intValue(), s, integer.intValue())).d();
                 }
@@ -116,8 +119,8 @@ public class StatisticList {
         }
 
         for (int l = j; l < k; ++l) {
-            if (Item.byId[l] != null) {
-                String s1 = StatisticCollector.a(s, new Object[] { Item.byId[l].j()});
+            if (org.bukkit.craftbukkit.item.Item.byId[l] != null) {
+                String s1 = StatisticCollector.a(s, new Object[] { org.bukkit.craftbukkit.item.Item.byId[l].j()});
 
                 astatistic[l] = (new CraftingStatistic(i + l, s1, l)).d();
                 if (l >= CraftBlock.byId.length) {
@@ -136,7 +139,7 @@ public class StatisticList {
         }
 
         for (int l = j; l < k; ++l) {
-            if (Item.byId[l] != null && Item.byId[l].f()) {
+            if (org.bukkit.craftbukkit.item.Item.byId[l] != null && org.bukkit.craftbukkit.item.Item.byId[l].f()) {
                 String s1 = StatisticCollector.a(s, new Object[] { Item.byId[l].j()});
 
                 astatistic[l] = (new CraftingStatistic(i + l, s1, l)).d();

@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.item.ItemArmor;
+import org.bukkit.craftbukkit.item.ItemStack;
+
 class SlotArmor extends Slot {
 
     final int d;

@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
+import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.network.Packet103SetSlot;
 
 public class ContainerPlayer extends Container {
