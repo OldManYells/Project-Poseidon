@@ -1,12 +1,14 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
+import net.minecraft.server.CraftBlock;
+import net.minecraft.server.World;
 import org.bukkit.BlockChangeDelegate;
 
 import java.util.Random;
 
-public class WorldGenTrees extends WorldGenerator {
+public class WorldGenForest extends WorldGenerator {
 
-    public WorldGenTrees() {}
+    public WorldGenForest() {}
 
     public boolean a(World world, Random random, int i, int j, int k) {
         // CraftBukkit start
@@ -19,7 +21,7 @@ public class WorldGenTrees extends WorldGenerator {
 
     public boolean generate(BlockChangeDelegate world, Random random, int i, int j, int k) {
         // CraftBukkit end
-        int l = random.nextInt(3) + 4;
+        int l = random.nextInt(3) + 5;
         boolean flag = true;
 
         if (j >= 1 && j + l + 1 <= 128) {
@@ -72,8 +74,8 @@ public class WorldGenTrees extends WorldGenerator {
                             for (int k2 = k - k1; k2 <= k + k1; ++k2) {
                                 int l2 = k2 - k;
 
-                                if ((Math.abs(j2) != k1 || Math.abs(l2) != k1 || random.nextInt(2) != 0 && j1 != 0) && !CraftBlock.o[world.getTypeId(l1, i2, k2)] && !CraftBlock.leafDecayBlacklist.contains(world.getTypeId(l1, i2, k2))) {
-                                    world.setRawTypeId(l1, i2, k2, CraftBlock.LEAVES.id);
+                                if ((Math.abs(j2) != k1 || Math.abs(l2) != k1 || random.nextInt(2) != 0 && j1 != 0) && !CraftBlock.o[world.getTypeId(l1, i2, k2)]) {
+                                    world.setRawTypeIdAndData(l1, i2, k2, CraftBlock.LEAVES.id, 2);
                                 }
                             }
                         }
@@ -82,7 +84,7 @@ public class WorldGenTrees extends WorldGenerator {
                     for (i2 = 0; i2 < l; ++i2) {
                         j1 = world.getTypeId(i, j + i2, k);
                         if (j1 == 0 || j1 == CraftBlock.LEAVES.id) {
-                            world.setRawTypeId(i, j + i2, k, CraftBlock.LOG.id);
+                            world.setRawTypeIdAndData(i, j + i2, k, CraftBlock.LOG.id, 2);
                         }
                     }
 

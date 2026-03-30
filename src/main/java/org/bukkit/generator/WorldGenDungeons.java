@@ -1,6 +1,7 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
 
+import net.minecraft.server.*;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
 

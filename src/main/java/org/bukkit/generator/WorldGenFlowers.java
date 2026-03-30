@@ -1,6 +1,8 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
 
+import net.minecraft.server.CraftBlock;
+import net.minecraft.server.World;
 import org.bukkit.craftbukkit.block.BlockFlower;
 
 import java.util.Random;

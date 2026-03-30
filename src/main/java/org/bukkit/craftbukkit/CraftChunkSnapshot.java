@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.BiomeBase;
+import org.bukkit.generator.BiomeBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;

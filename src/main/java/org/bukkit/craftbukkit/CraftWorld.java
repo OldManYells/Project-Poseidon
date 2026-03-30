@@ -16,8 +16,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.SpawnChangeEvent;
-import org.bukkit.generator.BlockPopulator;
-import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.generator.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 

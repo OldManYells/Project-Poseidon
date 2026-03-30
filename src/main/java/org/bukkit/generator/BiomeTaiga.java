@@ -1,4 +1,4 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
 import org.bukkit.craftbukkit.entity.EntityWolf;
 

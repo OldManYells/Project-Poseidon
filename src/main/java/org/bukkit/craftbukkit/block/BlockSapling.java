@@ -2,6 +2,10 @@ package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.*;
 import org.bukkit.BlockChangeDelegate;
+import org.bukkit.generator.WorldGenBigTree;
+import org.bukkit.generator.WorldGenForest;
+import org.bukkit.generator.WorldGenTaiga2;
+import org.bukkit.generator.WorldGenTrees;
 
 import java.util.Random;
 

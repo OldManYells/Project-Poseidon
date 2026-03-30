@@ -1,5 +1,9 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
+
+import net.minecraft.server.CraftBlock;
+import net.minecraft.server.Material;
+import net.minecraft.server.World;
 
 import java.util.Random;
 

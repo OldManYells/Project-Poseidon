@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.generator.BiomeBase;
+
 import java.util.Arrays;
 
 public class WorldChunkManagerHell extends WorldChunkManager {

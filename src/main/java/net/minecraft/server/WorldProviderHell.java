@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 
+import org.bukkit.generator.BiomeBase;
+
 public class WorldProviderHell extends WorldProvider {
 
     public WorldProviderHell() {}

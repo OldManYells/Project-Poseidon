@@ -1,16 +1,20 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
 
+import net.minecraft.server.CraftBlock;
+import net.minecraft.server.World;
 import org.bukkit.craftbukkit.block.BlockFlower;
 
 import java.util.Random;
 
-public class WorldGenDeadBush extends WorldGenerator {
+public class WorldGenGrass extends WorldGenerator {
 
     private int a;
+    private int b;
 
-    public WorldGenDeadBush(int i) {
+    public WorldGenGrass(int i, int j) {
         this.a = i;
+        this.b = j;
     }
 
     public boolean a(World world, Random random, int i, int j, int k) {
@@ -20,13 +24,13 @@ public class WorldGenDeadBush extends WorldGenerator {
             ;
         }
 
-        for (int i1 = 0; i1 < 4; ++i1) {
+        for (int i1 = 0; i1 < 128; ++i1) {
             int j1 = i + random.nextInt(8) - random.nextInt(8);
             int k1 = j + random.nextInt(4) - random.nextInt(4);
             int l1 = k + random.nextInt(8) - random.nextInt(8);
 
             if (world.isEmpty(j1, k1, l1) && ((BlockFlower) CraftBlock.byId[this.a]).f(world, j1, k1, l1)) {
-                world.setRawTypeId(j1, k1, l1, this.a);
+                world.setRawTypeIdAndData(j1, k1, l1, this.a, this.b);
             }
         }
 

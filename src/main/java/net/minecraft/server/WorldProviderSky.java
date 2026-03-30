@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 
+import org.bukkit.generator.BiomeBase;
+
 public class WorldProviderSky extends WorldProvider {
 
     public WorldProviderSky() {}

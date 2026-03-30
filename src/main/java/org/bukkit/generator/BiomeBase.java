@@ -1,5 +1,6 @@
-package net.minecraft.server;
+package org.bukkit.generator;
 
+import net.minecraft.server.*;
 import org.bukkit.craftbukkit.entity.*;
 
 import java.util.ArrayList;

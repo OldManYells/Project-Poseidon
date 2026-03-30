@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 
 import org.bukkit.craftbukkit.block.BlockSand;
+import org.bukkit.generator.*;
 
 import java.util.Random;
 

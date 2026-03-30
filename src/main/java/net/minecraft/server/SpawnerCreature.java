@@ -3,6 +3,8 @@ package net.minecraft.server;
 import org.bukkit.craftbukkit.block.BlockBed;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.generator.BiomeBase;
+import org.bukkit.generator.BiomeMeta;
 
 import java.util.HashSet;
 import java.util.Iterator;

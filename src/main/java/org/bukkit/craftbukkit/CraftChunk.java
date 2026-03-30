@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit;
 
 import com.google.common.collect.MapMaker;
-import net.minecraft.server.BiomeBase;
+import org.bukkit.generator.BiomeBase;
 import net.minecraft.server.ChunkPosition;
 import net.minecraft.server.WorldChunkManager;
 import net.minecraft.server.WorldServer;
