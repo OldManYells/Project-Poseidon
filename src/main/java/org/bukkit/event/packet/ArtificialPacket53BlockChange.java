@@ -1,6 +1,6 @@
 package org.bukkit.event.packet;
 
-import net.minecraft.server.NetHandler;
+import org.bukkit.craftbukkit.network.NetHandler;
 import net.minecraft.server.Packet;
 import net.minecraft.server.World;
 

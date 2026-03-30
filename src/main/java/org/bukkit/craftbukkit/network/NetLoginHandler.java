@@ -1,7 +1,10 @@
-package net.minecraft.server;
+package org.bukkit.craftbukkit.network;
 
+import net.minecraft.server.ChunkCoordinates;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Packet;
+import net.minecraft.server.WorldServer;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
-import org.bukkit.craftbukkit.network.*;
 import org.bukkit.network.ConnectionType;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.network.LoginProcessHandler;

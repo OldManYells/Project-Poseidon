@@ -4,6 +4,7 @@ import org.bukkit.Poseidon;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.entity.EntityTracker;
+import org.bukkit.craftbukkit.network.NetworkListenThread;
 import org.bukkit.craftbukkit.network.Packet4UpdateTime;
 import org.bukkit.util.ServerLogRotator;
 import org.bukkit.utility.PerformanceStatistic;

@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.network.NetLoginHandler;
 import org.bukkit.craftbukkit.network.Packet1Login;
 import org.bukkit.network.LoginProcessHandler;
 import org.bukkit.util.SessionAPI;
@@ -14,7 +15,7 @@ public class ThreadLoginVerifier extends Thread {
 
     final Packet1Login loginPacket;
 
-    final NetLoginHandler netLoginHandler;
+    final org.bukkit.craftbukkit.network.NetLoginHandler netLoginHandler;
 
     final LoginProcessHandler loginProcessHandler;  //Project Poseidon
 

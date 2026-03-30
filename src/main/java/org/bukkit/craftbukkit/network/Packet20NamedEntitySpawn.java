@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit.network;
 
 import org.bukkit.craftbukkit.item.ItemStack;
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.NetHandler;
 import net.minecraft.server.Packet;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 

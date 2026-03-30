@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.network.NetworkManager;
+
 import javax.swing.*;
 import java.awt.*;
 

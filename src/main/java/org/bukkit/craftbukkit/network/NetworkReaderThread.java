@@ -1,4 +1,4 @@
-package net.minecraft.server;
+package org.bukkit.craftbukkit.network;
 
 import org.bukkit.PoseidonConfig;
 

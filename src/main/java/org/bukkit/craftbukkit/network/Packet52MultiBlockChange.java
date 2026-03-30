@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.network;
 
 import net.minecraft.server.Chunk;
-import net.minecraft.server.NetHandler;
 import net.minecraft.server.Packet;
 import net.minecraft.server.World;
 

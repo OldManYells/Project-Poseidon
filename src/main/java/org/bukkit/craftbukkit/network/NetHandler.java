@@ -1,6 +1,6 @@
-package net.minecraft.server;
+package org.bukkit.craftbukkit.network;
 
-import org.bukkit.craftbukkit.network.*;
+import net.minecraft.server.Packet;
 
 public abstract class NetHandler {
 

@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.item.ItemInWorldManager;
 import org.bukkit.craftbukkit.network.*;
+import org.bukkit.craftbukkit.network.NetLoginHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
 

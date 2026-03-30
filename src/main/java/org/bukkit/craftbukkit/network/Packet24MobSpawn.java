@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit.network;
 
 import net.minecraft.server.DataWatcher;
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.NetHandler;
 import net.minecraft.server.Packet;
 import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.entity.EntityTypes;

@@ -5,7 +5,7 @@ import org.bukkit.utility.PoseidonVersionChecker;
 import org.bukkit.watchdog.WatchDogThread;
 import org.bukkit.uuid.UUIDManager;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.NetServerHandler;
+import org.bukkit.craftbukkit.network.NetServerHandler;
 import org.bukkit.craftbukkit.CraftServer;
 
 import java.io.IOException;

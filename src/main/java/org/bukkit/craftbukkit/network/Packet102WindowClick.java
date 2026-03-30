@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.network;
 
 import org.bukkit.craftbukkit.item.ItemStack;
-import net.minecraft.server.NetHandler;
 import net.minecraft.server.Packet;
 
 import java.io.DataInputStream;

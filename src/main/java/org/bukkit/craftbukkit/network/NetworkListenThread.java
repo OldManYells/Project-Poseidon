@@ -1,4 +1,6 @@
-package net.minecraft.server;
+package org.bukkit.craftbukkit.network;
+
+import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
 import java.net.InetAddress;

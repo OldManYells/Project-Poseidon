@@ -5,6 +5,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.network.NetServerHandler;
 import org.bukkit.craftbukkit.network.Packet3Chat;
 
 import java.util.Iterator;

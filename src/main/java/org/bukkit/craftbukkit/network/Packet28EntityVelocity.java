@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.network;
 
-import net.minecraft.server.NetHandler;
 import net.minecraft.server.Packet;
 import org.bukkit.craftbukkit.entity.Entity;
 

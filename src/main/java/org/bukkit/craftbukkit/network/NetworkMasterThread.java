@@ -1,4 +1,4 @@
-package net.minecraft.server;
+package org.bukkit.craftbukkit.network;
 
 class NetworkMasterThread extends Thread {
 

@@ -1,10 +1,12 @@
 package net.minecraft.server;
 
-class ThreadMonitorConnection extends Thread {
+import org.bukkit.craftbukkit.network.NetworkManager;
+
+public class ThreadMonitorConnection extends Thread {
 
     final NetworkManager a;
 
-    ThreadMonitorConnection(NetworkManager networkmanager) {
+    public ThreadMonitorConnection(NetworkManager networkmanager) {
         this.a = networkmanager;
     }
 

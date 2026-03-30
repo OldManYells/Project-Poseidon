@@ -1,10 +1,10 @@
-package net.minecraft.server;
+package org.bukkit.craftbukkit.network;
 
+import net.minecraft.server.*;
 import org.bukkit.Poseidon;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.item.ItemStack;
-import org.bukkit.craftbukkit.network.*;
 import org.bukkit.event.player.PlayerSendPacketEvent;
 import org.bukkit.network.ConnectionType;
 import org.bukkit.PoseidonConfig;

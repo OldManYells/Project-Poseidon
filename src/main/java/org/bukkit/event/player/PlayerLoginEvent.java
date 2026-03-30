@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import net.minecraft.server.NetLoginHandler;
+import org.bukkit.craftbukkit.network.NetLoginHandler;
 import org.bukkit.entity.Player;
 
 import java.net.InetAddress;
