@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.entity.Explosive;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;

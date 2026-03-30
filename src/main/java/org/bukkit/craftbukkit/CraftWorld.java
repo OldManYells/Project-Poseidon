@@ -9,6 +9,9 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.network.Packet4UpdateTime;
 import org.bukkit.craftbukkit.network.Packet61;
+import org.bukkit.craftbukkit.server.ChunkCoordinates;
+import org.bukkit.craftbukkit.world.WorldProvider;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -109,7 +112,7 @@ public class CraftWorld implements World {
         org.bukkit.Chunk[] craftChunks = new CraftChunk[chunks.length];
 
         for (int i = 0; i < chunks.length; i++) {
-            net.minecraft.server.Chunk chunk = (net.minecraft.server.Chunk) chunks[i];
+            org.bukkit.craftbukkit.server.Chunk chunk = (org.bukkit.craftbukkit.server.Chunk) chunks[i];
             craftChunks[i] = chunk.bukkitChunk;
         }
 
@@ -151,7 +154,7 @@ public class CraftWorld implements World {
             return false;
         }
 
-        net.minecraft.server.Chunk chunk = world.chunkProviderServer.getOrCreateChunk(x, z);
+        org.bukkit.craftbukkit.server.Chunk chunk = world.chunkProviderServer.getOrCreateChunk(x, z);
 
         if (save && !chunk.isEmpty()) {
             chunk.removeEntities();
@@ -172,7 +175,7 @@ public class CraftWorld implements World {
 
         world.chunkProviderServer.unloadQueue.remove(x, z);
 
-        net.minecraft.server.Chunk chunk = null;
+        org.bukkit.craftbukkit.server.Chunk chunk = null;
 
         if (world.chunkProviderServer.chunkProvider == null) {
             chunk = world.chunkProviderServer.emptyChunk;
@@ -235,7 +238,7 @@ public class CraftWorld implements World {
         }
 
         world.chunkProviderServer.unloadQueue.remove(x, z);
-        net.minecraft.server.Chunk chunk = (net.minecraft.server.Chunk) world.chunkProviderServer.chunks.get(x, z);
+        org.bukkit.craftbukkit.server.Chunk chunk = (org.bukkit.craftbukkit.server.Chunk) world.chunkProviderServer.chunks.get(x, z);
 
         if (chunk == null) {
             chunk = world.chunkProviderServer.loadChunk(x, z);
@@ -246,7 +249,7 @@ public class CraftWorld implements World {
     }
 
     @SuppressWarnings("unchecked")
-    private void chunkLoadPostProcess(net.minecraft.server.Chunk chunk, int x, int z) {
+    private void chunkLoadPostProcess(org.bukkit.craftbukkit.server.Chunk chunk, int x, int z) {
         if (chunk != null) {
             world.chunkProviderServer.chunks.put(x, z, chunk);
             world.chunkProviderServer.chunkList.add(chunk);

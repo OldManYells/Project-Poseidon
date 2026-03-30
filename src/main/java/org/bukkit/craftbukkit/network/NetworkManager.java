@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.network;
 
 import net.minecraft.server.Packet;
-import net.minecraft.server.ThreadMonitorConnection;
+import org.bukkit.craftbukkit.server.ThreadMonitorConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.PoseidonConfig;

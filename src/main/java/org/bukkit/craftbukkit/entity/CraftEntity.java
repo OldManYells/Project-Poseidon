@@ -1,13 +1,13 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.collect.MapMaker;
-import net.minecraft.server.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.Vector;
 

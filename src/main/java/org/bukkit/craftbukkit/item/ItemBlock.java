@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.item;
 
 // CraftBukkit start
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.EntityHuman;
@@ -76,7 +76,7 @@ public class ItemBlock extends Item {
             }
 
             /**
-            * @see net.minecraft.server.World#setTypeIdAndData(int i, int j, int k, int l, int i1)
+            * @see World#setTypeIdAndData(int i, int j, int k, int l, int i1)
             *
             * This replaces world.setTypeIdAndData(IIIII), we're doing this because we need to
             * hook between the 'placement' and the informing to 'world' so we can

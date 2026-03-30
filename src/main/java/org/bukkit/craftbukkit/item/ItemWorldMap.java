@@ -6,6 +6,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.network.Packet131;
+import org.bukkit.craftbukkit.server.Chunk;
+import org.bukkit.craftbukkit.world.World;
+import org.bukkit.craftbukkit.world.WorldMap;
+import org.bukkit.craftbukkit.world.WorldMapBase;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.event.server.MapInitializeEvent;
 // CraftBukkit end
 

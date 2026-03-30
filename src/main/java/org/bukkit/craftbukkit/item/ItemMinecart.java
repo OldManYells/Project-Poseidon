@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.item;
 
 // CraftBukkit start
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.block.BlockMinecartTrack;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityMinecart;

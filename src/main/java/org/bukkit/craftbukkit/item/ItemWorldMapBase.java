@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.item;
 
 import net.minecraft.server.Packet;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 
 public class ItemWorldMapBase extends Item {

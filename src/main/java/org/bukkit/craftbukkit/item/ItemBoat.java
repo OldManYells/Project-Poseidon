@@ -5,6 +5,7 @@ import net.minecraft.server.*;
 import org.bukkit.craftbukkit.entity.EntityBoat;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 // CraftBukkit end

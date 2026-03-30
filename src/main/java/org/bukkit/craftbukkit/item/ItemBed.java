@@ -3,7 +3,7 @@ package org.bukkit.craftbukkit.item;
 // CraftBukkit start
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.block.BlockBed;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.EntityHuman;

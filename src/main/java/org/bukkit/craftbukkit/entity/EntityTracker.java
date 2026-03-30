@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Chunk;
+import org.bukkit.craftbukkit.server.Chunk;
 import net.minecraft.server.IAnimal;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Packet;

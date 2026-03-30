@@ -4,6 +4,7 @@ import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.network.Packet103SetSlot;
+import org.bukkit.craftbukkit.world.World;
 
 public class ContainerWorkbench extends Container {
 

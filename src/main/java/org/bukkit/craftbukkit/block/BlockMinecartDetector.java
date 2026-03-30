@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.IBlockAccess;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityMinecart;
 import org.bukkit.event.block.BlockRedstoneEvent;

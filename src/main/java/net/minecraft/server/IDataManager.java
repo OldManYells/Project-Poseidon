@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.world.WorldData;
+import org.bukkit.craftbukkit.world.WorldProvider;
+
 import java.io.File;
 import java.util.List;
 import java.util.UUID;

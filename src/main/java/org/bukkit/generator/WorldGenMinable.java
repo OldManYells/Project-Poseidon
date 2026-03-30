@@ -3,7 +3,7 @@ package org.bukkit.generator;
 
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 import java.util.Random;
 

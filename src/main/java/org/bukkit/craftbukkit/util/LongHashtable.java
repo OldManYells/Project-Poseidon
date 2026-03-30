@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
-import net.minecraft.server.Chunk;
+import org.bukkit.craftbukkit.server.Chunk;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;

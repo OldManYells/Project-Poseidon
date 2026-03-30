@@ -3,6 +3,8 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.*;
 import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.server.ChunkPosition;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.ArrayList;

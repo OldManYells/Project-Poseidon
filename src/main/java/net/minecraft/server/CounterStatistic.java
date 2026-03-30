@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.server.StatisticList;
+
 public class CounterStatistic extends Statistic {
 
     public CounterStatistic(int i, String s, Counter counter) {

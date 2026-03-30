@@ -3,7 +3,7 @@ package org.bukkit.craftbukkit.entity;
 // CraftBukkit start
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Explosive;
 import org.bukkit.event.entity.ExplosionPrimeEvent;

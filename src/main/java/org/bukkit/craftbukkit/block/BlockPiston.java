@@ -5,6 +5,7 @@ import net.minecraft.server.CraftBlock;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityLiving;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 

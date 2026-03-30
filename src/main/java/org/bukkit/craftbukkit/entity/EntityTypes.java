@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 import java.util.HashMap;
 import java.util.Map;

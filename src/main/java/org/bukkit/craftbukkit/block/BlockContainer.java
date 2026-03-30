@@ -3,7 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.Material;
 import net.minecraft.server.TileEntity;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 public abstract class BlockContainer extends CraftBlock {
 

@@ -3,8 +3,8 @@ package org.bukkit.craftbukkit.item;
 // CraftBukkit start
 
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.World;
-import net.minecraft.server.WorldServer;
+import org.bukkit.craftbukkit.world.World;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.network.Packet53BlockChange;

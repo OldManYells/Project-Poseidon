@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.server.ChunkCoordinates;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

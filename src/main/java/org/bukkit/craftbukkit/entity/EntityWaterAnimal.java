@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.IAnimal;
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 public class EntityWaterAnimal extends EntityCreature implements IAnimal {
 

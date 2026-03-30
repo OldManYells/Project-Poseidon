@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
 

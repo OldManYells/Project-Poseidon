@@ -6,6 +6,12 @@ import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.entity.EntityTracker;
 import org.bukkit.craftbukkit.network.NetworkListenThread;
 import org.bukkit.craftbukkit.network.Packet4UpdateTime;
+import org.bukkit.craftbukkit.server.*;
+import org.bukkit.craftbukkit.server.ConsoleCommandHandler;
+import org.bukkit.craftbukkit.world.World;
+import org.bukkit.craftbukkit.world.WorldLoaderServer;
+import org.bukkit.craftbukkit.world.WorldManager;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.util.ServerLogRotator;
 import org.bukkit.utility.PerformanceStatistic;
 import org.bukkit.watchdog.WatchDogThread;
@@ -89,7 +95,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     }
 
     private boolean init() throws UnknownHostException { // CraftBukkit - added throws UnknownHostException
-        this.consoleCommandHandler = new ConsoleCommandHandler(this);
+        this.consoleCommandHandler = new org.bukkit.craftbukkit.server.ConsoleCommandHandler(this);
         ThreadCommandReader threadcommandreader = new ThreadCommandReader(this);
 
         threadcommandreader.setDaemon(true);

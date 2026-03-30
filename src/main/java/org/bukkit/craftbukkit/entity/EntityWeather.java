@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 public abstract class EntityWeather extends Entity {
 

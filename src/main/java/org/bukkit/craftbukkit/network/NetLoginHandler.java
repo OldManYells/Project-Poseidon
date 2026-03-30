@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.network;
 
-import net.minecraft.server.ChunkCoordinates;
+import org.bukkit.craftbukkit.server.ChunkCoordinates;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Packet;
-import net.minecraft.server.WorldServer;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.network.ConnectionType;
 import org.bukkit.PoseidonConfig;

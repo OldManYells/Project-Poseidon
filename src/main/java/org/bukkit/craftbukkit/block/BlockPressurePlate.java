@@ -6,6 +6,7 @@ import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 

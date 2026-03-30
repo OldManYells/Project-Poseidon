@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.server.Chunk;
+import org.bukkit.craftbukkit.world.World;
+
 import java.io.IOException;
 
 public interface IChunkLoader {

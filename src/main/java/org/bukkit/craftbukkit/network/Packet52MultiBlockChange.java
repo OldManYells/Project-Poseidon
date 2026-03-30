@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.network;
 
-import net.minecraft.server.Chunk;
+import org.bukkit.craftbukkit.server.Chunk;
 import net.minecraft.server.Packet;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

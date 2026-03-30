@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockSpreadEvent;
 
 import java.util.Random;

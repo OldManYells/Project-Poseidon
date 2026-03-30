@@ -6,7 +6,7 @@ import org.bukkit.PoseidonPlugin;
 import org.bukkit.uuid.ThreadUUIDFetcher;
 import org.bukkit.craftbukkit.network.NetLoginHandler;
 import org.bukkit.craftbukkit.network.Packet1Login;
-import net.minecraft.server.ThreadLoginVerifier;
+import org.bukkit.craftbukkit.server.ThreadLoginVerifier;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;

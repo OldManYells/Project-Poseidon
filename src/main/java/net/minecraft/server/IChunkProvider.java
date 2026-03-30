@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.server.Chunk;
+
 public interface IChunkProvider {
 
     boolean isChunkLoaded(int i, int j);

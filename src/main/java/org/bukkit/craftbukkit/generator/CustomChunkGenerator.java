@@ -1,6 +1,9 @@
 package org.bukkit.craftbukkit.generator;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.server.Chunk;
+import org.bukkit.craftbukkit.world.World;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 

@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.Material;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 public class BlockBloodStone extends net.minecraft.server.CraftBlock {

@@ -4,7 +4,7 @@ import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.IBlockAccess;
 import net.minecraft.server.Material;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.world.PortalCreateEvent;

@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.TrigMath;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;

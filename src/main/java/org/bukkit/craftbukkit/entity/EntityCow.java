@@ -4,7 +4,7 @@ package org.bukkit.craftbukkit.entity;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;

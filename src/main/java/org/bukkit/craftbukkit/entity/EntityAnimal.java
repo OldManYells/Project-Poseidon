@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.world.World;
 
 public abstract class EntityAnimal extends EntityCreature implements IAnimal {
 

@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.world.World;
 
 import java.util.Random;
 

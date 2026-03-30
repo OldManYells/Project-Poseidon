@@ -3,6 +3,8 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.server.StatisticList;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;

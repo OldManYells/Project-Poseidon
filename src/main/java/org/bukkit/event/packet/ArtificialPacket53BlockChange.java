@@ -2,7 +2,7 @@ package org.bukkit.event.packet;
 
 import org.bukkit.craftbukkit.network.NetHandler;
 import net.minecraft.server.Packet;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

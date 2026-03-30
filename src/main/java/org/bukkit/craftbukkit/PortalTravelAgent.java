@@ -1,10 +1,11 @@
 package org.bukkit.craftbukkit;
 
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.WorldServer;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.TravelAgent;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.Random;
@@ -41,7 +42,7 @@ public class PortalTravelAgent implements TravelAgent {
     }
 
     public Location findPortal(Location location) {
-        net.minecraft.server.World world = ((CraftWorld) location.getWorld()).getHandle();
+        World world = ((CraftWorld) location.getWorld()).getHandle();
         // short short1 = 128;
         double d0 = -1.0D;
         int i = 0;
@@ -106,7 +107,7 @@ public class PortalTravelAgent implements TravelAgent {
     }
 
     public boolean createPortal(Location location) {
-        net.minecraft.server.World world = ((CraftWorld) location.getWorld()).getHandle();
+        World world = ((CraftWorld) location.getWorld()).getHandle();
         // byte b0 = 16;
         double d0 = -1.0D;
         int i = location.getBlockX();

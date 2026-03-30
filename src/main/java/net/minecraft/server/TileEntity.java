@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.world.World;
+
 import java.util.HashMap;
 import java.util.Map;
 

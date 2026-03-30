@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.server.Chunk;
+import org.bukkit.craftbukkit.world.World;
 
 public class EntitySlime extends EntityLiving implements IMonster {
 

@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.entity;
 // CraftBukkit start
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.PigZapEvent;
 // CraftBukkit end

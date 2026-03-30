@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.network;
 
-import net.minecraft.server.ChunkPosition;
+import org.bukkit.craftbukkit.server.ChunkPosition;
 import net.minecraft.server.Packet;
 
 import java.io.DataInputStream;

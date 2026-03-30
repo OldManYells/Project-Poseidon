@@ -3,7 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.IBlockAccess;
 import net.minecraft.server.RedstoneUpdateInfo;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.ArrayList;

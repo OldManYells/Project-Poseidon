@@ -2,9 +2,9 @@ package org.bukkit.craftbukkit;
 
 import com.google.common.collect.MapMaker;
 import org.bukkit.generator.BiomeBase;
-import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.WorldChunkManager;
-import net.minecraft.server.WorldServer;
+import org.bukkit.craftbukkit.server.ChunkPosition;
+import org.bukkit.craftbukkit.world.WorldChunkManager;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
@@ -17,14 +17,14 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentMap;
 
 public class CraftChunk implements Chunk {
-    private WeakReference<net.minecraft.server.Chunk> weakChunk;
+    private WeakReference<org.bukkit.craftbukkit.server.Chunk> weakChunk;
     private final ConcurrentMap<Integer, Block> cache = new MapMaker().softValues().makeMap();
     private WorldServer worldServer;
     private int x;
     private int z;
 
-    public CraftChunk(net.minecraft.server.Chunk chunk) {
-        this.weakChunk = new WeakReference<net.minecraft.server.Chunk>(chunk);
+    public CraftChunk(org.bukkit.craftbukkit.server.Chunk chunk) {
+        this.weakChunk = new WeakReference<org.bukkit.craftbukkit.server.Chunk>(chunk);
         worldServer = (WorldServer) getHandle().world;
         x = getHandle().x;
         z = getHandle().z;
@@ -34,11 +34,11 @@ public class CraftChunk implements Chunk {
         return worldServer.getWorld();
     }
 
-    public net.minecraft.server.Chunk getHandle() {
-        net.minecraft.server.Chunk c = weakChunk.get();
+    public org.bukkit.craftbukkit.server.Chunk getHandle() {
+        org.bukkit.craftbukkit.server.Chunk c = weakChunk.get();
         if (c == null) {
             c = worldServer.getChunkAt(x, z);
-            weakChunk = new WeakReference<net.minecraft.server.Chunk>(c);
+            weakChunk = new WeakReference<org.bukkit.craftbukkit.server.Chunk>(c);
         }
         return c;
     }
@@ -77,7 +77,7 @@ public class CraftChunk implements Chunk {
 
     public Entity[] getEntities() {
         int count = 0, index = 0;
-        net.minecraft.server.Chunk chunk = getHandle();
+        org.bukkit.craftbukkit.server.Chunk chunk = getHandle();
         for (int i = 0; i < 8; i++) {
             count += chunk.entitySlices[i].size();
         }
@@ -96,7 +96,7 @@ public class CraftChunk implements Chunk {
 
     public BlockState[] getTileEntities() {
         int index = 0;
-        net.minecraft.server.Chunk chunk = getHandle();
+        org.bukkit.craftbukkit.server.Chunk chunk = getHandle();
         BlockState[] entities = new BlockState[chunk.tileEntities.size()];
         for (Object obj : chunk.tileEntities.keySet().toArray()) {
             if (!(obj instanceof ChunkPosition)) {
@@ -137,7 +137,7 @@ public class CraftChunk implements Chunk {
     }
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain) {
-        net.minecraft.server.Chunk chunk = getHandle();
+        org.bukkit.craftbukkit.server.Chunk chunk = getHandle();
         byte[] buf = new byte[32768 + 16384 + 16384 + 16384]; // Get big enough buffer for whole chunk
         chunk.getData(buf, 0, 0, 0, 16, 128, 16, 0); // Get whole chunk
         byte[] hmap = null;

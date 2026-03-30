@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.world.World;
+
 public class TileEntityNote extends TileEntity {
 
     public byte note = 0;

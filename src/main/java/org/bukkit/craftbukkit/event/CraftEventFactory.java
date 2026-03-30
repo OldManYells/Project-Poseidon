@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.event;
 
-import net.minecraft.server.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,6 +12,9 @@ import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.server.ChunkCoordinates;
+import org.bukkit.craftbukkit.world.World;
+import org.bukkit.craftbukkit.world.WorldServer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Player;

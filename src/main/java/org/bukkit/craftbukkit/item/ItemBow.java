@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.item;
 
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.entity.EntityArrow;
 import org.bukkit.craftbukkit.entity.EntityHuman;

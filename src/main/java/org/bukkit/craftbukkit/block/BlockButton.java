@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.*;
 import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
 
 import java.util.Random;

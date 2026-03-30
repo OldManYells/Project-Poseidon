@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.item;
 
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.block.BlockCloth;
 import org.bukkit.craftbukkit.block.BlockCrops;
 import org.bukkit.craftbukkit.block.BlockSapling;

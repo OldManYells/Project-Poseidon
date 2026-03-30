@@ -5,6 +5,7 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemFood;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;

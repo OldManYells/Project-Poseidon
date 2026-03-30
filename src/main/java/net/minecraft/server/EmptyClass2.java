@@ -1,3 +1,3 @@
 package net.minecraft.server;
 
-class EmptyClass2 {}
+public class EmptyClass2 {}

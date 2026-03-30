@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.item;
 
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.entity.EntityEgg;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 

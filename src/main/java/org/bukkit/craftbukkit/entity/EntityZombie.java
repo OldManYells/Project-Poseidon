@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import org.bukkit.craftbukkit.item.Item;
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityCombustEvent;
 
 public class EntityZombie extends EntityMonster {

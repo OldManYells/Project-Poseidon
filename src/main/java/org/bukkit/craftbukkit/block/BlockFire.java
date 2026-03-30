@@ -4,7 +4,7 @@ import net.minecraft.server.AxisAlignedBB;
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.IBlockAccess;
 import net.minecraft.server.Material;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;

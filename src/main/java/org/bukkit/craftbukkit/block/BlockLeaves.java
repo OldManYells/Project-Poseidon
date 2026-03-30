@@ -6,6 +6,8 @@ import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.server.StatisticList;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.LeavesDecayEvent;
 
 import java.util.Random;

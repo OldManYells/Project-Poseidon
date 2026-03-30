@@ -7,6 +7,8 @@ import org.bukkit.craftbukkit.entity.EntityItem;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.server.StatisticList;
+import org.bukkit.craftbukkit.world.World;
 
 import java.util.Random;
 

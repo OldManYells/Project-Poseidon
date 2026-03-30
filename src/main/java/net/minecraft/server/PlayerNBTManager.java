@@ -2,6 +2,11 @@ package net.minecraft.server;
 
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.entity.EntityHuman;
+import org.bukkit.craftbukkit.server.ChunkLoader;
+import org.bukkit.craftbukkit.server.CompressedStreamTools;
+import org.bukkit.craftbukkit.world.WorldData;
+import org.bukkit.craftbukkit.world.WorldProvider;
+import org.bukkit.craftbukkit.world.WorldProviderHell;
 import org.bukkit.uuid.UUIDManager;
 
 import java.io.*;

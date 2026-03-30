@@ -6,6 +6,7 @@ import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityItem;
 import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.world.World;
 
 import java.util.Random;
 

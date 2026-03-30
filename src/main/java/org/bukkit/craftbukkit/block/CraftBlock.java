@@ -282,7 +282,7 @@ public class CraftBlock implements Block {
     public int getBlockPower(BlockFace face) {
         int power = 0;
         BlockRedstoneWire wire = (BlockRedstoneWire) net.minecraft.server.CraftBlock.REDSTONE_WIRE;
-        net.minecraft.server.World world = chunk.getHandle().world;
+        org.bukkit.craftbukkit.world.World world = chunk.getHandle().world;
         if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(x, y - 1, z, 0)) power = wire.getPower(world, x, y - 1, z, power);
         if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(x, y + 1, z, 1)) power = wire.getPower(world, x, y + 1, z, power);
         if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z - 1, 2)) power = wire.getPower(world, x, y, z - 1, power);

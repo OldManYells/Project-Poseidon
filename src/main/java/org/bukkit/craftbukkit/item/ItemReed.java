@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.item;
 
 // CraftBukkit start
 import net.minecraft.server.CraftBlock;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
@@ -58,7 +58,7 @@ public class ItemReed extends Item {
                 // CraftBukkit start - This executes the placement of the block
                 CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
                 /**
-                 * @see net.minecraft.server.World#setTypeId(int i, int j, int k, int l)
+                 * @see org.bukkit.craftbukkit.world.World#setTypeId(int i, int j, int k, int l)
                  *
                  * This replaces world.setTypeId(IIII), we're doing this because we need to
                  * hook between the 'placement' and the informing to 'world' so we can

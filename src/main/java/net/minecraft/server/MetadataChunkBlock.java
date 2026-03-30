@@ -1,6 +1,9 @@
 package net.minecraft.server;
 
 
+import org.bukkit.craftbukkit.server.Chunk;
+import org.bukkit.craftbukkit.world.World;
+
 public class MetadataChunkBlock {
 
     public final EnumSkyBlock a;

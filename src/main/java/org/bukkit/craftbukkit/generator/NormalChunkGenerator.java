@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.generator;
 
-import net.minecraft.server.Chunk;
+import org.bukkit.craftbukkit.server.Chunk;
 import net.minecraft.server.IChunkProvider;
 import net.minecraft.server.IProgressUpdate;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.generator.BlockPopulator;
 

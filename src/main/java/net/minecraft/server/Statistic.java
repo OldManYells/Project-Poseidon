@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.server.StatisticList;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;

@@ -9,6 +9,9 @@ import org.bukkit.craftbukkit.entity.EntityItem;
 import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.item.*;
 import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.server.StatisticCollector;
+import org.bukkit.craftbukkit.server.StatisticList;
+import org.bukkit.craftbukkit.world.World;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.*;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 

@@ -2,8 +2,8 @@ package org.bukkit.craftbukkit.item;
 
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.StatisticList;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.server.StatisticList;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityLiving;

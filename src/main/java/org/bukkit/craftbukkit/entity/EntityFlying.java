@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.MathHelper;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 public class EntityFlying extends EntityLiving {
 

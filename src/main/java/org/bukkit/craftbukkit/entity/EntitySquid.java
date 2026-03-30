@@ -3,7 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import net.minecraft.server.Material;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 public class EntitySquid extends EntityWaterAnimal {

@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import java.util.logging.Level;

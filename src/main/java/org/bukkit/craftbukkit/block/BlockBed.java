@@ -5,6 +5,8 @@ import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.item.Item;
+import org.bukkit.craftbukkit.server.ChunkCoordinates;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.Iterator;

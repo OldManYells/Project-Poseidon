@@ -3,7 +3,7 @@ package org.bukkit.craftbukkit.entity;
 import org.bukkit.craftbukkit.block.BlockSand;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.World;
+import org.bukkit.craftbukkit.world.World;
 
 public class EntityFallingSand extends Entity {
 

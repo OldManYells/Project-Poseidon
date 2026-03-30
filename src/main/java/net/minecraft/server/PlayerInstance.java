@@ -2,6 +2,8 @@ package net.minecraft.server;
 
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.network.*;
+import org.bukkit.craftbukkit.server.ChunkCoordIntPair;
+import org.bukkit.craftbukkit.world.WorldServer;
 
 import java.util.ArrayList;
 import java.util.List;

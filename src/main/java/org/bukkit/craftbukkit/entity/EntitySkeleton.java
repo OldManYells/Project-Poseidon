@@ -5,6 +5,7 @@ import org.bukkit.PoseidonConfig;
 // CraftBukkit start
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 // CraftBukkit end

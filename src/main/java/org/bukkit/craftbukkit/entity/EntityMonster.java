@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 // CraftBukkit start
 import net.minecraft.server.*;
+import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
