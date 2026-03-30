@@ -65,7 +65,7 @@ public class PlayerManager {
         int i = (int) entityplayer.locX >> 4;
         int j = (int) entityplayer.locZ >> 4;
 
-        entityplayer.d = entityplayer.locX;
+        entityplayer.d = (int) entityplayer.locX;
         entityplayer.e = entityplayer.locZ;
         int k = 0;
         int l = this.f;
@@ -153,7 +153,7 @@ public class PlayerManager {
                     }
                 }
 
-                entityplayer.d = entityplayer.locX;
+                entityplayer.d = (int)entityplayer.locX;
                 entityplayer.e = entityplayer.locZ;
 
                 // CraftBukkit start - send nearest chunks first

@@ -207,7 +207,7 @@ public class ItemInWorldManager {
 
     public boolean useItem(EntityHuman entityhuman, World world, ItemStack itemstack) {
         int i = itemstack.count;
-        ItemStack itemstack1 = itemstack.a(world, entityhuman);
+        ItemStack itemstack1 = itemstack.useItemRightClick(world, entityhuman);
 
         if (itemstack1 == itemstack && (itemstack1 == null || itemstack1.count == i)) {
             return false;

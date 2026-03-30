@@ -56,7 +56,7 @@ public abstract class EntityHuman extends EntityLiving {
     public int D = 20;
     protected boolean E = false;
     public float F;
-    private int d = 0;
+    public int d = 0;
     public EntityFish hookedFish = null;
 
     public EntityHuman(World world) {
@@ -153,7 +153,7 @@ public abstract class EntityHuman extends EntityLiving {
         return this.health <= 0 || this.isSleeping();
     }
 
-    protected void y() {
+    public void y() {
         this.activeContainer = this.defaultContainer;
     }
 

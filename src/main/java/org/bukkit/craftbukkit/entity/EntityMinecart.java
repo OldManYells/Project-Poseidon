@@ -673,7 +673,7 @@ public class EntityMinecart extends Entity implements IInventory {
                     NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
                     nbttagcompound1.a("Slot", (byte) i);
-                    this.items[i].a(nbttagcompound1);
+                    this.items[i].writeToNBT(nbttagcompound1);
                     nbttaglist.a((NBTBase) nbttagcompound1);
                 }
             }
@@ -814,7 +814,7 @@ public class EntityMinecart extends Entity implements IInventory {
                 this.items[i] = null;
                 return itemstack;
             } else {
-                itemstack = this.items[i].a(j);
+                itemstack = this.items[i].splitStack(j);
                 if (this.items[i].count == 0) {
                     this.items[i] = null;
                 }

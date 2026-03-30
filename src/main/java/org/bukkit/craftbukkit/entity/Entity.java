@@ -94,7 +94,7 @@ public abstract class Entity {
     protected DataWatcher datawatcher;
     public float bF;
     private double d;
-    private double e;
+    public double e;
     public boolean bG;
     public int bH;
     public int bI;

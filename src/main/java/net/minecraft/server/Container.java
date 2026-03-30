@@ -10,62 +10,71 @@ import java.util.Set;
 
 public abstract class Container {
 
+    // Cached stacks sent to listeners
     public List d = new ArrayList();
+
+    // Slots in this container
     public List e = new ArrayList();
+
     public int windowId = 0;
+
+    // Better name: transactionId
     private short a = 0;
+
     protected List listeners = new ArrayList();
+
+    // Players temporarily blocked from crafting/interacting
     private Set b = new HashSet();
 
     public Container() {}
 
-    protected void a(Slot slot) {
+    protected void addSlot(Slot slot) {
         slot.a = this.e.size();
         this.e.add(slot);
         this.d.add(null);
     }
 
-    public void a(ICrafting icrafting) {
-        if (this.listeners.contains(icrafting)) {
+    public void addSlotListener(ICrafting listener) {
+        if (this.listeners.contains(listener)) {
             throw new IllegalArgumentException("Listener already listening");
-        } else {
-            this.listeners.add(icrafting);
-            icrafting.a(this, this.b());
-            this.a();
-        }
-    }
-
-    public List b() {
-        ArrayList arraylist = new ArrayList();
-
-        for (int i = 0; i < this.e.size(); ++i) {
-            arraylist.add(((Slot) this.e.get(i)).getItem());
         }
 
-        return arraylist;
+        this.listeners.add(listener);
+        listener.a(this, this.getContents());
+        this.detectAndSendChanges();
     }
 
-    public void a() {
+    public List getContents() {
+        ArrayList contents = new ArrayList();
+
         for (int i = 0; i < this.e.size(); ++i) {
-            ItemStack itemstack = ((Slot) this.e.get(i)).getItem();
-            ItemStack itemstack1 = (ItemStack) this.d.get(i);
+            contents.add(((Slot) this.e.get(i)).getItem());
+        }
 
-            if (!ItemStack.equals(itemstack1, itemstack)) {
-                itemstack1 = itemstack == null ? null : itemstack.cloneItemStack();
-                this.d.set(i, itemstack1);
+        return contents;
+    }
 
-                for (int j = 0; j < this.listeners.size(); ++j) {
-                    ((ICrafting) this.listeners.get(j)).a(this, i, itemstack1);
+    public void detectAndSendChanges() {
+        for (int i = 0; i < this.e.size(); ++i) {
+            ItemStack current = ((Slot) this.e.get(i)).getItem();
+            ItemStack cached = (ItemStack) this.d.get(i);
+
+            if (!ItemStack.equals(cached, current)) {
+                cached = current == null ? null : current.cloneItemStack();
+                this.d.set(i, cached);
+
+                for (int listenerIndex = 0; listenerIndex < this.listeners.size(); ++listenerIndex) {
+                    ((ICrafting) this.listeners.get(listenerIndex)).a(this, i, cached);
                 }
             }
         }
     }
 
-    public Slot a(IInventory iinventory, int i) {
-        for (int j = 0; j < this.e.size(); ++j) {
-            Slot slot = (Slot) this.e.get(j);
+    public Slot getSlot(IInventory inventory, int slotIndex) {
+        for (int i = 0; i < this.e.size(); ++i) {
+            Slot slot = (Slot) this.e.get(i);
 
-            if (slot.a(iinventory, i)) {
+            if (slot.a(inventory, slotIndex)) {
                 return slot;
             }
         }
@@ -73,120 +82,123 @@ public abstract class Container {
         return null;
     }
 
-    public Slot b(int i) {
-        return (Slot) this.e.get(i);
+    public Slot getSlot(int slotIndex) {
+        return (Slot) this.e.get(slotIndex);
     }
 
-    public ItemStack a(int i) {
-        Slot slot = (Slot) this.e.get(i);
-
+    public ItemStack getItem(int slotIndex) {
+        Slot slot = (Slot) this.e.get(slotIndex);
         return slot != null ? slot.getItem() : null;
     }
 
-    public ItemStack a(int i, int j, boolean flag, EntityHuman entityhuman) {
-        ItemStack itemstack = null;
+    public ItemStack clickItem(int slotIndex, int mouseButton, boolean shiftHeld, EntityHuman player) {
+        ItemStack result = null;
 
-        if (j == 0 || j == 1) {
-            InventoryPlayer inventoryplayer = entityhuman.inventory;
+        if (mouseButton == 0 || mouseButton == 1) {
+            InventoryPlayer playerInventory = player.inventory;
 
-            if (i == -999) {
-                if (inventoryplayer.j() != null && i == -999) {
-                    if (j == 0) {
-                        entityhuman.b(inventoryplayer.j());
-                        inventoryplayer.b((ItemStack) null);
+            if (slotIndex == -999) {
+                if (playerInventory.j() != null) {
+                    if (mouseButton == 0) {
+                        player.b(playerInventory.j());
+                        playerInventory.b((ItemStack) null);
                     }
 
-                    if (j == 1) {
-                        entityhuman.b(inventoryplayer.j().a(1));
-                        if (inventoryplayer.j().count == 0) {
-                            inventoryplayer.b((ItemStack) null);
+                    if (mouseButton == 1) {
+                        player.b(playerInventory.j().splitStack(1));
+                        if (playerInventory.j().count == 0) {
+                            playerInventory.b((ItemStack) null);
                         }
                     }
                 }
             } else {
-                int k;
+                int amount;
 
-                if (flag) {
-                    ItemStack itemstack1 = this.a(i);
+                if (shiftHeld) {
+                    ItemStack clicked = this.getItem(slotIndex);
 
-                    if (itemstack1 != null) {
-                        int l = itemstack1.count;
-
-                        itemstack = itemstack1.cloneItemStack();
-                        Slot slot = (Slot) this.e.get(i);
+                    if (clicked != null) {
+                        int previousCount = clicked.count;
+                        result = clicked.cloneItemStack();
+                        Slot slot = (Slot) this.e.get(slotIndex);
 
                         if (slot != null && slot.getItem() != null) {
-                            k = slot.getItem().count;
-                            if (k < l) {
-                                this.a(i, j, flag, entityhuman);
+                            amount = slot.getItem().count;
+                            if (amount < previousCount) {
+                                this.clickItem(slotIndex, mouseButton, shiftHeld, player);
                             }
                         }
                     }
                 } else {
-                    Slot slot1 = (Slot) this.e.get(i);
+                    Slot slot = (Slot) this.e.get(slotIndex);
 
-                    if (slot1 != null) {
-                        slot1.c();
-                        ItemStack itemstack2 = slot1.getItem();
-                        ItemStack itemstack3 = inventoryplayer.j();
+                    if (slot != null) {
+                        slot.c();
+                        ItemStack slotStack = slot.getItem();
+                        ItemStack carriedStack = playerInventory.j();
 
-                        if (itemstack2 != null) {
-                            itemstack = itemstack2.cloneItemStack();
+                        if (slotStack != null) {
+                            result = slotStack.cloneItemStack();
                         }
 
-                        if (itemstack2 == null) {
-                            if (itemstack3 != null && slot1.isAllowed(itemstack3)) {
-                                k = j == 0 ? itemstack3.count : 1;
-                                if (k > slot1.d()) {
-                                    k = slot1.d();
+                        if (slotStack == null) {
+                            if (carriedStack != null && slot.isAllowed(carriedStack)) {
+                                amount = mouseButton == 0 ? carriedStack.count : 1;
+                                if (amount > slot.d()) {
+                                    amount = slot.d();
                                 }
 
-                                slot1.c(itemstack3.a(k));
-                                if (itemstack3.count == 0) {
-                                    inventoryplayer.b((ItemStack) null);
+                                slot.c(carriedStack.splitStack(amount));
+                                if (carriedStack.count == 0) {
+                                    playerInventory.b((ItemStack) null);
                                 }
                             }
-                        } else if (itemstack3 == null) {
-                            k = j == 0 ? itemstack2.count : (itemstack2.count + 1) / 2;
-                            ItemStack itemstack4 = slot1.a(k);
+                        } else if (carriedStack == null) {
+                            amount = mouseButton == 0 ? slotStack.count : (slotStack.count + 1) / 2;
+                            ItemStack taken = slot.getItem().splitStack(amount);
 
-                            inventoryplayer.b(itemstack4);
-                            if (itemstack2.count == 0) {
-                                slot1.c((ItemStack) null);
+                            playerInventory.b(taken);
+                            if (slotStack.count == 0) {
+                                slot.c((ItemStack) null);
                             }
 
-                            slot1.a(inventoryplayer.j());
-                        } else if (slot1.isAllowed(itemstack3)) {
-                            if (itemstack2.id == itemstack3.id && (!itemstack2.usesData() || itemstack2.getData() == itemstack3.getData())) {
-                                k = j == 0 ? itemstack3.count : 1;
-                                if (k > slot1.d() - itemstack2.count) {
-                                    k = slot1.d() - itemstack2.count;
+                            slot.a(playerInventory.j());
+                        } else if (slot.isAllowed(carriedStack)) {
+                            if (slotStack.id == carriedStack.id
+                                    && (!slotStack.usesData() || slotStack.getData() == carriedStack.getData())) {
+
+                                amount = mouseButton == 0 ? carriedStack.count : 1;
+                                if (amount > slot.d() - slotStack.count) {
+                                    amount = slot.d() - slotStack.count;
                                 }
 
-                                if (k > itemstack3.getMaxStackSize() - itemstack2.count) {
-                                    k = itemstack3.getMaxStackSize() - itemstack2.count;
+                                if (amount > carriedStack.getMaxStackSize() - slotStack.count) {
+                                    amount = carriedStack.getMaxStackSize() - slotStack.count;
                                 }
 
-                                itemstack3.a(k);
-                                if (itemstack3.count == 0) {
-                                    inventoryplayer.b((ItemStack) null);
+                                carriedStack.splitStack(amount);
+                                if (carriedStack.count == 0) {
+                                    playerInventory.b((ItemStack) null);
                                 }
 
-                                itemstack2.count += k;
-                            } else if (itemstack3.count <= slot1.d()) {
-                                slot1.c(itemstack3);
-                                inventoryplayer.b(itemstack2);
+                                slotStack.count += amount;
+                            } else if (carriedStack.count <= slot.d()) {
+                                slot.c(carriedStack);
+                                playerInventory.b(slotStack);
                             }
-                        } else if (itemstack2.id == itemstack3.id && itemstack3.getMaxStackSize() > 1 && (!itemstack2.usesData() || itemstack2.getData() == itemstack3.getData())) {
-                            k = itemstack2.count;
-                            if (k > 0 && k + itemstack3.count <= itemstack3.getMaxStackSize()) {
-                                itemstack3.count += k;
-                                itemstack2.a(k);
-                                if (itemstack2.count == 0) {
-                                    slot1.c((ItemStack) null);
+                        } else if (slotStack.id == carriedStack.id
+                                && carriedStack.getMaxStackSize() > 1
+                                && (!slotStack.usesData() || slotStack.getData() == carriedStack.getData())) {
+
+                            amount = slotStack.count;
+                            if (amount > 0 && amount + carriedStack.count <= carriedStack.getMaxStackSize()) {
+                                carriedStack.count += amount;
+                                slotStack.splitStack(amount);
+                                if (slotStack.count == 0) {
+                                    slot.c((ItemStack) null);
                                 }
 
-                                slot1.a(inventoryplayer.j());
+                                slot.a(playerInventory.j());
                             }
                         }
                     }
@@ -194,95 +206,156 @@ public abstract class Container {
             }
         }
 
-        return itemstack;
+        return result;
     }
 
-    public void a(EntityHuman entityhuman) {
-        InventoryPlayer inventoryplayer = entityhuman.inventory;
+    public void onContainerClosed(EntityHuman player) {
+        InventoryPlayer playerInventory = player.inventory;
 
-        if (inventoryplayer.j() != null) {
-            entityhuman.b(inventoryplayer.j());
-            inventoryplayer.b((ItemStack) null);
+        if (playerInventory.j() != null) {
+            player.b(playerInventory.j());
+            playerInventory.b((ItemStack) null);
         }
     }
 
-    public void a(IInventory iinventory) {
-        this.a();
+    public void onInventoryChanged(IInventory inventory) {
+        this.detectAndSendChanges();
     }
 
-    public boolean c(EntityHuman entityhuman) {
-        return !this.b.contains(entityhuman);
+    public boolean canCraft(EntityHuman player) {
+        return !this.b.contains(player);
     }
 
-    public void a(EntityHuman entityhuman, boolean flag) {
-        if (flag) {
-            this.b.remove(entityhuman);
+    public void setCanCraft(EntityHuman player, boolean canCraft) {
+        if (canCraft) {
+            this.b.remove(player);
         } else {
-            this.b.add(entityhuman);
+            this.b.add(player);
         }
     }
 
-    public abstract boolean b(EntityHuman entityhuman);
+    public boolean canUse(EntityHuman player) {
+        return this.b(player);
+    }
 
-    protected void a(ItemStack itemstack, int i, int j, boolean flag) {
-        int k = i;
+    protected void mergeItemStack(ItemStack stack, int startIndex, int endIndex, boolean reverse) {
+        int slotIndex = startIndex;
 
-        if (flag) {
-            k = j - 1;
+        if (reverse) {
+            slotIndex = endIndex - 1;
         }
 
         Slot slot;
-        ItemStack itemstack1;
+        ItemStack slotStack;
 
-        if (itemstack.isStackable()) {
-            while (itemstack.count > 0 && (!flag && k < j || flag && k >= i)) {
-                slot = (Slot) this.e.get(k);
-                itemstack1 = slot.getItem();
-                if (itemstack1 != null && itemstack1.id == itemstack.id && (!itemstack.usesData() || itemstack.getData() == itemstack1.getData())) {
-                    int l = itemstack1.count + itemstack.count;
+        if (stack.isStackable()) {
+            while (stack.count > 0 && (!reverse && slotIndex < endIndex || reverse && slotIndex >= startIndex)) {
+                slot = (Slot) this.e.get(slotIndex);
+                slotStack = slot.getItem();
 
-                    if (l <= itemstack.getMaxStackSize()) {
-                        itemstack.count = 0;
-                        itemstack1.count = l;
+                if (slotStack != null
+                        && slotStack.id == stack.id
+                        && (!stack.usesData() || stack.getData() == slotStack.getData())) {
+
+                    int mergedCount = slotStack.count + stack.count;
+
+                    if (mergedCount <= stack.getMaxStackSize()) {
+                        stack.count = 0;
+                        slotStack.count = mergedCount;
                         slot.c();
-                    } else if (itemstack1.count < itemstack.getMaxStackSize()) {
-                        itemstack.count -= itemstack.getMaxStackSize() - itemstack1.count;
-                        itemstack1.count = itemstack.getMaxStackSize();
+                    } else if (slotStack.count < stack.getMaxStackSize()) {
+                        stack.count -= stack.getMaxStackSize() - slotStack.count;
+                        slotStack.count = stack.getMaxStackSize();
                         slot.c();
                     }
                 }
 
-                if (flag) {
-                    --k;
+                if (reverse) {
+                    --slotIndex;
                 } else {
-                    ++k;
+                    ++slotIndex;
                 }
             }
         }
 
-        if (itemstack.count > 0) {
-            if (flag) {
-                k = j - 1;
-            } else {
-                k = i;
-            }
+        if (stack.count > 0) {
+            slotIndex = reverse ? endIndex - 1 : startIndex;
 
-            while (!flag && k < j || flag && k >= i) {
-                slot = (Slot) this.e.get(k);
-                itemstack1 = slot.getItem();
-                if (itemstack1 == null) {
-                    slot.c(itemstack.cloneItemStack());
+            while (!reverse && slotIndex < endIndex || reverse && slotIndex >= startIndex) {
+                slot = (Slot) this.e.get(slotIndex);
+                slotStack = slot.getItem();
+
+                if (slotStack == null) {
+                    slot.c(stack.cloneItemStack());
                     slot.c();
-                    itemstack.count = 0;
+                    stack.count = 0;
                     break;
                 }
 
-                if (flag) {
-                    --k;
+                if (reverse) {
+                    --slotIndex;
                 } else {
-                    ++k;
+                    ++slotIndex;
                 }
             }
         }
+    }
+
+    // ---------------------------------------------------------------------
+    // Compatibility bridge methods for old obfuscated call sites
+    // ---------------------------------------------------------------------
+
+    protected void a(Slot slot) {
+        this.addSlot(slot);
+    }
+
+    public void a(ICrafting listener) {
+        this.addSlotListener(listener);
+    }
+
+    public List b() {
+        return this.getContents();
+    }
+
+    public void a() {
+        this.detectAndSendChanges();
+    }
+
+    public Slot a(IInventory inventory, int slotIndex) {
+        return this.getSlot(inventory, slotIndex);
+    }
+
+    public Slot b(int slotIndex) {
+        return this.getSlot(slotIndex);
+    }
+
+    public ItemStack a(int slotIndex) {
+        return this.getItem(slotIndex);
+    }
+
+    public ItemStack a(int slotIndex, int mouseButton, boolean shiftHeld, EntityHuman player) {
+        return this.clickItem(slotIndex, mouseButton, shiftHeld, player);
+    }
+
+    public void a(EntityHuman player) {
+        this.onContainerClosed(player);
+    }
+
+    public void a(IInventory inventory) {
+        this.onInventoryChanged(inventory);
+    }
+
+    public boolean c(EntityHuman player) {
+        return this.canCraft(player);
+    }
+
+    public void a(EntityHuman player, boolean canCraft) {
+        this.setCanCraft(player, canCraft);
+    }
+
+    public abstract boolean b(EntityHuman player);
+
+    protected void a(ItemStack stack, int startIndex, int endIndex, boolean reverse) {
+        this.mergeItemStack(stack, startIndex, endIndex, reverse);
     }
 }

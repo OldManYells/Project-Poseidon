@@ -157,7 +157,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         s = event.getReason();
         // CraftBukkit end
 
-        this.player.B();
+        this.player.cleanupOnDisconnect();
         this.sendPacket(new Packet255KickDisconnect(s));
         this.networkManager.d();
 
@@ -179,7 +179,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         if (event.isCancelled())
             return;
 
-        this.player.a(packet27.c(), packet27.e(), packet27.g(), packet27.h(), packet27.d(), packet27.f());
+        this.player.setMovementInput(packet27.c(), packet27.e(), packet27.g(), packet27.h(), packet27.d(), packet27.f());
     }
 
     public void a(Packet10Flying packet10flying) {
@@ -307,7 +307,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 }
 
                 this.player.onGround = packet10flying.g;
-                this.player.a(true);
+                this.player.updatePlayer(true);
                 this.player.move(d5, 0.0D, d4);
                 this.player.setLocation(d1, d2, d3, f, f1);
                 this.player.motX = d5;
@@ -330,7 +330,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             }
 
             if (this.player.isSleeping()) {
-                this.player.a(true);
+                this.player.updatePlayer(true);
                 this.player.setLocation(this.x, this.y, this.z, this.player.yaw, this.player.pitch);
                 worldserver.playerJoinedWorld(this.player);
                 return;
@@ -372,7 +372,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 f3 = packet10flying.pitch;
             }
 
-            this.player.a(true);
+            this.player.updatePlayer(true);
             this.player.br = 0.0F;
             this.player.setLocation(this.x, this.y, this.z, f2, f3);
             if (!this.checkMovement) {
@@ -701,12 +701,12 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             this.player.inventory.items[this.player.inventory.itemInHandIndex] = null;
         }
 
-        this.player.h = true;
+        this.player.isUpdatingInventory = true;
         this.player.inventory.items[this.player.inventory.itemInHandIndex] = ItemStack.copyOrNull(this.player.inventory.items[this.player.inventory.itemInHandIndex]);
         Slot slot = this.player.activeContainer.a(this.player.inventory, this.player.inventory.itemInHandIndex);
 
         this.player.activeContainer.a();
-        this.player.h = false;
+        this.player.isUpdatingInventory = false;
         // CraftBukkit
         if (!ItemStack.equals(this.player.inventory.getItemInHand(), packet15place.itemstack) || always) {
             this.sendPacket(new Packet103SetSlot(this.player.activeContainer.windowId, slot.a, this.player.inventory.getItemInHand()));
@@ -1082,7 +1082,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     public void a(Packet101CloseWindow packet101closewindow) {
         if (this.player.dead) return; // CraftBukkit
 
-        this.player.A();
+        this.player.resetContainer();
     }
 
     public void a(Packet102WindowClick packet102windowclick) {
@@ -1099,10 +1099,10 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
             if (ItemStack.equals(packet102windowclick.clickedItem, itemstack)) {
                 this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.windowId, packet102windowclick.actionId, true));
-                this.player.h = true;
+                this.player.isUpdatingInventory = true;
                 this.player.activeContainer.a();
-                this.player.z();
-                this.player.h = false;
+                this.player.sendCursorUpdate();
+                this.player.isUpdatingInventory = false;
             } else {
                 this.n.put(Integer.valueOf(this.player.activeContainer.windowId), Short.valueOf(packet102windowclick.actionId));
                 this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.windowId, packet102windowclick.actionId, false));

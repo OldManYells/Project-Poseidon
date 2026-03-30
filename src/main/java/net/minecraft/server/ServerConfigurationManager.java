@@ -313,7 +313,6 @@ public class ServerConfigurationManager {
         this.players.add(entityplayer1);
         //PlayerTracker.getInstance().addPlayer(entityplayer1.name); //Project POSEIDON
         this.updateClient(entityplayer1); // CraftBukkit
-        entityplayer1.x();
         // CraftBukkit start - don't fire on respawn
         if (fromWorld != location.getWorld()) {
             org.bukkit.event.player.PlayerChangedWorldEvent event = new org.bukkit.event.player.PlayerChangedWorldEvent((Player) entityplayer1.getBukkitEntity(), fromWorld);
@@ -687,6 +686,6 @@ public class ServerConfigurationManager {
 
     public void updateClient(EntityPlayer entityplayer) {
         entityplayer.updateInventory(entityplayer.defaultContainer);
-        entityplayer.C();
+        entityplayer.resetHealthUpdate();
     }
 }

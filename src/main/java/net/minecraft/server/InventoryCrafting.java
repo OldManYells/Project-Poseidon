@@ -55,7 +55,7 @@ public class InventoryCrafting implements IInventory {
                 this.c.a((IInventory) this);
                 return itemstack;
             } else {
-                itemstack = this.items[i].a(j);
+                itemstack = this.items[i].splitStack(j);
                 if (this.items[i].count == 0) {
                     this.items[i] = null;
                 }
