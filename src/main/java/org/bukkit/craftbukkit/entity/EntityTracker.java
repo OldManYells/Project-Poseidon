@@ -35,7 +35,7 @@ public class EntityTracker {
                 EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
 
                 if (entitytrackerentry.tracker != entityplayer) {
-                    entitytrackerentry.b(entityplayer);
+                    entitytrackerentry.updatePlayer(entityplayer);
                 }
             }
         } else if (entity instanceof EntityFish) {
@@ -98,7 +98,7 @@ public class EntityTracker {
             while (iterator.hasNext()) {
                 EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
 
-                entitytrackerentry.a(entityplayer);
+                entitytrackerentry.removePlayer(entityplayer);
             }
         }
 
@@ -106,7 +106,7 @@ public class EntityTracker {
 
         if (entitytrackerentry1 != null) {
             this.a.remove(entitytrackerentry1);
-            entitytrackerentry1.a();
+            entitytrackerentry1.destroyTrackedEntity();
         }
     }
 
@@ -132,7 +132,7 @@ public class EntityTracker {
                 EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry) iterator1.next();
 
                 if (entitytrackerentry1.tracker != entityplayer) {
-                    entitytrackerentry1.b(entityplayer);
+                    entitytrackerentry1.updatePlayer(entityplayer);
                 }
             }
         }
@@ -143,7 +143,7 @@ public class EntityTracker {
         EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) this.b.a(entity.id);
 
         if (entitytrackerentry != null) {
-            entitytrackerentry.a(packet);
+            entitytrackerentry.sendPacketToTrackedPlayers(packet);
         }
     }
 
@@ -152,7 +152,7 @@ public class EntityTracker {
         EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) this.b.a(entity.id);
 
         if (entitytrackerentry != null) {
-            entitytrackerentry.b(packet);
+            entitytrackerentry.sendPacketToTrackedPlayersAndSelf(packet);
         }
     }
 
@@ -163,7 +163,7 @@ public class EntityTracker {
         while (iterator.hasNext()) {
             EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
 
-            entitytrackerentry.c(entityplayer);
+            entitytrackerentry.untrackPlayer(entityplayer);
         }
     }
     
@@ -176,7 +176,7 @@ public class EntityTracker {
             EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
 
             if (entitytrackerentry.tracker != entityplayer && entitytrackerentry.tracker.bH == chunk.x && entitytrackerentry.tracker.bJ == chunk.z) {
-                entitytrackerentry.b(entityplayer);
+                entitytrackerentry.updatePlayer(entityplayer);
             }
         }
     }

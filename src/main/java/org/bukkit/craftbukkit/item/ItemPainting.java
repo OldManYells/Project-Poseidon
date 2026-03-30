@@ -38,7 +38,7 @@ public class ItemPainting extends Item {
 
             EntityPainting entitypainting = new EntityPainting(world, i, j, k, b0);
 
-            if (entitypainting.h()) {
+            if (entitypainting.isPositionValid()) {
                 if (!world.isStatic) {
                     // CraftBukkit start
                     Player who = (entityhuman == null) ? null : (Player) entityhuman.getBukkitEntity();

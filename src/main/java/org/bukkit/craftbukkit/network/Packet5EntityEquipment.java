@@ -10,44 +10,64 @@ import java.io.IOException;
 
 public class Packet5EntityEquipment extends Packet {
 
-    public int a;
-    public int b;
-    public int c;
-    public int d;
+    public int entityId;
+    public int slot;
+    public int itemId;
+    public int itemDamage;
 
     public Packet5EntityEquipment() {}
 
     public Packet5EntityEquipment(int i, int j, ItemStack itemstack) {
-        this.a = i;
-        this.b = j;
+        this.entityId = i;
+        this.slot = j;
         if (itemstack == null) {
-            this.c = -1;
-            this.d = 0;
+            this.itemId = -1;
+            this.itemDamage = 0;
         } else {
-            this.c = itemstack.id;
-            this.d = itemstack.getData();
+            this.itemId = itemstack.id;
+            this.itemDamage = itemstack.getData();
         }
     }
 
+    @Override
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.readShort();
-        this.c = datainputstream.readShort();
-        this.d = datainputstream.readShort();
+        this.readPacketData(datainputstream);
     }
 
+    public void readPacketData(DataInputStream datainputstream) throws IOException {
+        this.entityId = datainputstream.readInt();
+        this.slot = datainputstream.readShort();
+        this.itemId = datainputstream.readShort();
+        this.itemDamage = datainputstream.readShort();
+    }
+
+    @Override
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeShort(this.b);
-        dataoutputstream.writeShort(this.c);
-        dataoutputstream.writeShort(this.d);
+        this.writePacketData(dataoutputstream);
     }
 
+    public void writePacketData(DataOutputStream dataoutputstream) throws IOException {
+        dataoutputstream.writeInt(this.entityId);
+        dataoutputstream.writeShort(this.slot);
+        dataoutputstream.writeShort(this.itemId);
+        dataoutputstream.writeShort(this.itemDamage);
+    }
+
+    @Override
     public void a(NetHandler nethandler) {
+        this.handlePacket(nethandler);
+    }
+
+    public void handlePacket(NetHandler nethandler) {
         nethandler.a(this);
     }
 
+    @Override
     public int a() {
+        return this.getPacketSize();
+    }
+
+    public int getPacketSize() {
         return 8;
     }
 }

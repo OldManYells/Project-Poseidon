@@ -13,36 +13,36 @@ import java.util.Set;
 public class EntityTrackerEntry {
 
     public Entity tracker;
-    public int b;
-    public int c;
-    public int d;
-    public int e;
-    public int f;
-    public int g;
-    public int h;
-    public double i;
-    public double j;
-    public double k;
-    public int l = 0;
-    private double o;
-    private double p;
-    private double q;
-    private boolean r = false;
+    public int trackDistance;
+    public int updateInterval;
+    public int encodedPosX;
+    public int encodedPosY;
+    public int encodedPosZ;
+    public int encodedRotationYaw;
+    public int encodedRotationPitch;
+    public double lastMotionX;
+    public double lastMotionY;
+    public double lastMotionZ;
+    public int tickCounter = 0;
+    private double lastTrackedX;
+    private double lastTrackedY;
+    private double lastTrackedZ;
+    private boolean hasUpdatedPosition = false;
     private boolean isMoving;
-    private int t = 0;
+    private int teleportCounter = 0;
     public boolean m = false;
     public Set trackedPlayers = new HashSet();
 
     public EntityTrackerEntry(Entity entity, int i, int j, boolean flag) {
         this.tracker = entity;
-        this.b = i;
-        this.c = j;
+        this.trackDistance = i;
+        this.updateInterval = j;
         this.isMoving = flag;
-        this.d = MathHelper.floor(entity.locX * 32.0D);
-        this.e = MathHelper.floor(entity.locY * 32.0D);
-        this.f = MathHelper.floor(entity.locZ * 32.0D);
-        this.g = MathHelper.d(entity.yaw * 256.0F / 360.0F);
-        this.h = MathHelper.d(entity.pitch * 256.0F / 360.0F);
+        this.encodedPosX = MathHelper.floor(entity.locX * 32.0D);
+        this.encodedPosY = MathHelper.floor(entity.locY * 32.0D);
+        this.encodedPosZ = MathHelper.floor(entity.locZ * 32.0D);
+        this.encodedRotationYaw = MathHelper.d(entity.yaw * 256.0F / 360.0F);
+        this.encodedRotationPitch = MathHelper.d(entity.pitch * 256.0F / 360.0F);
     }
 
     public boolean equals(Object object) {
@@ -55,17 +55,17 @@ public class EntityTrackerEntry {
 
     public void track(List list) {
         this.m = false;
-        if (!this.r || this.tracker.e(this.o, this.p, this.q) > 16.0D) {
-            this.o = this.tracker.locX;
-            this.p = this.tracker.locY;
-            this.q = this.tracker.locZ;
-            this.r = true;
+        if (!this.hasUpdatedPosition || this.tracker.e(this.lastTrackedX, this.lastTrackedY, this.lastTrackedZ) > 16.0D) {
+            this.lastTrackedX = this.tracker.locX;
+            this.lastTrackedY = this.tracker.locY;
+            this.lastTrackedZ = this.tracker.locZ;
+            this.hasUpdatedPosition = true;
             this.m = true;
             this.scanPlayers(list);
         }
 
-        if (++this.l % this.c == 0 || this.tracker.airBorne || this.tracker.aa().a()) {
-            ++this.t; // Poseidon - moved below
+        if (++this.tickCounter % this.updateInterval == 0 || this.tracker.airBorne || this.tracker.aa().a()) {
+            ++this.teleportCounter; // Poseidon - moved below
 
             // encoded means multiplied by 32
             // this is required to send it to the client, as the relative position is sent as the float multiplied by 32
@@ -74,9 +74,9 @@ public class EntityTrackerEntry {
             int newEncodedPosZ = MathHelper.floor(this.tracker.locZ * 32.0D);
             int newEncodedRotationYaw = MathHelper.d(this.tracker.yaw * 256.0F / 360.0F);
             int newEncodedRotationPitch = MathHelper.d(this.tracker.pitch * 256.0F / 360.0F);
-            int encodedDiffX = newEncodedPosX - this.d;
-            int encodedDiffY = newEncodedPosY - this.e;
-            int encodedDiffZ = newEncodedPosZ - this.f;
+            int encodedDiffX = newEncodedPosX - this.encodedPosX;
+            int encodedDiffY = newEncodedPosY - this.encodedPosY;
+            int encodedDiffZ = newEncodedPosZ - this.encodedPosZ;
             Object packet = null;
             // mob movement fix, credit to Oldmana#7086 from the Modification Station discord server
             // https://discordapp.com/channels/397834523028488203/397839387465089054/684637208199823377
@@ -84,23 +84,23 @@ public class EntityTrackerEntry {
             int rotationUpdateTreshold = 1;
             boolean needsPositionUpdate = Math.abs(encodedDiffX) >= movementUpdateTreshold || Math.abs(encodedDiffY) >= movementUpdateTreshold || Math.abs(encodedDiffZ) >= movementUpdateTreshold
                     || tracker instanceof EntityBoat || tracker instanceof EntityMinecart;
-            
-            boolean needsRotationUpdate = Math.abs(newEncodedRotationYaw - this.g) >= rotationUpdateTreshold || Math.abs(newEncodedRotationPitch - this.h) >= rotationUpdateTreshold;
+
+            boolean needsRotationUpdate = Math.abs(newEncodedRotationYaw - this.encodedRotationYaw) >= rotationUpdateTreshold || Math.abs(newEncodedRotationPitch - this.encodedRotationPitch) >= rotationUpdateTreshold;
 
             // CraftBukkit start - Code moved from below
             if (needsPositionUpdate) {
-                this.d = newEncodedPosX;
-                this.e = newEncodedPosY;
-                this.f = newEncodedPosZ;
+                this.encodedPosX = newEncodedPosX;
+                this.encodedPosY = newEncodedPosY;
+                this.encodedPosZ = newEncodedPosZ;
             }
 
             if (needsRotationUpdate) {
-                this.g = newEncodedRotationYaw;
-                this.h = newEncodedRotationPitch;
+                this.encodedRotationYaw = newEncodedRotationYaw;
+                this.encodedRotationPitch = newEncodedRotationPitch;
             }
             // CraftBukkit end
-            
-            if (encodedDiffX >= -128 && encodedDiffX < 128 && encodedDiffY >= -128 && encodedDiffY < 128 && encodedDiffZ >= -128 && encodedDiffZ < 128 && this.t <= 400) {
+
+            if (encodedDiffX >= -128 && encodedDiffX < 128 && encodedDiffY >= -128 && encodedDiffY < 128 && encodedDiffZ >= -128 && encodedDiffZ < 128 && this.teleportCounter <= 400) {
                 // entity has moved less than 4 blocks
                 if (needsPositionUpdate && needsRotationUpdate) {
                     packet = new Packet33RelEntityMoveLook(this.tracker.id, (byte) encodedDiffX, (byte) encodedDiffY, (byte) encodedDiffZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
@@ -110,57 +110,57 @@ public class EntityTrackerEntry {
                     packet = new Packet32EntityLook(this.tracker.id, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
                 }
             } else {
-                this.t = 0;
+                this.teleportCounter = 0;
                 // minecart clipping fix
-                //this.tracker.locX = (double) i / 32.0D;
-                //this.tracker.locY = (double) j / 32.0D;
-                //this.tracker.locZ = (double) k / 32.0D;
+                //this.tracker.locX = (double) encodedPosX / 32.0D;
+                //this.tracker.locY = (double) encodedPosY / 32.0D;
+                //this.tracker.locZ = (double) encodedPosZ / 32.0D;
                 // entity has moved more than 4 blocks, send teleport
-                
+
                 // CraftBukkit start - Refresh list of who can see a player before sending teleport packet
                 if (this.tracker instanceof EntityPlayer) {
                     this.scanPlayers(new java.util.ArrayList(this.trackedPlayers));
                 }
                 // CraftBukkit end
-                
+
                 packet = new Packet34EntityTeleport(this.tracker.id, newEncodedPosX, newEncodedPosY, newEncodedPosZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
             }
 
             if (this.isMoving) {
-                double d0 = this.tracker.motX - this.i;
-                double d1 = this.tracker.motY - this.j;
-                double d2 = this.tracker.motZ - this.k;
+                double d0 = this.tracker.motX - this.lastMotionX;
+                double d1 = this.tracker.motY - this.lastMotionY;
+                double d2 = this.tracker.motZ - this.lastMotionZ;
                 double d3 = 0.02D;
                 double d4 = d0 * d0 + d1 * d1 + d2 * d2;
 
                 if (d4 > d3 * d3 || d4 > 0.0D && this.tracker.motX == 0.0D && this.tracker.motY == 0.0D && this.tracker.motZ == 0.0D) {
-                    this.i = this.tracker.motX;
-                    this.j = this.tracker.motY;
-                    this.k = this.tracker.motZ;
-                    this.a((Packet) (new Packet28EntityVelocity(this.tracker.id, this.i, this.j, this.k)));
+                    this.lastMotionX = this.tracker.motX;
+                    this.lastMotionY = this.tracker.motY;
+                    this.lastMotionZ = this.tracker.motZ;
+                    this.sendPacketToTrackedPlayers((Packet) (new Packet28EntityVelocity(this.tracker.id, this.lastMotionX, this.lastMotionY, this.lastMotionZ)));
                 }
             }
 
             if (packet != null) {
-                this.a((Packet) packet);
+                this.sendPacketToTrackedPlayers((Packet) packet);
             }
 
             DataWatcher datawatcher = this.tracker.aa();
 
             if (datawatcher.a()) {
-                this.b((Packet) (new Packet40EntityMetadata(this.tracker.id, datawatcher)));
+                this.sendPacketToTrackedPlayersAndSelf((Packet) (new Packet40EntityMetadata(this.tracker.id, datawatcher)));
             }
 
             /* CraftBukkit start - Code moved up
             if (needsPositionUpdate) {
-                this.d = newEncodedPosX;
-                this.e = newEncodedPosY;
-                this.f = newEncodedPosZ;
+                this.encodedPosX = newEncodedPosX;
+                this.encodedPosY = newEncodedPosY;
+                this.encodedPosZ = newEncodedPosZ;
             }
 
             if (needsRotationUpdate) {
-                this.g = newEncodedRotationYaw;
-                this.h = newEncodedRotationPitch;
+                this.encodedRotationYaw = newEncodedRotationYaw;
+                this.encodedRotationPitch = newEncodedRotationPitch;
             }
             // Craftbukkit end */
             this.tracker.airBorne = false;
@@ -186,14 +186,14 @@ public class EntityTrackerEntry {
             }
 
             if(!cancelled) {
-                this.b((Packet) (new Packet28EntityVelocity(this.tracker)));
+                this.sendPacketToTrackedPlayersAndSelf((Packet) (new Packet28EntityVelocity(this.tracker)));
             }
             // CraftBukkit end
             this.tracker.velocityChanged = false;
         }
     }
 
-    public void a(Packet packet) {
+    public void sendPacketToTrackedPlayers(Packet packet) {
         Iterator iterator = this.trackedPlayers.iterator();
 
         while (iterator.hasNext()) {
@@ -203,16 +203,16 @@ public class EntityTrackerEntry {
         }
     }
 
-    public void b(Packet packet) {
-        this.a(packet);
+    public void sendPacketToTrackedPlayersAndSelf(Packet packet) {
+        this.sendPacketToTrackedPlayers(packet);
         if (this.tracker instanceof EntityPlayer) {
             ((EntityPlayer) this.tracker).netServerHandler.sendPacket(packet);
         }
     }
 
-    public void a() {
+    public void destroyTrackedEntity() {
         // Poseidon start
-        //this.a((Packet) (new Packet29DestroyEntity(this.tracker.id)));
+        //this.sendPacketToTrackedPlayers((Packet) (new Packet29DestroyEntity(this.tracker.id)));
         Iterator iterator = this.trackedPlayers.iterator();
 
         while (iterator.hasNext()) {
@@ -223,20 +223,20 @@ public class EntityTrackerEntry {
         // Poseidon end
     }
 
-    public void a(EntityPlayer entityplayer) {
+    public void removePlayer(EntityPlayer entityplayer) {
         if (this.trackedPlayers.contains(entityplayer)) {
             entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id)); // Poseidon
             this.trackedPlayers.remove(entityplayer);
         }
     }
 
-    public void b(EntityPlayer entityplayer) {
+    public void updatePlayer(EntityPlayer entityplayer) {
         if (entityplayer != this.tracker) {
-            double d0 = entityplayer.locX - (double) (this.d / 32);
-            double d1 = entityplayer.locZ - (double) (this.f / 32);
+            double d0 = entityplayer.locX - (double) (this.encodedPosX / 32);
+            double d1 = entityplayer.locZ - (double) (this.encodedPosZ / 32);
 
-            if (d0 >= (double) (-this.b) && d0 <= (double) this.b && d1 >= (double) (-this.b) && d1 <= (double) this.b) {
-                if (!this.trackedPlayers.contains(entityplayer) && this.d(entityplayer)) {
+            if (d0 >= (double) (-this.trackDistance) && d0 <= (double) this.trackDistance && d1 >= (double) (-this.trackDistance) && d1 <= (double) this.trackDistance) {
+                if (!this.trackedPlayers.contains(entityplayer) && this.isPlayerInTrackingRange(entityplayer)) {
                     // CraftBukkit start
                     if (tracker instanceof EntityPlayer) {
                         org.bukkit.entity.Player player = (Player) ((EntityPlayer) tracker).getBukkitEntity();
@@ -244,21 +244,21 @@ public class EntityTrackerEntry {
                             return;
                         }
                     }
-                    
+
                     entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.id));
                     // CraftBukkit end
-                    
+
                     this.trackedPlayers.add(entityplayer);
-                    Packet packet = this.b();
+                    Packet packet = this.createSpawnPacket();
                     entityplayer.netServerHandler.sendPacket(packet);
                     // Poseidon Start
                     if (!this.tracker.datawatcher.getD()) {
                         entityplayer.netServerHandler.sendPacket(new Packet40EntityMetadata(this.tracker.id, this.tracker.datawatcher));
                     }
-                    
-                    this.i = this.tracker.motX;
-                    this.j = this.tracker.motY;
-                    this.k = this.tracker.motZ;
+
+                    this.lastMotionX = this.tracker.motX;
+                    this.lastMotionY = this.tracker.motY;
+                    this.lastMotionZ = this.tracker.motZ;
                     if (this.isMoving) {
                         entityplayer.netServerHandler.sendPacket(new Packet28EntityVelocity(this.tracker.id, this.tracker.motX, this.tracker.motY, this.tracker.motZ));
                     }
@@ -267,7 +267,7 @@ public class EntityTrackerEntry {
                         entityplayer.netServerHandler.sendPacket(new Packet39AttachEntity(this.tracker, this.tracker.vehicle));
                     }
                     // Poseidon end
-                    
+
                     // CraftBukkit start
                     if (this.tracker.passenger != null) {
                         entityplayer.netServerHandler.sendPacket(new Packet39AttachEntity(this.tracker.passenger, this.tracker));
@@ -297,25 +297,25 @@ public class EntityTrackerEntry {
             }
         }
     }
-    
-    private boolean d(EntityPlayer entityplayer) {
+
+    private boolean isPlayerInTrackingRange(EntityPlayer entityplayer) {
         return entityplayer.getWorldServer().getPlayerManager().a(entityplayer, this.tracker.bH, this.tracker.bJ);
     }
 
     public void scanPlayers(List list) {
         for (int i = 0; i < list.size(); ++i) {
-            this.b((EntityPlayer) list.get(i));
+            this.updatePlayer((EntityPlayer) list.get(i));
         }
     }
 
-    private Packet b() {
+    private Packet createSpawnPacket() {
         if (this.tracker.dead) { // Poseidon
             // CraftBukkit start - Remove useless error spam, just return
             // System.out.println("Fetching addPacket for removed entity");
             return null;
             // CraftBukkit end
         }
-        
+
         if (this.tracker instanceof EntityItem) {
             EntityItem entityitem = (EntityItem) this.tracker;
             Packet21PickupSpawn packet21pickupspawn = new Packet21PickupSpawn(entityitem);
@@ -368,9 +368,9 @@ public class EntityTrackerEntry {
                 Packet23VehicleSpawn packet23vehiclespawn = new Packet23VehicleSpawn(this.tracker, 63, shooter);
                 // CraftBukkit end
 
-                packet23vehiclespawn.e = (int) (entityfireball.c * 8000.0D);
-                packet23vehiclespawn.f = (int) (entityfireball.d * 8000.0D);
-                packet23vehiclespawn.g = (int) (entityfireball.e * 8000.0D);
+                packet23vehiclespawn.velocityX = (int) (entityfireball.directionX * 8000.0D);
+                packet23vehiclespawn.velocityY = (int) (entityfireball.directionY * 8000.0D);
+                packet23vehiclespawn.velocityZ = (int) (entityfireball.directionZ * 8000.0D);
                 return packet23vehiclespawn;
             } else if (this.tracker instanceof EntityEgg) {
                 return new Packet23VehicleSpawn(this.tracker, 62);
@@ -398,7 +398,7 @@ public class EntityTrackerEntry {
         }
     }
 
-    public void c(EntityPlayer entityplayer) {
+    public void untrackPlayer(EntityPlayer entityplayer) {
         if (this.trackedPlayers.contains(entityplayer)) {
             this.trackedPlayers.remove(entityplayer);
             entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id)); // Poseidon

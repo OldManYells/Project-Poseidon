@@ -21,7 +21,7 @@ public class SlotResult extends Slot {
     }
 
     public void a(ItemStack itemstack) {
-        itemstack.b(this.e.world, this.e);
+        itemstack.onCrafted(this.e.world, this.e);
         if (itemstack.id == CraftBlock.WORKBENCH.id) {
             this.e.a(AchievementList.h, 1);
         } else if (itemstack.id == org.bukkit.craftbukkit.item.Item.WOOD_PICKAXE.id) {

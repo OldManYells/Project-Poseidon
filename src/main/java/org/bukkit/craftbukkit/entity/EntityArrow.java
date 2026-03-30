@@ -16,17 +16,17 @@ import java.util.List;
 
 public class EntityArrow extends Entity {
 
-    private int d = -1;
-    private int e = -1;
-    private int f = -1;
-    private int g = 0;
-    private int h = 0;
+    private int tileX = -1;
+    private int tileY = -1;
+    private int tileZ = -1;
+    private int inBlockId = 0;
+    private int inBlockData = 0;
     private boolean inGround = false;
     public boolean fromPlayer = false;
     public int shake = 0;
     public EntityLiving shooter;
-    private int j;
-    private int k = 0;
+    private int ticksInGround;
+    private int ticksInAir = 0;
 
     public EntityArrow(World world) {
         super(world);
@@ -54,31 +54,31 @@ public class EntityArrow extends Entity {
         this.motX = (double) (-MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
         this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F));
         this.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F));
-        this.a(this.motX, this.motY, this.motZ, 1.5F, 1.0F);
+        this.setArrowVelocity(this.motX, this.motY, this.motZ, 1.5F, 1.0F);
     }
 
     protected void b() {}
 
-    public void a(double d0, double d1, double d2, float f, float f1) {
-        float f2 = MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
+    public void setArrowVelocity(double velX, double velY, double velZ, float speed, float spread) {
+        float magnitude = MathHelper.a(velX * velX + velY * velY + velZ * velZ);
 
-        d0 /= (double) f2;
-        d1 /= (double) f2;
-        d2 /= (double) f2;
-        d0 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d1 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d2 += this.random.nextGaussian() * 0.007499999832361937D * (double) f1;
-        d0 *= (double) f;
-        d1 *= (double) f;
-        d2 *= (double) f;
-        this.motX = d0;
-        this.motY = d1;
-        this.motZ = d2;
-        float f3 = MathHelper.a(d0 * d0 + d2 * d2);
+        velX /= (double) magnitude;
+        velY /= (double) magnitude;
+        velZ /= (double) magnitude;
+        velX += this.random.nextGaussian() * 0.007499999832361937D * (double) spread;
+        velY += this.random.nextGaussian() * 0.007499999832361937D * (double) spread;
+        velZ += this.random.nextGaussian() * 0.007499999832361937D * (double) spread;
+        velX *= (double) speed;
+        velY *= (double) speed;
+        velZ *= (double) speed;
+        this.motX = velX;
+        this.motY = velY;
+        this.motZ = velZ;
+        float horizontalSpeed = MathHelper.a(velX * velX + velZ * velZ);
 
-        this.lastYaw = this.yaw = (float) (Math.atan2(d0, d2) * 180.0D / 3.1415927410125732D);
-        this.lastPitch = this.pitch = (float) (Math.atan2(d1, (double) f3) * 180.0D / 3.1415927410125732D);
-        this.j = 0;
+        this.lastYaw = this.yaw = (float) (Math.atan2(velX, velZ) * 180.0D / 3.1415927410125732D);
+        this.lastPitch = this.pitch = (float) (Math.atan2(velY, (double) horizontalSpeed) * 180.0D / 3.1415927410125732D);
+        this.ticksInGround = 0;
     }
 
     public void m_() {
@@ -90,11 +90,11 @@ public class EntityArrow extends Entity {
             this.lastPitch = this.pitch = (float) (Math.atan2(this.motY, (double) f) * 180.0D / 3.1415927410125732D);
         }
 
-        int i = this.world.getTypeId(this.d, this.e, this.f);
+        int i = this.world.getTypeId(this.tileX, this.tileY, this.tileZ);
 
         if (i > 0) {
-            CraftBlock.byId[i].a(this.world, this.d, this.e, this.f);
-            AxisAlignedBB axisalignedbb = CraftBlock.byId[i].e(this.world, this.d, this.e, this.f);
+            CraftBlock.byId[i].a(this.world, this.tileX, this.tileY, this.tileZ);
+            AxisAlignedBB axisalignedbb = CraftBlock.byId[i].e(this.world, this.tileX, this.tileY, this.tileZ);
 
             if (axisalignedbb != null && axisalignedbb.a(Vec3D.create(this.locX, this.locY, this.locZ))) {
                 this.inGround = true;
@@ -106,12 +106,12 @@ public class EntityArrow extends Entity {
         }
 
         if (this.inGround) {
-            i = this.world.getTypeId(this.d, this.e, this.f);
-            int j = this.world.getData(this.d, this.e, this.f);
+            i = this.world.getTypeId(this.tileX, this.tileY, this.tileZ);
+            int j = this.world.getData(this.tileX, this.tileY, this.tileZ);
 
-            if (i == this.g && j == this.h) {
-                ++this.j;
-                if (this.j == 1200) {
+            if (i == this.inBlockId && j == this.inBlockData) {
+                ++this.ticksInGround;
+                if (this.ticksInGround == 1200) {
                     this.die();
                 }
             } else {
@@ -119,11 +119,11 @@ public class EntityArrow extends Entity {
                 this.motX *= (double) (this.random.nextFloat() * 0.2F);
                 this.motY *= (double) (this.random.nextFloat() * 0.2F);
                 this.motZ *= (double) (this.random.nextFloat() * 0.2F);
-                this.j = 0;
-                this.k = 0;
+                this.ticksInGround = 0;
+                this.ticksInAir = 0;
             }
         } else {
-            ++this.k;
+            ++this.ticksInAir;
             Vec3D vec3d = Vec3D.create(this.locX, this.locY, this.locZ);
             Vec3D vec3d1 = Vec3D.create(this.locX + this.motX, this.locY + this.motY, this.locZ + this.motZ);
             MovingObjectPosition movingobjectposition = this.world.rayTrace(vec3d, vec3d1, false, true);
@@ -143,7 +143,7 @@ public class EntityArrow extends Entity {
             for (int k = 0; k < list.size(); ++k) {
                 Entity entity1 = (Entity) list.get(k);
 
-                if (entity1.l_() && (entity1 != this.shooter || this.k >= 5)) {
+                if (entity1.l_() && (entity1 != this.shooter || this.ticksInAir >= 5)) {
                     f1 = 0.3F;
                     AxisAlignedBB axisalignedbb1 = entity1.boundingBox.b((double) f1, (double) f1, (double) f1);
                     MovingObjectPosition movingobjectposition1 = axisalignedbb1.a(vec3d, vec3d1);
@@ -205,14 +205,14 @@ public class EntityArrow extends Entity {
                         this.motZ *= -0.10000000149011612D;
                         this.yaw += 180.0F;
                         this.lastYaw += 180.0F;
-                        this.k = 0;
+                        this.ticksInAir = 0;
                     }
                 } else {
-                    this.d = movingobjectposition.b;
-                    this.e = movingobjectposition.c;
-                    this.f = movingobjectposition.d;
-                    this.g = this.world.getTypeId(this.d, this.e, this.f);
-                    this.h = this.world.getData(this.d, this.e, this.f);
+                    this.tileX = movingobjectposition.b;
+                    this.tileY = movingobjectposition.c;
+                    this.tileZ = movingobjectposition.d;
+                    this.inBlockId = this.world.getTypeId(this.tileX, this.tileY, this.tileZ);
+                    this.inBlockData = this.world.getData(this.tileX, this.tileY, this.tileZ);
                     this.motX = (double) ((float) (movingobjectposition.f.a - this.locX));
                     this.motY = (double) ((float) (movingobjectposition.f.b - this.locY));
                     this.motZ = (double) ((float) (movingobjectposition.f.c - this.locZ));
@@ -272,22 +272,22 @@ public class EntityArrow extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.d);
-        nbttagcompound.a("yTile", (short) this.e);
-        nbttagcompound.a("zTile", (short) this.f);
-        nbttagcompound.a("inTile", (byte) this.g);
-        nbttagcompound.a("inData", (byte) this.h);
+        nbttagcompound.a("xTile", (short) this.tileX);
+        nbttagcompound.a("yTile", (short) this.tileY);
+        nbttagcompound.a("zTile", (short) this.tileZ);
+        nbttagcompound.a("inTile", (byte) this.inBlockId);
+        nbttagcompound.a("inData", (byte) this.inBlockData);
         nbttagcompound.a("shake", (byte) this.shake);
         nbttagcompound.a("inGround", (byte) (this.inGround ? 1 : 0));
         nbttagcompound.a("player", this.fromPlayer);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.d = nbttagcompound.d("xTile");
-        this.e = nbttagcompound.d("yTile");
-        this.f = nbttagcompound.d("zTile");
-        this.g = nbttagcompound.c("inTile") & 255;
-        this.h = nbttagcompound.c("inData") & 255;
+        this.tileX = nbttagcompound.d("xTile");
+        this.tileY = nbttagcompound.d("yTile");
+        this.tileZ = nbttagcompound.d("zTile");
+        this.inBlockId = nbttagcompound.c("inTile") & 255;
+        this.inBlockData = nbttagcompound.c("inData") & 255;
         this.shake = nbttagcompound.c("shake") & 255;
         this.inGround = nbttagcompound.c("inGround") == 1;
         this.fromPlayer = nbttagcompound.m("player");

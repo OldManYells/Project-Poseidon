@@ -644,9 +644,9 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             always = (itemstack.count != itemstackAmount);
             // CraftBukkit end
         } else {
-            int i = packet15place.a;
-            int j = packet15place.b;
-            int k = packet15place.c;
+            int i = packet15place.blockX;
+            int j = packet15place.blockY;
+            int k = packet15place.blockZ;
             int l = packet15place.face;
             ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
             int i1 = (int) MathHelper.abs((float) (i - chunkcoordinates.x));
@@ -702,7 +702,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         }
 
         this.player.h = true;
-        this.player.inventory.items[this.player.inventory.itemInHandIndex] = ItemStack.b(this.player.inventory.items[this.player.inventory.itemInHandIndex]);
+        this.player.inventory.items[this.player.inventory.itemInHandIndex] = ItemStack.copyOrNull(this.player.inventory.items[this.player.inventory.itemInHandIndex]);
         Slot slot = this.player.activeContainer.a(this.player.inventory, this.player.inventory.itemInHandIndex);
 
         this.player.activeContainer.a();
@@ -1094,18 +1094,18 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
         if (this.player.dead) return; // CraftBukkit
 
-        if (this.player.activeContainer.windowId == packet102windowclick.a && this.player.activeContainer.c(this.player)) {
-            ItemStack itemstack = this.player.activeContainer.a(packet102windowclick.b, packet102windowclick.c, packet102windowclick.f, this.player);
+        if (this.player.activeContainer.windowId == packet102windowclick.windowId && this.player.activeContainer.c(this.player)) {
+            ItemStack itemstack = this.player.activeContainer.a(packet102windowclick.slot, packet102windowclick.mouseButton, packet102windowclick.shiftHeld, this.player);
 
-            if (ItemStack.equals(packet102windowclick.e, itemstack)) {
-                this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.a, packet102windowclick.d, true));
+            if (ItemStack.equals(packet102windowclick.clickedItem, itemstack)) {
+                this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.windowId, packet102windowclick.actionId, true));
                 this.player.h = true;
                 this.player.activeContainer.a();
                 this.player.z();
                 this.player.h = false;
             } else {
-                this.n.put(Integer.valueOf(this.player.activeContainer.windowId), Short.valueOf(packet102windowclick.d));
-                this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.a, packet102windowclick.d, false));
+                this.n.put(Integer.valueOf(this.player.activeContainer.windowId), Short.valueOf(packet102windowclick.actionId));
+                this.player.netServerHandler.sendPacket(new Packet106Transaction(packet102windowclick.windowId, packet102windowclick.actionId, false));
                 this.player.activeContainer.a(this.player, false);
                 ArrayList arraylist = new ArrayList();
 

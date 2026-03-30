@@ -516,7 +516,7 @@ public abstract class EntityHuman extends EntityLiving {
             ItemStack itemstack = this.G();
 
             if (itemstack != null && entity instanceof EntityLiving) {
-                itemstack.a((EntityLiving) entity);
+                itemstack.hitEntity((EntityLiving) entity);
                 // CraftBukkit - bypass infinite items; <= 0 -> == 0
                 if (itemstack.count == 0) {
                     itemstack.a(this);
@@ -604,7 +604,7 @@ public abstract class EntityHuman extends EntityLiving {
             ItemStack itemstack = this.G();
 
             if (itemstack != null && entity instanceof EntityLiving) {
-                itemstack.a((EntityLiving) entity, this);
+                itemstack.useOnEntity((EntityLiving) entity, this);
                 // CraftBukkit - bypass infinite items; <= 0 -> == 0
                 if (itemstack.count == 0) {
                     itemstack.a(this);

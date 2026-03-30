@@ -18,13 +18,13 @@ import java.util.List;
 
 public class EntityWolf extends EntityAnimal {
 
-    private boolean a = false;
-    private float b;
-    private float c;
-    private boolean f;
-    private boolean g;
-    private float h;
-    private float i;
+    private boolean isInterested = false;
+    private float headRotationAngle;
+    private float prevHeadRotationAngle;
+    private boolean isWet;
+    private boolean isShaking;
+    private float shakeProgress;
+    private float prevShakeProgress;
 
     public EntityWolf(World world) {
         super(world);
@@ -72,23 +72,23 @@ public class EntityWolf extends EntityAnimal {
         return !this.isTamed();
     }
 
-    protected String g() {
+    protected String getAmbientSound() {
         return this.isAngry() ? "mob.wolf.growl" : (this.random.nextInt(3) == 0 ? (this.isTamed() && this.datawatcher.b(18) < 10 ? "mob.wolf.whine" : "mob.wolf.panting") : "mob.wolf.bark");
     }
 
-    protected String h() {
+    protected String getHurtSound() {
         return "mob.wolf.hurt";
     }
 
-    protected String i() {
+    protected String getDeathSound() {
         return "mob.wolf.death";
     }
 
-    protected float k() {
+    protected float getSoundVolume() {
         return 0.4F;
     }
 
-    protected int j() {
+    protected int getDropItemId() {
         return -1;
     }
 
@@ -101,7 +101,7 @@ public class EntityWolf extends EntityAnimal {
                 float f = entityhuman.f(this);
 
                 if (f > 5.0F) {
-                    this.c(entityhuman, f);
+                    this.tryTeleportToOwner(entityhuman, f);
                 }
             } else if (!this.ad()) {
                 this.setSitting(true);
@@ -133,9 +133,9 @@ public class EntityWolf extends EntityAnimal {
         }
     }
 
-    public void v() {
+    public void onLivingUpdate() {
         super.v();
-        this.a = false;
+        this.isInterested = false;
         if (this.V() && !this.C() && !this.isAngry()) {
             Entity entity = this.W();
 
@@ -145,57 +145,57 @@ public class EntityWolf extends EntityAnimal {
 
                 if (itemstack != null) {
                     if (!this.isTamed() && itemstack.id == org.bukkit.craftbukkit.item.Item.BONE.id) {
-                        this.a = true;
-                    } else if (this.isTamed() && org.bukkit.craftbukkit.item.Item.byId[itemstack.id] instanceof ItemFood) {
-                        this.a = ((ItemFood) org.bukkit.craftbukkit.item.Item.byId[itemstack.id]).l();
+                    this.isInterested = true;
+                } else if (this.isTamed() && org.bukkit.craftbukkit.item.Item.byId[itemstack.id] instanceof ItemFood) {
+                    this.isInterested = ((ItemFood) org.bukkit.craftbukkit.item.Item.byId[itemstack.id]).l();
                     }
                 }
             }
         }
 
-        if (!this.Y && this.f && !this.g && !this.C() && this.onGround) {
-            this.g = true;
-            this.h = 0.0F;
-            this.i = 0.0F;
+        if (!this.Y && this.isWet && !this.isShaking && !this.C() && this.onGround) {
+            this.isShaking = true;
+            this.shakeProgress = 0.0F;
+            this.prevShakeProgress = 0.0F;
             this.world.a(this, (byte) 8);
         }
     }
 
     public void m_() {
         super.m_();
-        this.c = this.b;
-        if (this.a) {
-            this.b += (1.0F - this.b) * 0.4F;
+        this.prevHeadRotationAngle = this.headRotationAngle;
+        if (this.isInterested) {
+            this.headRotationAngle += (1.0F - this.headRotationAngle) * 0.4F;
         } else {
-            this.b += (0.0F - this.b) * 0.4F;
+            this.headRotationAngle += (0.0F - this.headRotationAngle) * 0.4F;
         }
 
-        if (this.a) {
+        if (this.isInterested) {
             this.aF = 10;
         }
 
         if (this.ac()) {
-            this.f = true;
-            this.g = false;
-            this.h = 0.0F;
-            this.i = 0.0F;
-        } else if ((this.f || this.g) && this.g) {
-            if (this.h == 0.0F) {
+            this.isWet = true;
+            this.isShaking = false;
+            this.shakeProgress = 0.0F;
+            this.prevShakeProgress = 0.0F;
+        } else if ((this.isWet || this.isShaking) && this.isShaking) {
+            if (this.shakeProgress == 0.0F) {
                 this.world.makeSound(this, "mob.wolf.shake", this.k(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
             }
 
-            this.i = this.h;
-            this.h += 0.05F;
-            if (this.i >= 2.0F) {
-                this.f = false;
-                this.g = false;
-                this.i = 0.0F;
-                this.h = 0.0F;
+            this.prevShakeProgress = this.shakeProgress;
+            this.shakeProgress += 0.05F;
+            if (this.prevShakeProgress >= 2.0F) {
+                this.isWet = false;
+                this.isShaking = false;
+                this.prevShakeProgress = 0.0F;
+                this.shakeProgress = 0.0F;
             }
 
-            if (this.h > 0.4F) {
+            if (this.shakeProgress > 0.4F) {
                 float f = (float) this.boundingBox.b;
-                int i = (int) (MathHelper.sin((this.h - 0.4F) * 3.1415927F) * 7.0F);
+                int i = (int) (MathHelper.sin((this.shakeProgress - 0.4F) * 3.1415927F) * 7.0F);
 
                 for (int j = 0; j < i; ++j) {
                     float f1 = (this.random.nextFloat() * 2.0F - 1.0F) * this.length * 0.5F;
@@ -207,15 +207,15 @@ public class EntityWolf extends EntityAnimal {
         }
     }
 
-    public float t() {
+    public float getEyeHeight() {
         return this.width * 0.8F;
     }
 
-    protected int u() {
+    protected int getExperiencePoints() {
         return this.isSitting() ? 20 : super.u();
     }
 
-    private void c(Entity entity, float f) {
+    private void tryTeleportToOwner(Entity entity, float f) {
         PathEntity pathentity = this.world.findPath(this, entity, 16.0F);
 
         if (pathentity == null && f > 12.0F) {
@@ -236,8 +236,8 @@ public class EntityWolf extends EntityAnimal {
         }
     }
 
-    protected boolean w() {
-        return this.isSitting() || this.g;
+    protected boolean isMovementBlocked() {
+        return this.isSitting() || this.isShaking;
     }
 
     public boolean damageEntity(Entity entity, int i) {
@@ -317,7 +317,7 @@ public class EntityWolf extends EntityAnimal {
         return this.isAngry() ? this.world.findNearbyPlayer(this, 16.0D) : null;
     }
 
-    protected void a(Entity entity, float f) {
+    protected void attackTarget(Entity entity, float f) {
         if (f > 2.0F && f < 6.0F && this.random.nextInt(10) == 0) {
             if (this.onGround) {
                 double d0 = entity.locX - this.locX;
@@ -370,10 +370,10 @@ public class EntityWolf extends EntityAnimal {
                         this.setSitting(true);
                         this.health = 20;
                         this.setOwnerName(entityhuman.name);
-                        this.a(true);
+                        this.spawnTameParticles(true);
                         this.world.a(this, (byte) 7);
                     } else {
-                        this.a(false);
+                        this.spawnTameParticles(false);
                         this.world.a(this, (byte) 6);
                     }
                 }
@@ -409,7 +409,7 @@ public class EntityWolf extends EntityAnimal {
         return false;
     }
 
-    void a(boolean flag) {
+    void spawnTameParticles(boolean flag) {
         String s = "heart";
 
         if (!flag) {
@@ -425,7 +425,7 @@ public class EntityWolf extends EntityAnimal {
         }
     }
 
-    public int l() {
+    public int getMaxSpawnedInChunk() {
         return 8;
     }
 

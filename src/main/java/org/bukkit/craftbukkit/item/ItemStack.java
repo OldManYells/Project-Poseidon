@@ -15,7 +15,7 @@ import org.bukkit.event.player.PlayerItemDamageEvent;
 public final class ItemStack {
 
     public int count;
-    public int b;
+    public int animationDelay;
     public int id;
     public int damage; // CraftBukkit - private -> public
 
@@ -52,10 +52,10 @@ public final class ItemStack {
 
     public ItemStack(NBTTagCompound nbttagcompound) {
         this.count = 0;
-        this.b(nbttagcompound);
+        this.readFromNBT(nbttagcompound);
     }
 
-    public ItemStack a(int i) {
+    public ItemStack splitStack(int i) {
         this.count -= i;
         return new ItemStack(this.id, i, this.damage);
     }
@@ -74,22 +74,22 @@ public final class ItemStack {
         return flag;
     }
 
-    public float a(CraftBlock baseBlock) {
+    public float getStrVsBlock(CraftBlock baseBlock) {
         return this.getItem().a(this, baseBlock);
     }
 
-    public ItemStack a(World world, EntityHuman entityhuman) {
+    public ItemStack useItemRightClick(World world, EntityHuman entityhuman) {
         return this.getItem().a(this, world, entityhuman);
     }
 
-    public NBTTagCompound a(NBTTagCompound nbttagcompound) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
         nbttagcompound.a("id", (short) this.id);
         nbttagcompound.a("Count", (byte) this.count);
         nbttagcompound.a("Damage", (short) this.damage);
         return nbttagcompound;
     }
 
-    public void b(NBTTagCompound nbttagcompound) {
+    public void readFromNBT(NBTTagCompound nbttagcompound) {
         this.id = nbttagcompound.d("id");
         this.count = nbttagcompound.c("Count");
         this.damage = nbttagcompound.d("Damage");
@@ -100,10 +100,10 @@ public final class ItemStack {
     }
 
     public boolean isStackable() {
-        return this.getMaxStackSize() > 1 && (!this.d() || !this.f());
+        return this.getMaxStackSize() > 1 && (!this.isDamageable() || !this.isDamaged());
     }
 
-    public boolean d() {
+    public boolean isDamageable() {
         return Item.byId[this.id].e() > 0;
     }
 
@@ -111,11 +111,11 @@ public final class ItemStack {
         return Item.byId[this.id].d();
     }
 
-    public boolean f() {
-        return this.d() && this.damage > 0;
+    public boolean isDamaged() {
+        return this.isDamageable() && this.damage > 0;
     }
 
-    public int g() {
+    public int getDamage() {
         return this.damage;
     }
 
@@ -127,13 +127,13 @@ public final class ItemStack {
         this.damage = i;
     }
 
-    public int i() {
+    public int getMaxDamage() {
         return Item.byId[this.id].e();
     }
 
     @SuppressWarnings("deprecation")
     public void damage(int i, Entity entity) {
-        if (this.d()) {
+        if (this.isDamageable()) {
             if (entity instanceof EntityPlayer) {
                 PlayerItemDamageEvent event = new PlayerItemDamageEvent((Player)entity.getBukkitEntity(), new CraftItemStack(this), i);
                 event.getPlayer().getServer().getPluginManager().callEvent(event);
@@ -144,7 +144,7 @@ public final class ItemStack {
                 i = event.getDamage();
             }
             this.damage += i;
-            if (this.damage > this.i()) {
+            if (this.damage > this.getMaxDamage()) {
                 if (entity instanceof EntityHuman) {
                     ((EntityHuman) entity).a(StatisticList.F[this.id], 1);
                 }
@@ -159,7 +159,7 @@ public final class ItemStack {
         }
     }
 
-    public void a(EntityLiving entityliving, EntityHuman entityhuman) {
+    public void useOnEntity(EntityLiving entityliving, EntityHuman entityhuman) {
         boolean flag = Item.byId[this.id].a(this, entityliving, (EntityLiving) entityhuman);
 
         if (flag) {
@@ -167,7 +167,7 @@ public final class ItemStack {
         }
     }
 
-    public void a(int i, int j, int k, int l, EntityHuman entityhuman) {
+    public void useOnBlock(int i, int j, int k, int l, EntityHuman entityhuman) {
         boolean flag = Item.byId[this.id].a(this, i, j, k, l, entityhuman);
 
         if (flag) {
@@ -175,17 +175,17 @@ public final class ItemStack {
         }
     }
 
-    public int a(Entity entity) {
+    public int getDamageVsEntity(Entity entity) {
         return Item.byId[this.id].a(entity);
     }
 
-    public boolean b(CraftBlock baseBlock) {
+    public boolean canHarvestBlock(CraftBlock baseBlock) {
         return Item.byId[this.id].a(baseBlock);
     }
 
     public void a(EntityHuman entityhuman) {}
 
-    public void a(EntityLiving entityliving) {
+    public void hitEntity(EntityLiving entityliving) {
         Item.byId[this.id].a(this, entityliving);
     }
 
@@ -194,10 +194,10 @@ public final class ItemStack {
     }
 
     public static boolean equals(ItemStack itemstack, ItemStack itemstack1) {
-        return itemstack == null && itemstack1 == null ? true : (itemstack != null && itemstack1 != null ? itemstack.d(itemstack1) : false);
+        return itemstack == null && itemstack1 == null ? true : (itemstack != null && itemstack1 != null ? itemstack.isStackIdentical(itemstack1) : false);
     }
 
-    private boolean d(ItemStack itemstack) {
+    private boolean isStackIdentical(ItemStack itemstack) {
         return this.count != itemstack.count ? false : (this.id != itemstack.id ? false : this.damage == itemstack.damage);
     }
 
@@ -205,7 +205,7 @@ public final class ItemStack {
         return this.id == itemstack.id && this.damage == itemstack.damage;
     }
 
-    public static ItemStack b(ItemStack itemstack) {
+    public static ItemStack copyOrNull(ItemStack itemstack) {
         return itemstack == null ? null : itemstack.cloneItemStack();
     }
 
@@ -213,20 +213,20 @@ public final class ItemStack {
         return this.count + "x" + (this.id < 0 ||  this.id >= Item.byId.length ? "missingno" : Item.byId[this.id].a()) + "@" + this.damage; // Project Poseidon: Fixes ArrayIndexOutOfBoundsException
     }
 
-    public void a(World world, Entity entity, int i, boolean flag) {
-        if (this.b > 0) {
-            --this.b;
+    public void inventoryTick(World world, Entity entity, int i, boolean flag) {
+        if (this.animationDelay > 0) {
+            --this.animationDelay;
         }
 
         Item.byId[this.id].a(this, world, entity, i, flag);
     }
 
-    public void b(World world, EntityHuman entityhuman) {
+    public void onCrafted(World world, EntityHuman entityhuman) {
         entityhuman.a(StatisticList.D[this.id], this.count);
         Item.byId[this.id].c(this, world, entityhuman);
     }
 
-    public boolean c(ItemStack itemstack) {
+    public boolean isStackExactlyEqual(ItemStack itemstack) {
         return this.id == itemstack.id && this.count == itemstack.count && this.damage == itemstack.damage;
     }
 }

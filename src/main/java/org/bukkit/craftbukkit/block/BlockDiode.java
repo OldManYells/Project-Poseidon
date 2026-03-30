@@ -10,13 +10,13 @@ import java.util.Random;
 
 public class BlockDiode extends net.minecraft.server.CraftBlock {
 
-    public static final double[] a = new double[] { -0.0625D, 0.0625D, 0.1875D, 0.3125D};
-    private static final int[] b = new int[] { 1, 2, 3, 4};
-    private final boolean c;
+    public static final double[] DELAY_OFFSETS = new double[] { -0.0625D, 0.0625D, 0.1875D, 0.3125D};
+    private static final int[] DELAY_TICKS = new int[] { 1, 2, 3, 4};
+    private final boolean isPowered;
 
     public BlockDiode(int i, boolean flag) {
         super(i, 6, Material.ORIENTABLE);
-        this.c = flag;
+        this.isPowered = flag;
         this.a(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
     }
 
@@ -32,36 +32,36 @@ public class BlockDiode extends net.minecraft.server.CraftBlock {
         return !world.e(i, j - 1, k) ? false : super.f(world, i, j, k);
     }
 
-    public void a(World world, int i, int j, int k, Random random) {
+    public void updateTick(World world, int i, int j, int k, Random random) {
         int l = world.getData(i, j, k);
-        boolean flag = this.f(world, i, j, k, l);
+        boolean flag = this.isInputPowered(world, i, j, k, l);
 
-        if (this.c && !flag) {
+        if (this.isPowered && !flag) {
             world.setTypeIdAndData(i, j, k, net.minecraft.server.CraftBlock.DIODE_OFF.id, l);
-        } else if (!this.c) {
+        } else if (!this.isPowered) {
             world.setTypeIdAndData(i, j, k, net.minecraft.server.CraftBlock.DIODE_ON.id, l);
             if (!flag) {
                 int i1 = (l & 12) >> 2;
 
-                world.c(i, j, k, net.minecraft.server.CraftBlock.DIODE_ON.id, b[i1] * 2);
+                world.c(i, j, k, net.minecraft.server.CraftBlock.DIODE_ON.id, DELAY_TICKS[i1] * 2);
             }
         }
     }
 
     public int a(int i, int j) {
-        return i == 0 ? (this.c ? 99 : 115) : (i == 1 ? (this.c ? 147 : 131) : 5);
+        return i == 0 ? (this.isPowered ? 99 : 115) : (i == 1 ? (this.isPowered ? 147 : 131) : 5);
     }
 
     public int a(int i) {
         return this.a(i, 0);
     }
 
-    public boolean d(World world, int i, int j, int k, int l) {
-        return this.a(world, i, j, k, l);
+    public boolean isProvidingStrongPower(World world, int i, int j, int k, int l) {
+        return this.isProvidingWeakPower(world, i, j, k, l);
     }
 
-    public boolean a(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        if (!this.c) {
+    public boolean isProvidingWeakPower(IBlockAccess iblockaccess, int i, int j, int k, int l) {
+        if (!this.isPowered) {
             return false;
         } else {
             int i1 = iblockaccess.getData(i, j, k) & 3;
@@ -76,18 +76,18 @@ public class BlockDiode extends net.minecraft.server.CraftBlock {
             world.setTypeId(i, j, k, 0);
         } else {
             int i1 = world.getData(i, j, k);
-            boolean flag = this.f(world, i, j, k, i1);
+            boolean flag = this.isInputPowered(world, i, j, k, i1);
             int j1 = (i1 & 12) >> 2;
 
-            if (this.c && !flag) {
-                world.c(i, j, k, this.id, b[j1] * 2);
-            } else if (!this.c && flag) {
-                world.c(i, j, k, this.id, b[j1] * 2);
+            if (this.isPowered && !flag) {
+                world.c(i, j, k, this.id, DELAY_TICKS[j1] * 2);
+            } else if (!this.isPowered && flag) {
+                world.c(i, j, k, this.id, DELAY_TICKS[j1] * 2);
             }
         }
     }
 
-    private boolean f(World world, int i, int j, int k, int l) {
+    private boolean isInputPowered(World world, int i, int j, int k, int l) {
         int i1 = l & 3;
 
         switch (i1) {
@@ -125,14 +125,14 @@ public class BlockDiode extends net.minecraft.server.CraftBlock {
         int l = ((MathHelper.floor((double) (entityliving.yaw * 4.0F / 360.0F) + 0.5D) & 3) + 2) % 4;
 
         world.setData(i, j, k, l);
-        boolean flag = this.f(world, i, j, k, l);
+        boolean flag = this.isInputPowered(world, i, j, k, l);
 
         if (flag) {
             world.c(i, j, k, this.id, 1);
         }
     }
 
-    public void c(World world, int i, int j, int k) {
+    public void onBlockAdded(World world, int i, int j, int k) {
         world.applyPhysics(i + 1, j, k, this.id);
         world.applyPhysics(i - 1, j, k, this.id);
         world.applyPhysics(i, j, k + 1, this.id);
@@ -145,7 +145,7 @@ public class BlockDiode extends net.minecraft.server.CraftBlock {
         return false;
     }
 
-    public int a(int i, Random random) {
+    public int getDropId(int i, Random random) {
         return Item.DIODE.id;
     }
 }

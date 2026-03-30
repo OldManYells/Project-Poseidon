@@ -11,15 +11,15 @@ import java.io.IOException;
 
 public class Packet23VehicleSpawn extends Packet {
 
-    public int a;
-    public int b;
-    public int c;
-    public int d;
-    public int e;
-    public int f;
-    public int g;
-    public int h;
-    public int i;
+    public int entityId;
+    public int encodedX;
+    public int encodedY;
+    public int encodedZ;
+    public int velocityX;
+    public int velocityY;
+    public int velocityZ;
+    public int type;
+    public int ownerEntityId;
 
     public Packet23VehicleSpawn() {}
 
@@ -27,14 +27,14 @@ public class Packet23VehicleSpawn extends Packet {
         this(entity, i, 0);
     }
 
-    public Packet23VehicleSpawn(Entity entity, int i, int j) {
-        this.a = entity.id;
-        this.b = MathHelper.floor(entity.locX * 32.0D);
-        this.c = MathHelper.floor(entity.locY * 32.0D);
-        this.d = MathHelper.floor(entity.locZ * 32.0D);
-        this.h = i;
-        this.i = j;
-        if (j > 0) {
+    public Packet23VehicleSpawn(Entity entity, int type, int ownerEntityId) {
+        this.entityId = entity.id;
+        this.encodedX = MathHelper.floor(entity.locX * 32.0D);
+        this.encodedY = MathHelper.floor(entity.locY * 32.0D);
+        this.encodedZ = MathHelper.floor(entity.locZ * 32.0D);
+        this.type = type;
+        this.ownerEntityId = ownerEntityId;
+        if (ownerEntityId > 0) {
             double d0 = entity.motX;
             double d1 = entity.motY;
             double d2 = entity.motZ;
@@ -64,45 +64,65 @@ public class Packet23VehicleSpawn extends Packet {
                 d2 = d3;
             }
 
-            this.e = (int) (d0 * 8000.0D);
-            this.f = (int) (d1 * 8000.0D);
-            this.g = (int) (d2 * 8000.0D);
+            this.velocityX = (int) (d0 * 8000.0D);
+            this.velocityY = (int) (d1 * 8000.0D);
+            this.velocityZ = (int) (d2 * 8000.0D);
         }
     }
 
+    @Override
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.h = datainputstream.readByte();
-        this.b = datainputstream.readInt();
-        this.c = datainputstream.readInt();
-        this.d = datainputstream.readInt();
-        this.i = datainputstream.readInt();
-        if (this.i > 0) {
-            this.e = datainputstream.readShort();
-            this.f = datainputstream.readShort();
-            this.g = datainputstream.readShort();
+        this.readPacketData(datainputstream);
+    }
+
+    public void readPacketData(DataInputStream datainputstream) throws IOException {
+        this.entityId = datainputstream.readInt();
+        this.type = datainputstream.readByte();
+        this.encodedX = datainputstream.readInt();
+        this.encodedY = datainputstream.readInt();
+        this.encodedZ = datainputstream.readInt();
+        this.ownerEntityId = datainputstream.readInt();
+        if (this.ownerEntityId > 0) {
+            this.velocityX = datainputstream.readShort();
+            this.velocityY = datainputstream.readShort();
+            this.velocityZ = datainputstream.readShort();
         }
     }
 
+    @Override
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.writeByte(this.h);
-        dataoutputstream.writeInt(this.b);
-        dataoutputstream.writeInt(this.c);
-        dataoutputstream.writeInt(this.d);
-        dataoutputstream.writeInt(this.i);
-        if (this.i > 0) {
-            dataoutputstream.writeShort(this.e);
-            dataoutputstream.writeShort(this.f);
-            dataoutputstream.writeShort(this.g);
+        this.writePacketData(dataoutputstream);
+    }
+
+    public void writePacketData(DataOutputStream dataoutputstream) throws IOException {
+        dataoutputstream.writeInt(this.entityId);
+        dataoutputstream.writeByte(this.type);
+        dataoutputstream.writeInt(this.encodedX);
+        dataoutputstream.writeInt(this.encodedY);
+        dataoutputstream.writeInt(this.encodedZ);
+        dataoutputstream.writeInt(this.ownerEntityId);
+        if (this.ownerEntityId > 0) {
+            dataoutputstream.writeShort(this.velocityX);
+            dataoutputstream.writeShort(this.velocityY);
+            dataoutputstream.writeShort(this.velocityZ);
         }
     }
 
+    @Override
     public void a(NetHandler nethandler) {
+        this.handlePacket(nethandler);
+    }
+
+    public void handlePacket(NetHandler nethandler) {
         nethandler.a(this);
     }
 
+    @Override
     public int a() {
-        return 21 + this.i > 0 ? 6 : 0;
+        return this.getPacketSize();
+    }
+
+    public int getPacketSize() {
+        return 21 + this.ownerEntityId > 0 ? 6 : 0;
     }
 }

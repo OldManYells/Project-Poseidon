@@ -15,7 +15,7 @@ public class ItemFishingRod extends Item {
 
     public ItemStack a(ItemStack itemstack, World world, EntityHuman entityhuman) {
         if (entityhuman.hookedFish != null) {
-            int i = entityhuman.hookedFish.h();
+            int i = entityhuman.hookedFish.reelIn();
 
             itemstack.damage(i, entityhuman);
             entityhuman.w();

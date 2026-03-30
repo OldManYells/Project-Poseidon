@@ -195,7 +195,7 @@ public class ItemInWorldManager {
         }
 
         if (itemstack != null) {
-            itemstack.a(l, i, j, k, this.player);
+            itemstack.useOnBlock(l, i, j, k, this.player);
             if (itemstack.count == 0) {
                 itemstack.a(this.player);
                 this.player.H();

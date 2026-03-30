@@ -10,18 +10,23 @@ import java.io.IOException;
 
 public class Packet15Place extends Packet {
 
-    public int a;
-    public int b;
-    public int c;
+    public int blockX;
+    public int blockY;
+    public int blockZ;
     public int face;
     public ItemStack itemstack;
 
     public Packet15Place() {}
 
+    @Override
     public void a(DataInputStream datainputstream) throws IOException {
-        this.a = datainputstream.readInt();
-        this.b = datainputstream.read();
-        this.c = datainputstream.readInt();
+        this.readPacketData(datainputstream);
+    }
+
+    public void readPacketData(DataInputStream datainputstream) throws IOException {
+        this.blockX = datainputstream.readInt();
+        this.blockY = datainputstream.read();
+        this.blockZ = datainputstream.readInt();
         this.face = datainputstream.read();
         short short1 = datainputstream.readShort();
 
@@ -35,10 +40,15 @@ public class Packet15Place extends Packet {
         }
     }
 
+    @Override
     public void a(DataOutputStream dataoutputstream) throws IOException {
-        dataoutputstream.writeInt(this.a);
-        dataoutputstream.write(this.b);
-        dataoutputstream.writeInt(this.c);
+        this.writePacketData(dataoutputstream);
+    }
+
+    public void writePacketData(DataOutputStream dataoutputstream) throws IOException {
+        dataoutputstream.writeInt(this.blockX);
+        dataoutputstream.write(this.blockY);
+        dataoutputstream.writeInt(this.blockZ);
         dataoutputstream.write(this.face);
         if (this.itemstack == null) {
             dataoutputstream.writeShort(-1);
@@ -49,11 +59,21 @@ public class Packet15Place extends Packet {
         }
     }
 
+    @Override
     public void a(NetHandler nethandler) {
+        this.handlePacket(nethandler);
+    }
+
+    public void handlePacket(NetHandler nethandler) {
         nethandler.a(this);
     }
 
+    @Override
     public int a() {
+        return this.getPacketSize();
+    }
+
+    public int getPacketSize() {
         return 15;
     }
 }

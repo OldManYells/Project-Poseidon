@@ -1023,7 +1023,7 @@ public abstract class Entity {
 
     protected abstract void b(NBTTagCompound nbttagcompound);
 
-    protected NBTTagList a(double... adouble) {
+    public NBTTagList a(double... adouble) {
         NBTTagList nbttaglist = new NBTTagList();
         double[] adouble1 = adouble;
         int i = adouble.length;

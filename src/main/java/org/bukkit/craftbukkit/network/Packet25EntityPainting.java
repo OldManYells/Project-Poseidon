@@ -22,11 +22,11 @@ public class Packet25EntityPainting extends Packet {
 
     public Packet25EntityPainting(EntityPainting entitypainting) {
         this.a = entitypainting.id;
-        this.b = entitypainting.b;
-        this.c = entitypainting.c;
-        this.d = entitypainting.d;
-        this.e = entitypainting.a;
-        this.f = entitypainting.e.A;
+        this.b = entitypainting.hangingX;
+        this.c = entitypainting.hangingY;
+        this.d = entitypainting.hangingZ;
+        this.e = entitypainting.hangingDirection;
+        this.f = entitypainting.art.A;
     }
 
     public void a(DataInputStream datainputstream) throws IOException {

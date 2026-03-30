@@ -14,14 +14,14 @@ import java.util.List;
 public class EntityBoat extends Entity {
 
     public int damage;
-    public int b;
-    public int c;
-    private int d;
-    private double e;
-    private double f;
-    private double g;
-    private double h;
-    private double i;
+    public int forwardDirection;
+    public int damageRecoveryRate;
+    private int clientInterpolationSteps;
+    private double clientTargetX;
+    private double clientTargetY;
+    private double clientTargetZ;
+    private double clientTargetYaw;
+    private double clientTargetPitch;
 
     // CraftBukkit start
     public double maxSpeed = 0.4D;
@@ -44,8 +44,8 @@ public class EntityBoat extends Entity {
     public EntityBoat(World world) {
         super(world);
         this.damage = 0;
-        this.b = 0;
-        this.c = 1;
+        this.forwardDirection = 0;
+        this.damageRecoveryRate = 1;
         this.aI = true;
         this.b(1.5F, 0.6F);
         this.height = this.width / 2.0F;
@@ -101,8 +101,8 @@ public class EntityBoat extends Entity {
             // i = event.getDamage(); // TODO Why don't we do this?
             // CraftBukkit end
 
-            this.c = -this.c;
-            this.b = 10;
+            this.damageRecoveryRate = -this.damageRecoveryRate;
+            this.forwardDirection = 10;
             this.damage += i * 10;
             this.af();
             if (this.damage > 40) {
@@ -154,8 +154,8 @@ public class EntityBoat extends Entity {
         // CraftBukkit end
 
         super.m_();
-        if (this.b > 0) {
-            --this.b;
+        if (this.forwardDirection > 0) {
+            --this.forwardDirection;
         }
 
         if (this.damage > 0) {
@@ -184,12 +184,12 @@ public class EntityBoat extends Entity {
         double d6;
 
         if (this.world.isStatic) {
-            if (this.d > 0) {
-                d3 = this.locX + (this.e - this.locX) / (double) this.d;
-                d4 = this.locY + (this.f - this.locY) / (double) this.d;
-                d5 = this.locZ + (this.g - this.locZ) / (double) this.d;
+            if (this.clientInterpolationSteps > 0) {
+                d3 = this.locX + (this.clientTargetX - this.locX) / (double) this.clientInterpolationSteps;
+                d4 = this.locY + (this.clientTargetY - this.locY) / (double) this.clientInterpolationSteps;
+                d5 = this.locZ + (this.clientTargetZ - this.locZ) / (double) this.clientInterpolationSteps;
 
-                for (d6 = this.h - (double) this.yaw; d6 < -180.0D; d6 += 360.0D) {
+                for (d6 = this.clientTargetYaw - (double) this.yaw; d6 < -180.0D; d6 += 360.0D) {
                     ;
                 }
 
@@ -197,9 +197,9 @@ public class EntityBoat extends Entity {
                     d6 -= 360.0D;
                 }
 
-                this.yaw = (float) ((double) this.yaw + d6 / (double) this.d);
-                this.pitch = (float) ((double) this.pitch + (this.i - (double) this.pitch) / (double) this.d);
-                --this.d;
+                this.yaw = (float) ((double) this.yaw + d6 / (double) this.clientInterpolationSteps);
+                this.pitch = (float) ((double) this.pitch + (this.clientTargetPitch - (double) this.pitch) / (double) this.clientInterpolationSteps);
+                --this.clientInterpolationSteps;
                 this.setPosition(d3, d4, d5);
                 this.c(this.yaw, this.pitch);
             } else {

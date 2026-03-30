@@ -18,7 +18,7 @@ public class SlotResult2 extends Slot {
     }
 
     public void a(ItemStack itemstack) {
-        itemstack.b(this.d.world, this.d);
+        itemstack.onCrafted(this.d.world, this.d);
         if (itemstack.id == org.bukkit.craftbukkit.item.Item.IRON_INGOT.id) {
             this.d.a(AchievementList.k, 1);
         }

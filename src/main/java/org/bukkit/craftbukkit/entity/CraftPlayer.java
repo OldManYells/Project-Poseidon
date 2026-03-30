@@ -411,7 +411,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         EntityPlayer other = ((CraftPlayer) player).getHandle();
         EntityTrackerEntry entry = (EntityTrackerEntry) tracker.b.a(other.id);
         if (entry != null) {
-            entry.c(getHandle());
+            entry.untrackPlayer(getHandle());
         }
 
     }
@@ -423,7 +423,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         EntityPlayer other = ((CraftPlayer) player).getHandle();
         EntityTrackerEntry entry = (EntityTrackerEntry) tracker.b.a(other.id);
         if (entry != null && !entry.trackedPlayers.contains(getHandle())) {
-            entry.b(getHandle());
+            entry.updatePlayer(getHandle());
         }
 
     }

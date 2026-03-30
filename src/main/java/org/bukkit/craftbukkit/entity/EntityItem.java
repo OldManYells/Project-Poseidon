@@ -135,7 +135,7 @@ public class EntityItem extends Entity {
     public void b(NBTTagCompound nbttagcompound) {
         nbttagcompound.a("Health", (short) ((byte) this.f));
         nbttagcompound.a("Age", (short) this.b);
-        nbttagcompound.a("Item", this.itemStack.a(new NBTTagCompound()));
+        nbttagcompound.a("Item", this.itemStack.writeToNBT(new NBTTagCompound()));
     }
 
     public void a(NBTTagCompound nbttagcompound) {

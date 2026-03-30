@@ -47,7 +47,7 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
     }
 
     public Vector getDirection() {
-        return new Vector(((EntityFireball) getHandle()).c, ((EntityFireball) getHandle()).d, ((EntityFireball) getHandle()).e);
+        return new Vector(((EntityFireball) getHandle()).directionX, ((EntityFireball) getHandle()).directionY, ((EntityFireball) getHandle()).directionZ);
     }
 
     public void setDirection(Vector direction) {

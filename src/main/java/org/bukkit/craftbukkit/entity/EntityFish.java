@@ -15,23 +15,23 @@ import java.util.List;
 
 public class EntityFish extends Entity {
 
-    private int d = -1;
-    private int e = -1;
-    private int f = -1;
-    private int g = 0;
-    private boolean h = false;
-    public int a = 0;
+    private int tileX = -1;
+    private int tileY = -1;
+    private int tileZ = -1;
+    private int inBlockId = 0;
+    private boolean inGround = false;
+    public int shake = 0;
     public EntityHuman owner;
-    private int i;
-    private int j = 0;
-    private int k = 0;
+    private int ticksInGround;
+    private int ticksInAir = 0;
+    private int fishBiteDelay = 0;
     public Entity c = null;
-    private int l;
-    private double m;
-    private double n;
-    private double o;
-    private double p;
-    private double q;
+    private int clientInterpolationSteps;
+    private double clientTargetX;
+    private double clientTargetY;
+    private double clientTargetZ;
+    private double clientTargetYaw;
+    private double clientTargetPitch;
 
     public EntityFish(World world) {
         super(world);
@@ -56,12 +56,12 @@ public class EntityFish extends Entity {
         this.motX = (double) (-MathHelper.sin(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F) * f);
         this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F) * f);
         this.motY = (double) (-MathHelper.sin(this.pitch / 180.0F * 3.1415927F) * f);
-        this.a(this.motX, this.motY, this.motZ, 1.5F, 1.0F);
+        this.setHookVelocity(this.motX, this.motY, this.motZ, 1.5F, 1.0F);
     }
 
     protected void b() {}
 
-    public void a(double d0, double d1, double d2, float f, float f1) {
+    public void setHookVelocity(double d0, double d1, double d2, float f, float f1) {
         float f2 = MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
 
         d0 /= (double) f2;
@@ -80,19 +80,19 @@ public class EntityFish extends Entity {
 
         this.lastYaw = this.yaw = (float) (Math.atan2(d0, d2) * 180.0D / 3.1415927410125732D);
         this.lastPitch = this.pitch = (float) (Math.atan2(d1, (double) f3) * 180.0D / 3.1415927410125732D);
-        this.i = 0;
+        this.ticksInGround = 0;
     }
 
     public void m_() {
         super.m_();
-        if (this.l > 0) {
-            double d0 = this.locX + (this.m - this.locX) / (double) this.l;
-            double d1 = this.locY + (this.n - this.locY) / (double) this.l;
-            double d2 = this.locZ + (this.o - this.locZ) / (double) this.l;
+        if (this.clientInterpolationSteps > 0) {
+            double d0 = this.locX + (this.clientTargetX - this.locX) / (double) this.clientInterpolationSteps;
+            double d1 = this.locY + (this.clientTargetY - this.locY) / (double) this.clientInterpolationSteps;
+            double d2 = this.locZ + (this.clientTargetZ - this.locZ) / (double) this.clientInterpolationSteps;
 
             double d3;
 
-            for (d3 = this.p - (double) this.yaw; d3 < -180.0D; d3 += 360.0D) {
+            for (d3 = this.clientTargetYaw - (double) this.yaw; d3 < -180.0D; d3 += 360.0D) {
                 ;
             }
 
@@ -100,9 +100,9 @@ public class EntityFish extends Entity {
                 d3 -= 360.0D;
             }
 
-            this.yaw = (float) ((double) this.yaw + d3 / (double) this.l);
-            this.pitch = (float) ((double) this.pitch + (this.q - (double) this.pitch) / (double) this.l);
-            --this.l;
+            this.yaw = (float) ((double) this.yaw + d3 / (double) this.clientInterpolationSteps);
+            this.pitch = (float) ((double) this.pitch + (this.clientTargetPitch - (double) this.pitch) / (double) this.clientInterpolationSteps);
+            --this.clientInterpolationSteps;
             this.setPosition(d0, d1, d2);
             this.c(this.yaw, this.pitch);
         } else {
@@ -127,30 +127,30 @@ public class EntityFish extends Entity {
                 }
             }
 
-            if (this.a > 0) {
-                --this.a;
+            if (this.shake > 0) {
+                --this.shake;
             }
 
-            if (this.h) {
-                int i = this.world.getTypeId(this.d, this.e, this.f);
+            if (this.inGround) {
+                int i = this.world.getTypeId(this.tileX, this.tileY, this.tileZ);
 
-                if (i == this.g) {
-                    ++this.i;
-                    if (this.i == 1200) {
+                if (i == this.inBlockId) {
+                    ++this.ticksInGround;
+                    if (this.ticksInGround == 1200) {
                         this.die();
                     }
 
                     return;
                 }
 
-                this.h = false;
+                this.inGround = false;
                 this.motX *= (double) (this.random.nextFloat() * 0.2F);
                 this.motY *= (double) (this.random.nextFloat() * 0.2F);
                 this.motZ *= (double) (this.random.nextFloat() * 0.2F);
-                this.i = 0;
-                this.j = 0;
+                this.ticksInGround = 0;
+                this.ticksInAir = 0;
             } else {
-                ++this.j;
+                ++this.ticksInAir;
             }
 
             Vec3D vec3d = Vec3D.create(this.locX, this.locY, this.locZ);
@@ -172,7 +172,7 @@ public class EntityFish extends Entity {
             for (int j = 0; j < list.size(); ++j) {
                 Entity entity1 = (Entity) list.get(j);
 
-                if (entity1.l_() && (entity1 != this.owner || this.j >= 5)) {
+                if (entity1.l_() && (entity1 != this.owner || this.ticksInAir >= 5)) {
                     float f = 0.3F;
                     AxisAlignedBB axisalignedbb = entity1.boundingBox.b((double) f, (double) f, (double) f);
                     MovingObjectPosition movingobjectposition1 = axisalignedbb.a(vec3d, vec3d1);
@@ -218,11 +218,11 @@ public class EntityFish extends Entity {
                         this.c = movingobjectposition.entity;
                     }
                 } else {
-                    this.h = true;
+                    this.inGround = true;
                 }
             }
 
-            if (!this.h) {
+            if (!this.inGround) {
                 this.move(this.motX, this.motY, this.motZ);
                 float f1 = MathHelper.a(this.motX * this.motX + this.motZ * this.motZ);
 
@@ -266,8 +266,8 @@ public class EntityFish extends Entity {
                 }
 
                 if (d6 > 0.0D) {
-                    if (this.k > 0) {
-                        --this.k;
+                    if (this.fishBiteDelay > 0) {
+                        --this.fishBiteDelay;
                     } else {
                         short short1 = 500;
 
@@ -276,7 +276,7 @@ public class EntityFish extends Entity {
                         }
 
                         if (this.random.nextInt(short1) == 0) {
-                            this.k = this.random.nextInt(30) + 10;
+                            this.fishBiteDelay = this.random.nextInt(30) + 10;
                             this.motY -= 0.20000000298023224D;
                             this.world.makeSound(this, "random.splash", 0.25F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
                             float f3 = (float) MathHelper.floor(this.boundingBox.b);
@@ -300,7 +300,7 @@ public class EntityFish extends Entity {
                     }
                 }
 
-                if (this.k > 0) {
+                if (this.fishBiteDelay > 0) {
                     this.motY -= (double) (this.random.nextFloat() * this.random.nextFloat() * this.random.nextFloat()) * 0.2D;
                 }
 
@@ -320,24 +320,24 @@ public class EntityFish extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.d);
-        nbttagcompound.a("yTile", (short) this.e);
-        nbttagcompound.a("zTile", (short) this.f);
-        nbttagcompound.a("inTile", (byte) this.g);
-        nbttagcompound.a("shake", (byte) this.a);
-        nbttagcompound.a("inGround", (byte) (this.h ? 1 : 0));
+        nbttagcompound.a("xTile", (short) this.tileX);
+        nbttagcompound.a("yTile", (short) this.tileY);
+        nbttagcompound.a("zTile", (short) this.tileZ);
+        nbttagcompound.a("inTile", (byte) this.inBlockId);
+        nbttagcompound.a("shake", (byte) this.shake);
+        nbttagcompound.a("inGround", (byte) (this.inGround ? 1 : 0));
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.d = nbttagcompound.d("xTile");
-        this.e = nbttagcompound.d("yTile");
-        this.f = nbttagcompound.d("zTile");
-        this.g = nbttagcompound.c("inTile") & 255;
-        this.a = nbttagcompound.c("shake") & 255;
-        this.h = nbttagcompound.c("inGround") == 1;
+        this.tileX = nbttagcompound.d("xTile");
+        this.tileY = nbttagcompound.d("yTile");
+        this.tileZ = nbttagcompound.d("zTile");
+        this.inBlockId = nbttagcompound.c("inTile") & 255;
+        this.shake = nbttagcompound.c("shake") & 255;
+        this.inGround = nbttagcompound.c("inGround") == 1;
     }
 
-    public int h() {
+    public int reelIn() {
         byte b0 = 0;
 
         if (this.c != null) {
@@ -361,7 +361,7 @@ public class EntityFish extends Entity {
             this.c.motY += d1 * d4 + (double) MathHelper.a(d3) * 0.08D;
             this.c.motZ += d2 * d4;
             b0 = 3;
-        } else if (this.k > 0) {
+        } else if (this.fishBiteDelay > 0) {
             EntityItem entityitem = new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.RAW_FISH));
             // CraftBukkit start
             PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) this.owner.getBukkitEntity(), entityitem.getBukkitEntity(), PlayerFishEvent.State.CAUGHT_FISH);
@@ -387,7 +387,7 @@ public class EntityFish extends Entity {
             b0 = 1;
         }
 
-        if (this.h) {
+        if (this.inGround) {
             // CraftBukkit start
             PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) this.owner.getBukkitEntity(), null, PlayerFishEvent.State.IN_GROUND);
             this.world.getServer().getPluginManager().callEvent(playerFishEvent);

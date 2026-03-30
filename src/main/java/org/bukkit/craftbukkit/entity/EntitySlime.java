@@ -5,8 +5,8 @@ import org.bukkit.craftbukkit.item.Item;
 
 public class EntitySlime extends EntityLiving implements IMonster {
 
-    public float a;
-    public float b;
+    public float squashStretchAmount;
+    public float prevSquashStretchAmount;
     private int size = 0;
 
     public EntitySlime(World world) {
@@ -46,7 +46,7 @@ public class EntitySlime extends EntityLiving implements IMonster {
     }
 
     public void m_() {
-        this.b = this.a;
+        this.prevSquashStretchAmount = this.squashStretchAmount;
         boolean flag = this.onGround;
 
         super.m_();
@@ -63,13 +63,13 @@ public class EntitySlime extends EntityLiving implements IMonster {
             }
 
             if (i > 2) {
-                this.world.makeSound(this, "mob.slime", this.k(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) / 0.8F);
+                this.world.makeSound(this, "mob.slime", this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) / 0.8F);
             }
 
-            this.a = -0.5F;
+            this.squashStretchAmount = -0.5F;
         }
 
-        this.a *= 0.6F;
+        this.squashStretchAmount *= 0.6F;
     }
 
     protected void c_() {
@@ -88,10 +88,10 @@ public class EntitySlime extends EntityLiving implements IMonster {
 
             this.aC = true;
             if (this.getSize() > 1) {
-                this.world.makeSound(this, "mob.slime", this.k(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.8F);
+                this.world.makeSound(this, "mob.slime", this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.8F);
             }
 
-            this.a = 1.0F;
+            this.squashStretchAmount = 1.0F;
             this.az = 1.0F - this.random.nextFloat() * 2.0F;
             this.aA = (float) (1 * this.getSize());
         } else {
@@ -128,25 +128,25 @@ public class EntitySlime extends EntityLiving implements IMonster {
         }
     }
 
-    protected String h() {
+    protected String getHurtSound() {
         return "mob.slime";
     }
 
-    protected String i() {
+    protected String getDeathSound() {
         return "mob.slime";
     }
 
-    protected int j() {
+    protected int getDropItemId() {
         return this.getSize() == 1 ? Item.SLIME_BALL.id : 0;
     }
 
-    public boolean d() {
+    public boolean canSpawn() {
         Chunk chunk = this.world.getChunkAtWorldCoords(MathHelper.floor(this.locX), MathHelper.floor(this.locZ));
 
         return (this.getSize() == 1 || this.world.spawnMonsters > 0) && this.random.nextInt(10) == 0 && chunk.a(987234911L).nextInt(10) == 0 && this.locY < 16.0D;
     }
 
-    protected float k() {
+    protected float getSoundVolume() {
         return 0.6F;
     }
 }

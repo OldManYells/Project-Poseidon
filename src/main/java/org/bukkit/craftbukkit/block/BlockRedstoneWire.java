@@ -12,8 +12,8 @@ import java.util.Set;
 
 public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
 
-    private boolean a = true;
-    private Set b = new HashSet();
+    private boolean canProvidePower = true;
+    private Set blocksNeedingUpdate = new HashSet();
 
     public BlockRedstoneWire(int i, int j) {
         super(i, j, Material.ORIENTABLE);
@@ -40,11 +40,11 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
         return world.e(i, j - 1, k);
     }
 
-    private void g(World world, int i, int j, int k) {
-        this.a(world, i, j, k, i, j, k);
-        ArrayList arraylist = new ArrayList(this.b);
+    private void updatePower(World world, int i, int j, int k) {
+        this.propagatePower(world, i, j, k, i, j, k);
+        ArrayList arraylist = new ArrayList(this.blocksNeedingUpdate);
 
-        this.b.clear();
+        this.blocksNeedingUpdate.clear();
 
         for (int l = 0; l < arraylist.size(); ++l) {
             ChunkPosition chunkposition = (ChunkPosition) arraylist.get(l);
@@ -53,14 +53,14 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
         }
     }
 
-    private void a(World world, int i, int j, int k, int l, int i1, int j1) {
+    private void propagatePower(World world, int i, int j, int k, int l, int i1, int j1) {
         int k1 = world.getData(i, j, k);
         int l1 = 0;
 
-        this.a = false;
+        this.canProvidePower = false;
         boolean flag = world.isBlockIndirectlyPowered(i, j, k);
 
-        this.a = true;
+        this.canProvidePower = true;
         int i2;
         int j2;
         int k2;
@@ -156,7 +156,7 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
                 }
 
                 if (i3 >= 0 && i3 != l1) {
-                    this.a(world, j2, j, k2, i, j, k);
+                    this.propagatePower(world, j2, j, k2, i, j, k);
                 }
 
                 i3 = this.getPower(world, j2, l2, k2, -1);
@@ -166,23 +166,23 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
                 }
 
                 if (i3 >= 0 && i3 != l1) {
-                    this.a(world, j2, l2, k2, i, j, k);
+                    this.propagatePower(world, j2, l2, k2, i, j, k);
                 }
             }
 
             if (k1 == 0 || l1 == 0) {
-                this.b.add(new ChunkPosition(i, j, k));
-                this.b.add(new ChunkPosition(i - 1, j, k));
-                this.b.add(new ChunkPosition(i + 1, j, k));
-                this.b.add(new ChunkPosition(i, j - 1, k));
-                this.b.add(new ChunkPosition(i, j + 1, k));
-                this.b.add(new ChunkPosition(i, j, k - 1));
-                this.b.add(new ChunkPosition(i, j, k + 1));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i, j, k));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i - 1, j, k));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i + 1, j, k));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i, j - 1, k));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i, j + 1, k));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i, j, k - 1));
+                this.blocksNeedingUpdate.add(new ChunkPosition(i, j, k + 1));
             }
         }
     }
 
-    private void h(World world, int i, int j, int k) {
+    private void notifyNeighborWire(World world, int i, int j, int k) {
         if (world.getTypeId(i, j, k) == this.id) {
             world.applyPhysics(i, j, k, this.id);
             world.applyPhysics(i - 1, j, k, this.id);
@@ -194,38 +194,38 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
         }
     }
 
-    public void c(World world, int i, int j, int k) {
+    public void onBlockAdded(World world, int i, int j, int k) {
         super.c(world, i, j, k);
         if (!world.isStatic) {
-            this.g(world, i, j, k);
+            this.updatePower(world, i, j, k);
             world.applyPhysics(i, j + 1, k, this.id);
             world.applyPhysics(i, j - 1, k, this.id);
-            this.h(world, i - 1, j, k);
-            this.h(world, i + 1, j, k);
-            this.h(world, i, j, k - 1);
-            this.h(world, i, j, k + 1);
+            this.notifyNeighborWire(world, i - 1, j, k);
+            this.notifyNeighborWire(world, i + 1, j, k);
+            this.notifyNeighborWire(world, i, j, k - 1);
+            this.notifyNeighborWire(world, i, j, k + 1);
             if (world.e(i - 1, j, k)) {
-                this.h(world, i - 1, j + 1, k);
+                this.notifyNeighborWire(world, i - 1, j + 1, k);
             } else {
-                this.h(world, i - 1, j - 1, k);
+                this.notifyNeighborWire(world, i - 1, j - 1, k);
             }
 
             if (world.e(i + 1, j, k)) {
-                this.h(world, i + 1, j + 1, k);
+                this.notifyNeighborWire(world, i + 1, j + 1, k);
             } else {
-                this.h(world, i + 1, j - 1, k);
+                this.notifyNeighborWire(world, i + 1, j - 1, k);
             }
 
             if (world.e(i, j, k - 1)) {
-                this.h(world, i, j + 1, k - 1);
+                this.notifyNeighborWire(world, i, j + 1, k - 1);
             } else {
-                this.h(world, i, j - 1, k - 1);
+                this.notifyNeighborWire(world, i, j - 1, k - 1);
             }
 
             if (world.e(i, j, k + 1)) {
-                this.h(world, i, j + 1, k + 1);
+                this.notifyNeighborWire(world, i, j + 1, k + 1);
             } else {
-                this.h(world, i, j - 1, k + 1);
+                this.notifyNeighborWire(world, i, j - 1, k + 1);
             }
         }
     }
@@ -235,33 +235,33 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
         if (!world.isStatic) {
             world.applyPhysics(i, j + 1, k, this.id);
             world.applyPhysics(i, j - 1, k, this.id);
-            this.g(world, i, j, k);
-            this.h(world, i - 1, j, k);
-            this.h(world, i + 1, j, k);
-            this.h(world, i, j, k - 1);
-            this.h(world, i, j, k + 1);
+            this.updatePower(world, i, j, k);
+            this.notifyNeighborWire(world, i - 1, j, k);
+            this.notifyNeighborWire(world, i + 1, j, k);
+            this.notifyNeighborWire(world, i, j, k - 1);
+            this.notifyNeighborWire(world, i, j, k + 1);
             if (world.e(i - 1, j, k)) {
-                this.h(world, i - 1, j + 1, k);
+                this.notifyNeighborWire(world, i - 1, j + 1, k);
             } else {
-                this.h(world, i - 1, j - 1, k);
+                this.notifyNeighborWire(world, i - 1, j - 1, k);
             }
 
             if (world.e(i + 1, j, k)) {
-                this.h(world, i + 1, j + 1, k);
+                this.notifyNeighborWire(world, i + 1, j + 1, k);
             } else {
-                this.h(world, i + 1, j - 1, k);
+                this.notifyNeighborWire(world, i + 1, j - 1, k);
             }
 
             if (world.e(i, j, k - 1)) {
-                this.h(world, i, j + 1, k - 1);
+                this.notifyNeighborWire(world, i, j + 1, k - 1);
             } else {
-                this.h(world, i, j - 1, k - 1);
+                this.notifyNeighborWire(world, i, j - 1, k - 1);
             }
 
             if (world.e(i, j, k + 1)) {
-                this.h(world, i, j + 1, k + 1);
+                this.notifyNeighborWire(world, i, j + 1, k + 1);
             } else {
-                this.h(world, i, j - 1, k + 1);
+                this.notifyNeighborWire(world, i, j - 1, k + 1);
             }
         }
     }
@@ -286,48 +286,48 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
                 this.g(world, i, j, k, i1);
                 world.setTypeId(i, j, k, 0);
             } else {
-                this.g(world, i, j, k);
+                this.updatePower(world, i, j, k);
             }
 
             super.doPhysics(world, i, j, k, l);
         }
     }
 
-    public int a(int i, Random random) {
+    public int getDropId(int i, Random random) {
         return Item.REDSTONE.id;
     }
 
-    public boolean d(World world, int i, int j, int k, int l) {
-        return !this.a ? false : this.a(world, i, j, k, l);
+    public boolean isProvidingStrongPower(World world, int i, int j, int k, int l) {
+        return !this.canProvidePower ? false : this.isProvidingWeakPower(world, i, j, k, l);
     }
 
-    public boolean a(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-        if (!this.a) {
+    public boolean isProvidingWeakPower(IBlockAccess iblockaccess, int i, int j, int k, int l) {
+        if (!this.canProvidePower) {
             return false;
         } else if (iblockaccess.getData(i, j, k) == 0) {
             return false;
         } else if (l == 1) {
             return true;
         } else {
-            boolean flag = c(iblockaccess, i - 1, j, k, 1) || !iblockaccess.e(i - 1, j, k) && c(iblockaccess, i - 1, j - 1, k, -1);
-            boolean flag1 = c(iblockaccess, i + 1, j, k, 3) || !iblockaccess.e(i + 1, j, k) && c(iblockaccess, i + 1, j - 1, k, -1);
-            boolean flag2 = c(iblockaccess, i, j, k - 1, 2) || !iblockaccess.e(i, j, k - 1) && c(iblockaccess, i, j - 1, k - 1, -1);
-            boolean flag3 = c(iblockaccess, i, j, k + 1, 0) || !iblockaccess.e(i, j, k + 1) && c(iblockaccess, i, j - 1, k + 1, -1);
+            boolean flag = canConnectTo(iblockaccess, i - 1, j, k, 1) || !iblockaccess.e(i - 1, j, k) && canConnectTo(iblockaccess, i - 1, j - 1, k, -1);
+            boolean flag1 = canConnectTo(iblockaccess, i + 1, j, k, 3) || !iblockaccess.e(i + 1, j, k) && canConnectTo(iblockaccess, i + 1, j - 1, k, -1);
+            boolean flag2 = canConnectTo(iblockaccess, i, j, k - 1, 2) || !iblockaccess.e(i, j, k - 1) && canConnectTo(iblockaccess, i, j - 1, k - 1, -1);
+            boolean flag3 = canConnectTo(iblockaccess, i, j, k + 1, 0) || !iblockaccess.e(i, j, k + 1) && canConnectTo(iblockaccess, i, j - 1, k + 1, -1);
 
             if (!iblockaccess.e(i, j + 1, k)) {
-                if (iblockaccess.e(i - 1, j, k) && c(iblockaccess, i - 1, j + 1, k, -1)) {
+                if (iblockaccess.e(i - 1, j, k) && canConnectTo(iblockaccess, i - 1, j + 1, k, -1)) {
                     flag = true;
                 }
 
-                if (iblockaccess.e(i + 1, j, k) && c(iblockaccess, i + 1, j + 1, k, -1)) {
+                if (iblockaccess.e(i + 1, j, k) && canConnectTo(iblockaccess, i + 1, j + 1, k, -1)) {
                     flag1 = true;
                 }
 
-                if (iblockaccess.e(i, j, k - 1) && c(iblockaccess, i, j + 1, k - 1, -1)) {
+                if (iblockaccess.e(i, j, k - 1) && canConnectTo(iblockaccess, i, j + 1, k - 1, -1)) {
                     flag2 = true;
                 }
 
-                if (iblockaccess.e(i, j, k + 1) && c(iblockaccess, i, j + 1, k + 1, -1)) {
+                if (iblockaccess.e(i, j, k + 1) && canConnectTo(iblockaccess, i, j + 1, k + 1, -1)) {
                     flag3 = true;
                 }
             }
@@ -337,10 +337,10 @@ public class BlockRedstoneWire extends net.minecraft.server.CraftBlock {
     }
 
     public boolean isPowerSource() {
-        return this.a;
+        return this.canProvidePower;
     }
 
-    public static boolean c(IBlockAccess iblockaccess, int i, int j, int k, int l) {
+    public static boolean canConnectTo(IBlockAccess iblockaccess, int i, int j, int k, int l) {
         int i1 = iblockaccess.getTypeId(i, j, k);
 
         if (i1 == net.minecraft.server.CraftBlock.REDSTONE_WIRE.id) {
