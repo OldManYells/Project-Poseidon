@@ -1,4 +1,6 @@
-package net.minecraft.server;
+package org.bukkit.util.noise;
+
+import net.minecraft.server.NoiseGenerator;
 
 import java.util.Random;
 

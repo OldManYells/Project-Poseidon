@@ -8,6 +8,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.List;
 

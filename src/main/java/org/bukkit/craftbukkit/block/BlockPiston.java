@@ -8,6 +8,7 @@ import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.ArrayList;
 

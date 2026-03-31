@@ -6,6 +6,8 @@ import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.Random;
 

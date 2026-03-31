@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.craftbukkit.entity.Entity;
+import org.bukkit.util.Vec3D;
 
 public class MovingObjectPosition {
 

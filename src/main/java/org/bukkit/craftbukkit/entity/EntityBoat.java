@@ -6,6 +6,7 @@ import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.List;
 

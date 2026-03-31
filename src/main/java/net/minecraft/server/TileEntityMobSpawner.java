@@ -3,6 +3,7 @@ package net.minecraft.server;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.List;
 

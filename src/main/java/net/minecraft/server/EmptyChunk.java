@@ -3,6 +3,7 @@ package net.minecraft.server;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.server.Chunk;
 import org.bukkit.craftbukkit.world.World;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.Arrays;
 import java.util.List;

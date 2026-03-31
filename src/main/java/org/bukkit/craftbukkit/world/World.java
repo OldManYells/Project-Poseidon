@@ -21,6 +21,8 @@ import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.generator.BiomeBase;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.*;
 

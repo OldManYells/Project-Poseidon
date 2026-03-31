@@ -9,6 +9,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.List;
 

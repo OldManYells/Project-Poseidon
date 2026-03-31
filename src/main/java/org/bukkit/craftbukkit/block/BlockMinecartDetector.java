@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.AxisAlignedBB;
+import org.bukkit.util.AxisAlignedBB;
 import net.minecraft.server.IBlockAccess;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.entity.Entity;

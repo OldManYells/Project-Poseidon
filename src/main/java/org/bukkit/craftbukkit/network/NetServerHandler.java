@@ -27,6 +27,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.packet.PacketReceivedEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.ArrayList;
 import java.util.HashMap;

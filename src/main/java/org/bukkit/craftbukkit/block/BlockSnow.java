@@ -9,6 +9,7 @@ import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.server.StatisticList;
 import org.bukkit.craftbukkit.world.World;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.Random;
 

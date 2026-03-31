@@ -5,6 +5,8 @@ import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 public class BlockTrapdoor extends net.minecraft.server.CraftBlock {
 

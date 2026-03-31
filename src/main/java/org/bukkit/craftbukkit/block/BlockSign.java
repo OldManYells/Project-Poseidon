@@ -5,6 +5,7 @@ import net.minecraft.server.CraftBlock;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.Random;
 

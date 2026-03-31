@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.world;
 
 import org.bukkit.craftbukkit.server.ChunkCoordIntPair;
-import net.minecraft.server.NoiseGeneratorOctaves2;
+import org.bukkit.util.noise.NoiseGeneratorOctaves2;
 import org.bukkit.generator.BiomeBase;
 
 import java.util.Random;

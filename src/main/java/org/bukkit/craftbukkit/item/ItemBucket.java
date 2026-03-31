@@ -10,6 +10,7 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.util.Vec3D;
 // CraftBukkit end
 
 public class ItemBucket extends Item {

@@ -5,6 +5,7 @@ import net.minecraft.server.*;
 import org.bukkit.craftbukkit.block.BlockSand;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.generator.*;
+import org.bukkit.util.noise.NoiseGeneratorOctaves;
 
 import java.util.Random;
 

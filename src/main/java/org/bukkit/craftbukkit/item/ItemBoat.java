@@ -8,6 +8,7 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.util.Vec3D;
 // CraftBukkit end
 
 public class ItemBoat extends Item {

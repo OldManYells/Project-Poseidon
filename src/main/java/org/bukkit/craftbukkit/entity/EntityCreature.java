@@ -4,7 +4,7 @@ package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.PathEntity;
-import net.minecraft.server.Vec3D;
+import org.bukkit.util.Vec3D;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.craftbukkit.TrigMath;
 import org.bukkit.event.entity.EntityTargetEvent;

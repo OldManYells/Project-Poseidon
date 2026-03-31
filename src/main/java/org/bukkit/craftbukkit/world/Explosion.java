@@ -10,6 +10,8 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

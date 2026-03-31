@@ -9,6 +9,7 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.List;
 import java.util.Random;

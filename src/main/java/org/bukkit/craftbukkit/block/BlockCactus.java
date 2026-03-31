@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.block;
 
 // CraftBukkit start
 
-import net.minecraft.server.AxisAlignedBB;
+import org.bukkit.util.AxisAlignedBB;
 import net.minecraft.server.CraftBlock;
 import net.minecraft.server.Material;
 import org.bukkit.craftbukkit.world.World;

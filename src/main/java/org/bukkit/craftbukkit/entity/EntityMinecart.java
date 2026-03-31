@@ -8,6 +8,8 @@ import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.vehicle.*;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.List;
 

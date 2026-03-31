@@ -5,6 +5,8 @@ import net.minecraft.server.*;
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.world.World;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 // CraftBukkit end
 
 public class EntityGhast extends EntityFlying implements IMonster {

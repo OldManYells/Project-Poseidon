@@ -6,6 +6,8 @@ import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityHuman;
 import org.bukkit.craftbukkit.entity.EntityLiving;
 import org.bukkit.craftbukkit.world.World;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -12,6 +12,8 @@ import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.server.StatisticCollector;
 import org.bukkit.craftbukkit.server.StatisticList;
 import org.bukkit.craftbukkit.world.World;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.ArrayList;
 import java.util.Arrays;

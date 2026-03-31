@@ -1,4 +1,6 @@
-package net.minecraft.server;
+package org.bukkit.util;
+
+import net.minecraft.server.MovingObjectPosition;
 
 import java.util.ArrayList;
 import java.util.List;

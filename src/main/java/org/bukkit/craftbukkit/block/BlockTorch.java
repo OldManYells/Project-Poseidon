@@ -4,6 +4,8 @@ import net.minecraft.server.*;
 import net.minecraft.server.CraftBlock;
 import org.bukkit.PoseidonConfig;
 import org.bukkit.craftbukkit.world.World;
+import org.bukkit.util.AxisAlignedBB;
+import org.bukkit.util.Vec3D;
 
 import java.util.Random;
 

@@ -7,6 +7,7 @@ import org.bukkit.craftbukkit.block.*;
 import org.bukkit.craftbukkit.entity.Entity;
 import org.bukkit.craftbukkit.entity.EntityPlayer;
 import org.bukkit.craftbukkit.world.World;
+import org.bukkit.util.AxisAlignedBB;
 
 import java.util.*;
 
