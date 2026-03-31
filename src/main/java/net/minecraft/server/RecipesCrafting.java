@@ -13,4 +13,9 @@ public class RecipesCrafting {
         craftingmanager.registerShapedRecipe(new ItemStack(CraftBlock.WORKBENCH), new Object[] { "##", "##", Character.valueOf('#'), CraftBlock.WOOD});
         craftingmanager.registerShapedRecipe(new ItemStack(CraftBlock.SANDSTONE), new Object[] { "##", "##", Character.valueOf('#'), CraftBlock.SAND});
     }
+
+    public void addRecipes(CraftingManager craftingManager) {
+        this.a(craftingManager);
+    }
+
 }

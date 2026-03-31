@@ -357,4 +357,13 @@ public class MinecartTrackLogic {
             }
         }
     }
+
+    public int getNeighborCount() {
+        return this.b();
+    }
+
+    public void updateTrackState(boolean powered, boolean forceUpdate) {
+        this.a(powered, forceUpdate);
+    }
+
 }

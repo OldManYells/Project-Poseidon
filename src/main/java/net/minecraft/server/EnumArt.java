@@ -19,4 +19,26 @@ public enum EnumArt {
         this.D = l;
         this.E = i1;
     }
+
+    public static final int MAX_TITLE_LENGTH = z;
+    public String getTitle() {
+        return this.A;
+    }
+
+    public int getWidth() {
+        return this.B;
+    }
+
+    public int getHeight() {
+        return this.C;
+    }
+
+    public int getTextureOffsetX() {
+        return this.D;
+    }
+
+    public int getTextureOffsetY() {
+        return this.E;
+    }
+
 }

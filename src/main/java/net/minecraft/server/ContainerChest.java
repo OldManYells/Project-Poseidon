@@ -60,4 +60,21 @@ public class ContainerChest extends Container {
 
         return itemstack;
     }
+
+    public IInventory getLowerChestInventory() {
+        return this.a;
+    }
+
+    public int getRowCount() {
+        return this.b;
+    }
+
+    public boolean canUse(EntityHuman player) {
+        return this.b(player);
+    }
+
+    public ItemStack transferStackInSlot(int slotIndex) {
+        return this.a(slotIndex);
+    }
+
 }

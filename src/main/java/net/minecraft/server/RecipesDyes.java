@@ -30,4 +30,9 @@ public class RecipesDyes {
         craftingmanager.registerShapelessRecipe(new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 3, 13), new Object[] { new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 1, 4), new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 1, 1), new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 1, 9)});
         craftingmanager.registerShapelessRecipe(new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 4, 13), new Object[] { new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 1, 4), new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 1, 1), new ItemStack(org.bukkit.craftbukkit.item.Item.INK_SACK, 1, 1), new ItemStack(Item.INK_SACK, 1, 15)});
     }
+
+    public void addRecipes(CraftingManager craftingManager) {
+        this.a(craftingManager);
+    }
+
 }

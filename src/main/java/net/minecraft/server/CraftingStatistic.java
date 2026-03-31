@@ -8,4 +8,9 @@ public class CraftingStatistic extends Statistic {
         super(i, s);
         this.a = j;
     }
+
+    public int getCraftedItemId() {
+        return this.a;
+    }
+
 }

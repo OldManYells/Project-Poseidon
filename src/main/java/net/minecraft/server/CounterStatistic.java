@@ -17,4 +17,9 @@ public class CounterStatistic extends Statistic {
         StatisticList.c.add(this);
         return this;
     }
+
+    public Statistic registerStat() {
+        return this.d();
+    }
+
 }

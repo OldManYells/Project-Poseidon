@@ -27,4 +27,9 @@ public class RecipesWeapons {
         craftingmanager.registerShapedRecipe(new ItemStack(org.bukkit.craftbukkit.item.Item.BOW, 1), new Object[] { " #X", "# X", " #X", Character.valueOf('X'), org.bukkit.craftbukkit.item.Item.STRING, Character.valueOf('#'), org.bukkit.craftbukkit.item.Item.STICK});
         craftingmanager.registerShapedRecipe(new ItemStack(org.bukkit.craftbukkit.item.Item.ARROW, 4), new Object[] { "X", "#", "Y", Character.valueOf('Y'), org.bukkit.craftbukkit.item.Item.FEATHER, Character.valueOf('X'), org.bukkit.craftbukkit.item.Item.FLINT, Character.valueOf('#'), Item.STICK});
     }
+
+    public void addRecipes(CraftingManager craftingManager) {
+        this.a(craftingManager);
+    }
+
 }

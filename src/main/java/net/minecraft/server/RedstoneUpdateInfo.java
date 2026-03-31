@@ -13,4 +13,21 @@ public class RedstoneUpdateInfo {
         this.c = k;
         this.d = l;
     }
+
+    public int getX() {
+        return this.a;
+    }
+
+    public int getY() {
+        return this.b;
+    }
+
+    public int getZ() {
+        return this.c;
+    }
+
+    public long getUpdateTime() {
+        return this.d;
+    }
+
 }

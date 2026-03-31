@@ -82,4 +82,9 @@ public class InventoryCrafting implements IInventory {
     public boolean a_(EntityHuman entityhuman) {
         return true;
     }
+
+    public ItemStack getItemAt(int x, int y) {
+        return this.b(x, y);
+    }
+
 }

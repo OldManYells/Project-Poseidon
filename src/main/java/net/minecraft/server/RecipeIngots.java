@@ -21,4 +21,9 @@ public class RecipeIngots {
             craftingmanager.registerShapedRecipe(itemstack, new Object[] { "#", Character.valueOf('#'), baseBlock});
         }
     }
+
+    public void addRecipes(CraftingManager craftingManager) {
+        this.a(craftingManager);
+    }
+
 }

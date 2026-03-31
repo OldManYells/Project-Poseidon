@@ -324,4 +324,17 @@ public class PortalTravelAgent {
 
         return true;
     }
+
+    public void placeInPortal(World world, Entity entity) {
+        this.a(world, entity);
+    }
+
+    public boolean placeInExistingPortal(World world, Entity entity) {
+        return this.b(world, entity);
+    }
+
+    public boolean createPortal(World world, Entity entity) {
+        return this.c(world, entity);
+    }
+
 }

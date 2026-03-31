@@ -47,4 +47,9 @@ class GuiLogFormatter extends Formatter {
 
         return stringbuilder.toString();
     }
+
+    public String formatRecord(LogRecord record) {
+        return this.format(record);
+    }
+
 }

@@ -81,4 +81,21 @@ public class ShapedRecipes implements CraftingRecipe {
     public int a() {
         return this.b * this.c;
     }
+
+    public ItemStack getRecipeOutput() {
+        return this.b();
+    }
+
+    public boolean matches(InventoryCrafting inventoryCrafting) {
+        return this.a(inventoryCrafting);
+    }
+
+    public ItemStack getCraftingResult(InventoryCrafting inventoryCrafting) {
+        return this.b(inventoryCrafting);
+    }
+
+    public int getRecipeSize() {
+        return this.a();
+    }
+
 }

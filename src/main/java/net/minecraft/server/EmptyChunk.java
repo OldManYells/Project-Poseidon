@@ -115,4 +115,85 @@ public class EmptyChunk extends Chunk {
     public boolean isEmpty() {
         return true;
     }
+
+    public boolean isAtLocation(int chunkX, int chunkZ) {
+        return this.a(chunkX, chunkZ);
+    }
+
+    public int getHeightValue(int localX, int localZ) {
+        return this.b(localX, localZ);
+    }
+
+    public boolean setTypeIdAndData(int x, int y, int z, int typeId, int data) {
+        return this.a(x, y, z, typeId, data);
+    }
+
+    public boolean setTypeId(int x, int y, int z, int typeId) {
+        return this.a(x, y, z, typeId);
+    }
+
+    public void setData(int x, int y, int z, int data) {
+        this.b(x, y, z, data);
+    }
+
+    public int getSavedLightValue(EnumSkyBlock skyBlock, int x, int y, int z) {
+        return this.a(skyBlock, x, y, z);
+    }
+
+    public void setLightValue(EnumSkyBlock skyBlock, int x, int y, int z, int lightValue) {
+        this.a(skyBlock, x, y, z, lightValue);
+    }
+
+    public int getBlockLightOpacity(int x, int y, int z, int lightOpacity) {
+        return this.c(x, y, z, lightOpacity);
+    }
+
+    public void addEntity(Entity entity) {
+        this.a(entity);
+    }
+
+    public void removeEntity(Entity entity) {
+        this.b(entity);
+    }
+
+    public void removeEntityAtIndex(Entity entity, int sectionIndex) {
+        this.a(entity, sectionIndex);
+    }
+
+    public boolean canBlockSeeTheSky(int x, int y, int z) {
+        return this.c(x, y, z);
+    }
+
+    public TileEntity getTileEntity(int x, int y, int z) {
+        return this.d(x, y, z);
+    }
+
+    public void setTileEntity(TileEntity tileEntity) {
+        this.a(tileEntity);
+    }
+
+    public void removeTileEntity(int x, int y, int z) {
+        this.e(x, y, z);
+    }
+
+    public void removeUnknownEntities() {
+        this.f();
+    }
+
+    public void getEntitiesWithinAABBForEntity(Entity entity, AxisAlignedBB box, List list) {
+        this.a(entity, box, list);
+    }
+
+    public void getEntitiesOfTypeWithinAAAB(Class entityClass, AxisAlignedBB box, List list) {
+        this.a(entityClass, box, list);
+    }
+
+    public boolean needsSaving(boolean force) {
+        return this.a(force);
+    }
+
+    public Random getRandomWithSeed(long seed) {
+        return this.a(seed);
+    }
+
 }

@@ -186,4 +186,17 @@ public class MapGenCavesHell extends MapGenBase {
             }
         }
     }
+
+    protected void generateLargeCaveNode(int chunkX, int chunkZ, byte[] blocks, double x, double y, double z) {
+        this.a(chunkX, chunkZ, blocks, x, y, z);
+    }
+
+    protected void generateCaveNode(int chunkX, int chunkZ, byte[] blocks, double x, double y, double z, float size, float yaw, float pitch, int startStep, int endStep, double verticalScale) {
+        this.a(chunkX, chunkZ, blocks, x, y, z, size, yaw, pitch, startStep, endStep, verticalScale);
+    }
+
+    protected void recursiveGenerate(World world, int chunkX, int chunkZ, int originX, int originZ, byte[] blocks) {
+        this.a(world, chunkX, chunkZ, originX, originZ, blocks);
+    }
+
 }

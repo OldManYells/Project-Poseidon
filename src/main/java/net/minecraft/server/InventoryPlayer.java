@@ -470,4 +470,13 @@ public class InventoryPlayer implements IInventory {
     public boolean c(ItemStack stack) {
         return this.containsExact(stack);
     }
+
+    public EntityHuman getOwner() {
+        return this.d;
+    }
+
+    public boolean isDirty() {
+        return this.e;
+    }
+
 }

@@ -565,4 +565,74 @@ public class CraftBlock {
         r[0] = true;
         StatisticList.b();
     }
+
+    public static final StepSound STONE_STEP_SOUND = d;
+    public static final StepSound WOOD_STEP_SOUND = e;
+    public static final StepSound GRAVEL_STEP_SOUND = f;
+    public static final StepSound GRASS_STEP_SOUND = g;
+    public static final StepSound METAL_STEP_SOUND = h;
+    public static final StepSound GLASS_STEP_SOUND = j;
+    public static final StepSound CLOTH_STEP_SOUND = k;
+    public static final StepSound SAND_STEP_SOUND = l;
+
+    protected CraftBlock setTicking() {
+        return this.g();
+    }
+
+    protected void onBlockAdded() {
+        this.h();
+    }
+
+    protected CraftBlock setStepSound(StepSound stepSound) {
+        return this.a(stepSound);
+    }
+
+    protected CraftBlock setLightOpacity(int lightOpacity) {
+        return this.f(lightOpacity);
+    }
+
+    protected CraftBlock setLightValue(float lightValue) {
+        return this.a(lightValue);
+    }
+
+    protected CraftBlock setResistance(float resistance) {
+        return this.b(resistance);
+    }
+
+    protected CraftBlock setHardness(float hardness) {
+        return this.c(hardness);
+    }
+
+    protected CraftBlock setUnbreakable() {
+        return this.i();
+    }
+
+    public void setBlockBounds(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+        this.a(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    public boolean isOpaqueCube() {
+        return this.a();
+    }
+
+    public int getTextureForSideAndData(int side, int data) {
+        return this.a(side, data);
+    }
+
+    public int getTextureForSide(int side) {
+        return this.a(side);
+    }
+
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+        return this.e(world, x, y, z);
+    }
+
+    public String getLocalizedName() {
+        return this.k();
+    }
+
+    public String getDescriptionId() {
+        return this.l();
+    }
+
 }

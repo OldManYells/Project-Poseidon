@@ -51,4 +51,9 @@ public class SlotResult extends Slot {
             }
         }
     }
+
+    public void onCrafting(ItemStack itemStack) {
+        this.a(itemStack);
+    }
+
 }

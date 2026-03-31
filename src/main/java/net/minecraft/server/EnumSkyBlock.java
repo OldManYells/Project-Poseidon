@@ -10,4 +10,13 @@ public enum EnumSkyBlock {
     private EnumSkyBlock(String s, int i, int j) {
         this.c = j;
     }
+
+    public int getDefaultLightValue() {
+        return this.c;
+    }
+
+    public static EnumSkyBlock[] getLegacyValues() {
+        return d.clone();
+    }
+
 }

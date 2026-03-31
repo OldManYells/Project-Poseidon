@@ -29,4 +29,9 @@ public class SlotResult2 extends Slot {
 
         super.a(itemstack);
     }
+
+    public void onCrafting(ItemStack itemStack) {
+        this.a(itemStack);
+    }
+
 }

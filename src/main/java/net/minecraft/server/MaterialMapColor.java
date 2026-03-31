@@ -25,4 +25,28 @@ public class MaterialMapColor {
         this.p = j;
         a[i] = this;
     }
+
+    public static final MaterialMapColor[] BY_ID = a;
+    public static final MaterialMapColor NONE = b;
+    public static final MaterialMapColor GRASS = c;
+    public static final MaterialMapColor SAND = d;
+    public static final MaterialMapColor CLOTH = e;
+    public static final MaterialMapColor TNT = f;
+    public static final MaterialMapColor ICE = g;
+    public static final MaterialMapColor IRON = h;
+    public static final MaterialMapColor FOLIAGE = i;
+    public static final MaterialMapColor SNOW = j;
+    public static final MaterialMapColor CLAY = k;
+    public static final MaterialMapColor DIRT = l;
+    public static final MaterialMapColor STONE = m;
+    public static final MaterialMapColor WATER = n;
+    public static final MaterialMapColor WOOD = o;
+    public int getColorValue() {
+        return this.p;
+    }
+
+    public int getId() {
+        return this.q;
+    }
+
 }

@@ -32,4 +32,13 @@ public class AchievementMap {
     public static String a(int i) {
         return (String) a.b.get(Integer.valueOf(i));
     }
+
+    public static AchievementMap getInstance() {
+        return a;
+    }
+
+    public static String getTranslationKey(int achievementId) {
+        return a(achievementId);
+    }
+
 }

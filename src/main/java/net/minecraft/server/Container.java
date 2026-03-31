@@ -358,4 +358,13 @@ public abstract class Container {
     protected void a(ItemStack stack, int startIndex, int endIndex, boolean reverse) {
         this.mergeItemStack(stack, startIndex, endIndex, reverse);
     }
+
+    public List getInventoryItemStacks() {
+        return this.d;
+    }
+
+    public List getSlots() {
+        return this.e;
+    }
+
 }

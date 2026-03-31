@@ -7,4 +7,9 @@ public class BedBlockTextures {
     public static final int[][] c = new int[][] { { 1, 0, 3, 2, 5, 4}, { 1, 0, 5, 4, 2, 3}, { 1, 0, 2, 3, 4, 5}, { 1, 0, 4, 5, 3, 2}};
 
     public BedBlockTextures() {}
+
+    public static final int[] FOOT_ROTATION_BY_DIRECTION = a;
+    public static final int[] HEAD_ROTATION_BY_DIRECTION = b;
+    public static final int[][] SIDE_ROTATION_BY_DIRECTION = c;
+
 }

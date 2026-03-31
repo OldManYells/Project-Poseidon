@@ -37,4 +37,77 @@ public class AchievementList {
     static {
         System.out.println(e.size() + " achievements");
     }
+
+    public static List getAllAchievements() {
+        return e;
+    }
+
+    public static Achievement getOpenInventoryAchievement() {
+        return f;
+    }
+
+    public static Achievement getMineWoodAchievement() {
+        return g;
+    }
+
+    public static Achievement getBuildWorkbenchAchievement() {
+        return h;
+    }
+
+    public static Achievement getBuildPickaxeAchievement() {
+        return i;
+    }
+
+    public static Achievement getBuildFurnaceAchievement() {
+        return j;
+    }
+
+    public static Achievement getAcquireIronAchievement() {
+        return k;
+    }
+
+    public static Achievement getBuildHoeAchievement() {
+        return l;
+    }
+
+    public static Achievement getMakeBreadAchievement() {
+        return m;
+    }
+
+    public static Achievement getBakeCakeAchievement() {
+        return n;
+    }
+
+    public static Achievement getBuildBetterPickaxeAchievement() {
+        return o;
+    }
+
+    public static Achievement getCookFishAchievement() {
+        return p;
+    }
+
+    public static Achievement getOnARailAchievement() {
+        return q;
+    }
+
+    public static Achievement getBuildSwordAchievement() {
+        return r;
+    }
+
+    public static Achievement getKillEnemyAchievement() {
+        return s;
+    }
+
+    public static Achievement getKillCowAchievement() {
+        return t;
+    }
+
+    public static Achievement getFlyPigAchievement() {
+        return u;
+    }
+
+    public static void initialize() {
+        a();
+    }
+
 }

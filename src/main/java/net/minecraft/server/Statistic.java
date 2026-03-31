@@ -49,4 +49,13 @@ public class Statistic {
     public String toString() {
         return this.f;
     }
+
+    public Statistic setIndependent() {
+        return this.e();
+    }
+
+    public Statistic registerStat() {
+        return this.d();
+    }
+
 }

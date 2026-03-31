@@ -7,4 +7,9 @@ public enum EnumMovingObjectType {
     private static final EnumMovingObjectType[] c = new EnumMovingObjectType[] { TILE, ENTITY};
 
     private EnumMovingObjectType(String s, int i) {}
+
+    public static EnumMovingObjectType[] getLegacyValues() {
+        return c.clone();
+    }
+
 }

@@ -26,4 +26,9 @@ public class RecipesTools {
 
         craftingmanager.registerShapedRecipe(new ItemStack(org.bukkit.craftbukkit.item.Item.SHEARS), new Object[] { " #", "# ", Character.valueOf('#'), Item.IRON_INGOT});
     }
+
+    public void addRecipes(CraftingManager craftingManager) {
+        this.a(craftingManager);
+    }
+
 }

@@ -32,4 +32,13 @@ public class ContainerDispenser extends Container {
     public boolean b(EntityHuman entityhuman) {
         return this.a.a_(entityhuman);
     }
+
+    public TileEntityDispenser getDispenser() {
+        return this.a;
+    }
+
+    public boolean canUse(EntityHuman player) {
+        return this.b(player);
+    }
+
 }

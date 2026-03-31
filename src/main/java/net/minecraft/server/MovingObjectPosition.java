@@ -27,4 +27,21 @@ public class MovingObjectPosition {
         this.entity = entity;
         this.f = Vec3D.create(entity.locX, entity.locY, entity.locZ);
     }
+
+    public int blockX() {
+        return this.b;
+    }
+
+    public int blockY() {
+        return this.c;
+    }
+
+    public int blockZ() {
+        return this.d;
+    }
+
+    public Vec3D getPos() {
+        return this.f;
+    }
+
 }

@@ -23,4 +23,17 @@ public class StepSound {
     public String getName() {
         return "step." + this.a;
     }
+
+    public String getSoundName() {
+        return this.a;
+    }
+
+    public float getVolume() {
+        return this.b;
+    }
+
+    public float getPitch() {
+        return this.c;
+    }
+
 }

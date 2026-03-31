@@ -95,4 +95,13 @@ public class PropertyManager {
         this.properties.setProperty(s, "" + flag);
         this.savePropertiesFile();
     }
+
+    public void generateNewPropertiesFile() {
+        this.a();
+    }
+
+    public void setBoolean(String key, boolean value) {
+        this.b(key, value);
+    }
+
 }

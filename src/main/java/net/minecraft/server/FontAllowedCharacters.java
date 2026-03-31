@@ -30,4 +30,11 @@ public class FontAllowedCharacters {
 
         return s;
     }
+
+    public static final char[] FILENAME_DISALLOWED_CHARACTERS = b;
+
+    public static String loadAllowedCharacters() {
+        return a();
+    }
+
 }

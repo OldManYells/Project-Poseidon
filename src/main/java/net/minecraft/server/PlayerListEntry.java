@@ -50,4 +50,13 @@ class PlayerListEntry {
     public final String toString() {
         return this.a() + "=" + this.b();
     }
+
+    public final long getKey() {
+        return this.a();
+    }
+
+    public final Object getValue() {
+        return this.b();
+    }
+
 }

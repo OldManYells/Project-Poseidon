@@ -715,4 +715,25 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public WatchDogThread getWatchdog() {
         return Poseidon.getServer().getWatchDogThread();
     }
+
+    public void tickServer() {
+        this.a();
+    }
+
+    public void processQueuedCommands() {
+        this.b();
+    }
+
+    public void addUpdateBox(IUpdatePlayerListBox updateBox) {
+        this.a(updateBox);
+    }
+
+    public File getFile(String path) {
+        return this.a(path);
+    }
+
+    public void warning(String message) {
+        this.c(message);
+    }
+
 }

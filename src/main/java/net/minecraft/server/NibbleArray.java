@@ -35,4 +35,17 @@ public class NibbleArray {
     public boolean a() {
         return this.a != null;
     }
+
+    public int get(int x, int y, int z) {
+        return this.a(x, y, z);
+    }
+
+    public void set(int x, int y, int z, int value) {
+        this.a(x, y, z, value);
+    }
+
+    public boolean isInitialized() {
+        return this.a();
+    }
+
 }

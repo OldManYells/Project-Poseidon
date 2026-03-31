@@ -37,4 +37,9 @@ public enum EnumCreatureType {
     public boolean isPeaceful() {
         return this.isPeaceful;
     }
+
+    public static EnumCreatureType[] getLegacyValues() {
+        return h.clone();
+    }
+
 }

@@ -184,4 +184,9 @@ public class CraftingManager {
     public List b() {
         return this.b;
     }
+
+    public List getRecipes() {
+        return this.b();
+    }
+
 }

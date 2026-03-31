@@ -106,4 +106,41 @@ public class Material {
         this.H = 2;
         return this;
     }
+
+    public Material setNoHarvest() {
+        return this.m();
+    }
+
+    public Material setNotPushable() {
+        return this.n();
+    }
+
+    public Material setBurning() {
+        return this.o();
+    }
+
+    public Material setReplaceable() {
+        return this.f();
+    }
+
+    public boolean blocksMovement() {
+        return this.h();
+    }
+
+    public boolean isAdventureModeExempt() {
+        return this.i();
+    }
+
+    public int getMobilityFlag() {
+        return this.j();
+    }
+
+    protected Material setGroundCover() {
+        return this.k();
+    }
+
+    protected Material setPushDestroys() {
+        return this.l();
+    }
+
 }

@@ -218,4 +218,17 @@ public class MetadataChunkBlock {
             return false;
         }
     }
+
+    public EnumSkyBlock getSkyBlockType() {
+        return this.a;
+    }
+
+    public void updateLight(World world) {
+        this.a(world);
+    }
+
+    public boolean expandToContain(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        return this.a(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
 }

@@ -247,4 +247,45 @@ public abstract class Packet {
         e = new HashMap();
         f = 0;
     }
+
+    public static Packet createPacket(int packetId) {
+        return a(packetId);
+    }
+
+    public int getPacketId() {
+        return this.b();
+    }
+
+    public static Packet readPacket(DataInputStream input, boolean serverSide) throws IOException {
+        return a(input, serverSide);
+    }
+
+    public static void writePacket(Packet packet, DataOutputStream output) throws IOException {
+        a(packet, output);
+    }
+
+    public static void writeString(String value, DataOutputStream output) throws IOException {
+        a(value, output);
+    }
+
+    public static String readString(DataInputStream input, int maxLength) throws IOException {
+        return a(input, maxLength);
+    }
+
+    public void read(DataInputStream input) throws IOException {
+        this.a(input);
+    }
+
+    public void write(DataOutputStream output) throws IOException {
+        this.a(output);
+    }
+
+    public void handle(NetHandler handler) {
+        this.a(handler);
+    }
+
+    public int getSize() {
+        return this.a();
+    }
+
 }

@@ -26,4 +26,9 @@ public class PlayerListBox extends JList implements IUpdatePlayerListBox {
             this.setListData(vector);
         }
     }
+
+    public void updatePlayerList() {
+        this.a();
+    }
+
 }

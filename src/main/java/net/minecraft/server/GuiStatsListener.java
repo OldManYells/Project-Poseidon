@@ -14,4 +14,9 @@ class GuiStatsListener implements ActionListener {
     public void actionPerformed(ActionEvent actionevent) {
         GuiStatsComponent.a(this.a);
     }
+
+    public GuiStatsComponent getStatsComponent() {
+        return this.a;
+    }
+
 }

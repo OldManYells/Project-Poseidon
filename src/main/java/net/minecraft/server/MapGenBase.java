@@ -27,4 +27,13 @@ public class MapGenBase {
     }
 
     protected void a(World world, int i, int j, int k, int l, byte[] abyte) {}
+
+    public void generate(IChunkProvider chunkProvider, World world, int chunkX, int chunkZ, byte[] blocks) {
+        this.a(chunkProvider, world, chunkX, chunkZ, blocks);
+    }
+
+    protected void recursiveGenerate(World world, int chunkX, int chunkZ, int originX, int originZ, byte[] blocks) {
+        this.a(world, chunkX, chunkZ, originX, originZ, blocks);
+    }
+
 }

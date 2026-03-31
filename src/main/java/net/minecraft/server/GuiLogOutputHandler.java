@@ -35,4 +35,9 @@ public class GuiLogOutputHandler extends Handler {
         this.b[this.c] = j;
         this.c = (this.c + 1) % 1024;
     }
+
+    public Formatter getGuiFormatter() {
+        return this.a;
+    }
+
 }

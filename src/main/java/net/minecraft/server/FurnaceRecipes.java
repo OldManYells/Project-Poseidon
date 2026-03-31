@@ -40,4 +40,13 @@ public class FurnaceRecipes {
     public Map b() {
         return this.b;
     }
+
+    public ItemStack getSmeltingResult(int sourceId) {
+        return this.a(sourceId);
+    }
+
+    public Map getRecipes() {
+        return this.b();
+    }
+
 }

@@ -56,4 +56,9 @@ public class GuiStatsComponent extends JComponent {
     static void a(GuiStatsComponent guistatscomponent) {
         guistatscomponent.a();
     }
+
+    public void updateStats() {
+        this.a();
+    }
+
 }

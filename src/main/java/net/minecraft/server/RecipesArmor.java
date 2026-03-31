@@ -24,4 +24,9 @@ public class RecipesArmor {
             }
         }
     }
+
+    public void addRecipes(CraftingManager craftingManager) {
+        this.a(craftingManager);
+    }
+
 }

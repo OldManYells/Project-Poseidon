@@ -23,4 +23,9 @@ class SlotArmor extends Slot {
     public boolean isAllowed(ItemStack itemstack) {
         return itemstack.getItem() instanceof ItemArmor ? ((ItemArmor) itemstack.getItem()).bk == this.d : (itemstack.getItem().id == CraftBlock.PUMPKIN.id ? this.d == 0 : false);
     }
+
+    public int getSlotStackLimit() {
+        return this.d();
+    }
+
 }

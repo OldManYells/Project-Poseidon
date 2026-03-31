@@ -61,4 +61,17 @@ public class InventoryLargeChest implements IInventory {
     public boolean a_(EntityHuman entityhuman) {
         return this.b.a_(entityhuman) && this.c.a_(entityhuman);
     }
+
+    public String getInventoryName() {
+        return this.a;
+    }
+
+    public IInventory getUpperChest() {
+        return this.b;
+    }
+
+    public IInventory getLowerChest() {
+        return this.c;
+    }
+
 }
