@@ -2,23 +2,38 @@ package net.minecraft.server;
 
 public class ConvertProgressUpdater implements IProgressUpdate {
 
-    private long b;
+    private long lastUpdateTime;
 
     final MinecraftServer a;
 
     public ConvertProgressUpdater(MinecraftServer minecraftserver) {
         this.a = minecraftserver;
-        this.b = System.currentTimeMillis();
+        this.lastUpdateTime = System.currentTimeMillis();
     }
 
-    public void a(String s) {}
+    public void start(String message) {}
 
-    public void a(int i) {
-        if (System.currentTimeMillis() - this.b >= 1000L) {
-            this.b = System.currentTimeMillis();
-            MinecraftServer.log.info("Converting... " + i + "%");
+    public void setProgress(int progress) {
+        if (System.currentTimeMillis() - this.lastUpdateTime >= 1000L) {
+            this.lastUpdateTime = System.currentTimeMillis();
+            MinecraftServer.log.info("Converting... " + progress + "%");
         }
     }
 
-    public void b(String s) {}
+    public void finish(String message) {}
+
+    @Deprecated
+    public void a(String message) {
+        this.start(message);
+    }
+
+    @Deprecated
+    public void a(int progress) {
+        this.setProgress(progress);
+    }
+
+    @Deprecated
+    public void b(String message) {
+        this.finish(message);
+    }
 }

@@ -10,22 +10,30 @@ public class NBTTagString extends NBTBase {
 
     public NBTTagString() {}
 
-    public NBTTagString(String s) {
-        this.a = s;
-        if (s == null) {
+    public NBTTagString(String value) {
+        this.a = value;
+        if (value == null) {
             throw new IllegalArgumentException("Empty string not allowed");
         }
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeUTF(this.a);
+    public String getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        this.a = datainput.readUTF();
+    public void setValue(String value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeUTF(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        this.a = input.readUTF();
+    }
+
+    public byte getTypeId() {
         return (byte) 8;
     }
 

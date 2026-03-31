@@ -6,218 +6,262 @@ import org.bukkit.craftbukkit.server.ChunkCoordinates;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class DataWatcher {
 
-    private boolean d = true;
-    private static final HashMap a = new HashMap();
-    private final Map b = new HashMap();
-    private boolean c;
+    private boolean blank = true;
+    private static final HashMap classToIdMap = new HashMap();
+    private final Map watchedObjects = new HashMap();
+    private boolean objectChanged;
 
     public DataWatcher() {}
 
-    public void a(int i, Object object) {
-        Integer integer = (Integer) a.get(object.getClass());
+    public void addObject(int dataValueId, Object value) {
+        Integer objectType = (Integer) classToIdMap.get(value.getClass());
 
-        if (integer == null) {
-            throw new IllegalArgumentException("Unknown data type: " + object.getClass());
-        } else if (i > 31) {
-            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 31 + ")");
-        } else if (this.b.containsKey(Integer.valueOf(i))) {
-            throw new IllegalArgumentException("Duplicate id value for " + i + "!");
+        if (objectType == null) {
+            throw new IllegalArgumentException("Unknown data type: " + value.getClass());
+        } else if (dataValueId > 31) {
+            throw new IllegalArgumentException("Data value id is too big with " + dataValueId + "! (Max is 31)");
+        } else if (this.watchedObjects.containsKey(Integer.valueOf(dataValueId))) {
+            throw new IllegalArgumentException("Duplicate id value for " + dataValueId + "!");
         } else {
-            WatchableObject watchableobject = new WatchableObject(integer.intValue(), i, object);
-
-            this.b.put(Integer.valueOf(i), watchableobject);
-            this.d = false;
+            WatchableObject watchableObject = new WatchableObject(objectType.intValue(), dataValueId, value);
+            this.watchedObjects.put(Integer.valueOf(dataValueId), watchableObject);
+            this.blank = false;
         }
     }
 
-    public byte a(int i) {
-        return ((Byte) ((WatchableObject) this.b.get(Integer.valueOf(i))).b()).byteValue();
+    public byte getByte(int dataValueId) {
+        return ((Byte) ((WatchableObject) this.watchedObjects.get(Integer.valueOf(dataValueId))).getValue()).byteValue();
     }
 
-    public int b(int i) {
-        return ((Integer) ((WatchableObject) this.b.get(Integer.valueOf(i))).b()).intValue();
+    public int getInt(int dataValueId) {
+        return ((Integer) ((WatchableObject) this.watchedObjects.get(Integer.valueOf(dataValueId))).getValue()).intValue();
     }
 
-    public String c(int i) {
-        return (String) ((WatchableObject) this.b.get(Integer.valueOf(i))).b();
+    public String getString(int dataValueId) {
+        return (String) ((WatchableObject) this.watchedObjects.get(Integer.valueOf(dataValueId))).getValue();
     }
 
-    public void watch(int i, Object object) {
-        WatchableObject watchableobject = (WatchableObject) this.b.get(Integer.valueOf(i));
+    public void watch(int dataValueId, Object value) {
+        WatchableObject watchableObject = (WatchableObject) this.watchedObjects.get(Integer.valueOf(dataValueId));
 
-        if (!object.equals(watchableobject.b())) {
-            watchableobject.a(object);
-            watchableobject.a(true);
-            this.c = true;
+        if (!value.equals(watchableObject.getValue())) {
+            watchableObject.setValue(value);
+            watchableObject.setWatched(true);
+            this.objectChanged = true;
         }
     }
 
-    public boolean a() {
-        return this.c;
+    public boolean hasChanged() {
+        return this.objectChanged;
     }
 
-    public static void a(List list, DataOutputStream dataoutputstream) throws IOException {
-        if (list != null) {
-            Iterator iterator = list.iterator();
+    public ArrayList getChangedObjects() {
+        ArrayList changedObjects = null;
+
+        if (this.objectChanged) {
+            Iterator iterator = this.watchedObjects.values().iterator();
 
             while (iterator.hasNext()) {
-                WatchableObject watchableobject = (WatchableObject) iterator.next();
+                WatchableObject watchableObject = (WatchableObject) iterator.next();
 
-                a(dataoutputstream, watchableobject);
-            }
-        }
-
-        dataoutputstream.writeByte(127);
-    }
-
-    public ArrayList b() {
-        ArrayList arraylist = null;
-
-        if (this.c) {
-            Iterator iterator = this.b.values().iterator();
-
-            while (iterator.hasNext()) {
-                WatchableObject watchableobject = (WatchableObject) iterator.next();
-
-                if (watchableobject.d()) {
-                    watchableobject.a(false);
-                    if (arraylist == null) {
-                        arraylist = new ArrayList();
+                if (watchableObject.isWatched()) {
+                    watchableObject.setWatched(false);
+                    if (changedObjects == null) {
+                        changedObjects = new ArrayList();
                     }
 
-                    arraylist.add(watchableobject);
+                    changedObjects.add(watchableObject);
                 }
             }
         }
 
-        this.c = false;
-        return arraylist;
+        this.objectChanged = false;
+        return changedObjects;
     }
 
-    public void a(DataOutputStream dataoutputstream) throws IOException {
-        Iterator iterator = this.b.values().iterator();
+    public void writeAll(DataOutputStream output) throws IOException {
+        Iterator iterator = this.watchedObjects.values().iterator();
 
         while (iterator.hasNext()) {
-            WatchableObject watchableobject = (WatchableObject) iterator.next();
-
-            a(dataoutputstream, watchableobject);
+            WatchableObject watchableObject = (WatchableObject) iterator.next();
+            writeWatchableObject(output, watchableObject);
         }
 
-        dataoutputstream.writeByte(127);
+        output.writeByte(127);
     }
 
-    private static void a(DataOutputStream dataoutputstream, WatchableObject watchableobject) throws IOException {
-        int i = (watchableobject.c() << 5 | watchableobject.a() & 31) & 255;
+    public boolean isBlank() {
+        return this.blank;
+    }
 
-        dataoutputstream.writeByte(i);
-        switch (watchableobject.c()) {
+    public static void writeWatchableObjects(List watchableObjects, DataOutputStream output) throws IOException {
+        if (watchableObjects != null) {
+            Iterator iterator = watchableObjects.iterator();
+
+            while (iterator.hasNext()) {
+                WatchableObject watchableObject = (WatchableObject) iterator.next();
+                writeWatchableObject(output, watchableObject);
+            }
+        }
+
+        output.writeByte(127);
+    }
+
+    private static void writeWatchableObject(DataOutputStream output, WatchableObject watchableObject) throws IOException {
+        int typeAndId = (watchableObject.getObjectType() << 5 | watchableObject.getDataValueId() & 31) & 255;
+
+        output.writeByte(typeAndId);
+        switch (watchableObject.getObjectType()) {
         case 0:
-            dataoutputstream.writeByte(((Byte) watchableobject.b()).byteValue());
+            output.writeByte(((Byte) watchableObject.getValue()).byteValue());
             break;
-
         case 1:
-            dataoutputstream.writeShort(((Short) watchableobject.b()).shortValue());
+            output.writeShort(((Short) watchableObject.getValue()).shortValue());
             break;
-
         case 2:
-            dataoutputstream.writeInt(((Integer) watchableobject.b()).intValue());
+            output.writeInt(((Integer) watchableObject.getValue()).intValue());
             break;
-
         case 3:
-            dataoutputstream.writeFloat(((Float) watchableobject.b()).floatValue());
+            output.writeFloat(((Float) watchableObject.getValue()).floatValue());
             break;
-
         case 4:
-            Packet.a((String) watchableobject.b(), dataoutputstream);
+            Packet.a((String) watchableObject.getValue(), output);
             break;
-
         case 5:
-            ItemStack itemstack = (ItemStack) watchableobject.b();
-
-            dataoutputstream.writeShort(itemstack.getItem().id);
-            dataoutputstream.writeByte(itemstack.count);
-            dataoutputstream.writeShort(itemstack.getData());
+            ItemStack itemStack = (ItemStack) watchableObject.getValue();
+            output.writeShort(itemStack.getItem().id);
+            output.writeByte(itemStack.count);
+            output.writeShort(itemStack.getData());
             break;
-
         case 6:
-            ChunkCoordinates chunkcoordinates = (ChunkCoordinates) watchableobject.b();
-
-            dataoutputstream.writeInt(chunkcoordinates.x);
-            dataoutputstream.writeInt(chunkcoordinates.y);
-            dataoutputstream.writeInt(chunkcoordinates.z);
+            ChunkCoordinates chunkCoordinates = (ChunkCoordinates) watchableObject.getValue();
+            output.writeInt(chunkCoordinates.x);
+            output.writeInt(chunkCoordinates.y);
+            output.writeInt(chunkCoordinates.z);
         }
     }
 
-    public static List a(DataInputStream datainputstream) throws IOException {
-        ArrayList arraylist = null;
+    public static List readWatchableObjects(DataInputStream input) throws IOException {
+        ArrayList watchableObjects = null;
 
-        for (byte b0 = datainputstream.readByte(); b0 != 127; b0 = datainputstream.readByte()) {
-            if (arraylist == null) {
-                arraylist = new ArrayList();
+        for (byte marker = input.readByte(); marker != 127; marker = input.readByte()) {
+            if (watchableObjects == null) {
+                watchableObjects = new ArrayList();
             }
 
-            int i = (b0 & 224) >> 5;
-            int j = b0 & 31;
-            WatchableObject watchableobject = null;
+            int objectType = (marker & 224) >> 5;
+            int dataValueId = marker & 31;
+            WatchableObject watchableObject = null;
 
-            switch (i) {
+            switch (objectType) {
             case 0:
-                watchableobject = new WatchableObject(i, j, Byte.valueOf(datainputstream.readByte()));
+                watchableObject = new WatchableObject(objectType, dataValueId, Byte.valueOf(input.readByte()));
                 break;
-
             case 1:
-                watchableobject = new WatchableObject(i, j, Short.valueOf(datainputstream.readShort()));
+                watchableObject = new WatchableObject(objectType, dataValueId, Short.valueOf(input.readShort()));
                 break;
-
             case 2:
-                watchableobject = new WatchableObject(i, j, Integer.valueOf(datainputstream.readInt()));
+                watchableObject = new WatchableObject(objectType, dataValueId, Integer.valueOf(input.readInt()));
                 break;
-
             case 3:
-                watchableobject = new WatchableObject(i, j, Float.valueOf(datainputstream.readFloat()));
+                watchableObject = new WatchableObject(objectType, dataValueId, Float.valueOf(input.readFloat()));
                 break;
-
             case 4:
-                watchableobject = new WatchableObject(i, j, Packet.a(datainputstream, 64));
+                watchableObject = new WatchableObject(objectType, dataValueId, Packet.a(input, 64));
                 break;
-
             case 5:
-                short short1 = datainputstream.readShort();
-                byte b1 = datainputstream.readByte();
-                short short2 = datainputstream.readShort();
-
-                watchableobject = new WatchableObject(i, j, new ItemStack(short1, b1, short2));
+                short itemId = input.readShort();
+                byte itemCount = input.readByte();
+                short itemData = input.readShort();
+                watchableObject = new WatchableObject(objectType, dataValueId, new ItemStack(itemId, itemCount, itemData));
                 break;
-
             case 6:
-                int k = datainputstream.readInt();
-                int l = datainputstream.readInt();
-                int i1 = datainputstream.readInt();
-
-                watchableobject = new WatchableObject(i, j, new ChunkCoordinates(k, l, i1));
+                int x = input.readInt();
+                int y = input.readInt();
+                int z = input.readInt();
+                watchableObject = new WatchableObject(objectType, dataValueId, new ChunkCoordinates(x, y, z));
             }
 
-            arraylist.add(watchableobject);
+            watchableObjects.add(watchableObject);
         }
 
-        return arraylist;
+        return watchableObjects;
     }
-    
+
+    // ---------------------------------------------------------------------
+    // Compatibility bridge methods for old obfuscated call sites
+    // ---------------------------------------------------------------------
+
+    @Deprecated
+    public void a(int dataValueId, Object value) {
+        this.addObject(dataValueId, value);
+    }
+
+    @Deprecated
+    public byte a(int dataValueId) {
+        return this.getByte(dataValueId);
+    }
+
+    @Deprecated
+    public int b(int dataValueId) {
+        return this.getInt(dataValueId);
+    }
+
+    @Deprecated
+    public String c(int dataValueId) {
+        return this.getString(dataValueId);
+    }
+
+    @Deprecated
+    public boolean a() {
+        return this.hasChanged();
+    }
+
+    @Deprecated
+    public static void a(List watchableObjects, DataOutputStream output) throws IOException {
+        writeWatchableObjects(watchableObjects, output);
+    }
+
+    @Deprecated
+    public ArrayList b() {
+        return this.getChangedObjects();
+    }
+
+    @Deprecated
+    public void a(DataOutputStream output) throws IOException {
+        this.writeAll(output);
+    }
+
+    @Deprecated
+    private static void a(DataOutputStream output, WatchableObject watchableObject) throws IOException {
+        writeWatchableObject(output, watchableObject);
+    }
+
+    @Deprecated
+    public static List a(DataInputStream input) throws IOException {
+        return readWatchableObjects(input);
+    }
+
+    @Deprecated
     public boolean getD() {
-        return this.d;
+        return this.isBlank();
     }
 
     static {
-        a.put(Byte.class, Integer.valueOf(0));
-        a.put(Short.class, Integer.valueOf(1));
-        a.put(Integer.class, Integer.valueOf(2));
-        a.put(Float.class, Integer.valueOf(3));
-        a.put(String.class, Integer.valueOf(4));
-        a.put(ItemStack.class, Integer.valueOf(5));
-        a.put(ChunkCoordinates.class, Integer.valueOf(6));
+        classToIdMap.put(Byte.class, Integer.valueOf(0));
+        classToIdMap.put(Short.class, Integer.valueOf(1));
+        classToIdMap.put(Integer.class, Integer.valueOf(2));
+        classToIdMap.put(Float.class, Integer.valueOf(3));
+        classToIdMap.put(String.class, Integer.valueOf(4));
+        classToIdMap.put(ItemStack.class, Integer.valueOf(5));
+        classToIdMap.put(ChunkCoordinates.class, Integer.valueOf(6));
     }
 }

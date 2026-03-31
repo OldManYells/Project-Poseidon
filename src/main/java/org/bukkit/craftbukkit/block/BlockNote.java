@@ -36,7 +36,7 @@ public class BlockNote extends BlockContainer {
         } else {
             TileEntityNote tileentitynote = (TileEntityNote) world.getTileEntity(i, j, k);
 
-            tileentitynote.a();
+            tileentitynote.incrementNote();
             tileentitynote.play(world, i, j, k);
             return true;
         }

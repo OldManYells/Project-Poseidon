@@ -11,104 +11,122 @@ public class ContainerPlayer extends Container {
     public IInventory resultInventory;
     public boolean c;
 
-    public ContainerPlayer(InventoryPlayer inventoryplayer) {
-        this(inventoryplayer, true);
+    public ContainerPlayer(InventoryPlayer inventoryPlayer) {
+        this(inventoryPlayer, true);
     }
 
-    public ContainerPlayer(InventoryPlayer inventoryplayer, boolean flag) {
+    public ContainerPlayer(InventoryPlayer inventoryPlayer, boolean isLocalWorld) {
         this.craftInventory = new InventoryCrafting(this, 2, 2);
         this.resultInventory = new InventoryCraftResult();
         this.c = false;
-        this.c = flag;
-        this.a((Slot) (new SlotResult(inventoryplayer.d, this.craftInventory, this.resultInventory, 0, 144, 36)));
+        this.c = isLocalWorld;
+        this.addSlot(new SlotResult(inventoryPlayer.d, this.craftInventory, this.resultInventory, 0, 144, 36));
 
-        int i;
-        int j;
+        int row;
+        int column;
 
-        for (i = 0; i < 2; ++i) {
-            for (j = 0; j < 2; ++j) {
-                this.a(new Slot(this.craftInventory, j + i * 2, 88 + j * 18, 26 + i * 18));
+        for (row = 0; row < 2; ++row) {
+            for (column = 0; column < 2; ++column) {
+                this.addSlot(new Slot(this.craftInventory, column + row * 2, 88 + column * 18, 26 + row * 18));
             }
         }
 
-        for (i = 0; i < 4; ++i) {
-            this.a((Slot) (new SlotArmor(this, inventoryplayer, inventoryplayer.getSize() - 1 - i, 8, 8 + i * 18, i)));
+        for (row = 0; row < 4; ++row) {
+            this.addSlot(new SlotArmor(this, inventoryPlayer, inventoryPlayer.getSize() - 1 - row, 8, 8 + row * 18, row));
         }
 
-        for (i = 0; i < 3; ++i) {
-            for (j = 0; j < 9; ++j) {
-                this.a(new Slot(inventoryplayer, j + (i + 1) * 9, 8 + j * 18, 84 + i * 18));
+        for (row = 0; row < 3; ++row) {
+            for (column = 0; column < 9; ++column) {
+                this.addSlot(new Slot(inventoryPlayer, column + (row + 1) * 9, 8 + column * 18, 84 + row * 18));
             }
         }
 
-        for (i = 0; i < 9; ++i) {
-            this.a(new Slot(inventoryplayer, i, 8 + i * 18, 142));
+        for (row = 0; row < 9; ++row) {
+            this.addSlot(new Slot(inventoryPlayer, row, 8 + row * 18, 142));
         }
 
-        this.a((IInventory) this.craftInventory);
+        this.onInventoryChanged(this.craftInventory);
     }
 
-    public void a(IInventory iinventory) {
-        // CraftBukkit start
+    public void onInventoryChanged(IInventory inventory) {
         ItemStack craftResult = CraftingManager.getInstance().craft(this.craftInventory);
         this.resultInventory.setItem(0, craftResult);
         if (super.listeners.size() < 1) {
             return;
         }
 
-        EntityPlayer player = (EntityPlayer) super.listeners.get(0); // TODO: Is this _always_ correct? Seems like it.
+        EntityPlayer player = (EntityPlayer) super.listeners.get(0);
         player.netServerHandler.sendPacket(new Packet103SetSlot(player.activeContainer.windowId, 0, craftResult));
-        // CraftBukkit end
     }
 
-    public void a(EntityHuman entityhuman) {
-        super.a(entityhuman);
+    public void onContainerClosed(EntityHuman player) {
+        super.onContainerClosed(player);
 
-        for (int i = 0; i < 4; ++i) {
-            ItemStack itemstack = this.craftInventory.getItem(i);
+        for (int slotIndex = 0; slotIndex < 4; ++slotIndex) {
+            ItemStack itemStack = this.craftInventory.getItem(slotIndex);
 
-            if (itemstack != null) {
-                entityhuman.b(itemstack);
-                this.craftInventory.setItem(i, (ItemStack) null);
+            if (itemStack != null) {
+                player.b(itemStack);
+                this.craftInventory.setItem(slotIndex, (ItemStack) null);
             }
         }
     }
 
-    public boolean b(EntityHuman entityhuman) {
+    public boolean canUse(EntityHuman player) {
         return true;
     }
 
-    public ItemStack a(int i) {
-        ItemStack itemstack = null;
-        Slot slot = (Slot) this.e.get(i);
+    public ItemStack transferStackInSlot(int slotIndex) {
+        ItemStack result = null;
+        Slot slot = (Slot) this.e.get(slotIndex);
 
-        if (slot != null && slot.b()) {
-            ItemStack itemstack1 = slot.getItem();
+        if (slot != null && slot.hasItem()) {
+            ItemStack slotStack = slot.getItem();
+            result = slotStack.cloneItemStack();
 
-            itemstack = itemstack1.cloneItemStack();
-            if (i == 0) {
-                this.a(itemstack1, 9, 45, true);
-            } else if (i >= 9 && i < 36) {
-                this.a(itemstack1, 36, 45, false);
-            } else if (i >= 36 && i < 45) {
-                this.a(itemstack1, 9, 36, false);
+            if (slotIndex == 0) {
+                this.mergeItemStack(slotStack, 9, 45, true);
+            } else if (slotIndex >= 9 && slotIndex < 36) {
+                this.mergeItemStack(slotStack, 36, 45, false);
+            } else if (slotIndex >= 36 && slotIndex < 45) {
+                this.mergeItemStack(slotStack, 9, 36, false);
             } else {
-                this.a(itemstack1, 9, 45, false);
+                this.mergeItemStack(slotStack, 9, 45, false);
             }
 
-            if (itemstack1.count == 0) {
-                slot.c((ItemStack) null);
+            if (slotStack.count == 0) {
+                slot.setItem((ItemStack) null);
             } else {
-                slot.c();
+                slot.onSlotChanged();
             }
 
-            if (itemstack1.count == itemstack.count) {
+            if (slotStack.count == result.count) {
                 return null;
             }
 
-            slot.a(itemstack1);
+            slot.onPickupFromSlot(slotStack);
         }
 
-        return itemstack;
+        return result;
+    }
+
+    @Deprecated
+    public void a(IInventory inventory) {
+        this.onInventoryChanged(inventory);
+    }
+
+    @Deprecated
+    public void a(EntityHuman player) {
+        this.onContainerClosed(player);
+    }
+
+    @Deprecated
+    public boolean b(EntityHuman player) {
+        return this.canUse(player);
+    }
+
+    @Deprecated
+    public ItemStack a(int slotIndex) {
+        return this.transferStackInSlot(slotIndex);
     }
 }

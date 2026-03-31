@@ -1,65 +1,87 @@
 package net.minecraft.server;
 
-
 import org.bukkit.craftbukkit.item.Item;
 import org.bukkit.craftbukkit.item.ItemStack;
 import org.bukkit.craftbukkit.server.StatisticCollector;
 
 public class Achievement extends Statistic {
 
-    public final int a;
-    public final int b;
-    public final Achievement c;
-    private final String l;
-    public final ItemStack d;
-    private boolean m;
+    public final int a; // displayColumn
+    public final int b; // displayRow
+    public final Achievement c; // parentAchievement
+    private final String description;
+    public final ItemStack d; // displayItem
+    private boolean special;
 
-    public Achievement(int i, String s, int j, int k, Item item, Achievement achievement) {
-        this(i, s, j, k, new ItemStack(item), achievement);
+    public Achievement(int id, String name, int displayColumn, int displayRow, Item item, Achievement parentAchievement) {
+        this(id, name, displayColumn, displayRow, new ItemStack(item), parentAchievement);
     }
 
-    public Achievement(int i, String s, int j, int k, CraftBlock baseBlock, Achievement achievement) {
-        this(i, s, j, k, new ItemStack(baseBlock), achievement);
+    public Achievement(int id, String name, int displayColumn, int displayRow, CraftBlock baseBlock, Achievement parentAchievement) {
+        this(id, name, displayColumn, displayRow, new ItemStack(baseBlock), parentAchievement);
     }
 
-    public Achievement(int i, String s, int j, int k, ItemStack itemstack, Achievement achievement) {
-        super(5242880 + i, StatisticCollector.a("achievement." + s));
-        this.d = itemstack;
-        this.l = StatisticCollector.a("achievement." + s + ".desc");
-        this.a = j;
-        this.b = k;
-        if (j < AchievementList.a) {
-            AchievementList.a = j;
+    public Achievement(int id, String name, int displayColumn, int displayRow, ItemStack displayItem, Achievement parentAchievement) {
+        super(5242880 + id, StatisticCollector.a("achievement." + name));
+        this.d = displayItem;
+        this.description = StatisticCollector.a("achievement." + name + ".desc");
+        this.a = displayColumn;
+        this.b = displayRow;
+        if (displayColumn < AchievementList.a) {
+            AchievementList.a = displayColumn;
         }
 
-        if (k < AchievementList.b) {
-            AchievementList.b = k;
+        if (displayRow < AchievementList.b) {
+            AchievementList.b = displayRow;
         }
 
-        if (j > AchievementList.c) {
-            AchievementList.c = j;
+        if (displayColumn > AchievementList.c) {
+            AchievementList.c = displayColumn;
         }
 
-        if (k > AchievementList.d) {
-            AchievementList.d = k;
+        if (displayRow > AchievementList.d) {
+            AchievementList.d = displayRow;
         }
 
-        this.c = achievement;
+        this.c = parentAchievement;
     }
 
-    public Achievement a() {
+    public String getDescription() {
+        return this.description;
+    }
+
+    public boolean isSpecial() {
+        return this.special;
+    }
+
+    public Achievement setIndependent() {
         this.g = true;
         return this;
     }
 
-    public Achievement b() {
-        this.m = true;
+    public Achievement setSpecial() {
+        this.special = true;
         return this;
     }
 
-    public Achievement c() {
+    public Achievement register() {
         super.d();
         AchievementList.e.add(this);
         return this;
+    }
+
+    @Deprecated
+    public Achievement a() {
+        return this.setIndependent();
+    }
+
+    @Deprecated
+    public Achievement b() {
+        return this.setSpecial();
+    }
+
+    @Deprecated
+    public Achievement c() {
+        return this.register();
     }
 }

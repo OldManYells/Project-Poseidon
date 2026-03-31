@@ -27,7 +27,7 @@ public class EntityPig extends EntityAnimal {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.setSaddle(nbttagcompound.m("Saddle"));
+        this.setSaddle(nbttagcompound.getBoolean("Saddle"));
     }
 
     protected String g() {

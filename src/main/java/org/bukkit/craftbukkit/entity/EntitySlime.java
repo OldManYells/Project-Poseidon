@@ -44,7 +44,7 @@ public class EntitySlime extends EntityLiving implements IMonster {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.setSize(nbttagcompound.e("Size") + 1);
+        this.setSize(nbttagcompound.getInt("Size") + 1);
     }
 
     public void m_() {

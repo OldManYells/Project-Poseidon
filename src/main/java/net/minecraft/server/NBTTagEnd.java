@@ -7,11 +7,11 @@ public class NBTTagEnd extends NBTBase {
 
     public NBTTagEnd() {}
 
-    void a(DataInput datainput) {}
+    protected void readTagContents(DataInput input) {}
 
-    void a(DataOutput dataoutput) {}
+    protected void writeTagContents(DataOutput output) {}
 
-    public byte a() {
+    public byte getTypeId() {
         return (byte) 0;
     }
 

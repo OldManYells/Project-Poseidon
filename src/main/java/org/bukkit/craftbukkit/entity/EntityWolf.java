@@ -60,8 +60,8 @@ public class EntityWolf extends EntityAnimal {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.setAngry(nbttagcompound.m("Angry"));
-        this.setSitting(nbttagcompound.m("Sitting"));
+        this.setAngry(nbttagcompound.getBoolean("Angry"));
+        this.setSitting(nbttagcompound.getBoolean("Sitting"));
         String s = nbttagcompound.getString("Owner");
 
         if (s.length() > 0) {

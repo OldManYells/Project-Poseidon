@@ -1155,7 +1155,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             if (tileentity instanceof TileEntitySign) {
                 TileEntitySign tileentitysign = (TileEntitySign) tileentity;
 
-                if (!tileentitysign.a()) {
+                if (!tileentitysign.isEditable()) {
                     this.minecraftServer.c("Player " + this.player.name + " just tried to change non-editable sign");
                     // CraftBukkit
                     this.sendPacket(new Packet130UpdateSign(packet130updatesign.x, packet130updatesign.y, packet130updatesign.z, tileentitysign.lines));
@@ -1200,7 +1200,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                     for (int l = 0; l < 4; ++l) {
                         tileentitysign1.lines[l] = event.getLine(l);
                     }
-                    tileentitysign1.a(false);
+                    tileentitysign1.setEditable(false);
                 }
                 // CraftBukkit end
 

@@ -92,7 +92,7 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
         if (file1.exists()) {
             try {
                 nbttagcompound = CompressedStreamTools.a((InputStream) (new FileInputStream(file1)));
-                nbttagcompound1 = nbttagcompound.k("Data");
+                nbttagcompound1 = nbttagcompound.getCompound("Data");
                 return new WorldData(nbttagcompound1);
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -103,7 +103,7 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
         if (file1.exists()) {
             try {
                 nbttagcompound = CompressedStreamTools.a((InputStream) (new FileInputStream(file1)));
-                nbttagcompound1 = nbttagcompound.k("Data");
+                nbttagcompound1 = nbttagcompound.getCompound("Data");
                 return new WorldData(nbttagcompound1);
             } catch (Exception exception1) {
                 exception1.printStackTrace();
@@ -117,7 +117,7 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
         NBTTagCompound nbttagcompound = worlddata.a(list);
         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-        nbttagcompound1.a("Data", (NBTBase) nbttagcompound);
+        nbttagcompound1.setTag("Data", (NBTBase) nbttagcompound);
 
         try {
             File file1 = new File(this.b, "level.dat_new");
@@ -147,7 +147,7 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
         NBTTagCompound nbttagcompound = worlddata.a();
         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-        nbttagcompound1.a("Data", (NBTBase) nbttagcompound);
+        nbttagcompound1.setTag("Data", (NBTBase) nbttagcompound);
 
         try {
             File file1 = new File(this.b, "level.dat_new");

@@ -10,23 +10,30 @@ public class NBTTagByteArray extends NBTBase {
 
     public NBTTagByteArray() {}
 
-    public NBTTagByteArray(byte[] abyte) {
-        this.a = abyte;
+    public NBTTagByteArray(byte[] value) {
+        this.a = value;
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeInt(this.a.length);
-        dataoutput.write(this.a);
+    public byte[] getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        int i = datainput.readInt();
-
-        this.a = new byte[i];
-        datainput.readFully(this.a);
+    public void setValue(byte[] value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeInt(this.a.length);
+        output.write(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        int length = input.readInt();
+        this.a = new byte[length];
+        input.readFully(this.a);
+    }
+
+    public byte getTypeId() {
         return (byte) 7;
     }
 

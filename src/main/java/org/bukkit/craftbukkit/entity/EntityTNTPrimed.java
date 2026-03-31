@@ -93,10 +93,10 @@ public class EntityTNTPrimed extends Entity {
     }
 
     protected void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Fuse", (byte) this.fuseTicks);
+        nbttagcompound.setByte("Fuse", (byte) this.fuseTicks);
     }
 
     protected void a(NBTTagCompound nbttagcompound) {
-        this.fuseTicks = nbttagcompound.c("Fuse");
+        this.fuseTicks = nbttagcompound.getByte("Fuse");
     }
 }

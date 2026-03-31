@@ -275,25 +275,25 @@ public class EntityArrow extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("xTile", (short) this.tileX);
-        nbttagcompound.a("yTile", (short) this.tileY);
-        nbttagcompound.a("zTile", (short) this.tileZ);
-        nbttagcompound.a("inTile", (byte) this.inBlockId);
-        nbttagcompound.a("inData", (byte) this.inBlockData);
-        nbttagcompound.a("shake", (byte) this.shake);
-        nbttagcompound.a("inGround", (byte) (this.inGround ? 1 : 0));
+        nbttagcompound.setShort("xTile", (short) this.tileX);
+        nbttagcompound.setShort("yTile", (short) this.tileY);
+        nbttagcompound.setShort("zTile", (short) this.tileZ);
+        nbttagcompound.setByte("inTile", (byte) this.inBlockId);
+        nbttagcompound.setByte("inData", (byte) this.inBlockData);
+        nbttagcompound.setByte("shake", (byte) this.shake);
+        nbttagcompound.setByte("inGround", (byte) (this.inGround ? 1 : 0));
         nbttagcompound.a("player", this.fromPlayer);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.tileX = nbttagcompound.d("xTile");
-        this.tileY = nbttagcompound.d("yTile");
-        this.tileZ = nbttagcompound.d("zTile");
-        this.inBlockId = nbttagcompound.c("inTile") & 255;
-        this.inBlockData = nbttagcompound.c("inData") & 255;
-        this.shake = nbttagcompound.c("shake") & 255;
-        this.inGround = nbttagcompound.c("inGround") == 1;
-        this.fromPlayer = nbttagcompound.m("player");
+        this.tileX = nbttagcompound.getShort("xTile");
+        this.tileY = nbttagcompound.getShort("yTile");
+        this.tileZ = nbttagcompound.getShort("zTile");
+        this.inBlockId = nbttagcompound.getByte("inTile") & 255;
+        this.inBlockData = nbttagcompound.getByte("inData") & 255;
+        this.shake = nbttagcompound.getByte("shake") & 255;
+        this.inGround = nbttagcompound.getByte("inGround") == 1;
+        this.fromPlayer = nbttagcompound.getBoolean("player");
     }
 
     public void b(EntityHuman entityhuman) {

@@ -25,17 +25,17 @@ public class ChunkRegionLoader implements IChunkLoader {
             if (!nbttagcompound.hasKey("Level")) {
                 System.out.println("Chunk file at " + i + "," + j + " is missing level data, skipping");
                 return null;
-            } else if (!nbttagcompound.k("Level").hasKey("Blocks")) {
+            } else if (!nbttagcompound.getCompound("Level").hasKey("Blocks")) {
                 System.out.println("Chunk file at " + i + "," + j + " is missing block data, skipping");
                 return null;
             } else {
-                Chunk chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
+                Chunk chunk = ChunkLoader.a(world, nbttagcompound.getCompound("Level"));
 
                 if (!chunk.a(i, j)) {
                     System.out.println("Chunk file at " + i + "," + j + " is in the wrong location; relocating. (Expected " + i + ", " + j + ", got " + chunk.x + ", " + chunk.z + ")");
                     nbttagcompound.a("xPos", i);
                     nbttagcompound.a("zPos", j);
-                    chunk = ChunkLoader.a(world, nbttagcompound.k("Level"));
+                    chunk = ChunkLoader.a(world, nbttagcompound.getCompound("Level"));
                 }
 
                 chunk.h();
@@ -54,7 +54,7 @@ public class ChunkRegionLoader implements IChunkLoader {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-            nbttagcompound.a("Level", (NBTBase) nbttagcompound1);
+            nbttagcompound.setTag("Level", (NBTBase) nbttagcompound1);
             ChunkLoader.a(chunk, world, nbttagcompound1);
             CompressedStreamTools.a(nbttagcompound, (DataOutput) dataoutputstream);
             dataoutputstream.close();

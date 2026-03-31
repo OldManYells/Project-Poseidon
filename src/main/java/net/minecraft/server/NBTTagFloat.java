@@ -10,19 +10,27 @@ public class NBTTagFloat extends NBTBase {
 
     public NBTTagFloat() {}
 
-    public NBTTagFloat(float f) {
-        this.a = f;
+    public NBTTagFloat(float value) {
+        this.a = value;
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeFloat(this.a);
+    public float getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        this.a = datainput.readFloat();
+    public void setValue(float value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeFloat(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        this.a = input.readFloat();
+    }
+
+    public byte getTypeId() {
         return (byte) 5;
     }
 

@@ -223,7 +223,7 @@ public class EntityPainting extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Dir", (byte) this.hangingDirection);
+        nbttagcompound.setByte("Dir", (byte) this.hangingDirection);
         nbttagcompound.setString("Motive", this.art.A);
         nbttagcompound.a("TileX", this.hangingX);
         nbttagcompound.a("TileY", this.hangingY);
@@ -231,10 +231,10 @@ public class EntityPainting extends Entity {
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.hangingDirection = nbttagcompound.c("Dir");
-        this.hangingX = nbttagcompound.e("TileX");
-        this.hangingY = nbttagcompound.e("TileY");
-        this.hangingZ = nbttagcompound.e("TileZ");
+        this.hangingDirection = nbttagcompound.getByte("Dir");
+        this.hangingX = nbttagcompound.getInt("TileX");
+        this.hangingY = nbttagcompound.getInt("TileY");
+        this.hangingZ = nbttagcompound.getInt("TileZ");
         String s = nbttagcompound.getString("Motive");
         EnumArt[] aenumart = EnumArt.values();
         int i = aenumart.length;

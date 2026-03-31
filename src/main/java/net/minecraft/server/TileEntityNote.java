@@ -5,18 +5,18 @@ import org.bukkit.craftbukkit.world.World;
 public class TileEntityNote extends TileEntity {
 
     public byte note = 0;
-    public boolean b = false;
+    public boolean b = false; // powered
 
     public TileEntityNote() {}
 
-    public void b(NBTTagCompound nbttagcompound) {
-        super.b(nbttagcompound);
-        nbttagcompound.a("note", this.note);
+    public void writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+        tag.setByte("note", this.note);
     }
 
-    public void a(NBTTagCompound nbttagcompound) {
-        super.a(nbttagcompound);
-        this.note = nbttagcompound.c("note");
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        this.note = tag.getByte("note");
         if (this.note < 0) {
             this.note = 0;
         }
@@ -26,33 +26,48 @@ public class TileEntityNote extends TileEntity {
         }
     }
 
-    public void a() {
+    public void incrementNote() {
         this.note = (byte) ((this.note + 1) % 25);
         this.update();
     }
 
-    public void play(World world, int i, int j, int k) {
-        if (world.getMaterial(i, j + 1, k) == Material.AIR) {
-            Material material = world.getMaterial(i, j - 1, k);
-            byte b0 = 0;
+    public void play(World world, int x, int y, int z) {
+        if (world.getMaterial(x, y + 1, z) == Material.AIR) {
+            Material materialBelow = world.getMaterial(x, y - 1, z);
+            byte instrument = 0;
 
-            if (material == Material.STONE) {
-                b0 = 1;
+            if (materialBelow == Material.STONE) {
+                instrument = 1;
             }
 
-            if (material == Material.SAND) {
-                b0 = 2;
+            if (materialBelow == Material.SAND) {
+                instrument = 2;
             }
 
-            if (material == Material.SHATTERABLE) {
-                b0 = 3;
+            if (materialBelow == Material.SHATTERABLE) {
+                instrument = 3;
             }
 
-            if (material == Material.WOOD) {
-                b0 = 4;
+            if (materialBelow == Material.WOOD) {
+                instrument = 4;
             }
 
-            world.playNote(i, j, k, b0, this.note);
+            world.playNote(x, y, z, instrument, this.note);
         }
+    }
+
+    @Deprecated
+    public void b(NBTTagCompound tag) {
+        this.writeToNBT(tag);
+    }
+
+    @Deprecated
+    public void a(NBTTagCompound tag) {
+        this.readFromNBT(tag);
+    }
+
+    @Deprecated
+    public void a() {
+        this.incrementNote();
     }
 }

@@ -34,7 +34,7 @@ public class EntityCreeper extends EntityMonster {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.datawatcher.watch(17, Byte.valueOf((byte) (nbttagcompound.m("powered") ? 1 : 0)));
+        this.datawatcher.watch(17, Byte.valueOf((byte) (nbttagcompound.getBoolean("powered") ? 1 : 0)));
     }
 
     protected void b(Entity entity, float f) {

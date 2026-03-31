@@ -10,19 +10,27 @@ public class NBTTagDouble extends NBTBase {
 
     public NBTTagDouble() {}
 
-    public NBTTagDouble(double d0) {
-        this.a = d0;
+    public NBTTagDouble(double value) {
+        this.a = value;
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeDouble(this.a);
+    public double getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        this.a = datainput.readDouble();
+    public void setValue(double value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeDouble(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        this.a = input.readDouble();
+    }
+
+    public byte getTypeId() {
         return (byte) 6;
     }
 

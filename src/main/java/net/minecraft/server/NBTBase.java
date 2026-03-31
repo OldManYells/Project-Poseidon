@@ -6,124 +6,150 @@ import java.io.IOException;
 
 public abstract class NBTBase {
 
-    private String a = null;
+    private String name = null;
 
     public NBTBase() {}
 
-    abstract void a(DataOutput dataoutput) throws IOException;
+    protected abstract void writeTagContents(DataOutput output) throws IOException;
 
-    abstract void a(DataInput datainput) throws IOException;
+    protected abstract void readTagContents(DataInput input) throws IOException;
 
-    public abstract byte a();
+    public abstract byte getTypeId();
 
-    public String b() {
-        return this.a == null ? "" : this.a;
+    public String getName() {
+        return this.name == null ? "" : this.name;
     }
 
-    public NBTBase a(String s) {
-        this.a = s;
+    public NBTBase setName(String name) {
+        this.name = name;
         return this;
     }
 
-    public static NBTBase b(DataInput datainput) throws IOException {
-        byte b0 = datainput.readByte();
+    public static NBTBase readNamedTag(DataInput input) throws IOException {
+        byte typeId = input.readByte();
 
-        if (b0 == 0) {
+        if (typeId == 0) {
             return new NBTTagEnd();
-        } else {
-            NBTBase nbtbase = a(b0);
+        }
 
-            nbtbase.a = datainput.readUTF();
-            nbtbase.a(datainput);
-            return nbtbase;
+        NBTBase tag = createTagOfType(typeId);
+        tag.name = input.readUTF();
+        tag.readTagContents(input);
+        return tag;
+    }
+
+    public static void writeNamedTag(NBTBase tag, DataOutput output) throws IOException {
+        output.writeByte(tag.getTypeId());
+        if (tag.getTypeId() != 0) {
+            output.writeUTF(tag.getName());
+            tag.writeTagContents(output);
         }
     }
 
-    public static void a(NBTBase nbtbase, DataOutput dataoutput) throws IOException {
-        dataoutput.writeByte(nbtbase.a());
-        if (nbtbase.a() != 0) {
-            dataoutput.writeUTF(nbtbase.b());
-            nbtbase.a(dataoutput);
-        }
-    }
-
-    public static NBTBase a(byte b0) {
-        switch (b0) {
+    public static NBTBase createTagOfType(byte typeId) {
+        switch (typeId) {
         case 0:
             return new NBTTagEnd();
-
         case 1:
             return new NBTTagByte();
-
         case 2:
             return new NBTTagShort();
-
         case 3:
             return new NBTTagInt();
-
         case 4:
             return new NBTTagLong();
-
         case 5:
             return new NBTTagFloat();
-
         case 6:
             return new NBTTagDouble();
-
         case 7:
             return new NBTTagByteArray();
-
         case 8:
             return new NBTTagString();
-
         case 9:
             return new NBTTagList();
-
         case 10:
             return new NBTTagCompound();
-
         default:
             return null;
         }
     }
 
-    public static String b(byte b0) {
-        switch (b0) {
+    public static String getTagName(byte typeId) {
+        switch (typeId) {
         case 0:
             return "TAG_End";
-
         case 1:
             return "TAG_Byte";
-
         case 2:
             return "TAG_Short";
-
         case 3:
             return "TAG_Int";
-
         case 4:
             return "TAG_Long";
-
         case 5:
             return "TAG_Float";
-
         case 6:
             return "TAG_Double";
-
         case 7:
             return "TAG_Byte_Array";
-
         case 8:
             return "TAG_String";
-
         case 9:
             return "TAG_List";
-
         case 10:
             return "TAG_Compound";
-
         default:
             return "UNKNOWN";
         }
+    }
+
+    // ---------------------------------------------------------------------
+    // Compatibility bridge methods for old obfuscated call sites
+    // ---------------------------------------------------------------------
+
+    @Deprecated
+    void a(DataOutput output) throws IOException {
+        this.writeTagContents(output);
+    }
+
+    @Deprecated
+    void a(DataInput input) throws IOException {
+        this.readTagContents(input);
+    }
+
+    @Deprecated
+    public byte a() {
+        return this.getTypeId();
+    }
+
+    @Deprecated
+    public String b() {
+        return this.getName();
+    }
+
+    @Deprecated
+    public NBTBase a(String name) {
+        return this.setName(name);
+    }
+
+    @Deprecated
+    public static NBTBase b(DataInput input) throws IOException {
+        return readNamedTag(input);
+    }
+
+    @Deprecated
+    public static void a(NBTBase tag, DataOutput output) throws IOException {
+        writeNamedTag(tag, output);
+    }
+
+    @Deprecated
+    public static NBTBase a(byte typeId) {
+        return createTagOfType(typeId);
+    }
+
+    @Deprecated
+    public static String b(byte typeId) {
+        return getTagName(typeId);
     }
 }

@@ -2,39 +2,73 @@ package net.minecraft.server;
 
 public class WatchableObject {
 
-    private final int a;
-    private final int b;
-    private Object c;
-    private boolean d;
+    private final int objectType;
+    private final int dataValueId;
+    private Object value;
+    private boolean watched;
 
-    public WatchableObject(int i, int j, Object object) {
-        this.b = j;
-        this.c = object;
-        this.a = i;
-        this.d = true;
+    public WatchableObject(int objectType, int dataValueId, Object value) {
+        this.dataValueId = dataValueId;
+        this.value = value;
+        this.objectType = objectType;
+        this.watched = true;
     }
 
+    public int getDataValueId() {
+        return this.dataValueId;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public Object getValue() {
+        return this.value;
+    }
+
+    public int getObjectType() {
+        return this.objectType;
+    }
+
+    public boolean isWatched() {
+        return this.watched;
+    }
+
+    public void setWatched(boolean watched) {
+        this.watched = watched;
+    }
+
+    // ---------------------------------------------------------------------
+    // Compatibility bridge methods for old obfuscated call sites
+    // ---------------------------------------------------------------------
+
+    @Deprecated
     public int a() {
-        return this.b;
+        return this.getDataValueId();
     }
 
-    public void a(Object object) {
-        this.c = object;
+    @Deprecated
+    public void a(Object value) {
+        this.setValue(value);
     }
 
+    @Deprecated
     public Object b() {
-        return this.c;
+        return this.getValue();
     }
 
+    @Deprecated
     public int c() {
-        return this.a;
+        return this.getObjectType();
     }
 
+    @Deprecated
     public boolean d() {
-        return this.d;
+        return this.isWatched();
     }
 
-    public void a(boolean flag) {
-        this.d = flag;
+    @Deprecated
+    public void a(boolean watched) {
+        this.setWatched(watched);
     }
 }

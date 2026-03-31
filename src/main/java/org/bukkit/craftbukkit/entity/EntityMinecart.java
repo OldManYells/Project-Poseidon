@@ -667,7 +667,7 @@ public class EntityMinecart extends Entity implements IInventory {
         if (this.type == 2) {
             nbttagcompound.a("PushX", this.f);
             nbttagcompound.a("PushZ", this.g);
-            nbttagcompound.a("Fuel", (short) this.e);
+            nbttagcompound.setShort("Fuel", (short) this.e);
         } else if (this.type == 1) {
             NBTTagList nbttaglist = new NBTTagList();
 
@@ -675,30 +675,30 @@ public class EntityMinecart extends Entity implements IInventory {
                 if (this.items[i] != null) {
                     NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-                    nbttagcompound1.a("Slot", (byte) i);
+                    nbttagcompound1.setByte("Slot", (byte) i);
                     this.items[i].writeToNBT(nbttagcompound1);
-                    nbttaglist.a((NBTBase) nbttagcompound1);
+                    nbttaglist.add(nbttagcompound1);
                 }
             }
 
-            nbttagcompound.a("Items", (NBTBase) nbttaglist);
+            nbttagcompound.setTag("Items", (NBTBase) nbttaglist);
         }
     }
 
     protected void a(NBTTagCompound nbttagcompound) {
-        this.type = nbttagcompound.e("Type");
+        this.type = nbttagcompound.getInt("Type");
         if (this.type == 2) {
-            this.f = nbttagcompound.h("PushX");
-            this.g = nbttagcompound.h("PushZ");
-            this.e = nbttagcompound.d("Fuel");
+            this.f = nbttagcompound.getDouble("PushX");
+            this.g = nbttagcompound.getDouble("PushZ");
+            this.e = nbttagcompound.getShort("Fuel");
         } else if (this.type == 1) {
-            NBTTagList nbttaglist = nbttagcompound.l("Items");
+            NBTTagList nbttaglist = nbttagcompound.getList("Items");
 
             this.items = new ItemStack[this.getSize()];
 
-            for (int i = 0; i < nbttaglist.c(); ++i) {
-                NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.a(i);
-                int j = nbttagcompound1.c("Slot") & 255;
+            for (int i = 0; i < nbttaglist.size(); ++i) {
+                NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.get(i);
+                int j = nbttagcompound1.getByte("Slot") & 255;
 
                 if (j >= 0 && j < this.items.length) {
                     this.items[j] = new ItemStack(nbttagcompound1);

@@ -40,12 +40,12 @@ public class EntityPigZombie extends EntityZombie {
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        nbttagcompound.a("Anger", (short) this.angerLevel);
+        nbttagcompound.setShort("Anger", (short) this.angerLevel);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.angerLevel = nbttagcompound.d("Anger");
+        this.angerLevel = nbttagcompound.getShort("Anger");
     }
 
     protected Entity findTarget() {

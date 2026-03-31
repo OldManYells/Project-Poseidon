@@ -61,13 +61,13 @@ public class TileEntityChest extends TileEntity implements IInventory {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        NBTTagList nbttaglist = nbttagcompound.l("Items");
+        NBTTagList nbttaglist = nbttagcompound.getList("Items");
 
         this.items = new ItemStack[this.getSize()];
 
-        for (int i = 0; i < nbttaglist.c(); ++i) {
-            NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.a(i);
-            int j = nbttagcompound1.c("Slot") & 255;
+        for (int i = 0; i < nbttaglist.size(); ++i) {
+            NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbttaglist.get(i);
+            int j = nbttagcompound1.getByte("Slot") & 255;
 
             if (j >= 0 && j < this.items.length) {
                 this.items[j] = new ItemStack(nbttagcompound1);
@@ -83,13 +83,13 @@ public class TileEntityChest extends TileEntity implements IInventory {
             if (this.items[i] != null) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-                nbttagcompound1.a("Slot", (byte) i);
+                nbttagcompound1.setByte("Slot", (byte) i);
                 this.items[i].writeToNBT(nbttagcompound1);
-                nbttaglist.a((NBTBase) nbttagcompound1);
+                nbttaglist.add(nbttagcompound1);
             }
         }
 
-        nbttagcompound.a("Items", (NBTBase) nbttaglist);
+        nbttagcompound.setTag("Items", (NBTBase) nbttaglist);
     }
 
     public int getMaxStackSize() {

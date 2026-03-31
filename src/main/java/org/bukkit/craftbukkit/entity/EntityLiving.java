@@ -620,21 +620,21 @@ public abstract class EntityLiving extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Health", (short) this.health);
-        nbttagcompound.a("HurtTime", (short) this.hurtTicks);
-        nbttagcompound.a("DeathTime", (short) this.deathTicks);
-        nbttagcompound.a("AttackTime", (short) this.attackTicks);
+        nbttagcompound.setShort("Health", (short) this.health);
+        nbttagcompound.setShort("HurtTime", (short) this.hurtTicks);
+        nbttagcompound.setShort("DeathTime", (short) this.deathTicks);
+        nbttagcompound.setShort("AttackTime", (short) this.attackTicks);
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.health = nbttagcompound.d("Health");
+        this.health = nbttagcompound.getShort("Health");
         if (!nbttagcompound.hasKey("Health")) {
             this.health = 10;
         }
 
-        this.hurtTicks = nbttagcompound.d("HurtTime");
-        this.deathTicks = nbttagcompound.d("DeathTime");
-        this.attackTicks = nbttagcompound.d("AttackTime");
+        this.hurtTicks = nbttagcompound.getShort("HurtTime");
+        this.deathTicks = nbttagcompound.getShort("DeathTime");
+        this.attackTicks = nbttagcompound.getShort("AttackTime");
     }
 
     public boolean T() {

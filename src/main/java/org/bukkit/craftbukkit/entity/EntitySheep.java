@@ -76,13 +76,13 @@ public class EntitySheep extends EntityAnimal {
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
         nbttagcompound.a("Sheared", this.isSheared());
-        nbttagcompound.a("Color", (byte) this.getColor());
+        nbttagcompound.setByte("Color", (byte) this.getColor());
     }
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.setSheared(nbttagcompound.m("Sheared"));
-        this.setColor(nbttagcompound.c("Color"));
+        this.setSheared(nbttagcompound.getBoolean("Sheared"));
+        this.setColor(nbttagcompound.getByte("Color"));
     }
 
     protected String g() {

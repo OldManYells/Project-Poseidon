@@ -10,19 +10,27 @@ public class NBTTagInt extends NBTBase {
 
     public NBTTagInt() {}
 
-    public NBTTagInt(int i) {
-        this.a = i;
+    public NBTTagInt(int value) {
+        this.a = value;
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeInt(this.a);
+    public int getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        this.a = datainput.readInt();
+    public void setValue(int value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeInt(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        this.a = input.readInt();
+    }
+
+    public byte getTypeId() {
         return (byte) 3;
     }
 

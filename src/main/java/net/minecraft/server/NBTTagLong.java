@@ -10,19 +10,27 @@ public class NBTTagLong extends NBTBase {
 
     public NBTTagLong() {}
 
-    public NBTTagLong(long i) {
-        this.a = i;
+    public NBTTagLong(long value) {
+        this.a = value;
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeLong(this.a);
+    public long getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        this.a = datainput.readLong();
+    public void setValue(long value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeLong(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        this.a = input.readLong();
+    }
+
+    public byte getTypeId() {
         return (byte) 4;
     }
 

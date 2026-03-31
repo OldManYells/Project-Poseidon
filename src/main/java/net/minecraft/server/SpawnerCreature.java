@@ -261,9 +261,9 @@ public final class SpawnerCreature {
 
                 if (mob.d()) {
                     // Must be able to path to the player
-                    PathEntity path = pathfinder.a(mob, player, 32.0F);
-                    if (path != null && path.a > 1) {
-                        PathPoint firstStep = path.c();
+                    PathEntity path = pathfinder.createEntityPathTo(mob, player, 32.0F);
+                    if (path != null && path.getCurrentPathLength() > 1) {
+                        PathPoint firstStep = path.getFinalPathPoint();
                         if (Math.abs(firstStep.a - player.locX) < 1.5D
                                 && Math.abs(firstStep.c - player.locZ) < 1.5D
                                 && Math.abs(firstStep.b - player.locY) < 1.5D) {

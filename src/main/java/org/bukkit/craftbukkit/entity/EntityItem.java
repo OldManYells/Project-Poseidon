@@ -134,15 +134,15 @@ public class EntityItem extends Entity {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Health", (short) ((byte) this.f));
-        nbttagcompound.a("Age", (short) this.b);
+        nbttagcompound.setShort("Health", (short) ((byte) this.f));
+        nbttagcompound.setShort("Age", (short) this.b);
         nbttagcompound.a("Item", this.itemStack.writeToNBT(new NBTTagCompound()));
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        this.f = nbttagcompound.d("Health") & 255;
-        this.b = nbttagcompound.d("Age");
-        NBTTagCompound nbttagcompound1 = nbttagcompound.k("Item");
+        this.f = nbttagcompound.getShort("Health") & 255;
+        this.b = nbttagcompound.getShort("Age");
+        NBTTagCompound nbttagcompound1 = nbttagcompound.getCompound("Item");
 
         this.itemStack = new ItemStack(nbttagcompound1);
     }

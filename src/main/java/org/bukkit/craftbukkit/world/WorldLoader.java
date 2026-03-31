@@ -32,7 +32,7 @@ public class WorldLoader implements Convertable {
             if (file2.exists()) {
                 try {
                     nbttagcompound = CompressedStreamTools.a((InputStream) (new FileInputStream(file2)));
-                    nbttagcompound1 = nbttagcompound.k("Data");
+                    nbttagcompound1 = nbttagcompound.getCompound("Data");
                     return new WorldData(nbttagcompound1);
                 } catch (Exception exception) {
                     exception.printStackTrace();
@@ -43,7 +43,7 @@ public class WorldLoader implements Convertable {
             if (file2.exists()) {
                 try {
                     nbttagcompound = CompressedStreamTools.a((InputStream) (new FileInputStream(file2)));
-                    nbttagcompound1 = nbttagcompound.k("Data");
+                    nbttagcompound1 = nbttagcompound.getCompound("Data");
                     return new WorldData(nbttagcompound1);
                 } catch (Exception exception1) {
                     exception1.printStackTrace();

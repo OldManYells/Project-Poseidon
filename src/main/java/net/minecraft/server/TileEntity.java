@@ -7,69 +7,68 @@ import java.util.Map;
 
 public class TileEntity {
 
-    private static Map a = new HashMap();
-    private static Map b = new HashMap();
+    private static Map nameToClassMap = new HashMap();
+    private static Map classToNameMap = new HashMap();
     public World world;
     public int x;
     public int y;
     public int z;
-    protected boolean h;
+    protected boolean invalid;
 
     public TileEntity() {}
 
-    private static void a(Class oclass, String s) {
-        if (b.containsKey(s)) {
-            throw new IllegalArgumentException("Duplicate id: " + s);
-        } else {
-            a.put(s, oclass);
-            b.put(oclass, s);
+    private static void addMapping(Class tileEntityClass, String id) {
+        if (classToNameMap.containsKey(id)) {
+            throw new IllegalArgumentException("Duplicate id: " + id);
         }
+
+        nameToClassMap.put(id, tileEntityClass);
+        classToNameMap.put(tileEntityClass, id);
     }
 
-    public void a(NBTTagCompound nbttagcompound) {
-        this.x = nbttagcompound.e("x");
-        this.y = nbttagcompound.e("y");
-        this.z = nbttagcompound.e("z");
+    public void readFromNBT(NBTTagCompound tag) {
+        this.x = tag.getInt("x");
+        this.y = tag.getInt("y");
+        this.z = tag.getInt("z");
     }
 
-    public void b(NBTTagCompound nbttagcompound) {
-        String s = (String) b.get(this.getClass());
+    public void writeToNBT(NBTTagCompound tag) {
+        String id = (String) classToNameMap.get(this.getClass());
 
-        if (s == null) {
+        if (id == null) {
             throw new RuntimeException(this.getClass() + " is missing a mapping! This is a bug!");
-        } else {
-            nbttagcompound.setString("id", s);
-            nbttagcompound.a("x", this.x);
-            nbttagcompound.a("y", this.y);
-            nbttagcompound.a("z", this.z);
         }
+
+        tag.setString("id", id);
+        tag.setInt("x", this.x);
+        tag.setInt("y", this.y);
+        tag.setInt("z", this.z);
     }
 
-    public void g_() {}
+    public void updateEntity() {}
 
-    public static TileEntity c(NBTTagCompound nbttagcompound) {
-        TileEntity tileentity = null;
+    public static TileEntity createAndLoadEntity(NBTTagCompound tag) {
+        TileEntity tileEntity = null;
 
         try {
-            Class oclass = (Class) a.get(nbttagcompound.getString("id"));
-
-            if (oclass != null) {
-                tileentity = (TileEntity) oclass.newInstance();
+            Class tileEntityClass = (Class) nameToClassMap.get(tag.getString("id"));
+            if (tileEntityClass != null) {
+                tileEntity = (TileEntity) tileEntityClass.newInstance();
             }
         } catch (Exception exception) {
             exception.printStackTrace();
         }
 
-        if (tileentity != null) {
-            tileentity.a(nbttagcompound);
+        if (tileEntity != null) {
+            tileEntity.readFromNBT(tag);
         } else {
-            System.out.println("Skipping TileEntity with id " + nbttagcompound.getString("id"));
+            System.out.println("Skipping TileEntity with id " + tag.getString("id"));
         }
 
-        return tileentity;
+        return tileEntity;
     }
 
-    public int e() {
+    public int getBlockMetadata() {
         return this.world.getData(this.x, this.y, this.z);
     }
 
@@ -79,30 +78,80 @@ public class TileEntity {
         }
     }
 
-    public Packet f() {
+    public Packet getUpdatePacket() {
         return null;
     }
 
+    public boolean isInvalid() {
+        return this.invalid;
+    }
+
+    public void invalidate() {
+        this.invalid = true;
+    }
+
+    public void validate() {
+        this.invalid = false;
+    }
+
+    @Deprecated
+    private static void a(Class tileEntityClass, String id) {
+        addMapping(tileEntityClass, id);
+    }
+
+    @Deprecated
+    public void a(NBTTagCompound tag) {
+        this.readFromNBT(tag);
+    }
+
+    @Deprecated
+    public void b(NBTTagCompound tag) {
+        this.writeToNBT(tag);
+    }
+
+    @Deprecated
+    public void g_() {
+        this.updateEntity();
+    }
+
+    @Deprecated
+    public static TileEntity c(NBTTagCompound tag) {
+        return createAndLoadEntity(tag);
+    }
+
+    @Deprecated
+    public int e() {
+        return this.getBlockMetadata();
+    }
+
+    @Deprecated
+    public Packet f() {
+        return this.getUpdatePacket();
+    }
+
+    @Deprecated
     public boolean g() {
-        return this.h;
+        return this.isInvalid();
     }
 
+    @Deprecated
     public void h() {
-        this.h = true;
+        this.invalidate();
     }
 
+    @Deprecated
     public void j() {
-        this.h = false;
+        this.validate();
     }
 
     static {
-        a(TileEntityFurnace.class, "Furnace");
-        a(TileEntityChest.class, "Chest");
-        a(TileEntityRecordPlayer.class, "RecordPlayer");
-        a(TileEntityDispenser.class, "Trap");
-        a(TileEntitySign.class, "Sign");
-        a(TileEntityMobSpawner.class, "MobSpawner");
-        a(TileEntityNote.class, "Music");
-        a(TileEntityPiston.class, "Piston");
+        addMapping(TileEntityFurnace.class, "Furnace");
+        addMapping(TileEntityChest.class, "Chest");
+        addMapping(TileEntityRecordPlayer.class, "RecordPlayer");
+        addMapping(TileEntityDispenser.class, "Trap");
+        addMapping(TileEntitySign.class, "Sign");
+        addMapping(TileEntityMobSpawner.class, "MobSpawner");
+        addMapping(TileEntityNote.class, "Music");
+        addMapping(TileEntityPiston.class, "Piston");
     }
 }

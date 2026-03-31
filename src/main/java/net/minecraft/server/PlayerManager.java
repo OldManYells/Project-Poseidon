@@ -10,187 +10,212 @@ import java.util.List;
 public class PlayerManager {
 
     public List managedPlayers = new ArrayList();
-    private PlayerList b = new PlayerList();
-    private List c = new ArrayList();
+    private PlayerList playerInstances = new PlayerList();
+    private List dirtyInstances = new ArrayList();
     private MinecraftServer server;
-    private int e;
-    private int f;
-    private final int[][] g = new int[][] { { 1, 0}, { 0, 1}, { -1, 0}, { 0, -1}};
+    private int dimension;
+    private int viewRadius;
+    private final int[][] spiralDirections = new int[][] { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 
-    public PlayerManager(MinecraftServer minecraftserver, int i, int j) {
-        if (j > 15) {
+    public PlayerManager(MinecraftServer server, int dimension, int viewRadius) {
+        if (viewRadius > 15) {
             throw new IllegalArgumentException("Too big view radius!");
-        } else if (j < 3) {
+        } else if (viewRadius < 3) {
             throw new IllegalArgumentException("Too small view radius!");
         } else {
-            this.f = j;
-            this.server = minecraftserver;
-            this.e = i;
+            this.viewRadius = viewRadius;
+            this.server = server;
+            this.dimension = dimension;
         }
     }
 
-    public WorldServer a() {
-        return this.server.getWorldServer(this.e);
+    public WorldServer getWorldServer() {
+        return this.server.getWorldServer(this.dimension);
     }
 
     public void flush() {
-        for (int i = 0; i < this.c.size(); ++i) {
-            ((PlayerInstance) this.c.get(i)).a();
+        for (int index = 0; index < this.dirtyInstances.size(); ++index) {
+            ((PlayerInstance) this.dirtyInstances.get(index)).sendChanges();
         }
 
-        this.c.clear();
+        this.dirtyInstances.clear();
     }
 
-    private PlayerInstance a(int i, int j, boolean flag) {
-        long k = (long) i + 2147483647L | (long) j + 2147483647L << 32;
-        PlayerInstance playerinstance = (PlayerInstance) this.b.a(k);
+    private PlayerInstance getPlayerInstance(int chunkX, int chunkZ, boolean createIfMissing) {
+        long chunkKey = (long) chunkX + 2147483647L | (long) chunkZ + 2147483647L << 32;
+        PlayerInstance playerInstance = (PlayerInstance) this.playerInstances.get(chunkKey);
 
-        if (playerinstance == null && flag) {
-            playerinstance = new PlayerInstance(this, i, j);
-            this.b.a(k, playerinstance);
+        if (playerInstance == null && createIfMissing) {
+            playerInstance = new PlayerInstance(this, chunkX, chunkZ);
+            this.playerInstances.put(chunkKey, playerInstance);
         }
 
-        return playerinstance;
+        return playerInstance;
     }
 
-    public void flagDirty(int i, int j, int k) {
-        int l = i >> 4;
-        int i1 = k >> 4;
-        PlayerInstance playerinstance = this.a(l, i1, false);
+    public void flagDirty(int x, int y, int z) {
+        int chunkX = x >> 4;
+        int chunkZ = z >> 4;
+        PlayerInstance playerInstance = this.getPlayerInstance(chunkX, chunkZ, false);
 
-        if (playerinstance != null) {
-            playerinstance.a(i & 15, j, k & 15);
+        if (playerInstance != null) {
+            playerInstance.flagDirty(x & 15, y, z & 15);
         }
     }
 
-    public void addPlayer(EntityPlayer entityplayer) {
-        int i = (int) entityplayer.locX >> 4;
-        int j = (int) entityplayer.locZ >> 4;
+    public void addPlayer(EntityPlayer player) {
+        int chunkX = (int) player.locX >> 4;
+        int chunkZ = (int) player.locZ >> 4;
 
-        entityplayer.d = (int) entityplayer.locX;
-        entityplayer.e = entityplayer.locZ;
-        int k = 0;
-        int l = this.f;
-        int i1 = 0;
-        int j1 = 0;
+        player.d = (int) player.locX;
+        player.e = player.locZ;
+        int directionIndex = 0;
+        int radius = this.viewRadius;
+        int offsetX = 0;
+        int offsetZ = 0;
 
-        this.a(i, j, true).a(entityplayer);
+        this.getPlayerInstance(chunkX, chunkZ, true).addPlayer(player);
 
-        int k1;
+        int ring;
+        for (ring = 1; ring <= radius * 2; ++ring) {
+            for (int side = 0; side < 2; ++side) {
+                int[] direction = this.spiralDirections[directionIndex++ % 4];
 
-        for (k1 = 1; k1 <= l * 2; ++k1) {
-            for (int l1 = 0; l1 < 2; ++l1) {
-                int[] aint = this.g[k++ % 4];
-
-                for (int i2 = 0; i2 < k1; ++i2) {
-                    i1 += aint[0];
-                    j1 += aint[1];
-                    this.a(i + i1, j + j1, true).a(entityplayer);
+                for (int step = 0; step < ring; ++step) {
+                    offsetX += direction[0];
+                    offsetZ += direction[1];
+                    this.getPlayerInstance(chunkX + offsetX, chunkZ + offsetZ, true).addPlayer(player);
                 }
             }
         }
 
-        k %= 4;
+        directionIndex %= 4;
 
-        for (k1 = 0; k1 < l * 2; ++k1) {
-            i1 += this.g[k][0];
-            j1 += this.g[k][1];
-            this.a(i + i1, j + j1, true).a(entityplayer);
+        for (ring = 0; ring < radius * 2; ++ring) {
+            offsetX += this.spiralDirections[directionIndex][0];
+            offsetZ += this.spiralDirections[directionIndex][1];
+            this.getPlayerInstance(chunkX + offsetX, chunkZ + offsetZ, true).addPlayer(player);
         }
 
-        this.managedPlayers.add(entityplayer);
+        this.managedPlayers.add(player);
     }
 
-    public void removePlayer(EntityPlayer entityplayer) {
-        int i = (int) entityplayer.d >> 4;
-        int j = (int) entityplayer.e >> 4;
+    public void removePlayer(EntityPlayer player) {
+        int previousChunkX = (int) player.d >> 4;
+        int previousChunkZ = (int) player.e >> 4;
 
-        for (int k = i - this.f; k <= i + this.f; ++k) {
-            for (int l = j - this.f; l <= j + this.f; ++l) {
-                PlayerInstance playerinstance = this.a(k, l, false);
+        for (int chunkX = previousChunkX - this.viewRadius; chunkX <= previousChunkX + this.viewRadius; ++chunkX) {
+            for (int chunkZ = previousChunkZ - this.viewRadius; chunkZ <= previousChunkZ + this.viewRadius; ++chunkZ) {
+                PlayerInstance playerInstance = this.getPlayerInstance(chunkX, chunkZ, false);
 
-                if (playerinstance != null) {
-                    playerinstance.b(entityplayer);
+                if (playerInstance != null) {
+                    playerInstance.removePlayer(player);
                 }
             }
         }
 
-        this.managedPlayers.remove(entityplayer);
+        this.managedPlayers.remove(player);
     }
 
-    private boolean a(int i, int j, int k, int l) {
-        int i1 = i - k;
-        int j1 = j - l;
-
-        return i1 >= -this.f && i1 <= this.f ? j1 >= -this.f && j1 <= this.f : false;
+    private boolean isWithinViewRadius(int chunkX, int chunkZ, int centerX, int centerZ) {
+        int deltaX = chunkX - centerX;
+        int deltaZ = chunkZ - centerZ;
+        return deltaX >= -this.viewRadius && deltaX <= this.viewRadius ? deltaZ >= -this.viewRadius && deltaZ <= this.viewRadius : false;
     }
 
-    public void movePlayer(EntityPlayer entityplayer) {
-        int i = (int) entityplayer.locX >> 4;
-        int j = (int) entityplayer.locZ >> 4;
-        double d0 = entityplayer.d - entityplayer.locX;
-        double d1 = entityplayer.e - entityplayer.locZ;
-        double d2 = d0 * d0 + d1 * d1;
+    public void movePlayer(EntityPlayer player) {
+        int currentChunkX = (int) player.locX >> 4;
+        int currentChunkZ = (int) player.locZ >> 4;
+        double deltaX = player.d - player.locX;
+        double deltaZ = player.e - player.locZ;
+        double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
 
-        if (d2 >= 64.0D) {
-            int k = (int) entityplayer.d >> 4;
-            int l = (int) entityplayer.e >> 4;
-            int i1 = i - k;
-            int j1 = j - l;
+        if (distanceSquared >= 64.0D) {
+            int previousChunkX = (int) player.d >> 4;
+            int previousChunkZ = (int) player.e >> 4;
+            int movedChunkX = currentChunkX - previousChunkX;
+            int movedChunkZ = currentChunkZ - previousChunkZ;
 
-            if (i1 != 0 || j1 != 0) {
-                for (int k1 = i - this.f; k1 <= i + this.f; ++k1) {
-                    for (int l1 = j - this.f; l1 <= j + this.f; ++l1) {
-                        if (!this.a(k1, l1, k, l)) {
-                            this.a(k1, l1, true).a(entityplayer);
+            if (movedChunkX != 0 || movedChunkZ != 0) {
+                for (int chunkX = currentChunkX - this.viewRadius; chunkX <= currentChunkX + this.viewRadius; ++chunkX) {
+                    for (int chunkZ = currentChunkZ - this.viewRadius; chunkZ <= currentChunkZ + this.viewRadius; ++chunkZ) {
+                        if (!this.isWithinViewRadius(chunkX, chunkZ, previousChunkX, previousChunkZ)) {
+                            this.getPlayerInstance(chunkX, chunkZ, true).addPlayer(player);
                         }
 
-                        if (!this.a(k1 - i1, l1 - j1, i, j)) {
-                            PlayerInstance playerinstance = this.a(k1 - i1, l1 - j1, false);
-
-                            if (playerinstance != null) {
-                                playerinstance.b(entityplayer);
+                        if (!this.isWithinViewRadius(chunkX - movedChunkX, chunkZ - movedChunkZ, currentChunkX, currentChunkZ)) {
+                            PlayerInstance playerInstance = this.getPlayerInstance(chunkX - movedChunkX, chunkZ - movedChunkZ, false);
+                            if (playerInstance != null) {
+                                playerInstance.removePlayer(player);
                             }
                         }
                     }
                 }
 
-                entityplayer.d = (int)entityplayer.locX;
-                entityplayer.e = entityplayer.locZ;
+                player.d = (int) player.locX;
+                player.e = player.locZ;
 
-                // CraftBukkit start - send nearest chunks first
-                if (i1 > 1 || i1 < -1 || j1 > 1 || j1 < -1) {
-                    final int x = i;
-                    final int z = j;
-                    List<ChunkCoordIntPair> chunksToSend = entityplayer.chunkCoordIntPairQueue;
+                if (movedChunkX > 1 || movedChunkX < -1 || movedChunkZ > 1 || movedChunkZ < -1) {
+                    final int x = currentChunkX;
+                    final int z = currentChunkZ;
+                    List chunksToSend = player.chunkCoordIntPairQueue;
 
-                    java.util.Collections.sort(chunksToSend, new java.util.Comparator<ChunkCoordIntPair>() {
-                        public int compare(ChunkCoordIntPair a, ChunkCoordIntPair b) {
+                    java.util.Collections.sort(chunksToSend, new java.util.Comparator() {
+                        public int compare(Object first, Object second) {
+                            ChunkCoordIntPair a = (ChunkCoordIntPair) first;
+                            ChunkCoordIntPair b = (ChunkCoordIntPair) second;
                             return Math.max(Math.abs(a.x - x), Math.abs(a.z - z)) - Math.max(Math.abs(b.x - x), Math.abs(b.z - z));
                         }
                     });
                 }
-                // CraftBukkit end
             }
         }
     }
-    
-    // Poseidon
-    public boolean a(EntityPlayer entityplayer, int i, int j) {
-        PlayerInstance playerchunk = this.a(i, j, false);
 
-        return playerchunk == null ? false : PlayerInstance.b(playerchunk).contains(entityplayer) && !entityplayer.chunkCoordIntPairQueue.contains(PlayerInstance.a(playerchunk));
+    public boolean isPlayerWatchingChunk(EntityPlayer player, int chunkX, int chunkZ) {
+        PlayerInstance playerInstance = this.getPlayerInstance(chunkX, chunkZ, false);
+        return playerInstance == null ? false : PlayerInstance.getPlayers(playerInstance).contains(player) && !player.chunkCoordIntPairQueue.contains(PlayerInstance.getLocation(playerInstance));
     }
 
     public int getFurthestViewableBlock() {
-        return this.f * 16 - 16;
+        return this.viewRadius * 16 - 16;
     }
 
-    static PlayerList a(PlayerManager playermanager) {
-        return playermanager.b;
+    static PlayerList getPlayerInstances(PlayerManager playerManager) {
+        return playerManager.playerInstances;
     }
 
-    static List b(PlayerManager playermanager) {
-        return playermanager.c;
+    static List getDirtyInstances(PlayerManager playerManager) {
+        return playerManager.dirtyInstances;
+    }
+
+    @Deprecated
+    public WorldServer a() {
+        return this.getWorldServer();
+    }
+
+    @Deprecated
+    private PlayerInstance a(int chunkX, int chunkZ, boolean createIfMissing) {
+        return this.getPlayerInstance(chunkX, chunkZ, createIfMissing);
+    }
+
+    @Deprecated
+    private boolean a(int chunkX, int chunkZ, int centerX, int centerZ) {
+        return this.isWithinViewRadius(chunkX, chunkZ, centerX, centerZ);
+    }
+
+    @Deprecated
+    public boolean a(EntityPlayer player, int chunkX, int chunkZ) {
+        return this.isPlayerWatchingChunk(player, chunkX, chunkZ);
+    }
+
+    @Deprecated
+    static PlayerList a(PlayerManager playerManager) {
+        return getPlayerInstances(playerManager);
+    }
+
+    @Deprecated
+    static List b(PlayerManager playerManager) {
+        return getDirtyInstances(playerManager);
     }
 }

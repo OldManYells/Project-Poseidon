@@ -83,16 +83,16 @@ public final class ItemStack {
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("id", (short) this.id);
-        nbttagcompound.a("Count", (byte) this.count);
-        nbttagcompound.a("Damage", (short) this.damage);
+        nbttagcompound.setShort("id", (short) this.id);
+        nbttagcompound.setByte("Count", (byte) this.count);
+        nbttagcompound.setShort("Damage", (short) this.damage);
         return nbttagcompound;
     }
 
     public void readFromNBT(NBTTagCompound nbttagcompound) {
-        this.id = nbttagcompound.d("id");
-        this.count = nbttagcompound.c("Count");
-        this.damage = nbttagcompound.d("Damage");
+        this.id = nbttagcompound.getShort("id");
+        this.count = nbttagcompound.getByte("Count");
+        this.damage = nbttagcompound.getShort("Damage");
     }
 
     public int getMaxStackSize() {

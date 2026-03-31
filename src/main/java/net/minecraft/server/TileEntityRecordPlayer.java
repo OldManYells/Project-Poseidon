@@ -8,7 +8,7 @@ public class TileEntityRecordPlayer extends TileEntity {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        this.a = nbttagcompound.e("Record");
+        this.a = nbttagcompound.getInt("Record");
     }
 
     public void b(NBTTagCompound nbttagcompound) {

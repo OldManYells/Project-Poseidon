@@ -10,19 +10,27 @@ public class NBTTagByte extends NBTBase {
 
     public NBTTagByte() {}
 
-    public NBTTagByte(byte b0) {
-        this.a = b0;
+    public NBTTagByte(byte value) {
+        this.a = value;
     }
 
-    void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeByte(this.a);
+    public byte getValue() {
+        return this.a;
     }
 
-    void a(DataInput datainput) throws IOException {
-        this.a = datainput.readByte();
+    public void setValue(byte value) {
+        this.a = value;
     }
 
-    public byte a() {
+    protected void writeTagContents(DataOutput output) throws IOException {
+        output.writeByte(this.a);
+    }
+
+    protected void readTagContents(DataInput input) throws IOException {
+        this.a = input.readByte();
+    }
+
+    public byte getTypeId() {
         return (byte) 1;
     }
 

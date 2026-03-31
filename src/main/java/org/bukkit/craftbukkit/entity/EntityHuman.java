@@ -340,12 +340,12 @@ public abstract class EntityHuman extends EntityLiving {
 
     public void a(NBTTagCompound nbttagcompound) {
         super.a(nbttagcompound);
-        NBTTagList nbttaglist = nbttagcompound.l("Inventory");
+        NBTTagList nbttaglist = nbttagcompound.getList("Inventory");
 
         this.inventory.b(nbttaglist);
-        this.dimension = nbttagcompound.e("Dimension");
-        this.sleeping = nbttagcompound.m("Sleeping");
-        this.sleepTicks = nbttagcompound.d("SleepTimer");
+        this.dimension = nbttagcompound.getInt("Dimension");
+        this.sleeping = nbttagcompound.getBoolean("Sleeping");
+        this.sleepTicks = nbttagcompound.getShort("SleepTimer");
         if (this.sleeping) {
             this.A = new ChunkCoordinates(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ));
             this.a(true, true, false);
@@ -359,16 +359,16 @@ public abstract class EntityHuman extends EntityLiving {
         // CraftBukkit end
 
         if (nbttagcompound.hasKey("SpawnX") && nbttagcompound.hasKey("SpawnY") && nbttagcompound.hasKey("SpawnZ")) {
-            this.b = new ChunkCoordinates(nbttagcompound.e("SpawnX"), nbttagcompound.e("SpawnY"), nbttagcompound.e("SpawnZ"));
+            this.b = new ChunkCoordinates(nbttagcompound.getInt("SpawnX"), nbttagcompound.getInt("SpawnY"), nbttagcompound.getInt("SpawnZ"));
         }
     }
 
     public void b(NBTTagCompound nbttagcompound) {
         super.b(nbttagcompound);
-        nbttagcompound.a("Inventory", (NBTBase) this.inventory.a(new NBTTagList()));
+        nbttagcompound.setTag("Inventory", (NBTBase) this.inventory.a(new NBTTagList()));
         nbttagcompound.a("Dimension", this.dimension);
         nbttagcompound.a("Sleeping", this.sleeping);
-        nbttagcompound.a("SleepTimer", (short) this.sleepTicks);
+        nbttagcompound.setShort("SleepTimer", (short) this.sleepTicks);
         if (this.b != null) {
             nbttagcompound.a("SpawnX", this.b.x);
             nbttagcompound.a("SpawnY", this.b.y);

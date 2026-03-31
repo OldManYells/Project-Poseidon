@@ -6,22 +6,22 @@ public class Slot {
 
     public final int index; // CraftBukkit - private -> public
     public final IInventory inventory; // CraftBukkit - private -> public
-    public int a;
-    public int b;
-    public int c;
+    public int a; // slotNumber
+    public int b; // xDisplayPosition
+    public int c; // yDisplayPosition
 
-    public Slot(IInventory iinventory, int i, int j, int k) {
-        this.inventory = iinventory;
-        this.index = i;
-        this.b = j;
-        this.c = k;
+    public Slot(IInventory inventory, int index, int xDisplayPosition, int yDisplayPosition) {
+        this.inventory = inventory;
+        this.index = index;
+        this.b = xDisplayPosition;
+        this.c = yDisplayPosition;
     }
 
-    public void a(ItemStack itemstack) {
-        this.c();
+    public void onPickupFromSlot(ItemStack itemStack) {
+        this.onSlotChanged();
     }
 
-    public boolean isAllowed(ItemStack itemstack) {
+    public boolean isAllowed(ItemStack itemStack) {
         return true;
     }
 
@@ -29,28 +29,63 @@ public class Slot {
         return this.inventory.getItem(this.index);
     }
 
-    public boolean b() {
+    public boolean hasItem() {
         return this.getItem() != null;
     }
 
-    public void c(ItemStack itemstack) {
-        this.inventory.setItem(this.index, itemstack);
-        this.c();
+    public void setItem(ItemStack itemStack) {
+        this.inventory.setItem(this.index, itemStack);
+        this.onSlotChanged();
     }
 
-    public void c() {
+    public void onSlotChanged() {
         this.inventory.update();
     }
 
-    public int d() {
+    public int getMaxStackSize() {
         return this.inventory.getMaxStackSize();
     }
 
-    public ItemStack a(int i) {
-        return this.inventory.splitStack(this.index, i);
+    public ItemStack splitStack(int amount) {
+        return this.inventory.splitStack(this.index, amount);
     }
 
-    public boolean a(IInventory iinventory, int i) {
-        return iinventory == this.inventory && i == this.index;
+    public boolean isAt(IInventory inventory, int index) {
+        return inventory == this.inventory && index == this.index;
+    }
+
+    @Deprecated
+    public void a(ItemStack itemStack) {
+        this.onPickupFromSlot(itemStack);
+    }
+
+    @Deprecated
+    public boolean b() {
+        return this.hasItem();
+    }
+
+    @Deprecated
+    public void c(ItemStack itemStack) {
+        this.setItem(itemStack);
+    }
+
+    @Deprecated
+    public void c() {
+        this.onSlotChanged();
+    }
+
+    @Deprecated
+    public int d() {
+        return this.getMaxStackSize();
+    }
+
+    @Deprecated
+    public ItemStack a(int amount) {
+        return this.splitStack(amount);
+    }
+
+    @Deprecated
+    public boolean a(IInventory inventory, int index) {
+        return this.isAt(inventory, index);
     }
 }

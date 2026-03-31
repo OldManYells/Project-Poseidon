@@ -76,10 +76,10 @@ public class EntityFallingSand extends Entity {
     }
 
     protected void b(NBTTagCompound nbttagcompound) {
-        nbttagcompound.a("Tile", (byte) this.a);
+        nbttagcompound.setByte("Tile", (byte) this.a);
     }
 
     protected void a(NBTTagCompound nbttagcompound) {
-        this.a = nbttagcompound.c("Tile") & 255;
+        this.a = nbttagcompound.getByte("Tile") & 255;
     }
 }

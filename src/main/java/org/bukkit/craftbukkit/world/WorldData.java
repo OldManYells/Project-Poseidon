@@ -27,22 +27,22 @@ public class WorldData {
 
     public WorldData(NBTTagCompound nbttagcompound) {
         this.a = nbttagcompound.getLong("RandomSeed");
-        this.b = nbttagcompound.e("SpawnX");
-        this.c = nbttagcompound.e("SpawnY");
-        this.d = nbttagcompound.e("SpawnZ");
-        this.yaw = nbttagcompound.g("SpawnYaw"); // Poseidon
-        this.pitch = nbttagcompound.g("SpawnPitch"); // Poseidon
+        this.b = nbttagcompound.getInt("SpawnX");
+        this.c = nbttagcompound.getInt("SpawnY");
+        this.d = nbttagcompound.getInt("SpawnZ");
+        this.yaw = nbttagcompound.getFloat("SpawnYaw"); // Poseidon
+        this.pitch = nbttagcompound.getFloat("SpawnPitch"); // Poseidon
         this.e = nbttagcompound.getLong("Time");
         this.f = nbttagcompound.getLong("LastPlayed");
         this.g = nbttagcompound.getLong("SizeOnDisk");
         this.name = nbttagcompound.getString("LevelName");
-        this.k = nbttagcompound.e("version");
-        this.m = nbttagcompound.e("rainTime");
-        this.l = nbttagcompound.m("raining");
-        this.o = nbttagcompound.e("thunderTime");
-        this.n = nbttagcompound.m("thundering");
+        this.k = nbttagcompound.getInt("version");
+        this.m = nbttagcompound.getInt("rainTime");
+        this.l = nbttagcompound.getBoolean("raining");
+        this.o = nbttagcompound.getInt("thunderTime");
+        this.n = nbttagcompound.getBoolean("thundering");
         if (nbttagcompound.hasKey("Player")) {
-            this.h = nbttagcompound.k("Player");
+            this.h = nbttagcompound.getCompound("Player");
             this.i = this.h.e("Dimension");
         }
     }
