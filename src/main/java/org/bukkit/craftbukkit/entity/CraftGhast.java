@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityGhast;
+import com.legacy.minecraft.poseidon.EntityGhast;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Ghast;
 

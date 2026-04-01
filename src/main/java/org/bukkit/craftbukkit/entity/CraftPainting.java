@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityPainting;
+import com.legacy.minecraft.poseidon.EntityPainting;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Painting;
 

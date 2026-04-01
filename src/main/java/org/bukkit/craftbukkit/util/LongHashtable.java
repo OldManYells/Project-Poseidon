@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.util;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.MinecraftServer;
+import com.legacy.minecraft.poseidon.Chunk;
+import com.legacy.minecraft.poseidon.MinecraftServer;
 
 import java.util.ArrayList;
 

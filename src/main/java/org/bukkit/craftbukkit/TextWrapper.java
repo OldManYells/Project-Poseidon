@@ -22,7 +22,7 @@ public class TextWrapper {
     public static final char COLOR_CHAR = '\u00A7';
     public static final int CHAT_WINDOW_WIDTH = 320;
     public static final int CHAT_STRING_LENGTH = 119;
-    public static final String allowedChars = net.minecraft.server.FontAllowedCharacters.allowedCharacters;
+    public static final String allowedChars = com.legacy.minecraft.poseidon.FontAllowedCharacters.allowedCharacters;
 
     public static String[] wrapText(final String text) {
         final StringBuilder out = new StringBuilder();

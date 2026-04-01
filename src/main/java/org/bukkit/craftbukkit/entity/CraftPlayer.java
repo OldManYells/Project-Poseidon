@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.projectposeidon.ConnectionType;
-import net.minecraft.server.*;
+import com.legacy.minecraft.poseidon.*;
 import org.bukkit.Achievement;
 import org.bukkit.Material;
 import org.bukkit.Statistic;

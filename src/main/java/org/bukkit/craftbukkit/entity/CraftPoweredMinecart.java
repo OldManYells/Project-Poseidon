@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecart;
+import com.legacy.minecraft.poseidon.EntityMinecart;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.PoweredMinecart;
 

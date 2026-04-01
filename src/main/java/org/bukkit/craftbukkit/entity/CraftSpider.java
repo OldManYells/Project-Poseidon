@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySpider;
+import com.legacy.minecraft.poseidon.EntitySpider;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Spider;
 

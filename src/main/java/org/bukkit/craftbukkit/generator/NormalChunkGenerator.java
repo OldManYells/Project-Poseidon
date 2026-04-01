@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.generator;
 
-import net.minecraft.server.Chunk;
-import net.minecraft.server.IChunkProvider;
-import net.minecraft.server.IProgressUpdate;
-import net.minecraft.server.World;
+import com.legacy.minecraft.poseidon.Chunk;
+import com.legacy.minecraft.poseidon.IChunkProvider;
+import com.legacy.minecraft.poseidon.IProgressUpdate;
+import com.legacy.minecraft.poseidon.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.generator.BlockPopulator;
 

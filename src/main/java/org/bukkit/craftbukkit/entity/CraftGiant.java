@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityGiantZombie;
+import com.legacy.minecraft.poseidon.EntityGiantZombie;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Giant;
 

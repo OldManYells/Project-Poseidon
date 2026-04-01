@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityWeatherStorm;
+import com.legacy.minecraft.poseidon.EntityWeatherStorm;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.LightningStrike;
 

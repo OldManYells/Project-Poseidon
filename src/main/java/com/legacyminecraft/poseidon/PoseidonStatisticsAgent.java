@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon;
 
-import net.minecraft.server.MinecraftServer;
+import com.legacy.minecraft.poseidon.MinecraftServer;
 import org.bukkit.craftbukkit.CraftServer;
 import org.json.simple.JSONObject;
 

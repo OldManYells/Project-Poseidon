@@ -1,7 +1,7 @@
 
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityHuman;
+import com.legacy.minecraft.poseidon.EntityHuman;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.entity.HumanEntity;

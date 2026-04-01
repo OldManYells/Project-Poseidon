@@ -1,6 +1,6 @@
 package com.legacyminecraft.poseidon.event;
 
-import net.minecraft.server.Packet;
+import com.legacy.minecraft.poseidon.Packet;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

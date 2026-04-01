@@ -1,11 +1,11 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.InventoryPlayer;
+import com.legacy.minecraft.poseidon.InventoryPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class CraftInventoryPlayer extends CraftInventory implements PlayerInventory {
-    public CraftInventoryPlayer(net.minecraft.server.InventoryPlayer inventory) {
+    public CraftInventoryPlayer(com.legacy.minecraft.poseidon.InventoryPlayer inventory) {
         super(inventory);
     }
 
@@ -62,7 +62,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public CraftItemStack[] getArmorContents() {
-        net.minecraft.server.ItemStack[] mcItems = getInventory().getArmorContents();
+        com.legacy.minecraft.poseidon.ItemStack[] mcItems = getInventory().getArmorContents();
         CraftItemStack[] ret = new CraftItemStack[mcItems.length];
 
         for (int i = 0; i < mcItems.length; i++) {

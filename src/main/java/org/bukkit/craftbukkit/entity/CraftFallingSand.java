@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFallingSand;
+import com.legacy.minecraft.poseidon.EntityFallingSand;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.FallingSand;
 

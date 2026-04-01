@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityChicken;
+import com.legacy.minecraft.poseidon.EntityChicken;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Chicken;
 
