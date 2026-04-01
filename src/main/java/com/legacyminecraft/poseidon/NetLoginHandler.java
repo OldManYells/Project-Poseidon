@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon;
 
 import com.projectposeidon.ConnectionType;
-import com.legacyminecraft.poseidon.compat.modloader.ModLoaderMp;
+import com.legacyminecraft.poseidon.modloader.ModLoaderMp;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
 import org.bukkit.Bukkit;

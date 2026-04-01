@@ -8,6 +8,8 @@ import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonServer;
+import com.legacyminecraft.poseidon.world.map.WorldMap;
+import com.legacyminecraft.poseidon.world.map.WorldMapCollection;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import jline.ConsoleReader;
 import com.legacyminecraft.poseidon.*;

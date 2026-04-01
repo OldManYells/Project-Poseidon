@@ -1,5 +1,11 @@
 package com.legacyminecraft.poseidon;
 
+import com.legacyminecraft.poseidon.world.storage.ChunkFile;
+import com.legacyminecraft.poseidon.world.storage.ChunkFileFilter;
+import com.legacyminecraft.poseidon.world.storage.ChunkFilenameFilter;
+import com.legacyminecraft.poseidon.world.storage.RegionFile;
+import com.legacyminecraft.poseidon.world.storage.RegionFileCache;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,8 +63,8 @@ public class WorldLoaderServer extends WorldLoader {
     }
 
     private void a(File file1, ArrayList arraylist, ArrayList arraylist1) {
-        ChunkFileFilter chunkfilefilter = new ChunkFileFilter((EmptyClass2) null);
-        ChunkFilenameFilter chunkfilenamefilter = new ChunkFilenameFilter((EmptyClass2) null);
+        ChunkFileFilter chunkfilefilter = new ChunkFileFilter();
+        ChunkFilenameFilter chunkfilenamefilter = new ChunkFilenameFilter();
         File[] afile = file1.listFiles(chunkfilefilter);
         File[] afile1 = afile;
         int i = afile.length;

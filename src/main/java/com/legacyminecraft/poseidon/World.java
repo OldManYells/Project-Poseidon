@@ -1,5 +1,7 @@
 package com.legacyminecraft.poseidon;
 
+import com.legacyminecraft.poseidon.world.map.WorldMapBase;
+import com.legacyminecraft.poseidon.world.map.WorldMapCollection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;

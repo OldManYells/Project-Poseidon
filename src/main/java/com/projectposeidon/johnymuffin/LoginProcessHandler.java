@@ -5,7 +5,7 @@ import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.uuid.ThreadUUIDFetcher;
 import com.legacyminecraft.poseidon.NetLoginHandler;
 import com.legacyminecraft.poseidon.Packet1Login;
-import com.legacyminecraft.poseidon.ThreadLoginVerifier;
+import com.legacyminecraft.poseidon.server.thread.ThreadLoginVerifier;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;

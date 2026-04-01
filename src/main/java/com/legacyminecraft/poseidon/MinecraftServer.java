@@ -1,9 +1,12 @@
 package com.legacyminecraft.poseidon;
 
-import com.legacyminecraft.poseidon.compat.modloader.ModLoader;
+import com.legacyminecraft.poseidon.modloader.ModLoader;
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
+import com.legacyminecraft.poseidon.server.thread.ThreadCommandReader;
+import com.legacyminecraft.poseidon.server.thread.ThreadServerApplication;
+import com.legacyminecraft.poseidon.server.thread.ThreadSleepForever;
 import com.legacyminecraft.poseidon.server.logging.ConsoleLogManager;
 import com.legacyminecraft.poseidon.util.ServerLogRotator;
 import com.legacyminecraft.poseidon.utility.PerformanceStatistic;

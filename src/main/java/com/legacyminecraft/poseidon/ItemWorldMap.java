@@ -1,5 +1,7 @@
 package com.legacyminecraft.poseidon;
 
+import com.legacyminecraft.poseidon.world.map.WorldMap;
+import com.legacyminecraft.poseidon.world.map.WorldMapBase;
 // CraftBukkit start
 import org.bukkit.Bukkit;
 import org.bukkit.event.server.MapInitializeEvent;

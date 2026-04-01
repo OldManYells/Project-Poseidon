@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.world.storage.ChunkLoader;
 import com.projectposeidon.johnymuffin.UUIDManager;
 
 import java.io.*;
