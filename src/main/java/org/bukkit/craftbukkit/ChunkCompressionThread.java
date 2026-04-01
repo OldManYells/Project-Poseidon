@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.packets.*;
 
-import com.legacyminecraft.poseidon.EntityPlayer;
+import com.legacyminecraft.poseidon.world.entity.EntityPlayer;
 import com.legacyminecraft.poseidon.packets.Packet;
 import com.legacyminecraft.poseidon.packets.Packet51MapChunk;
 

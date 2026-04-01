@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon.modloader;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import com.legacyminecraft.poseidon.EntityPlayer;
+import com.legacyminecraft.poseidon.world.entity.EntityPlayer;
 
 import java.lang.reflect.Method;
 

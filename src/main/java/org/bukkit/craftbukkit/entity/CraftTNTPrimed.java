@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import com.legacyminecraft.poseidon.EntityTNTPrimed;
+import com.legacyminecraft.poseidon.world.entity.EntityTNTPrimed;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.TNTPrimed;
 

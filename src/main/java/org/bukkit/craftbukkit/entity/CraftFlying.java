@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import com.legacyminecraft.poseidon.EntityFlying;
+import com.legacyminecraft.poseidon.world.entity.EntityFlying;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Flying;
 

@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.packets.*;
 
 import com.projectposeidon.ConnectionType;

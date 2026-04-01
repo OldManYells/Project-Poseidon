@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.world.PortalCreateEvent;

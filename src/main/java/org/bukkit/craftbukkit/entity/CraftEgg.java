@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import com.legacyminecraft.poseidon.EntityEgg;
-import com.legacyminecraft.poseidon.EntityLiving;
+import com.legacyminecraft.poseidon.world.entity.EntityEgg;
+import com.legacyminecraft.poseidon.world.entity.EntityLiving;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.LivingEntity;

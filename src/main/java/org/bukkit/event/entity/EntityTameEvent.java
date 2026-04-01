@@ -1,4 +1,5 @@
 package org.bukkit.event.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;

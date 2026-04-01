@@ -1,4 +1,5 @@
 package org.bukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 /**
  * Represents a shootable entity

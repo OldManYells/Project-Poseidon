@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.block.*;
 
-import com.legacyminecraft.poseidon.Entity;
+import com.legacyminecraft.poseidon.world.entity.Entity;
 import com.legacyminecraft.poseidon.*;
 import org.bukkit.Location;
 import org.bukkit.block.Block;

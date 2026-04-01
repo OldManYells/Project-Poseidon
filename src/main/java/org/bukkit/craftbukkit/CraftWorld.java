@@ -1,4 +1,6 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.block.entity.*;
+import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.packets.*;
 import com.legacyminecraft.poseidon.world.item.*;
 import com.legacyminecraft.poseidon.world.block.*;
@@ -530,8 +532,8 @@ public class CraftWorld implements World {
         List<Entity> list = new ArrayList<Entity>();
 
         for (Object o: world.entityList) {
-            if (o instanceof com.legacyminecraft.poseidon.Entity) {
-                com.legacyminecraft.poseidon.Entity mcEnt = (com.legacyminecraft.poseidon.Entity) o;
+            if (o instanceof com.legacyminecraft.poseidon.world.entity.Entity) {
+                com.legacyminecraft.poseidon.world.entity.Entity mcEnt = (com.legacyminecraft.poseidon.world.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -548,8 +550,8 @@ public class CraftWorld implements World {
         List<LivingEntity> list = new ArrayList<LivingEntity>();
 
         for (Object o: world.entityList) {
-            if (o instanceof com.legacyminecraft.poseidon.Entity) {
-                com.legacyminecraft.poseidon.Entity mcEnt = (com.legacyminecraft.poseidon.Entity) o;
+            if (o instanceof com.legacyminecraft.poseidon.world.entity.Entity) {
+                com.legacyminecraft.poseidon.world.entity.Entity mcEnt = (com.legacyminecraft.poseidon.world.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -566,8 +568,8 @@ public class CraftWorld implements World {
         List<Player> list = new ArrayList<Player>();
 
         for (Object o : world.entityList) {
-            if (o instanceof com.legacyminecraft.poseidon.Entity) {
-                com.legacyminecraft.poseidon.Entity mcEnt = (com.legacyminecraft.poseidon.Entity) o;
+            if (o instanceof com.legacyminecraft.poseidon.world.entity.Entity) {
+                com.legacyminecraft.poseidon.world.entity.Entity mcEnt = (com.legacyminecraft.poseidon.world.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 if ((bukkitEntity != null) && (bukkitEntity instanceof Player)) {
@@ -692,7 +694,7 @@ public class CraftWorld implements World {
             throw new IllegalArgumentException("Location or entity class cannot be null");
         }
 
-        com.legacyminecraft.poseidon.Entity entity = null;
+        com.legacyminecraft.poseidon.world.entity.Entity entity = null;
 
         double x = location.getX();
         double y = location.getY();

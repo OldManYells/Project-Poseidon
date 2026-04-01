@@ -1,4 +1,5 @@
 package org.bukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 /**
  * A representation of an explosive entity

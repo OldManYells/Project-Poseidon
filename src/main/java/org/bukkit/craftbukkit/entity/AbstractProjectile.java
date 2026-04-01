@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Projectile;
@@ -7,7 +8,7 @@ public abstract class AbstractProjectile extends CraftEntity implements Projecti
 
     private boolean doesBounce;
 
-    public AbstractProjectile(CraftServer server, com.legacyminecraft.poseidon.Entity entity) {
+    public AbstractProjectile(CraftServer server, com.legacyminecraft.poseidon.world.entity.Entity entity) {
         super(server, entity);
         doesBounce = false;
     }

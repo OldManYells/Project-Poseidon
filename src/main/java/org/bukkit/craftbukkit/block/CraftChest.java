@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.block.entity.*;
 
-import com.legacyminecraft.poseidon.TileEntityChest;
+import com.legacyminecraft.poseidon.world.block.entity.TileEntityChest;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.CraftWorld;

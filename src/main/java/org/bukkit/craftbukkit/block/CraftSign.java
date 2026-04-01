@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.block.entity.*;
 
-import com.legacyminecraft.poseidon.TileEntitySign;
+import com.legacyminecraft.poseidon.world.block.entity.TileEntitySign;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.CraftWorld;

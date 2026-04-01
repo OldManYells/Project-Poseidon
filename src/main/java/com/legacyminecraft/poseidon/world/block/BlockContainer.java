@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.block;
+import com.legacyminecraft.poseidon.world.block.entity.*;
 import com.legacyminecraft.poseidon.*;
 
 public abstract class BlockContainer extends Block {

@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.block;
+import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.*;
 
 public class BlockWorkbench extends Block {

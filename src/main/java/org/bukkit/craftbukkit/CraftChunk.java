@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.block.*;
 
 import com.google.common.collect.MapMaker;
@@ -86,10 +87,10 @@ public class CraftChunk implements Chunk {
         Entity[] entities = new Entity[count];
         for (int i = 0; i < 8; i++) {
             for (Object obj: chunk.entitySlices[i].toArray()) {
-                if (!(obj instanceof com.legacyminecraft.poseidon.Entity)) {
+                if (!(obj instanceof com.legacyminecraft.poseidon.world.entity.Entity)) {
                     continue;
                 }
-                entities[index++] = ((com.legacyminecraft.poseidon.Entity) obj).getBukkitEntity();
+                entities[index++] = ((com.legacyminecraft.poseidon.world.entity.Entity) obj).getBukkitEntity();
             }
         }
         return entities;
