@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.item;
+import com.legacyminecraft.poseidon.packets.*;
 import com.legacyminecraft.poseidon.*;
 
 public class ItemWorldMapBase extends Item {

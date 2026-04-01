@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.packets.*;
 
 public class TileEntitySign extends TileEntity {
 

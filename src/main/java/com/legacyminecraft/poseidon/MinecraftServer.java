@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.packets.*;
 
 import com.legacyminecraft.poseidon.modloader.ModLoader;
 import com.legacyminecraft.poseidon.Poseidon;

@@ -1,7 +1,8 @@
 package org.bukkit.entity;
+import com.legacyminecraft.poseidon.packets.*;
 
 import com.projectposeidon.ConnectionType;
-import com.legacyminecraft.poseidon.Packet;
+import com.legacyminecraft.poseidon.packets.Packet;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.map.MapView;

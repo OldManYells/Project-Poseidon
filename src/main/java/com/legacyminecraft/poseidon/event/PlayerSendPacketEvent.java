@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon.event;
+import com.legacyminecraft.poseidon.packets.*;
 
-import com.legacyminecraft.poseidon.Packet;
+import com.legacyminecraft.poseidon.packets.Packet;
 
 public class PlayerSendPacketEvent extends PlayerPacketEvent {
 
