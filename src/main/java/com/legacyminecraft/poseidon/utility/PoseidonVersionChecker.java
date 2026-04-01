@@ -1,10 +1,4 @@
 package com.legacyminecraft.poseidon.utility;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import org.bukkit.craftbukkit.CraftServer;
@@ -15,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 public class PoseidonVersionChecker {

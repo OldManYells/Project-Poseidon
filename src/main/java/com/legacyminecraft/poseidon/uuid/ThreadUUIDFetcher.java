@@ -1,18 +1,10 @@
 package com.legacyminecraft.poseidon.uuid;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.server.network.*;
-import com.legacyminecraft.poseidon.packets.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.packets.Packet1Login;
 import com.legacyminecraft.poseidon.util.GetUUIDFetcher;
 import com.legacyminecraft.poseidon.util.UUIDResult;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
-import com.legacyminecraft.poseidon.packets.Packet1Login;
 import org.bukkit.ChatColor;
 
 import java.util.UUID;

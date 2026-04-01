@@ -1,18 +1,10 @@
 package com.legacyminecraft.poseidon.block;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.block.material.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.material.MaterialData;
 
 /**

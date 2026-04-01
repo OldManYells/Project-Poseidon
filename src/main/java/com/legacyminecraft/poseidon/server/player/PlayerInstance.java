@@ -1,22 +1,11 @@
 package com.legacyminecraft.poseidon.server.player;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.server.network.*;
-import com.legacyminecraft.poseidon.world.block.*;
-import com.legacyminecraft.poseidon.world.block.entity.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.inventory.*;
+
 import com.legacyminecraft.poseidon.packets.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.block.entity.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.packets.*;
+import com.legacyminecraft.poseidon.world.block.Block;
+import com.legacyminecraft.poseidon.world.block.entity.TileEntity;
+import com.legacyminecraft.poseidon.world.core.ChunkCoordIntPair;
+import com.legacyminecraft.poseidon.world.core.WorldServer;
+import com.legacyminecraft.poseidon.world.entity.EntityPlayer;
 
 import java.util.ArrayList;
 import java.util.List;

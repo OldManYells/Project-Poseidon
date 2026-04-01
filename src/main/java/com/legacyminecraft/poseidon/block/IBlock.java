@@ -1,23 +1,10 @@
 package com.legacyminecraft.poseidon.block;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.block.material.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.block.*;
 
 /**
  * Represents a block. This is a live object, and only one Block may exist for

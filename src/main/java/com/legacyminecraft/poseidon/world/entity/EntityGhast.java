@@ -1,15 +1,11 @@
 package com.legacyminecraft.poseidon.world.entity;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.item.Item;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.*;
 
-// CraftBukkit start
+import com.legacyminecraft.poseidon.api.IMonster;
+import com.legacyminecraft.poseidon.world.core.World;
+import com.legacyminecraft.poseidon.world.item.Item;
+import com.legacyminecraft.poseidon.world.math.MathHelper;
+import com.legacyminecraft.poseidon.world.math.Vec3D;
+import com.legacyminecraft.poseidon.world.physics.AxisAlignedBB;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
 // CraftBukkit end

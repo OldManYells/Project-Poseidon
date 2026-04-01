@@ -1,20 +1,17 @@
 package com.legacyminecraft.poseidon.server.command;
-import com.legacyminecraft.poseidon.MinecraftServer;
-import com.legacyminecraft.poseidon.server.player.ServerConfigurationManager;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.item.Item;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.server.network.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.packets.*;
-import com.legacyminecraft.poseidon.world.item.*;
 
+import com.legacyminecraft.poseidon.MinecraftServer;
+import com.legacyminecraft.poseidon.api.ICommandListener;
+import com.legacyminecraft.poseidon.api.IProgressUpdate;
+import com.legacyminecraft.poseidon.packets.Packet;
+import com.legacyminecraft.poseidon.packets.Packet3Chat;
 import com.legacyminecraft.poseidon.server.gui.ServerGUI;
+import com.legacyminecraft.poseidon.server.network.NetServerHandler;
+import com.legacyminecraft.poseidon.server.player.ServerConfigurationManager;
+import com.legacyminecraft.poseidon.world.core.WorldServer;
+import com.legacyminecraft.poseidon.world.entity.EntityPlayer;
+import com.legacyminecraft.poseidon.world.item.Item;
+import com.legacyminecraft.poseidon.world.item.ItemStack;
 import org.bukkit.craftbukkit.command.ServerCommandListener;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 

@@ -1,17 +1,8 @@
 package com.legacyminecraft.poseidon.world.entity;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
+
+import com.legacyminecraft.poseidon.world.core.World;
 import com.legacyminecraft.poseidon.world.item.Item;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
-import com.legacyminecraft.poseidon.*;
-
-// CraftBukkit start
-
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.CreeperPowerEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;

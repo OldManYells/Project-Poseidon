@@ -1,22 +1,11 @@
 package com.legacyminecraft.poseidon.world.core;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.server.network.*;
-import com.legacyminecraft.poseidon.world.block.*;
-import com.legacyminecraft.poseidon.world.block.entity.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.generation.*;
-import com.legacyminecraft.poseidon.world.inventory.*;
-import com.legacyminecraft.poseidon.world.item.*;
-import com.legacyminecraft.poseidon.world.map.*;
-import com.legacyminecraft.poseidon.world.storage.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
+
+import com.legacyminecraft.poseidon.api.Convertable;
+import com.legacyminecraft.poseidon.api.IDataManager;
+import com.legacyminecraft.poseidon.api.IProgressUpdate;
+import com.legacyminecraft.poseidon.world.storage.PlayerNBTManager;
+import com.legacyminecraft.poseidon.world.storage.nbt.CompressedStreamTools;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 
 import java.io.File;
 import java.io.FileInputStream;

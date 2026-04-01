@@ -1,21 +1,16 @@
 package com.legacyminecraft.poseidon.world.block.entity;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.block.Block;
-import com.legacyminecraft.poseidon.world.block.material.*;
-import com.legacyminecraft.poseidon.world.inventory.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.item.*;
-import com.legacyminecraft.poseidon.world.block.*;
 
-// CraftBukkit start
+import com.legacyminecraft.poseidon.api.IInventory;
+import com.legacyminecraft.poseidon.world.block.Block;
+import com.legacyminecraft.poseidon.world.block.BlockFurnace;
+import com.legacyminecraft.poseidon.world.block.material.Material;
+import com.legacyminecraft.poseidon.world.entity.EntityHuman;
+import com.legacyminecraft.poseidon.world.inventory.FurnaceRecipes;
+import com.legacyminecraft.poseidon.world.item.Item;
+import com.legacyminecraft.poseidon.world.item.ItemStack;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTBase;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagList;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;

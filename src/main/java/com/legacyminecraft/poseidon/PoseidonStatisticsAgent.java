@@ -1,12 +1,5 @@
 package com.legacyminecraft.poseidon;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
 
-import com.legacyminecraft.poseidon.MinecraftServer;
 import org.bukkit.craftbukkit.CraftServer;
 import org.json.simple.JSONObject;
 

@@ -1,18 +1,12 @@
 package com.legacyminecraft.poseidon.world.inventory;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.item.*;
-import com.legacyminecraft.poseidon.world.block.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.packets.*;
-import com.legacyminecraft.poseidon.world.item.*;
+
+import com.legacyminecraft.poseidon.api.IInventory;
+import com.legacyminecraft.poseidon.packets.Packet103SetSlot;
+import com.legacyminecraft.poseidon.world.block.Block;
+import com.legacyminecraft.poseidon.world.core.World;
+import com.legacyminecraft.poseidon.world.entity.EntityHuman;
+import com.legacyminecraft.poseidon.world.entity.EntityPlayer;
+import com.legacyminecraft.poseidon.world.item.ItemStack;
 
 public class ContainerWorkbench extends Container {
 

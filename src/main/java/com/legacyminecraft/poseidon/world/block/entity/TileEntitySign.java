@@ -1,14 +1,8 @@
 package com.legacyminecraft.poseidon.world.block.entity;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.packets.*;
+
+import com.legacyminecraft.poseidon.packets.Packet;
+import com.legacyminecraft.poseidon.packets.Packet130UpdateSign;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 
 public class TileEntitySign extends TileEntity {
 

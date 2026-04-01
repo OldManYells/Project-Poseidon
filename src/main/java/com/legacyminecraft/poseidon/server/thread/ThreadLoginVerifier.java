@@ -1,16 +1,9 @@
 package com.legacyminecraft.poseidon.server.thread;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.server.network.*;
-import com.legacyminecraft.poseidon.packets.*;
-import com.legacyminecraft.poseidon.*;
 
-import com.projectposeidon.johnymuffin.LoginProcessHandler;
+import com.legacyminecraft.poseidon.packets.Packet1Login;
+import com.legacyminecraft.poseidon.server.network.NetLoginHandler;
 import com.legacyminecraft.poseidon.util.SessionAPI;
+import com.projectposeidon.johnymuffin.LoginProcessHandler;
 import org.bukkit.craftbukkit.CraftServer;
 
 import java.net.InetSocketAddress;

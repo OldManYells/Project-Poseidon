@@ -1,17 +1,8 @@
 package com.legacyminecraft.poseidon.event;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.packets.*;
 
 import com.legacyminecraft.poseidon.packets.Packet;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerEvent;
 
 public class PlayerPacketEvent extends Event implements Cancellable {
     private boolean cancel;

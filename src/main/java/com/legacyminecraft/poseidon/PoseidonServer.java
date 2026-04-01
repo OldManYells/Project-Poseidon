@@ -1,18 +1,10 @@
 package com.legacyminecraft.poseidon;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.server.network.*;
 
+import com.legacyminecraft.poseidon.server.network.NetServerHandler;
 import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import com.projectposeidon.johnymuffin.UUIDManager;
-import com.legacyminecraft.poseidon.MinecraftServer;
-import com.legacyminecraft.poseidon.server.network.NetServerHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
 
@@ -21,11 +13,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.logging.Logger;
 
 public final class PoseidonServer {
     private final MinecraftServer server;

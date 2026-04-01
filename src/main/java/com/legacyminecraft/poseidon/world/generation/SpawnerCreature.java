@@ -1,16 +1,16 @@
 package com.legacyminecraft.poseidon.world.generation;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.block.material.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.world.block.*;
 
+import com.legacyminecraft.poseidon.world.block.BlockBed;
+import com.legacyminecraft.poseidon.world.block.material.Material;
+import com.legacyminecraft.poseidon.world.core.ChunkCoordIntPair;
+import com.legacyminecraft.poseidon.world.core.ChunkCoordinates;
+import com.legacyminecraft.poseidon.world.core.ChunkPosition;
+import com.legacyminecraft.poseidon.world.core.World;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.world.math.MathHelper;
+import com.legacyminecraft.poseidon.world.pathfinding.PathEntity;
+import com.legacyminecraft.poseidon.world.pathfinding.PathPoint;
+import com.legacyminecraft.poseidon.world.pathfinding.Pathfinder;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import java.util.HashSet;

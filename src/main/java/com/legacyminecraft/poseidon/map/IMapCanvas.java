@@ -1,15 +1,8 @@
 package com.legacyminecraft.poseidon.map;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
 
-import java.awt.Image;
-import org.bukkit.map.MapCursorCollection;
-import org.bukkit.map.MapFont;
-import org.bukkit.map.MapView;
+import org.bukkit.map.*;
+
+import java.awt.*;
 
 /**
  * Represents a canvas for drawing to a map. Each canvas is associated with a

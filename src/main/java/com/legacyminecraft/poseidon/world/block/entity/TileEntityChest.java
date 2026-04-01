@@ -1,16 +1,11 @@
 package com.legacyminecraft.poseidon.world.block.entity;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.inventory.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
-import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.item.*;
+
+import com.legacyminecraft.poseidon.api.IInventory;
+import com.legacyminecraft.poseidon.world.entity.EntityHuman;
+import com.legacyminecraft.poseidon.world.item.ItemStack;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTBase;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagList;
 
 public class TileEntityChest extends TileEntity implements IInventory {
 

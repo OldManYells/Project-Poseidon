@@ -1,12 +1,10 @@
 package com.legacyminecraft.poseidon.world.map;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.storage.nbt.*;
-import com.legacyminecraft.poseidon.*;
+
+import com.legacyminecraft.poseidon.api.IDataManager;
+import com.legacyminecraft.poseidon.world.storage.nbt.CompressedStreamTools;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTBase;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
+import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagShort;
 
 import java.io.*;
 import java.util.*;

@@ -1,12 +1,8 @@
 package com.legacyminecraft.poseidon.world.entity.data;
-import com.legacyminecraft.poseidon.api.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.packets.*;
-import com.legacyminecraft.poseidon.world.item.*;
+
+import com.legacyminecraft.poseidon.packets.Packet;
+import com.legacyminecraft.poseidon.world.core.ChunkCoordinates;
+import com.legacyminecraft.poseidon.world.item.ItemStack;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

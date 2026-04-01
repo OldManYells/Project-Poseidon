@@ -1,11 +1,7 @@
 package com.legacyminecraft.poseidon.api;
-import com.legacyminecraft.poseidon.world.entity.data.*;
-import com.legacyminecraft.poseidon.statistics.*;
-import com.legacyminecraft.poseidon.world.pathfinding.*;
-import com.legacyminecraft.poseidon.world.physics.*;
-import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.entity.*;
-import com.legacyminecraft.poseidon.world.item.*;
+
+import com.legacyminecraft.poseidon.world.entity.EntityHuman;
+import com.legacyminecraft.poseidon.world.item.ItemStack;
 
 public interface IInventory {
 
