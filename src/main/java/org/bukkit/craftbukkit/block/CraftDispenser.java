@@ -33,7 +33,7 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
 
         synchronized (block) {
             if (block.getType() == Material.DISPENSER) {
-                BlockDispenser dispense = (BlockDispenser) com.legacyminecraft.poseidon.Block.DISPENSER;
+                BlockDispenser dispense = (BlockDispenser) com.legacyminecraft.poseidon.world.block.Block.DISPENSER;
 
                 dispense.dispense(world.getHandle(), getX(), getY(), getZ(), new Random());
                 return true;

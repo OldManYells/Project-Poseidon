@@ -21,7 +21,7 @@ public class CraftItem extends CraftEntity implements Item {
     }
 
     public void setItemStack(ItemStack stack) {
-        item.itemStack = new com.legacyminecraft.poseidon.ItemStack(stack.getTypeId(), stack.getAmount(), stack.getDurability());
+        item.itemStack = new com.legacyminecraft.poseidon.world.item.ItemStack(stack.getTypeId(), stack.getAmount(), stack.getDurability());
     }
 
     @Override

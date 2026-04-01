@@ -1,4 +1,7 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.block;
+import com.legacyminecraft.poseidon.world.item.Item;
+import com.legacyminecraft.poseidon.*;
+import com.legacyminecraft.poseidon.world.block.material.*;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.inventory.*;
 import com.legacyminecraft.poseidon.world.block.entity.*;
@@ -6,7 +9,6 @@ import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.item.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.world.block.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;

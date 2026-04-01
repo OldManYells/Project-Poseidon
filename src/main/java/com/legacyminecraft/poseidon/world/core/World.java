@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.core;
+import com.legacyminecraft.poseidon.world.block.material.*;
 import com.legacyminecraft.poseidon.*;
 import com.legacyminecraft.poseidon.server.network.*;
 import com.legacyminecraft.poseidon.world.block.*;

@@ -294,7 +294,7 @@ public class CraftWorld implements World {
     }
 
     public org.bukkit.entity.Item dropItem(Location loc, ItemStack item) {
-        com.legacyminecraft.poseidon.ItemStack stack = new com.legacyminecraft.poseidon.ItemStack(
+        com.legacyminecraft.poseidon.world.item.ItemStack stack = new com.legacyminecraft.poseidon.world.item.ItemStack(
             item.getTypeId(),
             item.getAmount(),
             item.getDurability()

@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.block;
+import com.legacyminecraft.poseidon.world.block.material.*;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.*;
 
@@ -12,7 +13,7 @@ public class BlockBloodStone extends Block {
 
     // CraftBukkit start
     public void doPhysics(World world, int i, int j, int k, int l) {
-        if (com.legacyminecraft.poseidon.Block.byId[l] != null && com.legacyminecraft.poseidon.Block.byId[l].isPowerSource()) {
+        if (com.legacyminecraft.poseidon.world.block.Block.byId[l] != null && com.legacyminecraft.poseidon.world.block.Block.byId[l].isPowerSource()) {
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
             int power = block.getBlockPower();
 

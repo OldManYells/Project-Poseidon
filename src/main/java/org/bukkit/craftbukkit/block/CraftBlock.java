@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.block;
 import com.legacyminecraft.poseidon.world.core.*;
-import com.legacyminecraft.poseidon.world.block.*;
 
 import com.legacyminecraft.poseidon.world.generation.BiomeBase;
 import com.legacyminecraft.poseidon.world.block.BlockRedstoneWire;
@@ -284,7 +283,7 @@ public class CraftBlock implements Block {
 
     public int getBlockPower(BlockFace face) {
         int power = 0;
-        BlockRedstoneWire wire = (BlockRedstoneWire) com.legacyminecraft.poseidon.Block.REDSTONE_WIRE;
+        BlockRedstoneWire wire = (BlockRedstoneWire) com.legacyminecraft.poseidon.world.block.Block.REDSTONE_WIRE;
         com.legacyminecraft.poseidon.world.core.World world = chunk.getHandle().world;
         if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(x, y - 1, z, 0)) power = wire.getPower(world, x, y - 1, z, power);
         if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(x, y + 1, z, 1)) power = wire.getPower(world, x, y + 1, z, power);
@@ -308,7 +307,7 @@ public class CraftBlock implements Block {
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(com.legacyminecraft.poseidon.Block.byId[this.getTypeId()].material.j());
+        return PistonMoveReaction.getById(com.legacyminecraft.poseidon.world.block.Block.byId[this.getTypeId()].material.j());
 
     }
 }

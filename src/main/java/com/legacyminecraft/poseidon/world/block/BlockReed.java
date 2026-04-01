@@ -1,4 +1,6 @@
 package com.legacyminecraft.poseidon.world.block;
+import com.legacyminecraft.poseidon.world.item.Item;
+import com.legacyminecraft.poseidon.world.block.material.*;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.*;
 

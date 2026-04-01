@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.material;
+import com.legacyminecraft.poseidon.world.block.material.*;
 
 /**
  * Indicated a Material that may carry or create a Redstone current

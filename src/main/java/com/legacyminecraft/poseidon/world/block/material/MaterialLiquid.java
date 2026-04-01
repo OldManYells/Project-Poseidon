@@ -1,4 +1,4 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.block.material;
 
 public class MaterialLiquid extends Material {
 

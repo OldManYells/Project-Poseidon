@@ -64,7 +64,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public CraftItemStack[] getArmorContents() {
-        com.legacyminecraft.poseidon.ItemStack[] mcItems = getInventory().getArmorContents();
+        com.legacyminecraft.poseidon.world.item.ItemStack[] mcItems = getInventory().getArmorContents();
         CraftItemStack[] ret = new CraftItemStack[mcItems.length];
 
         for (int i = 0; i < mcItems.length; i++) {

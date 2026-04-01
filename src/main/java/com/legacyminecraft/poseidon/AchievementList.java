@@ -1,4 +1,6 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.item.Item;
+import com.legacyminecraft.poseidon.world.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;

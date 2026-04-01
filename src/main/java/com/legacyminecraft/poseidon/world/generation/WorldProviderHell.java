@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.generation;
+import com.legacyminecraft.poseidon.world.block.Block;
 import com.legacyminecraft.poseidon.*;
 
 public class WorldProviderHell extends WorldProvider {

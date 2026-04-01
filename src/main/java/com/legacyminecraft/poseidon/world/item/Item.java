@@ -1,8 +1,10 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.item;
+import com.legacyminecraft.poseidon.*;
+import com.legacyminecraft.poseidon.EnumToolMaterial;
+import com.legacyminecraft.poseidon.world.block.Block;
+import com.legacyminecraft.poseidon.world.block.material.*;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
-
-import com.legacyminecraft.poseidon.world.item.*;
 
 import java.util.Random;
 

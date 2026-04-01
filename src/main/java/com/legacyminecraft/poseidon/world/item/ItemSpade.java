@@ -1,4 +1,6 @@
 package com.legacyminecraft.poseidon.world.item;
+import com.legacyminecraft.poseidon.EnumToolMaterial;
+import com.legacyminecraft.poseidon.world.block.Block;
 import com.legacyminecraft.poseidon.*;
 
 public class ItemSpade extends ItemTool {

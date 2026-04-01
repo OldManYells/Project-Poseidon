@@ -50,10 +50,10 @@ public class CraftEventFactory {
      * Block place methods
      */
     public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityHuman who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ, int type) {
-        return callBlockPlaceEvent(world, who, replacedBlockState, clickedX, clickedY, clickedZ, com.legacyminecraft.poseidon.Block.byId[type]);
+        return callBlockPlaceEvent(world, who, replacedBlockState, clickedX, clickedY, clickedZ, com.legacyminecraft.poseidon.world.block.Block.byId[type]);
     }
 
-    public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityHuman who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ, com.legacyminecraft.poseidon.Block block) {
+    public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityHuman who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ, com.legacyminecraft.poseidon.world.block.Block block) {
         return callBlockPlaceEvent(world, who, replacedBlockState, clickedX, clickedY, clickedZ, new ItemStack(block));
     }
 
@@ -82,11 +82,11 @@ public class CraftEventFactory {
         return (PlayerBucketEmptyEvent) getPlayerBucketEvent(Type.PLAYER_BUCKET_EMPTY, who, clickedX, clickedY, clickedZ, clickedFace, itemInHand, Item.BUCKET);
     }
 
-    public static PlayerBucketFillEvent callPlayerBucketFillEvent(EntityHuman who, int clickedX, int clickedY, int clickedZ, int clickedFace, ItemStack itemInHand, com.legacyminecraft.poseidon.Item bucket) {
+    public static PlayerBucketFillEvent callPlayerBucketFillEvent(EntityHuman who, int clickedX, int clickedY, int clickedZ, int clickedFace, ItemStack itemInHand, com.legacyminecraft.poseidon.world.item.Item bucket) {
         return (PlayerBucketFillEvent) getPlayerBucketEvent(Type.PLAYER_BUCKET_FILL, who, clickedX, clickedY, clickedZ, clickedFace, itemInHand, bucket);
     }
 
-    private static PlayerEvent getPlayerBucketEvent(Type type, EntityHuman who, int clickedX, int clickedY, int clickedZ, int clickedFace, ItemStack itemstack, com.legacyminecraft.poseidon.Item item) {
+    private static PlayerEvent getPlayerBucketEvent(Type type, EntityHuman who, int clickedX, int clickedY, int clickedZ, int clickedFace, ItemStack itemstack, com.legacyminecraft.poseidon.world.item.Item item) {
         Player player = (who == null) ? null : (Player) who.getBukkitEntity();
         CraftItemStack itemInHand = new CraftItemStack(new ItemStack(item));
         Material bucket = Material.getMaterial(itemstack.id);
