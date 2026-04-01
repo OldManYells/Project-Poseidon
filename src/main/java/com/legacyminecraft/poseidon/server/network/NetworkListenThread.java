@@ -1,4 +1,5 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.server.network;
+import com.legacyminecraft.poseidon.*;
 
 import java.io.IOException;
 import java.net.InetAddress;

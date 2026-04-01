@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon.server.gui;
+import com.legacyminecraft.poseidon.server.network.*;
 
-import com.legacyminecraft.poseidon.NetworkManager;
+import com.legacyminecraft.poseidon.server.network.NetworkManager;
 
 import javax.swing.*;
 import java.awt.*;

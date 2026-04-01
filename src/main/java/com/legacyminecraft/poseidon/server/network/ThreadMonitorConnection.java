@@ -1,4 +1,6 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.server.network;
+import com.legacyminecraft.poseidon.*;
+import com.legacyminecraft.poseidon.server.network.*;
 
 class ThreadMonitorConnection extends Thread {
 

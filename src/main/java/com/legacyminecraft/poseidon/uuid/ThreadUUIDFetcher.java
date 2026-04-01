@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.uuid;
+import com.legacyminecraft.poseidon.server.network.*;
 import com.legacyminecraft.poseidon.packets.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;

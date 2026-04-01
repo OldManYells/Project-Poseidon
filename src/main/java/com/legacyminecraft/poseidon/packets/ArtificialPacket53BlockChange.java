@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon.packets;
+import com.legacyminecraft.poseidon.server.network.*;
 
-import com.legacyminecraft.poseidon.NetHandler;
+import com.legacyminecraft.poseidon.server.network.NetHandler;
 import com.legacyminecraft.poseidon.World;
 
 import java.io.DataInputStream;
