@@ -1,13 +1,15 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.api;
 import com.legacyminecraft.poseidon.world.entity.data.*;
 import com.legacyminecraft.poseidon.statistics.*;
 import com.legacyminecraft.poseidon.world.pathfinding.*;
 import com.legacyminecraft.poseidon.world.physics.*;
 import com.legacyminecraft.poseidon.world.math.*;
 
-public interface ICommandListener {
+public interface IProgressUpdate {
 
-    void sendMessage(String s);
+    void a(String s);
 
-    String getName();
+    void b(String s);
+
+    void a(int i);
 }

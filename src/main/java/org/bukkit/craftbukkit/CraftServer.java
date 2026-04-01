@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.api.*;
 
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
@@ -11,6 +12,7 @@ import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonServer;
+import com.legacyminecraft.poseidon.server.progress.ConvertProgressUpdater;
 import com.legacyminecraft.poseidon.world.map.WorldMap;
 import com.legacyminecraft.poseidon.world.map.WorldMapCollection;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;

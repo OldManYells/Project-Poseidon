@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.inventory;
 import com.legacyminecraft.poseidon.world.item.*;
 
-import com.legacyminecraft.poseidon.IInventory;
+import com.legacyminecraft.poseidon.api.IInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryTransactionEvent;

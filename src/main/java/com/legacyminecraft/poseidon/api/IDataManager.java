@@ -1,4 +1,4 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.api;
 import com.legacyminecraft.poseidon.world.entity.data.*;
 import com.legacyminecraft.poseidon.statistics.*;
 import com.legacyminecraft.poseidon.world.pathfinding.*;
@@ -6,6 +6,7 @@ import com.legacyminecraft.poseidon.world.physics.*;
 import com.legacyminecraft.poseidon.world.math.*;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.generation.WorldProvider;
+import com.legacyminecraft.poseidon.api.PlayerFileData;
 
 import java.io.File;
 import java.util.List;

@@ -1,4 +1,6 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.server.progress;
+import com.legacyminecraft.poseidon.api.*;
+import com.legacyminecraft.poseidon.MinecraftServer;
 import com.legacyminecraft.poseidon.world.entity.data.*;
 import com.legacyminecraft.poseidon.statistics.*;
 import com.legacyminecraft.poseidon.world.pathfinding.*;

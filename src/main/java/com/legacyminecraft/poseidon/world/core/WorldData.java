@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.core;
+import com.legacyminecraft.poseidon.api.*;
 import com.legacyminecraft.poseidon.world.entity.data.*;
 import com.legacyminecraft.poseidon.statistics.*;
 import com.legacyminecraft.poseidon.world.pathfinding.*;

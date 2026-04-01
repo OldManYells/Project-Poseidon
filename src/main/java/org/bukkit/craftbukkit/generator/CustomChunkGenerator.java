@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.generator;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.block.*;
+import com.legacyminecraft.poseidon.api.*;
 
 import com.legacyminecraft.poseidon.*;
 import org.bukkit.generator.BlockPopulator;

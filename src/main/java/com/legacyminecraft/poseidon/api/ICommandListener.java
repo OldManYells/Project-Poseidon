@@ -1,14 +1,13 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.api;
 import com.legacyminecraft.poseidon.world.entity.data.*;
 import com.legacyminecraft.poseidon.statistics.*;
 import com.legacyminecraft.poseidon.world.pathfinding.*;
 import com.legacyminecraft.poseidon.world.physics.*;
 import com.legacyminecraft.poseidon.world.math.*;
-import com.legacyminecraft.poseidon.world.entity.*;
 
-public interface PlayerFileData {
+public interface ICommandListener {
 
-    void a(EntityHuman entityhuman);
+    void sendMessage(String s);
 
-    void b(EntityHuman entityhuman);
+    String getName();
 }
