@@ -1,5 +1,6 @@
 package com.legacyminecraft.poseidon;
 import com.legacyminecraft.poseidon.world.block.*;
+import com.legacyminecraft.poseidon.world.generation.*;
 
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.craftbukkit.generator.*;

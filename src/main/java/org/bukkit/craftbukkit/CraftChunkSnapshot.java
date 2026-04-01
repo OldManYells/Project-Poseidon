@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit;
 
-import com.legacyminecraft.poseidon.BiomeBase;
+import com.legacyminecraft.poseidon.world.generation.BiomeBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;

@@ -1,6 +1,7 @@
 package com.legacyminecraft.poseidon;
 import com.legacyminecraft.poseidon.world.item.*;
 import com.legacyminecraft.poseidon.world.block.*;
+import com.legacyminecraft.poseidon.world.generation.*;
 
 import com.legacyminecraft.poseidon.world.map.WorldMapBase;
 import com.legacyminecraft.poseidon.world.map.WorldMapCollection;

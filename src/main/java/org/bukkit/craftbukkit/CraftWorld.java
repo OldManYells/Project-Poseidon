@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit;
 import com.legacyminecraft.poseidon.world.item.*;
 import com.legacyminecraft.poseidon.world.block.*;
+import com.legacyminecraft.poseidon.world.generation.*;
 
 import com.google.common.collect.MapMaker;
 import com.legacyminecraft.poseidon.*;

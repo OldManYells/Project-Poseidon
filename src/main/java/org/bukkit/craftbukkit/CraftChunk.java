@@ -2,9 +2,9 @@ package org.bukkit.craftbukkit;
 import com.legacyminecraft.poseidon.world.block.*;
 
 import com.google.common.collect.MapMaker;
-import com.legacyminecraft.poseidon.BiomeBase;
+import com.legacyminecraft.poseidon.world.generation.BiomeBase;
 import com.legacyminecraft.poseidon.ChunkPosition;
-import com.legacyminecraft.poseidon.WorldChunkManager;
+import com.legacyminecraft.poseidon.world.generation.WorldChunkManager;
 import com.legacyminecraft.poseidon.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;

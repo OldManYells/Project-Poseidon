@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.generation.*;
 
 import com.legacyminecraft.poseidon.world.storage.ChunkRegionLoader;
 import com.legacyminecraft.poseidon.world.storage.RegionFileCache;
