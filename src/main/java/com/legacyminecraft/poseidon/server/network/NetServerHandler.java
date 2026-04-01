@@ -13,6 +13,7 @@ import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.packets.*;
 import com.legacyminecraft.poseidon.world.item.*;
 import com.legacyminecraft.poseidon.world.block.*;
+import com.legacyminecraft.poseidon.util.text.FontAllowedCharacters;
 
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonServer;

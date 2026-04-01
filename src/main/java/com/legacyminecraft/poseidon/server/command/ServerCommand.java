@@ -1,4 +1,4 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.server.command;
 import com.legacyminecraft.poseidon.api.*;
 import com.legacyminecraft.poseidon.world.entity.data.*;
 import com.legacyminecraft.poseidon.statistics.*;
@@ -6,11 +6,13 @@ import com.legacyminecraft.poseidon.world.pathfinding.*;
 import com.legacyminecraft.poseidon.world.physics.*;
 import com.legacyminecraft.poseidon.world.math.*;
 
-public enum EnumMovingObjectType {
+public class ServerCommand {
 
-    TILE("TILE", 0), ENTITY("ENTITY", 1);
+    public final String command;
+    public final ICommandListener b;
 
-    private static final EnumMovingObjectType[] c = new EnumMovingObjectType[] { TILE, ENTITY};
-
-    private EnumMovingObjectType(String s, int i) {}
+    public ServerCommand(String s, ICommandListener icommandlistener) {
+        this.command = s;
+        this.b = icommandlistener;
+    }
 }

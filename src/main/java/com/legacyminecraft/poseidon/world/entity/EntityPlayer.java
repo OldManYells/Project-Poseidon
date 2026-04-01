@@ -9,6 +9,7 @@ import com.legacyminecraft.poseidon.world.item.Item;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.inventory.*;
 import com.legacyminecraft.poseidon.server.network.*;
+import com.legacyminecraft.poseidon.server.player.ItemInWorldManager;
 import com.legacyminecraft.poseidon.world.block.entity.*;
 import com.legacyminecraft.poseidon.*;
 import com.legacyminecraft.poseidon.packets.*;

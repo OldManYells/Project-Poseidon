@@ -11,6 +11,7 @@ import com.legacyminecraft.poseidon.world.block.material.*;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.storage.nbt.*;
 import com.legacyminecraft.poseidon.*;
+import com.legacyminecraft.poseidon.util.exception.MinecraftException;
 import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.Bukkit;
