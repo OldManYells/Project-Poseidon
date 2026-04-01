@@ -1,8 +1,9 @@
 package com.legacyminecraft.poseidon.server.gui;
+import com.legacyminecraft.poseidon.server.player.*;
 
 import com.legacyminecraft.poseidon.ICommandListener;
 import com.legacyminecraft.poseidon.MinecraftServer;
-import com.legacyminecraft.poseidon.PlayerListBox;
+import com.legacyminecraft.poseidon.server.player.PlayerListBox;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
