@@ -1,4 +1,5 @@
 package org.bukkit.event.entity;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;

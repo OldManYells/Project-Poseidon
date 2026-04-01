@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import com.legacyminecraft.poseidon.CraftingManager;
 import org.bukkit.inventory.ItemStack;

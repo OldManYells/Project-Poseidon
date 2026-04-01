@@ -1,4 +1,5 @@
 package org.bukkit.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 /**
  * Represents a slot in an inventory

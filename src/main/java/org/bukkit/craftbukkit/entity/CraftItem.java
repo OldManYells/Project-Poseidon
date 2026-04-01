@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import com.legacyminecraft.poseidon.EntityItem;
 import org.bukkit.craftbukkit.CraftServer;

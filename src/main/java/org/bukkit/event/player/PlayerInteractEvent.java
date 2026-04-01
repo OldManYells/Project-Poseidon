@@ -1,4 +1,6 @@
 package org.bukkit.event.player;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;

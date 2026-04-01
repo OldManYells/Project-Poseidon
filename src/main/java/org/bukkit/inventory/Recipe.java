@@ -1,4 +1,5 @@
 package org.bukkit.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 /**
  * Represents some type of crafting recipe.

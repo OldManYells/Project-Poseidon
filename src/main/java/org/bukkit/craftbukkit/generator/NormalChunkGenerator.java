@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.generator;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import com.legacyminecraft.poseidon.Chunk;
 import com.legacyminecraft.poseidon.IChunkProvider;

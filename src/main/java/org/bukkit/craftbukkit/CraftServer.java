@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;

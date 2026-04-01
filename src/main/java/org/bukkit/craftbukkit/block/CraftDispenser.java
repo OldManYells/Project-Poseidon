@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.block.*;
 
-import com.legacyminecraft.poseidon.BlockDispenser;
+import com.legacyminecraft.poseidon.world.block.BlockDispenser;
 import com.legacyminecraft.poseidon.TileEntityDispenser;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

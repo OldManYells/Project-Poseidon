@@ -1,4 +1,6 @@
 package org.bukkit.event;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.entity.Projectile;
 

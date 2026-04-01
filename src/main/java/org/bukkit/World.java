@@ -1,4 +1,6 @@
 package org.bukkit;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;

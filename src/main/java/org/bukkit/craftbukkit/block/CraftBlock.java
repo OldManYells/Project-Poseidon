@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import com.legacyminecraft.poseidon.BiomeBase;
-import com.legacyminecraft.poseidon.BlockRedstoneWire;
+import com.legacyminecraft.poseidon.world.block.BlockRedstoneWire;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;

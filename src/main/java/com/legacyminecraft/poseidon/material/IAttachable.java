@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.material;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.block.BlockFace;
 

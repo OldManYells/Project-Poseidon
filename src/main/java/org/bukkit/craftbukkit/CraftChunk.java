@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import com.google.common.collect.MapMaker;
 import com.legacyminecraft.poseidon.BiomeBase;

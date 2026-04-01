@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import com.legacyminecraft.poseidon.FurnaceRecipes;
 import org.bukkit.Material;

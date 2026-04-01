@@ -1,4 +1,5 @@
 package org.bukkit.event.world;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Chunk;
 import org.bukkit.generator.BlockPopulator;

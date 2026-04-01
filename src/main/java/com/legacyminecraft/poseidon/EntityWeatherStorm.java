@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.event.block.BlockIgniteEvent;

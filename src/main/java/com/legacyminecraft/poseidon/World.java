@@ -1,4 +1,6 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import com.legacyminecraft.poseidon.world.map.WorldMapBase;
 import com.legacyminecraft.poseidon.world.map.WorldMapCollection;
@@ -412,7 +414,7 @@ public class World implements IBlockAccess {
         }
     }
 
-    protected void update(int i, int j, int k, int l) {
+    public void update(int i, int j, int k, int l) {
         this.notify(i, j, k);
         this.applyPhysics(i, j, k, l);
     }

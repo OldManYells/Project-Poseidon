@@ -1,4 +1,5 @@
 package org.bukkit.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 /**
  * Includes interface to the 4 armor slots

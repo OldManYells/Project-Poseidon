@@ -1,4 +1,5 @@
 package org.bukkit;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

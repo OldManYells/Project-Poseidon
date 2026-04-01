@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.item.*;
 
 public class TileEntityChest extends TileEntity implements IInventory {
 

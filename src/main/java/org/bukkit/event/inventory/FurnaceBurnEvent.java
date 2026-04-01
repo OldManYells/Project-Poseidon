@@ -1,4 +1,5 @@
 package org.bukkit.event.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;

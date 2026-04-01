@@ -1,6 +1,8 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -214,6 +216,10 @@ public class Block {
 
     public float j() {
         return this.strength;
+    }
+
+    public float durabilityValue() {
+        return this.durability;
     }
 
     protected Block a(boolean flag) {

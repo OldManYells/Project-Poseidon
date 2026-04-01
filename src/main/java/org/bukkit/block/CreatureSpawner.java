@@ -1,4 +1,5 @@
 package org.bukkit.block;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.entity.CreatureType;
 

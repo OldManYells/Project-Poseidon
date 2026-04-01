@@ -1,4 +1,6 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 // CraftBukkit start
 import org.bukkit.craftbukkit.inventory.CraftItemStack;

@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.map;
+import com.legacyminecraft.poseidon.world.item.*;
 import com.legacyminecraft.poseidon.*;
 
 // CraftBukkit start

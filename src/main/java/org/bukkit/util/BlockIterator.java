@@ -1,4 +1,5 @@
 package org.bukkit.util;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Location;
 import org.bukkit.World;
