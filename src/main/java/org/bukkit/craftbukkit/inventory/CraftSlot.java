@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.inventory.*;
 import com.legacyminecraft.poseidon.world.item.*;
 
-import com.legacyminecraft.poseidon.Slot;
+import com.legacyminecraft.poseidon.world.inventory.Slot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 

@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.inventory.*;
 import com.legacyminecraft.poseidon.world.item.*;
 
-import com.legacyminecraft.poseidon.CraftingManager;
+import com.legacyminecraft.poseidon.world.inventory.CraftingManager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.material.MaterialData;

@@ -1,4 +1,8 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.inventory;
+import com.legacyminecraft.poseidon.*;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 import com.legacyminecraft.poseidon.world.storage.nbt.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.item.*;

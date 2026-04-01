@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.inventory.*;
 import com.legacyminecraft.poseidon.world.item.*;
 
-import com.legacyminecraft.poseidon.InventoryPlayer;
+import com.legacyminecraft.poseidon.world.inventory.InventoryPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class CraftInventoryPlayer extends CraftInventory implements PlayerInventory {
-    public CraftInventoryPlayer(com.legacyminecraft.poseidon.InventoryPlayer inventory) {
+    public CraftInventoryPlayer(com.legacyminecraft.poseidon.world.inventory.InventoryPlayer inventory) {
         super(inventory);
     }
 
