@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
@@ -298,7 +299,7 @@ public class Explosion {
         return blockDensity;
     }
 
-    static class CacheKey {
+    public static class CacheKey {
         private final World world;
         private final double posX, posY, posZ;
         private final double minX, minY, minZ;

@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.item;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.*;
 import com.legacyminecraft.poseidon.world.block.*;
@@ -76,7 +77,7 @@ public class ItemBlock extends Item {
             }
 
             /**
-            * @see com.legacyminecraft.poseidon.World#setTypeIdAndData(int i, int j, int k, int l, int i1)
+            * @see com.legacyminecraft.poseidon.world.core.World#setTypeIdAndData(int i, int j, int k, int l, int i1)
             *
             * This replaces world.setTypeIdAndData(IIIII), we're doing this because we need to
             * hook between the 'placement' and the informing to 'world' so we can

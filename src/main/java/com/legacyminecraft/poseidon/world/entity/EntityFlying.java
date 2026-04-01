@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.entity;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.*;
 
 public class EntityFlying extends EntityLiving {

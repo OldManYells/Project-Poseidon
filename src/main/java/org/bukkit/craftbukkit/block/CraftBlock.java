@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.block.*;
 
 import com.legacyminecraft.poseidon.world.generation.BiomeBase;
@@ -284,7 +285,7 @@ public class CraftBlock implements Block {
     public int getBlockPower(BlockFace face) {
         int power = 0;
         BlockRedstoneWire wire = (BlockRedstoneWire) com.legacyminecraft.poseidon.Block.REDSTONE_WIRE;
-        com.legacyminecraft.poseidon.World world = chunk.getHandle().world;
+        com.legacyminecraft.poseidon.world.core.World world = chunk.getHandle().world;
         if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(x, y - 1, z, 0)) power = wire.getPower(world, x, y - 1, z, power);
         if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(x, y + 1, z, 1)) power = wire.getPower(world, x, y + 1, z, power);
         if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isBlockFacePowered(x, y, z - 1, 2)) power = wire.getPower(world, x, y, z - 1, power);

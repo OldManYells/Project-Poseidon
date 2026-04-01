@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.item;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.*;
 import com.legacyminecraft.poseidon.world.block.*;
@@ -58,7 +59,7 @@ public class ItemReed extends Item {
                 // CraftBukkit start - This executes the placement of the block
                 CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
                 /**
-                 * @see com.legacyminecraft.poseidon.World#setTypeId(int i, int j, int k, int l)
+                 * @see com.legacyminecraft.poseidon.world.core.World#setTypeId(int i, int j, int k, int l)
                  *
                  * This replaces world.setTypeId(IIII), we're doing this because we need to
                  * hook between the 'placement' and the informing to 'world' so we can

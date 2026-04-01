@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.block.*;
 
@@ -53,7 +54,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public Egg throwEgg() {
-        com.legacyminecraft.poseidon.World world = ((CraftWorld) getWorld()).getHandle();
+        com.legacyminecraft.poseidon.world.core.World world = ((CraftWorld) getWorld()).getHandle();
         EntityEgg egg = new EntityEgg(world, getHandle());
 
         world.addEntity(egg);
@@ -61,7 +62,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public Snowball throwSnowball() {
-        com.legacyminecraft.poseidon.World world = ((CraftWorld) getWorld()).getHandle();
+        com.legacyminecraft.poseidon.world.core.World world = ((CraftWorld) getWorld()).getHandle();
         EntitySnowball snowball = new EntitySnowball(world, getHandle());
 
         world.addEntity(snowball);
@@ -116,7 +117,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public Arrow shootArrow() {
-        com.legacyminecraft.poseidon.World world = ((CraftWorld) getWorld()).getHandle();
+        com.legacyminecraft.poseidon.world.core.World world = ((CraftWorld) getWorld()).getHandle();
         EntityArrow arrow = new EntityArrow(world, getHandle());
 
         world.addEntity(arrow);

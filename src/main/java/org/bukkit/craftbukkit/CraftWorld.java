@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.block.entity.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.packets.*;
@@ -116,7 +117,7 @@ public class CraftWorld implements World {
         org.bukkit.Chunk[] craftChunks = new CraftChunk[chunks.length];
 
         for (int i = 0; i < chunks.length; i++) {
-            com.legacyminecraft.poseidon.Chunk chunk = (com.legacyminecraft.poseidon.Chunk) chunks[i];
+            com.legacyminecraft.poseidon.world.core.Chunk chunk = (com.legacyminecraft.poseidon.world.core.Chunk) chunks[i];
             craftChunks[i] = chunk.bukkitChunk;
         }
 
@@ -158,7 +159,7 @@ public class CraftWorld implements World {
             return false;
         }
 
-        com.legacyminecraft.poseidon.Chunk chunk = world.chunkProviderServer.getOrCreateChunk(x, z);
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = world.chunkProviderServer.getOrCreateChunk(x, z);
 
         if (save && !chunk.isEmpty()) {
             chunk.removeEntities();
@@ -179,7 +180,7 @@ public class CraftWorld implements World {
 
         world.chunkProviderServer.unloadQueue.remove(x, z);
 
-        com.legacyminecraft.poseidon.Chunk chunk = null;
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = null;
 
         if (world.chunkProviderServer.chunkProvider == null) {
             chunk = world.chunkProviderServer.emptyChunk;
@@ -242,7 +243,7 @@ public class CraftWorld implements World {
         }
 
         world.chunkProviderServer.unloadQueue.remove(x, z);
-        com.legacyminecraft.poseidon.Chunk chunk = (com.legacyminecraft.poseidon.Chunk) world.chunkProviderServer.chunks.get(x, z);
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = (com.legacyminecraft.poseidon.world.core.Chunk) world.chunkProviderServer.chunks.get(x, z);
 
         if (chunk == null) {
             chunk = world.chunkProviderServer.loadChunk(x, z);
@@ -253,7 +254,7 @@ public class CraftWorld implements World {
     }
 
     @SuppressWarnings("unchecked")
-    private void chunkLoadPostProcess(com.legacyminecraft.poseidon.Chunk chunk, int x, int z) {
+    private void chunkLoadPostProcess(com.legacyminecraft.poseidon.world.core.Chunk chunk, int x, int z) {
         if (chunk != null) {
             world.chunkProviderServer.chunks.put(x, z, chunk);
             world.chunkProviderServer.chunkList.add(chunk);

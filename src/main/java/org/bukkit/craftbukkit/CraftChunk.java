@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.entity.*;
 import com.legacyminecraft.poseidon.world.block.*;
 
 import com.google.common.collect.MapMaker;
 import com.legacyminecraft.poseidon.world.generation.BiomeBase;
-import com.legacyminecraft.poseidon.ChunkPosition;
+import com.legacyminecraft.poseidon.world.core.ChunkPosition;
 import com.legacyminecraft.poseidon.world.generation.WorldChunkManager;
-import com.legacyminecraft.poseidon.WorldServer;
+import com.legacyminecraft.poseidon.world.core.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
@@ -19,14 +20,14 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentMap;
 
 public class CraftChunk implements Chunk {
-    private WeakReference<com.legacyminecraft.poseidon.Chunk> weakChunk;
+    private WeakReference<com.legacyminecraft.poseidon.world.core.Chunk> weakChunk;
     private final ConcurrentMap<Integer, Block> cache = new MapMaker().softValues().makeMap();
     private WorldServer worldServer;
     private int x;
     private int z;
 
-    public CraftChunk(com.legacyminecraft.poseidon.Chunk chunk) {
-        this.weakChunk = new WeakReference<com.legacyminecraft.poseidon.Chunk>(chunk);
+    public CraftChunk(com.legacyminecraft.poseidon.world.core.Chunk chunk) {
+        this.weakChunk = new WeakReference<com.legacyminecraft.poseidon.world.core.Chunk>(chunk);
         worldServer = (WorldServer) getHandle().world;
         x = getHandle().x;
         z = getHandle().z;
@@ -36,11 +37,11 @@ public class CraftChunk implements Chunk {
         return worldServer.getWorld();
     }
 
-    public com.legacyminecraft.poseidon.Chunk getHandle() {
-        com.legacyminecraft.poseidon.Chunk c = weakChunk.get();
+    public com.legacyminecraft.poseidon.world.core.Chunk getHandle() {
+        com.legacyminecraft.poseidon.world.core.Chunk c = weakChunk.get();
         if (c == null) {
             c = worldServer.getChunkAt(x, z);
-            weakChunk = new WeakReference<com.legacyminecraft.poseidon.Chunk>(c);
+            weakChunk = new WeakReference<com.legacyminecraft.poseidon.world.core.Chunk>(c);
         }
         return c;
     }
@@ -79,7 +80,7 @@ public class CraftChunk implements Chunk {
 
     public Entity[] getEntities() {
         int count = 0, index = 0;
-        com.legacyminecraft.poseidon.Chunk chunk = getHandle();
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = getHandle();
         for (int i = 0; i < 8; i++) {
             count += chunk.entitySlices[i].size();
         }
@@ -98,7 +99,7 @@ public class CraftChunk implements Chunk {
 
     public BlockState[] getTileEntities() {
         int index = 0;
-        com.legacyminecraft.poseidon.Chunk chunk = getHandle();
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = getHandle();
         BlockState[] entities = new BlockState[chunk.tileEntities.size()];
         for (Object obj : chunk.tileEntities.keySet().toArray()) {
             if (!(obj instanceof ChunkPosition)) {
@@ -139,7 +140,7 @@ public class CraftChunk implements Chunk {
     }
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain) {
-        com.legacyminecraft.poseidon.Chunk chunk = getHandle();
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = getHandle();
         byte[] buf = new byte[32768 + 16384 + 16384 + 16384]; // Get big enough buffer for whole chunk
         chunk.getData(buf, 0, 0, 0, 16, 128, 16, 0); // Get whole chunk
         byte[] hmap = null;

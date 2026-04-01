@@ -1,4 +1,5 @@
 package org.bukkit.event.world;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.World;
 import org.bukkit.event.Cancellable;

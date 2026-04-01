@@ -1,4 +1,5 @@
 package org.bukkit.command.defaults;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;

@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.map;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.World;
 import org.bukkit.map.MapRenderer;

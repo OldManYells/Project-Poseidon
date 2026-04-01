@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.generation;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.*;
 
 import java.util.Random;

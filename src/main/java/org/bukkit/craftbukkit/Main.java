@@ -1,4 +1,5 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;

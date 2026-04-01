@@ -1,5 +1,6 @@
 
 package org.bukkit.event.player;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.World;
 import org.bukkit.entity.Player;

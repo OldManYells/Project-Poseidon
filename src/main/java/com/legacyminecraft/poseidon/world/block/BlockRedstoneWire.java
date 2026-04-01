@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.block;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.*;
 
 import org.bukkit.event.block.BlockRedstoneEvent;

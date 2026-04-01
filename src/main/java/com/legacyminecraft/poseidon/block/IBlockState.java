@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.block;
+import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Chunk;
