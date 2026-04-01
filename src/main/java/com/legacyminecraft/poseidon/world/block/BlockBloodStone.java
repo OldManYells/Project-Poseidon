@@ -10,7 +10,6 @@ public class BlockBloodStone extends Block {
         super(i, j, Material.STONE);
     }
 
-    // CraftBukkit start
     public void doPhysics(World world, int i, int j, int k, int l) {
         if (com.legacyminecraft.poseidon.world.block.Block.byId[l] != null && com.legacyminecraft.poseidon.world.block.Block.byId[l].isPowerSource()) {
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
@@ -20,5 +19,4 @@ public class BlockBloodStone extends Block {
             world.getServer().getPluginManager().callEvent(event);
         }
     }
-    // CraftBukkit end
 }

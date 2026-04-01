@@ -14,7 +14,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-// CraftBukkit end
 
 public class ItemInWorldManager {
 
@@ -61,7 +60,6 @@ public class ItemInWorldManager {
         this.lastDigTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
         int i1 = this.world.getTypeId(i, j, k);
 
-        // CraftBukkit start
         // Swings at air do *NOT* exist.
         if (i1 <= 0) {
             return;
@@ -105,7 +103,6 @@ public class ItemInWorldManager {
         }
 
         if (toolDamage >= 1.0F) {
-            // CraftBukkit end
             this.c(i, j, k);
         } else {
             this.e = i;
@@ -134,10 +131,8 @@ public class ItemInWorldManager {
                     this.m = this.lastDigTick;
                 }
             }
-        // CraftBukkit start - force blockreset to client
         } else {
             ((EntityPlayer) this.player).netServerHandler.sendPacket(new Packet53BlockChange(i, j, k, this.world));
-            // CraftBukkit end
         }
 
         this.c = 0.0F;
@@ -159,16 +154,13 @@ public class ItemInWorldManager {
         int l = this.world.getTypeId(i, j, k);
         int i1 = this.world.getData(i, j, k);
 
-        // CraftBukkit start
         if (this.player instanceof EntityPlayer) {
             org.bukkit.block.Block block = this.world.getWorld().getBlockAt(i, j, k);
 
-            // Poseidon start - CraftBukkit backport
             // Tell the client the block is gone immediately then process events
             if (world.getTileEntity(i, j, k) == null) {
                 ((EntityPlayer) this.player).netServerHandler.sendPacket(new ArtificialPacket53BlockChange(i, j, k, 0,0));
             }
-            // Poseidon end
             BlockBreakEvent event = new BlockBreakEvent(block, (org.bukkit.entity.Player) this.player.getBukkitEntity());
             this.world.getServer().getPluginManager().callEvent(event);
 
@@ -178,7 +170,6 @@ public class ItemInWorldManager {
                 return false;
             }
         }
-        // CraftBukkit end
 
         // Poseidon - moved up
         //int l = this.world.getTypeId(i, j, k);
@@ -223,7 +214,6 @@ public class ItemInWorldManager {
     public boolean interact(EntityHuman entityhuman, World world, ItemStack itemstack, int i, int j, int k, int l) {
         int i1 = world.getTypeId(i, j, k);
 
-        // CraftBukkit start - Interact
         boolean result = false;
         if (i1 > 0) {
             PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(entityhuman, Action.RIGHT_CLICK_BLOCK, i, j, k, l, itemstack);
@@ -248,6 +238,5 @@ public class ItemInWorldManager {
             }
         }
         return result;
-        // CraftBukkit end
     }
 }

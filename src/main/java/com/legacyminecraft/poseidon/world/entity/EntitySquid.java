@@ -59,7 +59,6 @@ public class EntitySquid extends EntityWaterAnimal {
     }
 
     protected void q() {
-        // CraftBukkit start - whole method
         java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 
         int count = this.random.nextInt(3) + 1;
@@ -76,7 +75,6 @@ public class EntitySquid extends EntityWaterAnimal {
         for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
             bworld.dropItemNaturally(entity.getLocation(), stack);
         }
-        // CraftBukkit end
     }
 
     public boolean a(EntityHuman entityhuman) {

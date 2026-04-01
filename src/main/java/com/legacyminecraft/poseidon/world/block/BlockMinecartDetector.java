@@ -63,7 +63,6 @@ public class BlockMinecartDetector extends BlockMinecartTrack {
             flag1 = true;
         }
 
-        // CraftBukkit start
         if (flag != flag1) {
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
 
@@ -72,7 +71,6 @@ public class BlockMinecartDetector extends BlockMinecartTrack {
 
             flag1 = eventRedstone.getNewCurrent() > 0;
         }
-        // CraftBukkit end
 
         if (flag1 && !flag) {
             world.setData(i, j, k, l | 8);

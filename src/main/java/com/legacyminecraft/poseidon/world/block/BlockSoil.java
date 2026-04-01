@@ -10,8 +10,6 @@ import org.bukkit.event.entity.EntityInteractEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockSoil extends Block {
 
@@ -57,7 +55,6 @@ public class BlockSoil extends Block {
 
     public void b(World world, int i, int j, int k, Entity entity) {
         if (world.random.nextInt(4) == 0) {
-            // CraftBukkit start - Interact Soil
             org.bukkit.event.Cancellable cancellable;
             if (entity instanceof EntityHuman) {
                 cancellable = CraftEventFactory.callPlayerInteractEvent((EntityHuman) entity, org.bukkit.event.block.Action.PHYSICAL, i, j, k, -1, null);
@@ -69,7 +66,6 @@ public class BlockSoil extends Block {
             if (cancellable.isCancelled()) {
                 return;
             }
-            // CraftBukkit end
 
             world.setTypeId(i, j, k, Block.DIRT.id);
         }

@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.entity.EntityHuman;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemReed extends Item {
 
@@ -54,7 +53,6 @@ public class ItemReed extends Item {
             if (world.a(this.id, i, j, k, false, l)) {
                 Block block = Block.byId[this.id];
 
-                // CraftBukkit start - This executes the placement of the block
                 CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k); // CraftBukkit
                 /**
                  * @see com.legacyminecraft.poseidon.world.core.World#setTypeId(int i, int j, int k, int l)
@@ -77,7 +75,6 @@ public class ItemReed extends Item {
                     }
 
                     world.update(i, j, k, this.id); // <-- world.setTypeId does this on success (tell the world)
-                    // CraftBukkit end
 
                     Block.byId[this.id].postPlace(world, i, j, k, l);
                     Block.byId[this.id].postPlace(world, i, j, k, entityhuman);

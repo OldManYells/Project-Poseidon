@@ -38,11 +38,9 @@ public class TileEntitySign extends TileEntity {
         for (int i = 0; i < 4; ++i) {
             astring[i] = this.lines[i];
 
-            // CraftBukkit start - limit sign text to 15 chars per line
             if (this.lines[i].length() > 15) {
                 astring[i] = this.lines[i].substring(0, 15);
             }
-            // CraftBukkit end
         }
 
         return new Packet130UpdateSign(this.x, this.y, this.z, astring);

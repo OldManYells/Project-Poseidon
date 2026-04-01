@@ -17,7 +17,6 @@ public class ThreadCommandReader extends Thread {
         String s = null;
 
         try {
-            // CraftBukkit start - JLine disabling compatibility
             while (!this.server.isStopped && MinecraftServer.isRunning(this.server)) {
                 if (org.bukkit.craftbukkit.Main.useJline) {
                     s = bufferedreader.readLine(">", null);
@@ -27,7 +26,6 @@ public class ThreadCommandReader extends Thread {
                 if (s != null) {
                     this.server.issueCommand(s, this.server);
                 }
-                // CraftBukkit end
             }
         } catch (IOException ioexception) {
             // CraftBukkit

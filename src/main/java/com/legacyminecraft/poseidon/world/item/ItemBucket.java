@@ -14,7 +14,6 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-// CraftBukkit end
 
 public class ItemBucket extends Item {
 
@@ -58,7 +57,6 @@ public class ItemBucket extends Item {
 
                 if (this.a == 0) {
                     if (world.getMaterial(i, j, k) == Material.WATER && world.getData(i, j, k) == 0) {
-                        // CraftBukkit start
                         PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, i, j, k, -1, itemstack, Item.WATER_BUCKET);
 
                         if (event.isCancelled()) {
@@ -67,14 +65,12 @@ public class ItemBucket extends Item {
 
                         CraftItemStack itemInHand = (CraftItemStack) event.getItemStack();
                         byte data = itemInHand.getData() == null ? (byte) 0 : itemInHand.getData().getData();
-                        // CraftBukkit end
 
                         world.setTypeId(i, j, k, 0);
                         return new ItemStack(itemInHand.getTypeId(), itemInHand.getAmount(), data); // CraftBukkit
                     }
 
                     if (world.getMaterial(i, j, k) == Material.LAVA && world.getData(i, j, k) == 0) {
-                        // CraftBukkit start
                         PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, i, j, k, -1, itemstack, Item.LAVA_BUCKET);
 
                         if (event.isCancelled()) {
@@ -83,14 +79,12 @@ public class ItemBucket extends Item {
 
                         CraftItemStack itemInHand = (CraftItemStack) event.getItemStack();
                         byte data = itemInHand.getData() == null ? (byte) 0 : itemInHand.getData().getData();
-                        // CraftBukkit end
 
                         world.setTypeId(i, j, k, 0);
                         return new ItemStack(itemInHand.getTypeId(), itemInHand.getAmount(), data); // CraftBukkit
                     }
                 } else {
                     if (this.a < 0) {
-                        // CraftBukkit start
                         PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(entityhuman, i, j, k, movingobjectposition.face, itemstack);
 
                         if (event.isCancelled()) {
@@ -103,7 +97,6 @@ public class ItemBucket extends Item {
                     }
 
                     int clickedX = i, clickedY = j, clickedZ = k;
-                    // CraftBukkit end
 
                     if (movingobjectposition.face == 0) {
                         --j;
@@ -130,13 +123,11 @@ public class ItemBucket extends Item {
                     }
 
                     if (world.isEmpty(i, j, k) || !world.getMaterial(i, j, k).isBuildable()) {
-                        // CraftBukkit start
                         PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(entityhuman, clickedX, clickedY, clickedZ, movingobjectposition.face, itemstack);
 
                         if (event.isCancelled()) {
                             return itemstack;
                         }
-                        // CraftBukkit end
 
                         if (world.worldProvider.d && this.a == Block.WATER.id) {
                             world.makeSound(d0 + 0.5D, d1 + 0.5D, d2 + 0.5D, "random.fizz", 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
@@ -148,16 +139,13 @@ public class ItemBucket extends Item {
                             world.setTypeIdAndData(i, j, k, this.a, 0);
                         }
 
-                        // CraftBukkit start
                         CraftItemStack itemInHand = (CraftItemStack) event.getItemStack();
                         byte data = itemInHand.getData() == null ? (byte) 0 : itemInHand.getData().getData();
 
                         return new ItemStack(itemInHand.getTypeId(), itemInHand.getAmount(), data);
-                        // CraftBukkit end
                     }
                 }
             } else if (this.a == 0 && movingobjectposition.entity instanceof EntityCow) {
-                // CraftBukkit start - This codepath seems to be *NEVER* called
                 Location loc = movingobjectposition.entity.getBukkitEntity().getLocation();
                 PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), -1, itemstack, Item.MILK_BUCKET);
 
@@ -168,7 +156,6 @@ public class ItemBucket extends Item {
                 CraftItemStack itemInHand = (CraftItemStack) event.getItemStack();
                 byte data = itemInHand.getData() == null ? (byte) 0 : itemInHand.getData().getData();
                 return new ItemStack(itemInHand.getTypeId(), itemInHand.getAmount(), data);
-                // CraftBukkit end
             }
 
             return itemstack;

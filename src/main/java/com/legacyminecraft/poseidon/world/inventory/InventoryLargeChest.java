@@ -10,7 +10,6 @@ public class InventoryLargeChest implements IInventory {
     private IInventory b;
     private IInventory c;
 
-    // CraftBukkit start
     public ItemStack[] getContents() {
         ItemStack[] result = new ItemStack[this.getSize()];
         for (int i = 0; i < result.length; i++) {
@@ -18,7 +17,6 @@ public class InventoryLargeChest implements IInventory {
         }
         return result;
     }
-    // CraftBukkit end
 
     public InventoryLargeChest(String s, IInventory iinventory, IInventory iinventory1) {
         this.a = s;

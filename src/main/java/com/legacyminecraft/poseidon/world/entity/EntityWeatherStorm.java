@@ -11,8 +11,6 @@ import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityWeatherStorm extends EntityWeather {
 
@@ -20,7 +18,6 @@ public class EntityWeatherStorm extends EntityWeather {
     public long a = 0L;
     private int c;
 
-    // CraftBukkit start
     private CraftWorld cworld;
     public boolean isEffect = false;
 
@@ -29,14 +26,11 @@ public class EntityWeatherStorm extends EntityWeather {
     }
 
     public EntityWeatherStorm(World world, double d0, double d1, double d2, boolean isEffect) {
-        // CraftBukkit end
 
         super(world);
 
-        // CraftBukkit start
         this.isEffect = isEffect;
         this.cworld = world.getWorld();
-        // CraftBukkit end
 
         this.setPositionRotation(d0, d1, d2, 0.0F, 0.0F);
         this.lifeTicks = 2;
@@ -49,14 +43,12 @@ public class EntityWeatherStorm extends EntityWeather {
             int k = MathHelper.floor(d2);
 
             if (world.getTypeId(i, j, k) == 0 && Block.FIRE.canPlace(world, i, j, k)) {
-                // CraftBukkit start
                 BlockIgniteEvent event = new BlockIgniteEvent(this.cworld.getBlockAt(i, j, k), IgniteCause.LIGHTNING, null);
                 world.getServer().getPluginManager().callEvent(event);
 
                 if (!event.isCancelled()) {
                     world.setTypeId(i, j, k, Block.FIRE.id);
                 }
-                // CraftBukkit end
             }
 
             for (i = 0; i < 4; ++i) {
@@ -65,14 +57,12 @@ public class EntityWeatherStorm extends EntityWeather {
                 int l = MathHelper.floor(d2) + this.random.nextInt(3) - 1;
 
                 if (world.getTypeId(j, k, l) == 0 && Block.FIRE.canPlace(world, j, k, l)) {
-                    // CraftBukkit start
                     BlockIgniteEvent event = new BlockIgniteEvent(this.cworld.getBlockAt(j, k, l), IgniteCause.LIGHTNING, null);
                     world.getServer().getPluginManager().callEvent(event);
 
                     if (!event.isCancelled()) {
                         world.setTypeId(j, k, l, Block.FIRE.id);
                     }
-                    // CraftBukkit end
                 }
             }
         }
@@ -100,14 +90,12 @@ public class EntityWeatherStorm extends EntityWeather {
                     int k = MathHelper.floor(this.locZ);
 
                     if (this.world.getTypeId(i, j, k) == 0 && Block.FIRE.canPlace(this.world, i, j, k)) {
-                        // CraftBukkit start
                         BlockIgniteEvent event = new BlockIgniteEvent(this.cworld.getBlockAt(i, j, k), IgniteCause.LIGHTNING, null);
                         this.world.getServer().getPluginManager().callEvent(event);
 
                         if (!event.isCancelled()) {
                             this.world.setTypeId(i, j, k, Block.FIRE.id);
                         }
-                        // CraftBukkit end
                     }
                 }
             }

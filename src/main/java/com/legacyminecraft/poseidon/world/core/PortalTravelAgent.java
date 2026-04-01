@@ -8,8 +8,6 @@ import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class PortalTravelAgent {
 
@@ -227,7 +225,6 @@ public class PortalTravelAgent {
 
         boolean flag;
 
-        // CraftBukkit start - portal create event
         java.util.Collection<org.bukkit.block.Block> blocks = new java.util.HashSet<org.bukkit.block.Block>();
         // Find out what blocks the portal is going to modify, duplicated from below
         org.bukkit.World bworld = world.getWorld();
@@ -272,7 +269,6 @@ public class PortalTravelAgent {
         if (event.isCancelled()) {
             return true;
         }
-        // CraftBukkit end
 
         if (d0 < 0.0D) {
             if (i1 < 70) {

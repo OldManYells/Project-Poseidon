@@ -138,7 +138,6 @@ public class BlockButton extends Block {
         if (j1 == 0) {
             return true;
         } else {
-            // CraftBukkit start
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
             int old = (j1 != 8) ? 1 : 0;
             int current = (j1 == 8) ? 1 : 0;
@@ -149,7 +148,6 @@ public class BlockButton extends Block {
             if ((eventRedstone.getNewCurrent() > 0) != (j1 == 8)) {
                 return true;
             }
-            // CraftBukkit end
 
             world.setData(i, j, k, i1 + j1);
             world.b(i, j, k, i, j, k);
@@ -220,14 +218,12 @@ public class BlockButton extends Block {
             int l = world.getData(i, j, k);
 
             if ((l & 8) != 0) {
-                // CraftBukkit start
                 org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
 
                 BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 1, 0);
                 world.getServer().getPluginManager().callEvent(eventRedstone);
 
                 if (eventRedstone.getNewCurrent() > 0) return;
-                // CraftBukkit end
 
                 world.setData(i, j, k, l & 7);
                 world.applyPhysics(i, j, k, this.id);

@@ -8,7 +8,6 @@ import com.legacyminecraft.poseidon.world.math.MathHelper;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemDoor extends Item {
 
@@ -80,7 +79,6 @@ public class ItemDoor extends Item {
                 world.suppressPhysics = true;
                 world.setTypeIdAndData(i, j, k, block.id, i1);
 
-                // CraftBukkit start - bed
                 world.suppressPhysics = false;
                 world.applyPhysics(i, j, k, Block.REDSTONE_WIRE.id);
                 BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, block);
@@ -91,7 +89,6 @@ public class ItemDoor extends Item {
                 }
 
                 world.suppressPhysics = true;
-                // CraftBukkit end
                 world.setTypeIdAndData(i, j + 1, k, block.id, i1 + 8);
                 world.suppressPhysics = false;
                 // world.applyPhysics(i, j, k, block.id); // CraftBukkit - moved up

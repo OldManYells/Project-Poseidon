@@ -32,19 +32,15 @@ public class EntityItem extends Entity {
         this.height = this.width / 2.0F;
         this.setPosition(d0, d1, d2);
         this.itemStack = itemstack;
-        // CraftBukkit start - infinite item fix
         if (this.itemStack.count <= -1) {
             this.itemStack.count = 1;
         }
-        // CraftBukkit end
-        // Project Poseidon start - kill ourselves if the item is null
         if (this.itemStack.id < 0 ||  this.itemStack.id >= Item.byId.length || Item.byId[this.itemStack.id] == null) {
             this.die();
             MinecraftException e = new MinecraftException("Unknown item id " + this.itemStack.id);
             Bukkit.getLogger().log(Level.WARNING, "Created the EntityItem object with an unknown item: " + this.itemStack, e);
             this.itemStack = new ItemStack(Block.STONE); // Workaround for the EntityTracker
         }
-        // Project Poseidon end
         this.yaw = (float) (Math.random() * 360.0D);
         this.motX = (double) ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D));
         this.motY = 0.20000000298023224D;
@@ -65,17 +61,13 @@ public class EntityItem extends Entity {
 
     public void m_() {
         super.m_();
-        // CraftBukkit start
         int currentTick = (int) (System.currentTimeMillis() / 50);
         this.pickupDelay -= (currentTick - this.lastTick);
         this.lastTick = currentTick;
-        // CraftBukkit end
-        // Project Poseidon start - kill ourselves if the item is null
         if (this.itemStack.id < 0 || this.itemStack.id >= Item.byId.length || Item.byId[this.itemStack.id] == null) {
             this.b = 6000_174; //TODO: Configurable lifetime of the EntityItem
             this.die();
         }
-        // Project Poseidon end
 
         this.lastX = this.locX;
         this.lastY = this.locY;
@@ -111,12 +103,10 @@ public class EntityItem extends Entity {
         ++this.e;
         ++this.b;
         if (this.b >= 6000) {
-            //Project Poseidon Start
             if (CraftEventFactory.callItemDespawnEvent(this).isCancelled()) {
                 this.b = 0;
                 return;
             }
-            // CraftBukkit end
             this.die();
         }
     }
@@ -157,7 +147,6 @@ public class EntityItem extends Entity {
         if (!this.world.isStatic) {
             int i = this.itemStack.count;
 
-            // CraftBukkit start
             int canHold = entityhuman.inventory.canHold(this.itemStack);
             int remaining = this.itemStack.count - canHold;
             if (this.pickupDelay <= 0 && canHold > 0) {
@@ -173,7 +162,6 @@ public class EntityItem extends Entity {
                 // Possibly < 0; fix here so we do not have to modify code below
                 this.pickupDelay = 0;
             }
-            // CraftBukkit end
 
             if (this.pickupDelay == 0 && entityhuman.inventory.pickup(this.itemStack)) {
                 if (this.itemStack.id == Block.LOG.id) {

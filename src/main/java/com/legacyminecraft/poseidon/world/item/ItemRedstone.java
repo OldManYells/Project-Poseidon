@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.entity.EntityHuman;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemRedstone extends Item {
 
@@ -52,7 +51,6 @@ public class ItemRedstone extends Item {
 
             world.setRawTypeId(i, j, k, Block.REDSTONE_WIRE.id); // CraftBukkit - We update after the event
 
-            // CraftBukkit start - redstone
             BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, Block.REDSTONE_WIRE);
 
             if (event.isCancelled() || !event.canBuild()) {
@@ -61,7 +59,6 @@ public class ItemRedstone extends Item {
             }
 
             world.update( i, j, k, Block.REDSTONE_WIRE.id); // Must take place after BlockPlaceEvent, we need to update all other blocks.
-            // CraftBukkit end
 
             --itemstack.count; // CraftBukkit - ORDER MATTERS
         }

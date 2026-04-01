@@ -19,8 +19,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class ConsoleCommandHandler {
 
@@ -32,7 +30,6 @@ public class ConsoleCommandHandler {
         this.server = minecraftserver;
     }
 
-    // Craftbukkit start
     private boolean hasPermission(ICommandListener listener, String perm) {
         if (listener instanceof ServerCommandListener) {
             ServerCommandListener serv = (ServerCommandListener)listener;
@@ -55,7 +52,6 @@ public class ConsoleCommandHandler {
             return false;
         }
     }
-    // Craftbukkit end
 
     public boolean handle(ServerCommand servercommand) { // CraftBukkit - returns boolean
         String s = servercommand.command;
@@ -83,7 +79,6 @@ public class ConsoleCommandHandler {
                         serverconfigurationmanager.savePlayers();
                     }
 
-                    // CraftBukkit start
                     for (i = 0; i < this.server.worlds.size(); ++i) {
                         worldserver = this.server.worlds.get(i);
                         boolean save = worldserver.canSave;
@@ -91,7 +86,6 @@ public class ConsoleCommandHandler {
                         worldserver.save(true, (IProgressUpdate) null);
                         worldserver.canSave = save;
                     }
-                    // CraftBukkit end
 
                     this.print(s1, "Save complete.");
                 } else if (s.toLowerCase().startsWith("save-off")) {
@@ -157,10 +151,8 @@ public class ConsoleCommandHandler {
 
                             if (s.toLowerCase().startsWith("kick ")) {
                                 if (!checkPermission(listener, "kick")) return true; // Craftbukkit
-                                // CraftBukkit start - Add kick message compatibility
                                 String[] parts = s.split(" ");
                                 s2 = parts.length >= 2 ? parts[1] : "";
-                                // CraftBukkit end
                                 entityplayer = null;
 
                                 for (j = 0; j < serverconfigurationmanager.players.size(); ++j) {
@@ -390,17 +382,14 @@ public class ConsoleCommandHandler {
     private void print(String s, String s1) {
         String s2 = s + ": " + s1;
 
-        // CraftBukkit start
         this.listener.sendMessage(s1);
         this.informOps("\u00A77(" + s2 + ")");
         if (this.listener instanceof MinecraftServer) {
             return; // Already logged so don't call a.info()
         }
-        // CraftBukkit end
         a.info(s2);
     }
 
-    // CraftBukkit start
     private void informOps(String msg) {
         Packet3Chat packet3chat = new Packet3Chat(msg);
         EntityPlayer sender = null;
@@ -418,7 +407,6 @@ public class ConsoleCommandHandler {
             }
         }
     }
-    // CraftBukkit end
 
     private int a(String s, int i) {
         try {

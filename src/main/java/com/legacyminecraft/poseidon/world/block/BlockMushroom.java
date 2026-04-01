@@ -26,7 +26,6 @@ public class BlockMushroom extends BlockFlower {
 
                 k1 = k + (random.nextInt(3) - 1);
                 if (world.isEmpty(l, i1, j1) && this.f(world, l, i1, j1)) {
-                    // CraftBukkit start
                     org.bukkit.World bworld = world.getWorld();
                     org.bukkit.block.BlockState blockState = bworld.getBlockAt(l, i1, j1).getState();
                     blockState.setTypeId(this.id);
@@ -37,7 +36,6 @@ public class BlockMushroom extends BlockFlower {
                     if (!event.isCancelled()) {
                         blockState.update(true);
                     }
-                    // CraftBukkit end
                 }
             }
         }

@@ -14,7 +14,6 @@ import com.legacyminecraft.poseidon.world.map.WorldMapBase;
 import com.legacyminecraft.poseidon.world.math.MathHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.event.server.MapInitializeEvent;
-// CraftBukkit end
 
 public class ItemWorldMap extends ItemWorldMapBase {
 
@@ -39,10 +38,8 @@ public class ItemWorldMap extends ItemWorldMapBase {
             worldmap.a();
             world.a(s, (WorldMapBase) worldmap);
             
-            // CraftBukkit start
             MapInitializeEvent event = new MapInitializeEvent(worldmap.mapView);
             Bukkit.getServer().getPluginManager().callEvent(event);
-            // CraftBukkit end
         }
 
         return worldmap;

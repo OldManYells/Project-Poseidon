@@ -40,8 +40,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import java.util.Iterator;
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public abstract class EntityHuman extends EntityLiving {
 
@@ -62,11 +60,9 @@ public abstract class EntityHuman extends EntityLiving {
     public double w;
     public double x;
     public double y;
-    // CraftBukkit start
     public boolean sleeping;
     public boolean fauxSleeping;
     public String spawnWorld = "";
-    // CraftBukkit end
     public ChunkCoordinates A;
     public int sleepTicks; // CraftBukkit - private -> public
     public float B;
@@ -314,7 +310,6 @@ public abstract class EntityHuman extends EntityLiving {
                 entityitem.motZ += Math.sin((double) f1) * (double) f;
             }
 
-            // CraftBukkit start
             Player player = (Player) this.getBukkitEntity();
             CraftItem drop = new CraftItem(this.world.getServer(), entityitem);
 
@@ -325,7 +320,6 @@ public abstract class EntityHuman extends EntityLiving {
                 player.getInventory().addItem(drop.getItemStack());
                 return;
             }
-            // CraftBukkit end
 
             this.a(entityitem);
             this.a(StatisticList.v, 1);
@@ -367,12 +361,10 @@ public abstract class EntityHuman extends EntityLiving {
             this.a(true, true, false);
         }
 
-        // CraftBukkit start
         this.spawnWorld = nbttagcompound.getString("SpawnWorld");
         if (this.spawnWorld == "") {
             this.spawnWorld = this.world.getServer().getWorlds().get(0).getName();
         }
-        // CraftBukkit end
 
         if (nbttagcompound.hasKey("SpawnX") && nbttagcompound.hasKey("SpawnY") && nbttagcompound.hasKey("SpawnZ")) {
             this.b = new ChunkCoordinates(nbttagcompound.e("SpawnX"), nbttagcompound.e("SpawnY"), nbttagcompound.e("SpawnZ"));
@@ -440,7 +432,6 @@ public abstract class EntityHuman extends EntityLiving {
                 }
 
                 if (object instanceof EntityLiving) {
-                    // CraftBukkit start - this is here instead of EntityMonster because EntityLiving(s) that aren't monsters
                     // also damage the player in this way. For example, EntitySlime.
 
                     // We handle projectiles in their individual classes!
@@ -457,7 +448,6 @@ public abstract class EntityHuman extends EntityLiving {
 
                         i = event.getDamage();
                     }
-                    // CraftBukkit end
 
                     this.a((EntityLiving) object, false);
                 }
@@ -491,7 +481,6 @@ public abstract class EntityHuman extends EntityLiving {
                     EntityWolf entitywolf1 = (EntityWolf) entity;
 
                     if (entitywolf1.isTamed() && entitywolf1.F() == null && this.name.equals(entitywolf1.getOwnerName()) && (!flag || !entitywolf1.isSitting())) {
-                        // CraftBukkit start
                         org.bukkit.entity.Entity bukkitTarget = entity == null ? null : entityliving.getBukkitEntity();
 
                         EntityTargetEvent event;
@@ -505,7 +494,6 @@ public abstract class EntityHuman extends EntityLiving {
                         if (event.isCancelled()) {
                             continue;
                         }
-                        // CraftBukkit end
 
                         entitywolf1.setSitting(false);
                         entitywolf1.setTarget(entityliving);
@@ -571,7 +559,6 @@ public abstract class EntityHuman extends EntityLiving {
                 ++i;
             }
 
-            // CraftBukkit start - Don't call the event when the entity is human since it will be called with damageEntity
             if (entity instanceof EntityLiving && !(entity instanceof EntityHuman)) {
                 org.bukkit.entity.Entity damager = this.getBukkitEntity();
                 org.bukkit.entity.Entity damagee = (entity == null) ? null : entity.getBukkitEntity();
@@ -585,9 +572,7 @@ public abstract class EntityHuman extends EntityLiving {
 
                 i = event.getDamage();
             }
-            // CraftBukkit end
 
-            // CraftBukkit start - Return when the damage fails so that the item will not lose durability
             double d0 = entity.motX;
             double d1 = entity.motY;
             double d2 = entity.motZ;
@@ -619,7 +604,6 @@ public abstract class EntityHuman extends EntityLiving {
                 }
             }
             
-            // CraftBukkit end
 
             ItemStack itemstack = this.G();
 
@@ -675,7 +659,6 @@ public abstract class EntityHuman extends EntityLiving {
             }
         }
 
-        // CraftBukkit start
         if (this.getBukkitEntity() instanceof Player) {
             Player player = (Player) this.getBukkitEntity();
             org.bukkit.block.Block bed = this.world.getWorld().getBlockAt(i, j, k);
@@ -687,7 +670,6 @@ public abstract class EntityHuman extends EntityLiving {
                 return EnumBedError.OTHER_PROBLEM;
             }
         }
-        // CraftBukkit end
 
         this.b(0.2F, 0.2F);
         this.height = 0.2F;
@@ -773,7 +755,6 @@ public abstract class EntityHuman extends EntityLiving {
             this.world.everyoneSleeping();
         }
 
-        // CraftBukkit start
         if (this.getBukkitEntity() instanceof Player) {
             Player player = (Player) this.getBukkitEntity();
 
@@ -787,7 +768,6 @@ public abstract class EntityHuman extends EntityLiving {
             PlayerBedLeaveEvent event = new PlayerBedLeaveEvent(player, bed);
             this.world.getServer().getPluginManager().callEvent(event);
         }
-        // CraftBukkit end
 
         if (flag) {
             this.sleepTicks = 0;

@@ -8,7 +8,6 @@ import com.legacyminecraft.poseidon.world.math.MathHelper;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemBed extends Item {
 
@@ -49,14 +48,12 @@ public class ItemBed extends Item {
 
                 world.setTypeIdAndData(i, j, k, blockbed.id, i1);
 
-                // CraftBukkit start - bed
                 BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, blockbed);
 
                 if (event.isCancelled() || !event.canBuild()) {
                     event.getBlockPlaced().setTypeIdAndData(blockState.getTypeId(), blockState.getRawData(), false);
                     return false;
                 }
-                // CraftBukkit end
 
                 world.setTypeIdAndData(i + b0, j, k + b1, blockbed.id, i1 + 8);
                 --itemstack.count;

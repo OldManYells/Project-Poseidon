@@ -18,8 +18,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityArrow extends Entity {
 
@@ -173,12 +171,9 @@ public class EntityArrow extends Entity {
             float f2;
 
             if (movingobjectposition != null) {
-                // CraftBukkit start
                 ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
                 this.world.getServer().getPluginManager().callEvent(phe);
-                // CraftBukkit end
                 if (movingobjectposition.entity != null) {
-                    // CraftBukkit start
                     boolean stick;
                     if (entity instanceof EntityLiving) {
                         org.bukkit.Server server = this.world.getServer();
@@ -203,7 +198,6 @@ public class EntityArrow extends Entity {
                         stick = movingobjectposition.entity.damageEntity(this.shooter, 4);
                     }
                     if (stick) {
-                        // CraftBukkit end
                         this.world.makeSound(this, "random.drr", 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                         this.die();
                     } else {
@@ -302,7 +296,6 @@ public class EntityArrow extends Entity {
 
     public void b(EntityHuman entityhuman) {
         if (!this.world.isStatic) {
-            // CraftBukkit start
             ItemStack itemstack = new ItemStack(Item.ARROW, 1);
             if (this.inGround && this.fromPlayer && this.shake <= 0 && entityhuman.inventory.canHold(itemstack) > 0) {
                 com.legacyminecraft.poseidon.world.entity.EntityItem item = new com.legacyminecraft.poseidon.world.entity.EntityItem(this.world, this.locX, this.locY, this.locZ, itemstack);
@@ -314,7 +307,6 @@ public class EntityArrow extends Entity {
                     return;
                 }
             }
-            // CraftBukkit end
 
             if (this.inGround && this.fromPlayer && this.shake <= 0 && entityhuman.inventory.pickup(new ItemStack(Item.ARROW, 1))) {
                 this.world.makeSound(this, "random.pop", 0.2F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);

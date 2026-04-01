@@ -27,7 +27,6 @@ import org.bukkit.event.inventory.ChestOpenedEvent;
 
 import java.util.*;
 
-// CraftBukkit start
 
 public class EntityPlayer extends EntityHuman implements ICrafting {
 
@@ -70,7 +69,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         this.name = s;
         this.height = 0.0F;
 
-        // CraftBukkit start
         this.displayName = this.name;
         this.playerUUID = PoseidonUUID.getPlayerGracefulUUID(this.name); //Project Poseidon
     }
@@ -78,7 +76,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public String displayName;
     public UUID playerUUID; //Project Poseidon
     public org.bukkit.Location compassTarget;
-    // CraftBukkit end
 
     public void spawnIn(World world) {
         super.spawnIn(world);
@@ -101,7 +98,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
             this.setPosition(position.x + 0.5, position.y, position.z + 0.5);
         }
         this.dimension = ((WorldServer) this.world).dimension;
-        // CraftBukkit end
         this.itemInWorldManager = new ItemInWorldManager((WorldServer) world);
         this.itemInWorldManager.player = this;
     }
@@ -142,7 +138,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     public void die(Entity entity) {
-        // CraftBukkit start
         java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 
         for (int i = 0; i < this.inventory.items.length; ++i) {
@@ -185,7 +180,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         }
 
         this.y();
-        // CraftBukkit end
     }
 
     public boolean damageEntity(Entity entity, int i) {
@@ -226,7 +220,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public void a(boolean flag) {
         super.m_();
         
-        // Poseidon start
         while (!this.removeQueue.isEmpty()) {
             int i = Math.min(this.removeQueue.size(), 127);
             int[] aint = new int[i];
@@ -242,7 +235,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                 this.netServerHandler.sendPacket(new Packet29DestroyEntity(aint[k]));
             }
         }
-        // poseidon end
 
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             ItemStack itemstack = this.inventory.getItem(i);
@@ -256,7 +248,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
             }
         }
 
-        // Poseidon start
         if (flag && !this.chunkCoordIntPairQueue.isEmpty()) {
             if (PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true)) {
                 ArrayList arraylist = new ArrayList();
@@ -268,11 +259,9 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     
                     iterator1.remove();
                     if (chunkcoordintpair != null && this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
-                        // CraftBukkit start - Get tile entities directly from the chunk instead of the world
                         Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
                         arraylist.add(chunk);
                         arraylist1.addAll(chunk.tileEntities.values());
-                        // CraftBukkit end
                     }
                 }
     
@@ -322,7 +311,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                 }
             }
         }
-        // Poseidon end
 
         if (this.E) {
             //if (this.b.propertyManager.getBoolean("allow-nether", true)) { // CraftBukkit
@@ -436,7 +424,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     }
 
     public void mount(Entity entity) {
-        // CraftBukkit start
         this.setPassengerOf(entity);
     }
 
@@ -445,7 +432,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         // so this method is needed
 
         super.setPassengerOf(entity);
-        // CraftBukkit end
 
         this.netServerHandler.sendPacket(new Packet39AttachEntity(this, this.vehicle));
         this.netServerHandler.a(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
@@ -473,11 +459,9 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public void a(IInventory iinventory) {
         this.ai();
 
-        // Poseidon start
         ChestOpenedEvent event = new ChestOpenedEvent((org.bukkit.entity.Player) this.getBukkitEntity(), iinventory.getContents());
         this.world.getServer().getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
-        // Poseidon end
 
         this.netServerHandler.sendPacket(new Packet100OpenWindow(this.bO, 0, iinventory.getName(), iinventory.getSize()));
         this.activeContainer = new ContainerChest(this.inventory, iinventory);
@@ -588,7 +572,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         this.netServerHandler.sendPacket(new Packet3Chat(s1));
     }
 
-    // CraftBukkit start
     public long timeOffset = 0;
     public boolean relativeTime = true;
 
@@ -606,5 +589,4 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public String toString() {
         return super.toString() + "(" + this.name + " at " + this.locX + "," + this.locY + "," + this.locZ + ")";
     }
-    // CraftBukkit end
 }

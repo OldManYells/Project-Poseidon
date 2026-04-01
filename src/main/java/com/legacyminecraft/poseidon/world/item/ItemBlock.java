@@ -7,7 +7,6 @@ import com.legacyminecraft.poseidon.world.entity.EntityHuman;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemBlock extends Item {
 
@@ -57,7 +56,6 @@ public class ItemBlock extends Item {
         } else if (world.a(this.id, i, j, k, false, l)) {
             Block block = Block.byId[this.id];
 
-            // CraftBukkit start - This executes the placement of the block
             CraftBlockState replacedBlockState = CraftBlockState.getBlockState(world, i, j, k);
 
             // There are like 30 combinations you can mix and match steps and double steps
@@ -104,7 +102,6 @@ public class ItemBlock extends Item {
                     return true;
 
                 }
-                // CraftBukkit end
 
                 if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.other-fixes.enabled", true) && (this.id == 29 || this.id == 33)) {
                     Block.byId[this.id].postPlace(world, i, j, k, l);

@@ -11,11 +11,9 @@ public class TileEntityChest extends TileEntity implements IInventory {
 
     private ItemStack[] items = new ItemStack[27]; // CraftBukkit
 
-    // CraftBukkit start
     public ItemStack[] getContents() {
         return this.items;
     }
-    // CraftBukkit end
 
     public TileEntityChest() {}
 

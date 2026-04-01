@@ -116,9 +116,7 @@ public class WorldChunkManager {
         return abiomebase;
     }
 
-    // CraftBukkit start
     public double getHumidity(int x, int z) {
         return this.f.a(this.rain, (double)x, (double)z, 1, 1, 0.05000000074505806D, 0.05000000074505806D, 0.3333333333333333D)[0];
     }
-    // CraftBukkit end
 }

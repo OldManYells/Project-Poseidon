@@ -8,7 +8,6 @@ import com.legacyminecraft.poseidon.world.math.MathHelper;
 import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-// CraftBukkit end
 
 public class EntitySkeleton extends EntityMonster {
 
@@ -36,14 +35,12 @@ public class EntitySkeleton extends EntityMonster {
             float f = this.c(1.0F);
 
             if (f > 0.5F && this.world.isChunkLoaded(MathHelper.floor(this.locX), MathHelper.floor(this.locY), MathHelper.floor(this.locZ)) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
-                // CraftBukkit start
                 EntityCombustEvent event = new EntityCombustEvent(this.getBukkitEntity());
                 this.world.getServer().getPluginManager().callEvent(event);
 
                 if (!event.isCancelled()) {
                     this.fireTicks = 300;
                 }
-                // CraftBukkit end
             }
         }
 
@@ -90,7 +87,6 @@ public class EntitySkeleton extends EntityMonster {
     }
 
     protected void q() {
-        // CraftBukkit start - whole method
         java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 
         int count = this.random.nextInt(3);
@@ -112,6 +108,5 @@ public class EntitySkeleton extends EntityMonster {
         for (org.bukkit.inventory.ItemStack stack: event.getDrops()) {
             bworld.dropItemNaturally(entity.getLocation(), stack);
         }
-        // CraftBukkit end
     }
 }

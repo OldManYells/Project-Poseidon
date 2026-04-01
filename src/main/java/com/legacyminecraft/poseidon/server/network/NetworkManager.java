@@ -63,15 +63,12 @@ public class NetworkManager {
         //Debug for packet spam detection
 //        System.out.println("[Poseidon] Packet spam detection is " + (this.spamDetection ? "enabled" : "disabled") + " with a threshold of " + this.threshold + " packets");
 
-        // CraftBukkit start - IPv6 stack in Java on BSD/OSX doesn't support setTrafficClass
         try {
             socket.setTrafficClass(24);
         } catch (SocketException e) {
         }
-        // CraftBukkit end
 
         try {
-            // CraftBukkit start - cant compile these outside the try
             socket.setSoTimeout(30000);
             if (PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)) {
                 socket.setTcpNoDelay(true);
@@ -79,21 +76,19 @@ public class NetworkManager {
             this.input = new DataInputStream(socket.getInputStream());
             this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
         } catch (java.io.IOException socketexception) {
-            // CraftBukkit end
             System.err.println(socketexception.getMessage());
         }
 
-        /* CraftBukkit start - moved up
+        /*
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
-        // CraftBukkit end */
+        */
         this.s = new NetworkReaderThread(this, s + " read thread");
         this.r = new NetworkWriterThread(this, s + " write thread");
         this.s.start();
         this.r.start();
     }
 
-    //Project Poseidon Start
     public void setSocketAddress(SocketAddress socketAddress) {
         this.i = socketAddress;
     }
@@ -102,7 +97,6 @@ public class NetworkManager {
         return new InetSocketAddress(hostname, port);
     }
 
-    //Project Poseidon End
 
     public void a(NetHandler nethandler) {
         this.p = nethandler;
@@ -281,7 +275,6 @@ public class NetworkManager {
         while (!this.m.isEmpty() && i-- >= 0) {
             Packet packet = (Packet) this.m.remove(0);
 
-            //Poseidon Start - Packet Receive Event
             if (firePacketEvents && this.p instanceof NetServerHandler) {
                 PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(((NetServerHandler) this.p).player.name, packet);
                 Bukkit.getPluginManager().callEvent(event);
@@ -294,7 +287,6 @@ public class NetworkManager {
                 packet.a(this.p);
             }
 
-            //Poseidon End
 
 //            packet.a(this.p);
         }

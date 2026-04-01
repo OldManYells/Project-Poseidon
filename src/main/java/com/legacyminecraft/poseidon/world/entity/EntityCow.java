@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-// CraftBukkit end
 
 public class EntityCow extends EntityAnimal {
 
@@ -50,7 +49,6 @@ public class EntityCow extends EntityAnimal {
         ItemStack itemstack = entityhuman.inventory.getItemInHand();
 
         if (itemstack != null && itemstack.id == Item.BUCKET.id) {
-            // CraftBukkit start - got milk?
             Location loc = this.getBukkitEntity().getLocation();
             PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(entityhuman, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), -1, itemstack, Item.MILK_BUCKET);
 
@@ -63,7 +61,6 @@ public class EntityCow extends EntityAnimal {
             itemstack = new ItemStack(itemInHand.getTypeId(), itemInHand.getAmount(), data);
 
             entityhuman.inventory.setItem(entityhuman.inventory.itemInHandIndex, itemstack);
-            // CraftBukkit end
 
             return true;
         } else {

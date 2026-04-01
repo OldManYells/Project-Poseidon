@@ -12,8 +12,6 @@ import org.bukkit.event.painting.PaintingBreakByWorldEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityPainting extends Entity {
 
@@ -128,14 +126,12 @@ public class EntityPainting extends Entity {
         if (this.f++ == 100 && !this.world.isStatic) {
             this.f = 0;
             if (!this.h()) {
-                // CraftBukkit start
                 PaintingBreakByWorldEvent event = new PaintingBreakByWorldEvent((org.bukkit.entity.Painting) this.getBukkitEntity());
                 this.world.getServer().getPluginManager().callEvent(event);
 
                 if (event.isCancelled()) {
                     return;
                 }
-                // CraftBukkit end
 
                 this.die();
                 this.world.addEntity(new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.PAINTING)));
@@ -207,14 +203,12 @@ public class EntityPainting extends Entity {
 
     public boolean damageEntity(Entity entity, int i) {
         if (!this.dead && !this.world.isStatic) {
-            // CraftBukkit start
             PaintingBreakByEntityEvent event = new PaintingBreakByEntityEvent((org.bukkit.entity.Painting) this.getBukkitEntity(), entity == null ? null : entity.getBukkitEntity());
             this.world.getServer().getPluginManager().callEvent(event);
 
             if (event.isCancelled()) {
                 return true;
             }
-            // CraftBukkit end
 
             this.die();
             this.af();

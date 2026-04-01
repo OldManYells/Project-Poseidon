@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.entity.EntityHuman;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemHoe extends Item {
 
@@ -33,14 +32,12 @@ public class ItemHoe extends Item {
 
                 world.setTypeId(i, j, k, block.id);
 
-                // CraftBukkit start - Hoes - blockface -1 for 'SELF'
                 BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, i, j, k, block);
 
                 if (event.isCancelled() || !event.canBuild()) {
                     event.getBlockPlaced().setTypeId(blockState.getTypeId());
                     return false;
                 }
-                // CraftBukkit end
 
                 itemstack.damage(1, entityhuman);
                 return true;

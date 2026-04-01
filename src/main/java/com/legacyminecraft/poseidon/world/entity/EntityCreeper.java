@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.CreeperPowerEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
-// CraftBukkit end
 
 public class EntityCreeper extends EntityMonster {
 
@@ -113,7 +112,6 @@ public class EntityCreeper extends EntityMonster {
                 this.e(1);
                 ++this.fuseTicks;
                 if (this.fuseTicks >= 30) {
-                    // CraftBukkit start
                     float radius = this.isPowered() ? 6.0F : 3.0F;
 
                     ExplosionPrimeEvent event = new ExplosionPrimeEvent(CraftEntity.getEntity(this.world.getServer(), this), radius, false);
@@ -125,7 +123,6 @@ public class EntityCreeper extends EntityMonster {
                     } else {
                         this.fuseTicks = 0;
                     }
-                    // CraftBukkit end
                 }
 
                 this.e = true;
@@ -152,7 +149,6 @@ public class EntityCreeper extends EntityMonster {
     public void a(EntityWeatherStorm entityweatherstorm) {
         super.a(entityweatherstorm);
 
-        // CraftBukkit start
         CreeperPowerEvent event = new CreeperPowerEvent(this.getBukkitEntity(), entityweatherstorm.getBukkitEntity(), CreeperPowerEvent.PowerCause.LIGHTNING);
         this.world.getServer().getPluginManager().callEvent(event);
 
@@ -167,7 +163,6 @@ public class EntityCreeper extends EntityMonster {
         if (!powered) {
             this.datawatcher.watch(17, Byte.valueOf((byte) 0));
         } else
-        // CraftBukkit end
         this.datawatcher.watch(17, Byte.valueOf((byte) 1));
     }
 }

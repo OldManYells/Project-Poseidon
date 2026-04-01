@@ -14,8 +14,6 @@ import org.bukkit.util.Vector;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockDispenser extends BlockContainer {
 
@@ -99,7 +97,6 @@ public class BlockDispenser extends BlockContainer {
         }
 
         TileEntityDispenser tileentitydispenser = (TileEntityDispenser) world.getTileEntity(i, j, k);
-        // CraftBukkit start
         int dispenseSlot = tileentitydispenser.findDispenseSlot();
         ItemStack itemstack = null;
         if (dispenseSlot > -1) {
@@ -108,7 +105,6 @@ public class BlockDispenser extends BlockContainer {
             // Copy item stack, because we want it to have 1 item
             itemstack = new ItemStack(itemstack.id, 1, itemstack.damage);
         }
-        // CraftBukkit end
 
         double d0 = (double) i + (double) b0 * 0.6D + 0.5D;
         double d1 = (double) j + 0.5D;
@@ -117,7 +113,6 @@ public class BlockDispenser extends BlockContainer {
         if (itemstack == null) {
             world.e(1001, i, j, k, 0);
         } else {
-            // CraftBukkit start
             double d3 = random.nextDouble() * 0.1D + 0.2D;
             double motX = (double) b0 * d3;
             double motY = 0.20000000298023224D;
@@ -144,7 +139,6 @@ public class BlockDispenser extends BlockContainer {
             motZ = event.getVelocity().getZ();
 
             itemstack = new ItemStack(event.getItem().getTypeId(), event.getItem().getAmount(), event.getItem().getDurability());
-            // CraftBukkit end
 
             if (itemstack.id == Item.ARROW.id) {
                 EntityArrow entityarrow = new EntityArrow(world, d0, d1, d2);
@@ -167,12 +161,10 @@ public class BlockDispenser extends BlockContainer {
                 world.e(1002, i, j, k, 0);
             } else {
                 EntityItem entityitem = new EntityItem(world, d0, d1 - 0.3D, d2, itemstack);
-                // CraftBukkit start
                 // double d3 = random.nextDouble() * 0.1D + 0.2D; // Moved up
                 entityitem.motX = motX;
                 entityitem.motY = motY;
                 entityitem.motZ = motZ;
-                // CraftBukkit end
                 world.addEntity(entityitem);
                 world.e(1000, i, j, k, 0);
             }

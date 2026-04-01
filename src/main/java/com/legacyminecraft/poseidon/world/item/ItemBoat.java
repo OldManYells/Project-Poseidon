@@ -11,7 +11,6 @@ import com.legacyminecraft.poseidon.world.physics.MovingObjectPosition;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-// CraftBukkit end
 
 public class ItemBoat extends Item {
 
@@ -47,13 +46,11 @@ public class ItemBoat extends Item {
                 int k = movingobjectposition.d;
 
                 if (!world.isStatic) {
-                    // CraftBukkit start - Boat placement
                     PlayerInteractEvent event = CraftEventFactory.callPlayerInteractEvent(entityhuman, Action.RIGHT_CLICK_BLOCK, i, j, k, movingobjectposition.face, itemstack);
 
                     if (event.isCancelled()) {
                         return itemstack;
                     }
-                    // CraftBukkit end
 
                     if (world.getTypeId(i, j, k) == Block.SNOW.id) {
                         --j;

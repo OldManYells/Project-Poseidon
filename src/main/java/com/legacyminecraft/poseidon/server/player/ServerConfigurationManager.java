@@ -23,8 +23,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class ServerConfigurationManager {
 
@@ -44,7 +42,6 @@ public class ServerConfigurationManager {
     public PlayerFileData playerFileData; // CraftBukkit - private - >public
     public boolean o; // Craftbukkit - private -> public
 
-    // CraftBukkit start
     private CraftServer cserver;
     private final String msgKickBanned, msgKickIPBanned, msgKickWhitelist, msgKickServerFull, msgPlayerJoin, msgPlayerLeave;
 
@@ -52,7 +49,6 @@ public class ServerConfigurationManager {
         minecraftserver.server = new CraftServer(minecraftserver, this);
         minecraftserver.console = new ColouredConsoleSender(minecraftserver.server);
         this.cserver = minecraftserver.server;
-        // CraftBukkit end
         this.msgKickBanned = PoseidonConfig.getInstance().getConfigString("message.kick.banned");
         this.msgKickIPBanned = PoseidonConfig.getInstance().getConfigString("message.kick.ip-banned");
         this.msgKickWhitelist = PoseidonConfig.getInstance().getConfigString("message.kick.not-whitelisted");
@@ -100,12 +96,10 @@ public class ServerConfigurationManager {
     }
 
     public int a() {
-        // CraftBukkit start
         if (this.server.worlds.size() == 0) {
             return this.server.propertyManager.getInt("view-distance", 10) * 16 - 16;
         }
         return this.server.worlds.get(0).manager.getFurthestViewableBlock();
-        // CraftBukkit end
     }
 
     private PlayerManager getPlayerManager(int i) {
@@ -129,7 +123,6 @@ public class ServerConfigurationManager {
             }
         }
 
-        // CraftBukkit start
         Player player = this.cserver.getPlayer(entityplayer);
         PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(player, msgPlayerJoin.replace("%player%", entityplayer.name));
         this.cserver.getPluginManager().callEvent(playerJoinEvent);
@@ -139,9 +132,7 @@ public class ServerConfigurationManager {
         if (joinMessage != null) {
             this.server.serverConfigurationManager.sendAll(new Packet3Chat(joinMessage));
         }
-        // CraftBukkit end
 
-        // Poseidon Start
         // Notify staff of Poseidon update if they are op or have poseidon.update permission
         if(PoseidonConfig.getInstance().getConfigBoolean("settings.update-checker.notify-staff.enabled", true) && Poseidon.getServer().isUpdateAvailable()) {
             if (player.isOp() || player.hasPermission("poseidon.update")) {
@@ -151,7 +142,6 @@ public class ServerConfigurationManager {
                 player.sendMessage(updateMessage);
             }
         }
-        // Poseidon End
 
         worldserver.addEntity(entityplayer);
         this.getPlayerManager(entityplayer.dimension).addPlayer(entityplayer);
@@ -165,14 +155,11 @@ public class ServerConfigurationManager {
         //if(entityplayer.netServerHandler.disconnected) return null; // CraftBukkit - exploits fix https://github.com/OvercastNetwork/CraftBukkit/commit/6f79ca5c54d30d04803143975757713a01bf4e35
 
 
-        // CraftBukkit start
         // Quitting must be before we do final save of data, in case plugins need to modify it
         this.getPlayerManager(entityplayer.dimension).removePlayer(entityplayer);
         PlayerQuitEvent playerQuitEvent = new PlayerQuitEvent(this.cserver.getPlayer(entityplayer), this.msgPlayerLeave.replace("%player%", entityplayer.name));
         this.cserver.getPluginManager().callEvent(playerQuitEvent);
-        // CraftBukkit end
 
-        //Project POSEIDON Start
 //        boolean found = false;
 //        for (int i = 0; i < this.players.size(); ++i) {
 //            EntityPlayer ep = (EntityPlayer) this.players.get(i);
@@ -186,7 +173,6 @@ public class ServerConfigurationManager {
 //            playerQuitEvent.setQuitMessage(null);
 //        }
 //        PlayerTracker.getInstance().removePlayer(entityplayer.name);
-        //Project POSEIDON End
 
         this.playerFileData.a(entityplayer);
         this.server.getWorldServer(entityplayer.dimension).kill(entityplayer);
@@ -197,7 +183,6 @@ public class ServerConfigurationManager {
     }
 
     public EntityPlayer a(NetLoginHandler netloginhandler, String s) {
-        // CraftBukkit start - note: this entire method needs to be changed
         // Instead of kicking then returning, we need to store the kick reason
         // in the event, check with plugins to see if it's ok, and THEN kick
         // depending on the outcome. Also change any reference to this.e.c to entity.world
@@ -241,10 +226,8 @@ public class ServerConfigurationManager {
         }
 
         return entity;
-        // CraftBukkit end
     }
 
-    // CraftBukkit start
     public EntityPlayer moveToWorld(EntityPlayer entityplayer, int i) {
         return this.moveToWorld(entityplayer, i, null);
     }
@@ -258,7 +241,6 @@ public class ServerConfigurationManager {
         this.server.getWorldServer(entityplayer.dimension).removeEntity(entityplayer);
         ChunkCoordinates chunkcoordinates = entityplayer.getBed();
 
-        // CraftBukkit start
         EntityPlayer entityplayer1 = entityplayer;
         org.bukkit.World fromWorld = entityplayer1.getBukkitEntity().getWorld();
 
@@ -296,7 +278,6 @@ public class ServerConfigurationManager {
         }
         WorldServer worldserver = ((CraftWorld) location.getWorld()).getHandle();
         entityplayer1.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-        // CraftBukkit end
 
         worldserver.chunkProviderServer.getChunkAt((int) entityplayer1.locX >> 4, (int) entityplayer1.locZ >> 4);
 
@@ -304,14 +285,12 @@ public class ServerConfigurationManager {
             entityplayer1.setPosition(entityplayer1.locX, entityplayer1.locY + 1.0D, entityplayer1.locZ);
         }
 
-        // CraftBukkit start
         byte actualDimension = (byte) (worldserver.getWorld().getEnvironment().getId());
         entityplayer1.netServerHandler.sendPacket(new Packet9Respawn((byte) (actualDimension >= 0 ? -1 : 0)));
         entityplayer1.netServerHandler.sendPacket(new Packet9Respawn(actualDimension));
         entityplayer1.spawnIn(worldserver);
         entityplayer1.dead = false;
         entityplayer1.netServerHandler.teleport(new Location(worldserver.getWorld(), entityplayer1.locX, entityplayer1.locY, entityplayer1.locZ, entityplayer1.yaw, entityplayer1.pitch));
-        // CraftBukkit end
         this.a(entityplayer1, worldserver);
         this.getPlayerManager(entityplayer1.dimension).addPlayer(entityplayer1);
         worldserver.addEntity(entityplayer1);
@@ -319,17 +298,14 @@ public class ServerConfigurationManager {
         //PlayerTracker.getInstance().addPlayer(entityplayer1.name); //Project POSEIDON
         this.updateClient(entityplayer1); // CraftBukkit
         entityplayer1.x();
-        // CraftBukkit start - don't fire on respawn
         if (fromWorld != location.getWorld()) {
             org.bukkit.event.player.PlayerChangedWorldEvent event = new org.bukkit.event.player.PlayerChangedWorldEvent((Player) entityplayer1.getBukkitEntity(), fromWorld);
             Bukkit.getServer().getPluginManager().callEvent(event);
         }
-        // CraftBukkit end
         return entityplayer1;
     }
 
     public void f(EntityPlayer entityplayer) {
-        // CraftBukkit start -- Replaced the standard handling of portals with a more customised method.
         int dimension = entityplayer.dimension;
         WorldServer fromWorld = this.server.getWorldServer(dimension);
         WorldServer toWorld = null;
@@ -359,15 +335,12 @@ public class ServerConfigurationManager {
         }
         toWorld = ((CraftWorld) finalLocation.getWorld()).getHandle();
         this.moveToWorld(entityplayer, toWorld.dimension, finalLocation);
-        // CraftBukkit end
     }
 
     public void b() {
-        // CraftBukkit start
         for (int i = 0; i < this.server.worlds.size(); ++i) {
             this.server.worlds.get(i).manager.flush();
         }
-        // CraftBukkit end
     }
 
     public void flagDirty(int i, int j, int k, int l) {
@@ -496,24 +469,20 @@ public class ServerConfigurationManager {
         this.h.add(s.toLowerCase());
         this.l();
 
-        // Craftbukkit start
         Player player = server.server.getPlayer(s);
         if (player != null) {
             player.recalculatePermissions();
         }
-        // Craftbukkit end
     }
 
     public void f(String s) {
         this.h.remove(s.toLowerCase());
         this.l();
 
-        // Craftbukkit start
         Player player = server.server.getPlayer(s);
         if (player != null) {
             player.recalculatePermissions();
         }
-        // Craftbukkit end
     }
 
     private void k() {

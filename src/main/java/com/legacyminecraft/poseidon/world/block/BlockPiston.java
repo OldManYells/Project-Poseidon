@@ -15,8 +15,6 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 
 import java.util.ArrayList;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockPiston extends Block {
 
@@ -72,7 +70,6 @@ public class BlockPiston extends Block {
 
         if (l != 7) {
             if (flag && !d(l)) {
-                // CraftBukkit start
                 int length;
                 try {
                     length = h(world, i, j, k, i1);
@@ -89,13 +86,11 @@ public class BlockPiston extends Block {
                     if (event.isCancelled()) {
                         return;
                     }
-                    // CraftBukkit end
 
                     world.setRawData(i, j, k, i1 | 8);
                     world.playNote(i, j, k, 0, i1);
                 }
             } else if (!flag && d(l)) {
-                // CraftBukkit start
                 org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
 
                 BlockPistonRetractEvent event = new BlockPistonRetractEvent(block);
@@ -104,7 +99,6 @@ public class BlockPiston extends Block {
                 if (event.isCancelled()) {
                     return;
                 }
-                // CraftBukkit end
 
                 world.setRawData(i, j, k, i1);
                 world.playNote(i, j, k, 1, i1);

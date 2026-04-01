@@ -110,14 +110,12 @@ public class BlockRedstoneWire extends Block {
             }
         }
 
-        // CraftBukkit start
         if (k1 != l1) {
             BlockRedstoneEvent event = new BlockRedstoneEvent(world.getWorld().getBlockAt(i, j, k), k1, l1);
             world.getServer().getPluginManager().callEvent(event);
 
             l1 = event.getNewCurrent();
         }
-        // CraftBukkit end
 
         if (k1 != l1) {
             world.suppressPhysics = true;

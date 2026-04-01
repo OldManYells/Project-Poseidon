@@ -9,8 +9,6 @@ import org.bukkit.event.entity.EntityTargetEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityPigZombie extends EntityZombie {
 
@@ -78,7 +76,6 @@ public class EntityPigZombie extends EntityZombie {
     }
 
     private void d(Entity entity) {
-        // CraftBukkit start
         org.bukkit.entity.Entity bukkitTarget = entity == null ? null : entity.getBukkitEntity();
 
         EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.PIG_ZOMBIE_TARGET);
@@ -93,7 +90,6 @@ public class EntityPigZombie extends EntityZombie {
             return;
         }
         entity = ((CraftEntity) event.getTarget()).getHandle();
-        // CraftBukkit end
 
         this.target = entity;
         this.angerLevel = 400 + this.random.nextInt(400);

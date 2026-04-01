@@ -87,11 +87,9 @@ public class BlockSnow extends Block {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (world.a(EnumSkyBlock.BLOCK, i, j, k) > 11) {
-            // CraftBukkit start
             if (CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(i, j, k), 0).isCancelled()) {
                 return;
             }
-            // CraftBukkit end
 
             this.g(world, i, j, k, world.getData(i, j, k));
             world.setTypeId(i, j, k, 0);

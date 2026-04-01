@@ -7,7 +7,6 @@ import com.legacyminecraft.poseidon.world.pathfinding.PathEntity;
 import org.bukkit.craftbukkit.TrigMath;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
-// CraftBukkit end
 
 public class EntityCreature extends EntityLiving {
 
@@ -28,7 +27,6 @@ public class EntityCreature extends EntityLiving {
         float f = 16.0F;
 
         if (this.target == null) {
-            // CraftBukkit start
             Entity target = this.findTarget();
             if (target != null) {
                 EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), target.getBukkitEntity(), EntityTargetEvent.TargetReason.CLOSEST_PLAYER);
@@ -42,13 +40,11 @@ public class EntityCreature extends EntityLiving {
                     }
                 }
             }
-            // CraftBukkit end
 
             if (this.target != null) {
                 this.pathEntity = this.world.findPath(this, this.target, f);
             }
         } else if (!this.target.T()) {
-            // CraftBukkit start
             EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), null, EntityTargetEvent.TargetReason.TARGET_DIED);
             this.world.getServer().getPluginManager().callEvent(event);
 
@@ -59,7 +55,6 @@ public class EntityCreature extends EntityLiving {
                     this.target = ((CraftEntity) event.getTarget()).getHandle();
                 }
             }
-            // CraftBukkit end
         } else {
             float f1 = this.target.f(this);
 

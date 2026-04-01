@@ -8,7 +8,6 @@ import com.legacyminecraft.poseidon.world.math.MathHelper;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemSign extends Item {
 
@@ -56,14 +55,12 @@ public class ItemSign extends Item {
                     world.setTypeIdAndData(i, j, k, Block.WALL_SIGN.id, l);
                 }
 
-                // CraftBukkit start - sign
                 BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, clickedX, clickedY, clickedZ, l == 1 ? Block.SIGN_POST : Block.WALL_SIGN);
 
                 if (event.isCancelled() || !event.canBuild()) {
                     event.getBlockPlaced().setTypeIdAndData(blockState.getTypeId(), blockState.getRawData(), false);
                     return false;
                 }
-                // CraftBukkit end
 
                 --itemstack.count;
                 TileEntitySign tileentitysign = (TileEntitySign) world.getTileEntity(i, j, k);

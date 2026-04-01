@@ -113,7 +113,6 @@ public class BlockSign extends BlockContainer {
 
         super.doPhysics(world, i, j, k, l);
 
-        // CraftBukkit start
         if (com.legacyminecraft.poseidon.world.block.Block.byId[l] != null && com.legacyminecraft.poseidon.world.block.Block.byId[l].isPowerSource()) {
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
             int power = block.getBlockPower();
@@ -121,6 +120,5 @@ public class BlockSign extends BlockContainer {
             BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, power, power);
             world.getServer().getPluginManager().callEvent(eventRedstone);
         }
-        // CraftBukkit end
     }
 }

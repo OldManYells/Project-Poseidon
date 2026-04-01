@@ -10,11 +10,9 @@ public class InventoryCrafting implements IInventory {
     private int b;
     private Container c;
 
-    // CraftBukkit start
     public ItemStack[] getContents() {
         return this.items;
     }
-    // CraftBukkit end
 
     public InventoryCrafting(Container container, int i, int j) {
         int k = i * j;

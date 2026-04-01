@@ -8,8 +8,6 @@ import org.bukkit.craftbukkit.CraftServer;
 
 import java.net.InetSocketAddress;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class ThreadLoginVerifier extends Thread {
 
@@ -19,12 +17,10 @@ public class ThreadLoginVerifier extends Thread {
 
     final LoginProcessHandler loginProcessHandler;  //Project Poseidon
 
-    // CraftBukkit start
     CraftServer server;
 
     public ThreadLoginVerifier(LoginProcessHandler loginProcessHandler, NetLoginHandler netloginhandler, Packet1Login packet1login, CraftServer server) {
         this.server = server;
-        // CraftBukkit end
         this.loginProcessHandler = loginProcessHandler;  //Project Poseidon
 
         this.netLoginHandler = netloginhandler;

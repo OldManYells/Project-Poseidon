@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.entity.EntityHuman;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemSeeds extends Item {
 
@@ -28,14 +27,12 @@ public class ItemSeeds extends Item {
 
                 world.setTypeId(i, j + 1, k, this.id);
 
-                // CraftBukkit start - seeds
                 BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(world, entityhuman, blockState, i, j, k, this.id);
 
                 if (event.isCancelled() || !event.canBuild()) {
                     event.getBlockPlaced().setTypeId(0);
                     return false;
                 }
-                // CraftBukkit end
 
                 --itemstack.count;
                 return true;

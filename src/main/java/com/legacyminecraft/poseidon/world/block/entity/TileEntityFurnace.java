@@ -14,7 +14,6 @@ import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagList;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
-// CraftBukkit end
 
 public class TileEntityFurnace extends TileEntity implements IInventory {
 
@@ -23,12 +22,10 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
     public int ticksForCurrentFuel = 0;
     public int cookTime = 0;
 
-    // CraftBukkit start
     private int lastTick = (int) (System.currentTimeMillis() / 50);
     public ItemStack[] getContents() {
         return this.items;
     }
-    // CraftBukkit end
 
     public TileEntityFurnace() {}
 
@@ -123,7 +120,6 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
         boolean flag = this.burnTime > 0;
         boolean flag1 = false;
 
-        // CraftBukkit start
         int currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
         int elapsedTicks = currentTick - this.lastTick;
         this.lastTick = currentTick;
@@ -139,14 +135,12 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
         } else {
             this.cookTime = 0;
         }
-        // CraftBukkit end
 
         if (this.burnTime > 0) {
             this.burnTime -= elapsedTicks; // CraftBukkit
         }
 
         if (!this.world.isStatic) {
-            // CraftBukkit start - handle multiple elapsed ticks
             if (this.burnTime <= 0 && this.canBurn() && this.items[1] != null) { // CraftBukkit - == to <=
                 CraftItemStack fuel = new CraftItemStack(this.items[1]);
 
@@ -160,7 +154,6 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
                 this.ticksForCurrentFuel = furnaceBurnEvent.getBurnTime();
                 this.burnTime += this.ticksForCurrentFuel;
                 if (this.burnTime > 0 && furnaceBurnEvent.isBurning()) {
-                    // CraftBukkit end
                     flag1 = true;
                     if (this.items[1] != null) {
                         --this.items[1].count;
@@ -171,7 +164,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
                 }
             }
 
-            /* CraftBukkit start - moved up
+            /*
             if (this.f() && this.process()) {
                 ++this.cookTime;
                 if (this.cookTime == 200) {
@@ -182,7 +175,7 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
             } else {
                 this.cookTime = 0;
             }
-            // CraftBukkit end */
+            */
 
             if (flag != this.burnTime > 0) {
                 flag1 = true;
@@ -210,7 +203,6 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
         if (this.canBurn()) {
             ItemStack itemstack = FurnaceRecipes.getInstance().a(this.items[0].getItem().id);
 
-            // CraftBukkit start
             CraftItemStack source = new CraftItemStack(this.items[0]);
             CraftItemStack result = new CraftItemStack(itemstack.cloneItemStack());
 
@@ -232,7 +224,6 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
                 if (this.items[2].damage == itemstack.damage) {
                     this.items[2].count += itemstack.count;
                 }
-                // CraftBukkit end
             }
 
             --this.items[0].count;

@@ -28,7 +28,6 @@ public class PropertyManager {
         }
     }
 
-    // CraftBukkit start
     private joptsimple.OptionSet options = null;
 
     public PropertyManager(final joptsimple.OptionSet options) {
@@ -44,7 +43,6 @@ public class PropertyManager {
 
         return value;
     }
-    // CraftBukkit end
 
     public void a() {
         a.log(Level.INFO, "Generating new properties file");

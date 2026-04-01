@@ -43,7 +43,6 @@ public class BlockSapling extends BlockFlower {
 
         world.setRawTypeId(i, j, k, 0);
 
-        // CraftBukkit start - fixes client updates on recently grown trees
         boolean grownTree;
         BlockChangeWithNotify delegate = new BlockChangeWithNotify(world);
 
@@ -62,14 +61,12 @@ public class BlockSapling extends BlockFlower {
         if (!grownTree) {
             world.setRawTypeIdAndData(i, j, k, this.id, l);
         }
-        // CraftBukkit end
     }
 
     protected int a_(int i) {
         return i & 3;
     }
 
-    // CraftBukkit start
     private class BlockChangeWithNotify implements BlockChangeDelegate {
         World world;
 
@@ -87,5 +84,4 @@ public class BlockSapling extends BlockFlower {
             return this.world.getTypeId(x, y, z);
         }
     }
-    // CraftBukkit end
 }

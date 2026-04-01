@@ -23,10 +23,8 @@ import org.bukkit.generator.ChunkGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-// CraftBukkit start
 
 public class WorldServer extends World implements BlockChangeDelegate {
-    // CraftBukkit end
 
     public ChunkProviderServer chunkProviderServer;
     public boolean weirdIsOpCache = false;
@@ -34,7 +32,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
     public final MinecraftServer server; // CraftBukkit - private -> public final
     private EntityList G = new EntityList();
 
-    // CraftBukkit start - change signature
     public WorldServer(MinecraftServer minecraftserver, IDataManager idatamanager, String s, int i, long j, org.bukkit.World.Environment env, ChunkGenerator gen) {
         super(idatamanager, s, j, WorldProvider.byDimension(env.getId()), gen, env);
         this.server = minecraftserver;
@@ -47,14 +44,13 @@ public class WorldServer extends World implements BlockChangeDelegate {
     public final int dimension;
     public EntityTracker tracker;
     public PlayerManager manager;
-    // CraftBukkit end
 
     public void entityJoinedWorld(Entity entity, boolean flag) {
-        /* CraftBukkit start - We prevent spawning in general, so this butchering is not needed
+        /*
         if (!this.server.spawnAnimals && (entity instanceof EntityAnimal || entity instanceof EntityWaterAnimal)) {
             entity.die();
         }
-        // CraftBukkit end */
+        */
 
         if (entity.passenger == null || !(entity.passenger instanceof EntityHuman)) {
             super.entityJoinedWorld(entity, flag);
@@ -68,7 +64,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
     protected IChunkProvider b() {
         IChunkLoader ichunkloader = this.w.a(this.worldProvider);
 
-        // CraftBukkit start
         InternalChunkGenerator gen;
 
         if (this.generator != null) {
@@ -82,7 +77,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
         }
 
         this.chunkProviderServer = new ChunkProviderServer(this, ichunkloader, gen);
-        // CraftBukkit end
 
         return this.chunkProviderServer;
     }
@@ -128,7 +122,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
     }
 
     public boolean strikeLightning(Entity entity) {
-        // CraftBukkit start
         LightningStrikeEvent lightning = new LightningStrikeEvent(this.getWorld(), (org.bukkit.entity.LightningStrike) entity.getBukkitEntity());
         this.getServer().getPluginManager().callEvent(lightning);
 
@@ -138,7 +131,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
 
         if (super.strikeLightning(entity)) {
             this.server.serverConfigurationManager.sendPacketNearby(entity.locX, entity.locY, entity.locZ, 512.0D, this.dimension, new Packet71Weather(entity));
-            // CraftBukkit end
             return true;
         } else {
             return false;
@@ -152,7 +144,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
         this.server.getTracker(this.dimension).sendPacketToEntity(entity, packet38entitystatus);
     }
 
-    //Project Poseidon Start
     public Explosion createExplosion(Entity entity, double d0, double d1, double d2, float f, boolean flag, EntityDamageEvent.DamageCause customDamageCause) {
         Explosion explosion = super.createExplosion(entity, d0, d1, d2, f, flag, customDamageCause);
 
@@ -163,10 +154,8 @@ public class WorldServer extends World implements BlockChangeDelegate {
 
         return explosion;
     }
-    //Project Poseidon End
 
     public Explosion createExplosion(Entity entity, double d0, double d1, double d2, float f, boolean flag) {
-        // CraftBukkit start
         Explosion explosion = super.createExplosion(entity, d0, d1, d2, f, flag);
 
         if (explosion.wasCanceled) {
@@ -179,7 +168,6 @@ public class WorldServer extends World implements BlockChangeDelegate {
         explosion.a(false);
         */
         this.server.serverConfigurationManager.sendPacketNearby(d0, d1, d2, 64.0D, this.dimension, new Packet60Explosion(d0, d1, d2, f, explosion.blocks));
-        // CraftBukkit end
         return explosion;
     }
 
@@ -198,13 +186,11 @@ public class WorldServer extends World implements BlockChangeDelegate {
 
         super.i();
         if (flag != this.v()) {
-            // CraftBukkit start - only sending weather packets to those affected
             for (int i = 0; i < this.players.size(); ++i) {
                 if (((EntityPlayer) this.players.get(i)).world == this) {
                     ((EntityPlayer) this.players.get(i)).netServerHandler.sendPacket(new Packet70Bed(flag ? 2 : 1));
                 }
             }
-            // CraftBukkit end
         }
     }
     

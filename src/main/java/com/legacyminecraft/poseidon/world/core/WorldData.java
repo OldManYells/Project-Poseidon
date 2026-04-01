@@ -134,7 +134,6 @@ public class WorldData {
         return this.d;
     }
 
-    // Poseidon start
     public float getYaw() {
         return this.yaw;
     }
@@ -143,7 +142,6 @@ public class WorldData {
         return this.pitch;
     }
 
-    // Poseidon end
 
     public long f() {
         return this.e;
@@ -171,7 +169,6 @@ public class WorldData {
         this.d = k;
     }
 
-    // Poseidon start
     public void setSpawn(int i, int j, int k, float yaw, float pitch) {
         this.b = i;
         this.c = j;
@@ -180,7 +177,6 @@ public class WorldData {
         this.pitch = pitch;
     }
 
-    // Poseidon end
 
     public void a(String s) {
         this.name = s;

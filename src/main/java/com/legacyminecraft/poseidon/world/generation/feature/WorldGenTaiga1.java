@@ -12,7 +12,6 @@ public class WorldGenTaiga1 extends WorldGenerator {
     }
 
     public boolean a(World world, Random random, int i, int j, int k) {
-        // CraftBukkit start
         // sk: The idea is to have (our) WorldServer implement
         // BlockChangeDelegate and then we can implicitly cast World to
         // WorldServer (a safe cast, AFAIK) and no code will be broken. This
@@ -21,7 +20,6 @@ public class WorldGenTaiga1 extends WorldGenerator {
     }
 
     public boolean generate(BlockChangeDelegate world, Random random, int i, int j, int k) {
-        // CraftBukkit end
         int l = random.nextInt(5) + 7;
         int i1 = l - random.nextInt(2) - 3;
         int j1 = l - i1;

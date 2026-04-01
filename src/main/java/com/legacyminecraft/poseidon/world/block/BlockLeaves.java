@@ -126,12 +126,10 @@ public class BlockLeaves extends BlockLeavesBase {
     }
 
     private void g(World world, int i, int j, int k) {
-        // CraftBukkit start
         LeavesDecayEvent event = new LeavesDecayEvent(world.getWorld().getBlockAt(i, j, k));
         world.getServer().getPluginManager().callEvent(event);
 
         if (event.isCancelled()) return;
-        // CraftBukkit end
 
         this.g(world, i, j, k, world.getData(i, j, k));
         world.setTypeId(i, j, k, 0);

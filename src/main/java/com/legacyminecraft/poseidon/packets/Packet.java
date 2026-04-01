@@ -113,7 +113,6 @@ public abstract class Packet {
             return null;
         }
 
-        // CraftBukkit start
         catch (java.net.SocketTimeoutException exception) {
             System.out.println("Read timed out");
             return null;
@@ -123,7 +122,6 @@ public abstract class Packet {
             }
             return null;
         }
-        // CraftBukkit end
 
         PacketCounter packetcounter = (PacketCounter) e.get(Integer.valueOf(i));
 

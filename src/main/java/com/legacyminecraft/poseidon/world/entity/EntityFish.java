@@ -17,8 +17,6 @@ import org.bukkit.event.player.PlayerFishEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityFish extends Entity {
 
@@ -200,7 +198,6 @@ public class EntityFish extends Entity {
 
             if (movingobjectposition != null) {
                 if (movingobjectposition.entity != null) {
-                    // CraftBukkit start
                     // TODO add EntityDamagedByProjectileEvent : fishing hook?
                     boolean stick;
                     if (movingobjectposition.entity instanceof EntityLiving) {
@@ -221,7 +218,6 @@ public class EntityFish extends Entity {
                         stick = movingobjectposition.entity.damageEntity(this.owner, 0);
                     }
                     if (!stick) {
-                        // CraftBukkit end
                         this.c = movingobjectposition.entity;
                     }
                 } else {
@@ -348,7 +344,6 @@ public class EntityFish extends Entity {
         byte b0 = 0;
 
         if (this.c != null) {
-            // CraftBukkit start
             PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) this.owner.getBukkitEntity(), this.c.getBukkitEntity(), PlayerFishEvent.State.CAUGHT_ENTITY);
             this.world.getServer().getPluginManager().callEvent(playerFishEvent);
 
@@ -357,7 +352,6 @@ public class EntityFish extends Entity {
                 this.owner.hookedFish = null;
                 return 0;
             }
-            // CraftBukkit end
             double d0 = this.owner.locX - this.locX;
             double d1 = this.owner.locY - this.locY;
             double d2 = this.owner.locZ - this.locZ;
@@ -370,7 +364,6 @@ public class EntityFish extends Entity {
             b0 = 3;
         } else if (this.k > 0) {
             EntityItem entityitem = new EntityItem(this.world, this.locX, this.locY, this.locZ, new ItemStack(Item.RAW_FISH));
-            // CraftBukkit start
             PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) this.owner.getBukkitEntity(), entityitem.getBukkitEntity(), PlayerFishEvent.State.CAUGHT_FISH);
             this.world.getServer().getPluginManager().callEvent(playerFishEvent);
 
@@ -379,7 +372,6 @@ public class EntityFish extends Entity {
                 this.owner.hookedFish = null;
                 return 0;
             }
-            // CraftBukkit end
             double d5 = this.owner.locX - this.locX;
             double d6 = this.owner.locY - this.locY;
             double d7 = this.owner.locZ - this.locZ;
@@ -395,7 +387,6 @@ public class EntityFish extends Entity {
         }
 
         if (this.h) {
-            // CraftBukkit start
             PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) this.owner.getBukkitEntity(), null, PlayerFishEvent.State.IN_GROUND);
             this.world.getServer().getPluginManager().callEvent(playerFishEvent);
 
@@ -404,16 +395,13 @@ public class EntityFish extends Entity {
                 this.owner.hookedFish = null;
                 return 0;
             }
-            // CraftBukkit end
             b0 = 2;
         }
 
-        // CraftBukkit start
         if (b0 == 0) {
             PlayerFishEvent playerFishEvent = new PlayerFishEvent((org.bukkit.entity.Player) this.owner.getBukkitEntity(), null, PlayerFishEvent.State.FAILED_ATTEMPT);
             this.world.getServer().getPluginManager().callEvent(playerFishEvent);
         }
-        // CraftBukkit end
         this.die();
         this.owner.hookedFish = null;
         return b0;

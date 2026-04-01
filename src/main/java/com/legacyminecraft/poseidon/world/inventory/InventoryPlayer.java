@@ -19,7 +19,6 @@ public class InventoryPlayer implements IInventory {
     private ItemStack f;
     public boolean e = false;
 
-    // CraftBukkit start
     public ItemStack[] getContents() {
         return this.items;
     }
@@ -27,7 +26,6 @@ public class InventoryPlayer implements IInventory {
     public ItemStack[] getArmorContents() {
         return this.armor;
     }
-    // CraftBukkit end
 
     public InventoryPlayer(EntityHuman entityhuman) {
         this.d = entityhuman;
@@ -61,7 +59,6 @@ public class InventoryPlayer implements IInventory {
         return -1;
     }
 
-    // CraftBukkit start - watch method above! :D
     public int canHold(ItemStack itemstack) {
         int remains = itemstack.count;
         for (int i = 0; i < this.items.length; ++i) {
@@ -75,7 +72,6 @@ public class InventoryPlayer implements IInventory {
         }
         return itemstack.count - remains;
     }
-    // CraftBukkit end
 
     private int k() {
         for (int i = 0; i < this.items.length; ++i) {

@@ -117,7 +117,6 @@ public class BlockTrapdoor extends Block {
                 this.g(world, i, j, k, i1);
             }
 
-            // CraftBukkit start
             if (l > 0 && Block.byId[l] != null && Block.byId[l].isPowerSource()) {
                 org.bukkit.World bworld = world.getWorld();
                 org.bukkit.block.Block block = bworld.getBlockAt(i, j, k);
@@ -131,7 +130,6 @@ public class BlockTrapdoor extends Block {
 
                     this.a(world, i, j, k, eventRedstone.getNewCurrent() > 0);
                 }
-                // CraftBukkit end
             }
         }
     }

@@ -294,7 +294,6 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
         return new File(this.d, s + ".dat");
     }
 
-    // CraftBukkit start
     public UUID getUUID() {
         if (uuid != null) return uuid;
         try {
@@ -315,5 +314,4 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
             return null;
         }
     }
-    // CraftBukkit end
 }

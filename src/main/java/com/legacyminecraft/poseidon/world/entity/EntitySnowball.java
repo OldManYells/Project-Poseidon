@@ -16,8 +16,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntitySnowball extends Entity {
 
@@ -157,7 +155,6 @@ public class EntitySnowball extends Entity {
         }
 
         if (movingobjectposition != null) {
-            // CraftBukkit start
             ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
             this.world.getServer().getPluginManager().callEvent(phe);
 
@@ -185,7 +182,6 @@ public class EntitySnowball extends Entity {
                     ;
                 }
             }
-            // CraftBukkit end
 
             for (int k = 0; k < 8; ++k) {
                 this.world.a("snowballpoof", this.locX, this.locY, this.locZ, 0.0D, 0.0D, 0.0D);

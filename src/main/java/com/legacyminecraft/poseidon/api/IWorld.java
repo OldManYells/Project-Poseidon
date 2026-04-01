@@ -393,7 +393,6 @@ public interface IWorld {
      */
     public boolean setSpawnLocation(int x, int y, int z);
 
-    // Poseidon start
 
     /**
      * Sets the spawn location of the world
@@ -407,7 +406,6 @@ public interface IWorld {
      */
     public boolean setSpawnLocation(int x, int y, int z, float yaw, float pitch);
 
-    // Poseidon end
 
     /**
      * Gets the relative in-game time of this world.

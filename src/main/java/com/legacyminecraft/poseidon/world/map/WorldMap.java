@@ -11,8 +11,6 @@ import org.bukkit.craftbukkit.map.CraftMapView;
 
 import java.util.*;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class WorldMap extends WorldMapBase {
 
@@ -26,22 +24,17 @@ public class WorldMap extends WorldMapBase {
     private Map j = new HashMap();
     public List i = new ArrayList();
 
-    // CraftBukkit start
     public final CraftMapView mapView;
     private CraftServer server;
     private UUID uniqueId = null;
-    // CraftBukkit end
 
     public WorldMap(String s) {
         super(s);
-        // CraftBukkit start
         mapView = new CraftMapView(this);
         server = (CraftServer) Bukkit.getServer();
-        // CraftBukkit end
     }
 
     public void a(NBTTagCompound nbttagcompound) {
-        // CraftBukkit start
         byte dimension = nbttagcompound.c("dimension");
 
         if (dimension >= 10) {
@@ -64,7 +57,6 @@ public class WorldMap extends WorldMapBase {
         }
 
         this.map = dimension;
-        // CraftBukkit end
         this.b = nbttagcompound.e("xCenter");
         this.c = nbttagcompound.e("zCenter");
         this.e = nbttagcompound.c("scale");
@@ -105,7 +97,6 @@ public class WorldMap extends WorldMapBase {
     }
 
     public void b(NBTTagCompound nbttagcompound) {
-        // CraftBukkit start
         if (this.map >= 10) {
             if (this.uniqueId == null) {
                 for (org.bukkit.World world : server.getWorlds()) {
@@ -123,7 +114,6 @@ public class WorldMap extends WorldMapBase {
                 nbttagcompound.setLong("UUIDMost", this.uniqueId.getMostSignificantBits());
             }
         }
-        // CraftBukkit end
         nbttagcompound.a("dimension", this.map);
         nbttagcompound.a("xCenter", this.b);
         nbttagcompound.a("zCenter", this.c);

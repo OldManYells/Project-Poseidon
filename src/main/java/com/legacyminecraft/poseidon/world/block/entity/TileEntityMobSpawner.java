@@ -64,12 +64,10 @@ public class TileEntityMobSpawner extends TileEntity {
                         return;
                     }
 
-                    // CraftBukkit start - The world we're spawning in accepts this creature
                     boolean isAnimal = entityliving instanceof EntityAnimal || entityliving instanceof EntityWaterAnimal;
                     if ((isAnimal && !this.world.allowAnimals) || (!isAnimal && !this.world.allowMonsters)) {
                         return;
                     }
-                    // CraftBukkit end
 
 
                     // Check mob cap within the spawning radius
@@ -80,7 +78,6 @@ public class TileEntityMobSpawner extends TileEntity {
                         return;
                     }
 
-                    //Poseidon Start - Ensure the mob cound of the specific type of mob is under the defined limit within the area
                     if(poseidonAreaLimit) {
                         double chunkSize = 16.0D;
                         AxisAlignedBB searchArea = AxisAlignedBB.b(this.x - poseidonChunkRadius * chunkSize, 0.0D, this.z - poseidonChunkRadius * chunkSize, this.x + poseidonChunkRadius * chunkSize, 128, this.z + poseidonChunkRadius * chunkSize);
@@ -90,7 +87,6 @@ public class TileEntityMobSpawner extends TileEntity {
                             return;
                         }
                     }
-                    //Poseidon End
 
                     if (entityliving != null) {
                         double d3 = (double) this.x + (this.world.random.nextDouble() - this.world.random.nextDouble()) * 4.0D;

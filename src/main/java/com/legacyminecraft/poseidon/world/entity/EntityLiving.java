@@ -19,8 +19,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public abstract class EntityLiving extends Entity {
 
@@ -127,14 +125,12 @@ public abstract class EntityLiving extends Entity {
         }
 
         if (this.T() && this.K()) {
-            // CraftBukkit start
             EntityDamageEvent event = new EntityDamageEvent(this.getBukkitEntity(), EntityDamageEvent.DamageCause.SUFFOCATION, 1);
             this.world.getServer().getPluginManager().callEvent(event);
 
             if (!event.isCancelled()) {
                 this.damageEntity((Entity) null, event.getDamage());
             }
-            // CraftBukkit end
         }
 
         if (this.fireProof || this.world.isStatic) {
@@ -156,7 +152,6 @@ public abstract class EntityLiving extends Entity {
                     this.world.a("bubble", this.locX + (double) f, this.locY + (double) f1, this.locZ + (double) f2, this.motX, this.motY, this.motZ);
                 }
 
-                // CraftBukkit start
                 EntityDamageEvent event = new EntityDamageEvent(this.getBukkitEntity(), EntityDamageEvent.DamageCause.DROWNING, 2);
                 this.world.getServer().getPluginManager().callEvent(event);
 
@@ -165,7 +160,6 @@ public abstract class EntityLiving extends Entity {
                     this.damageEntity((Entity) null, event.getDamage());
                     if (PoseidonConfig.getInstance().getBoolean("settings.fix-drowning-push-down.enabled", true)) this.velocityChanged = vc;
                 }
-                // CraftBukkit end
             }
 
             this.fireTicks = 0;
@@ -326,7 +320,6 @@ public abstract class EntityLiving extends Entity {
         super.b(f, f1);
     }
 
-    // CraftBukkit start - delegate so we can handle providing a reason for health being regained
     public void b(int i) {
         b(i, RegainReason.CUSTOM);
     }
@@ -339,7 +332,6 @@ public abstract class EntityLiving extends Entity {
             if (!event.isCancelled()) {
                 this.health += event.getAmount();
             }
-            // CraftBukkit end
             if (this.health > 20) {
                 this.health = 20;
             }
@@ -466,7 +458,6 @@ public abstract class EntityLiving extends Entity {
     protected void q() {
         int i = this.j();
 
-        // CraftBukkit start - whole method
         List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
         int count = this.random.nextInt(3);
 
@@ -482,7 +473,6 @@ public abstract class EntityLiving extends Entity {
         for (org.bukkit.inventory.ItemStack stack: event.getDrops()) {
             bworld.dropItemNaturally(entity.getLocation(), stack);
         }
-        // CraftBukkit end
     }
 
     protected int j() {
@@ -494,14 +484,12 @@ public abstract class EntityLiving extends Entity {
         int i = (int) Math.ceil((double) (f - 3.0F));
 
         if (i > 0) {
-            // CraftBukkit start
             EntityDamageEvent event = new EntityDamageEvent(this.getBukkitEntity(), EntityDamageEvent.DamageCause.FALL, i);
             this.world.getServer().getPluginManager().callEvent(event);
 
             if (!event.isCancelled() && event.getDamage() != 0) {
                 this.damageEntity((Entity) null, event.getDamage());
             }
-            // CraftBukkit end
 
             int j = this.world.getTypeId(MathHelper.floor(this.locX), MathHelper.floor(this.locY - 0.20000000298023224D - (double) this.height), MathHelper.floor(this.locZ));
 
@@ -867,7 +855,6 @@ public abstract class EntityLiving extends Entity {
     }
 
     protected void Y() {
-        // CraftBukkit start
         EntityDamageByBlockEvent event = new EntityDamageByBlockEvent(null, this.getBukkitEntity(), EntityDamageEvent.DamageCause.VOID, 4);
         this.world.getServer().getPluginManager().callEvent(event);
 
@@ -876,7 +863,6 @@ public abstract class EntityLiving extends Entity {
         }
 
         this.damageEntity((Entity) null, event.getDamage());
-        // CraftBukkit end
     }
 
     public Vec3D Z() {

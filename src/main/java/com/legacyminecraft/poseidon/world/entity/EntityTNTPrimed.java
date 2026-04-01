@@ -7,7 +7,6 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Explosive;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
-// CraftBukkit end
 
 public class EntityTNTPrimed extends Entity {
 
@@ -64,10 +63,8 @@ public class EntityTNTPrimed extends Entity {
 
         if (this.fuseTicks-- <= 0) {
             if (!this.world.isStatic) {
-                // CraftBukkit start - Need to reverse the order of the explosion and the entity death so we have a location for the event.
                 this.explode();
                 this.die();
-                // CraftBukkit end
             } else {
                 this.die();
             }
@@ -77,7 +74,6 @@ public class EntityTNTPrimed extends Entity {
     }
 
     private void explode() {
-        // CraftBukkit start
         // float f = 4.0F;
 
         CraftServer server = this.world.getServer();
@@ -89,7 +85,6 @@ public class EntityTNTPrimed extends Entity {
             // give 'this' instead of (Entity) null so we know what causes the damage
             this.world.createExplosion(this, this.locX, this.locY, this.locZ, event.getRadius(), event.getFire());
         }
-        // CraftBukkit end
     }
 
     protected void b(NBTTagCompound nbttagcompound) {

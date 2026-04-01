@@ -15,8 +15,6 @@ import org.bukkit.event.entity.EntityInteractEvent;
 import java.util.List;
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockPressurePlate extends Block {
 
@@ -104,7 +102,6 @@ public class BlockPressurePlate extends Block {
             flag1 = true;
         }
 
-        // CraftBukkit start - Interact Pressure Plate
         org.bukkit.World bworld = world.getWorld();
         org.bukkit.plugin.PluginManager manager = world.getServer().getPluginManager();
 
@@ -134,7 +131,6 @@ public class BlockPressurePlate extends Block {
 
             flag1 = eventRedstone.getNewCurrent() > 0;
         }
-        // CraftBukkit end
 
         if (flag1 && !flag) {
             world.setData(i, j, k, 1);

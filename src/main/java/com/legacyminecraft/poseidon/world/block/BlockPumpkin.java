@@ -53,7 +53,6 @@ public class BlockPumpkin extends Block {
         world.setData(i, j, k, l);
     }
 
-    // CraftBukkit start
     public void doPhysics(World world, int i, int j, int k, int l) {
         if (com.legacyminecraft.poseidon.world.block.Block.byId[l] != null && com.legacyminecraft.poseidon.world.block.Block.byId[l].isPowerSource()) {
             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
@@ -63,5 +62,4 @@ public class BlockPumpkin extends Block {
             world.getServer().getPluginManager().callEvent(eventRedstone);
         }
     }
-    // CraftBukkit end
 }

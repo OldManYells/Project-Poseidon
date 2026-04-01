@@ -17,8 +17,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityFireball extends Entity {
 
@@ -53,7 +51,6 @@ public class EntityFireball extends Entity {
         this.setPosition(this.locX, this.locY, this.locZ);
         this.height = 0.0F;
         this.motX = this.motY = this.motZ = 0.0D;
-        // CraftBukkit start (added setDirection method)
         this.setDirection(d0, d1, d2);
     }
 
@@ -135,12 +132,9 @@ public class EntityFireball extends Entity {
         }
 
         if (movingobjectposition != null) {
-            // CraftBukkit start
             ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
             this.world.getServer().getPluginManager().callEvent(phe);
-            // CraftBukkit end
             if (!this.world.isStatic) {
-                // CraftBukkit start
                 if (movingobjectposition.entity != null) {
                     boolean stick;
                     if (movingobjectposition.entity instanceof EntityLiving) {
@@ -174,7 +168,6 @@ public class EntityFireball extends Entity {
                     // give 'this' instead of (Entity) null so we know what causes the damage
                     this.world.createExplosion(this, this.locX, this.locY, this.locZ, event.getRadius(), event.getFire());
                 }
-                // CraftBukkit end
             }
 
             this.die();

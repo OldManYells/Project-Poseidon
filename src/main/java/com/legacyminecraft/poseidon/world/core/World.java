@@ -35,8 +35,6 @@ import org.bukkit.generator.ChunkGenerator;
 
 import java.util.*;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class World implements IBlockAccess {
 
@@ -90,7 +88,6 @@ public class World implements IBlockAccess {
         return this.worldProvider.b;
     }
 
-    // CraftBukkit start
     private final CraftWorld world;
     public boolean pvpMode;
     public boolean keepSpawnInMemory = true;
@@ -126,7 +123,6 @@ public class World implements IBlockAccess {
         this.generator = gen;
         this.world = new CraftWorld((WorldServer) this, gen, env);
         tileEntitiesToUnload = new ArrayList<TileEntity>();
-        // CraftBukkit end
 
         this.Q = this.random.nextInt(12000);
         this.R = new ArrayList();
@@ -177,7 +173,6 @@ public class World implements IBlockAccess {
 
         int j;
 
-        // CraftBukkit start
         if (this.generator != null) {
             Random rand = new Random(this.getSeed());
             Location spawn = this.generator.getFixedSpawnLocation(((WorldServer) this).getWorld(), rand);
@@ -210,7 +205,6 @@ public class World implements IBlockAccess {
             }
         }
 
-        // CraftBukkit end
 
         this.worldData.setSpawn(i, b0, j);
         this.isLoading = false;
@@ -294,7 +288,6 @@ public class World implements IBlockAccess {
         return this.getChunkAt(i >> 4, j >> 4);
     }
 
-    // CraftBukkit start
     public Chunk getChunkAt(int i, int j) {
         Chunk result = null;
         synchronized (this.chunkLock) {
@@ -307,7 +300,6 @@ public class World implements IBlockAccess {
         }
         return result;
     }
-    // CraftBukkit end
 
     public boolean setRawTypeIdAndData(int i, int j, int k, int l, int i1) {
         if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
@@ -397,7 +389,6 @@ public class World implements IBlockAccess {
     }
 
     public boolean setTypeId(int i, int j, int k, int l) {
-        // CraftBukkit start
         int old = this.getTypeId(i, j, k);
         if (this.setRawTypeId(i, j, k, l)) {
             this.update(i, j, k, l == 0 ? old : l);
@@ -405,11 +396,9 @@ public class World implements IBlockAccess {
         } else {
             return false;
         }
-        // CraftBukkit end
     }
 
     public boolean setTypeIdAndData(int i, int j, int k, int l, int i1) {
-        // CraftBukkit start
         int old = this.getTypeId(i, j, k);
         if (this.setRawTypeIdAndData(i, j, k, l, i1)) {
             this.update(i, j, k, l == 0 ? old : l);
@@ -417,7 +406,6 @@ public class World implements IBlockAccess {
         } else {
             return false;
         }
-        // CraftBukkit end
     }
 
     public void notify(int i, int j, int k) {
@@ -468,7 +456,6 @@ public class World implements IBlockAccess {
             Block block = Block.byId[this.getTypeId(i, j, k)];
 
             if (block != null) {
-                // CraftBukkit start
                 CraftWorld world = ((WorldServer) this).getWorld();
                 if (world != null) {
                     BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(i, j, k), l);
@@ -478,7 +465,6 @@ public class World implements IBlockAccess {
                         return;
                     }
                 }
-                // CraftBukkit end
 
                 block.doPhysics(this, i, j, k, l);
             }
@@ -858,14 +844,12 @@ public class World implements IBlockAccess {
         return true;
     }
 
-    // CraftBukkit start - used for entities other than creatures
     public boolean addEntity(Entity entity) {
         return this.addEntity(entity, SpawnReason.CUSTOM); // Set reason as Custom by default
     }
 
 
     public boolean addEntity(Entity entity, SpawnReason spawnReason) { // Changed signature, added SpawnReason
-    // CraftBukkit end
         int i = MathHelper.floor(entity.locX / 16.0D);
         int j = MathHelper.floor(entity.locZ / 16.0D);
         boolean flag = false;
@@ -874,7 +858,6 @@ public class World implements IBlockAccess {
             flag = true;
         }
 
-        // CraftBukkit start
         if (entity instanceof EntityLiving && !(entity instanceof EntityPlayer)) {
             CreatureSpawnEvent event = CraftEventFactory.callCreatureSpawnEvent((EntityLiving) entity, spawnReason);
 
@@ -887,7 +870,6 @@ public class World implements IBlockAccess {
                 return false;
             }
         }
-        // CraftBukkit end
 
         if (!flag && !this.isChunkLoaded(i, j)) {
             return false;
@@ -1088,11 +1070,9 @@ public class World implements IBlockAccess {
 
         for (i = 0; i < this.e.size(); ++i) {
             entity = (Entity) this.e.get(i);
-            // CraftBukkit start - fixed an NPE
             if (entity == null) {
                 continue;
             }
-            // CraftBukkit end
             entity.m_();
             if (entity.dead) {
                 this.e.remove(i--);
@@ -1168,12 +1148,10 @@ public class World implements IBlockAccess {
 
         this.L = false;
 
-        // Craftbukkit start
         if (!tileEntitiesToUnload.isEmpty()) {
             this.c.removeAll(tileEntitiesToUnload);
             this.tileEntitiesToUnload.clear();
         }
-        // Craftbukkit end
 
         if (!this.G.isEmpty()) {
             Iterator iterator1 = this.G.iterator();
@@ -1191,11 +1169,9 @@ public class World implements IBlockAccess {
 
                     if (chunk1 != null) {
                         chunk1.placeTileEntity(tileentity1.x & 15, tileentity1.y, tileentity1.z & 15, tileentity1);
-                        // CraftBukkit start - moved in from above
                         if (!this.c.contains(tileentity1)) {
                             this.c.add(tileentity1);
                         }
-                        // CraftBukkit end
                     }
 
                     this.notify(tileentity1.x, tileentity1.y, tileentity1.z);
@@ -1497,7 +1473,6 @@ public class World implements IBlockAccess {
         return this.createExplosion(entity, d0, d1, d2, f, false);
     }
 
-    //Project Poseidon Start
     public Explosion createExplosion(Entity entity, double d0, double d1, double d2, float f, boolean flag, EntityDamageEvent.DamageCause customDamageCause) {
         Explosion explosion = new Explosion(this, entity, d0, d1, d2, f);
         explosion.customDamageCause = customDamageCause;
@@ -1507,7 +1482,6 @@ public class World implements IBlockAccess {
         explosion.a(true);
         return explosion;
     }
-    //Project Poseidon End
 
     public Explosion createExplosion(Entity entity, double d0, double d1, double d2, float f, boolean flag) {
         Explosion explosion = new Explosion(this, entity, d0, d1, d2, f);
@@ -1746,11 +1720,9 @@ public class World implements IBlockAccess {
             }
         }
 
-        // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
         if ((this.allowMonsters || this.allowAnimals) && (this instanceof WorldServer && this.getServer().getHandle().players.size() > 0)) {
             SpawnerCreature.spawnEntities(this, this.allowMonsters, this.allowAnimals);
         }
-        // CraftBukkit end
 
         this.chunkProvider.unloadChunks();
         int j = this.a(1.0F);
@@ -1800,13 +1772,11 @@ public class World implements IBlockAccess {
                 --i;
                 this.worldData.setThunderDuration(i);
                 if (i <= 0) {
-                    // CraftBukkit start
                     ThunderChangeEvent thunder = new ThunderChangeEvent(this.getWorld(), !this.worldData.isThundering());
                     this.getServer().getPluginManager().callEvent(thunder);
                     if (!thunder.isCancelled()) {
                         this.worldData.setThundering(!this.worldData.isThundering());
                     }
-                    // CraftBukkit end
                 }
             }
 
@@ -1822,14 +1792,12 @@ public class World implements IBlockAccess {
                 --j;
                 this.worldData.setWeatherDuration(j);
                 if (j <= 0) {
-                    // CraftBukkit start
                     WeatherChangeEvent weather = new WeatherChangeEvent(this.getWorld(), !this.worldData.hasStorm());
                     this.getServer().getPluginManager().callEvent(weather);
 
                     if (!weather.isCancelled()) {
                         this.worldData.setStorm(!this.worldData.hasStorm());
                     }
-                    // CraftBukkit end
                 }
             }
 
@@ -1866,7 +1834,6 @@ public class World implements IBlockAccess {
     }
 
     private void y() {
-        // CraftBukkit start
         WeatherChangeEvent weather = new WeatherChangeEvent(this.getWorld(), false);
         this.getServer().getPluginManager().callEvent(weather);
 
@@ -1880,7 +1847,6 @@ public class World implements IBlockAccess {
             this.worldData.setThunderDuration(0);
             this.worldData.setThundering(false);
         }
-        // CraftBukkit end
     }
 
     protected void j() {
@@ -1964,7 +1930,6 @@ public class World implements IBlockAccess {
                     l1 = chunk.getTypeId(l, k1 - 1, j1);
                     i2 = chunk.getTypeId(l, k1, j1);
                     if (this.v() && i2 == 0 && Block.SNOW.canPlace(this, l + i, k1, j1 + j) && l1 != 0 && l1 != Block.ICE.id && Block.byId[l1].material.isSolid()) {
-                        // CraftBukkit start
                         BlockState blockState = this.getWorld().getBlockAt(l + i, k1, j1 + j).getState();
                         blockState.setTypeId(Block.SNOW.id);
 
@@ -1973,10 +1938,8 @@ public class World implements IBlockAccess {
                         if (!snow.isCancelled()) {
                             blockState.update(true);
                         }
-                        // CraftBukkit end
                     }
 
-                    // CraftBukkit start
                         if (l1 == Block.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
                             BlockState blockState = this.getWorld().getBlockAt(l + i, k1 - 1, j1 + j).getState();
                             blockState.setTypeId(Block.ICE.id);
@@ -1987,7 +1950,6 @@ public class World implements IBlockAccess {
                                 blockState.update(true);
                             }
                     }
-                    // CraftBukkit end
                 }
             }
 
@@ -2100,17 +2062,13 @@ public class World implements IBlockAccess {
     }
 
     public void a(List list) {
-        // CraftBukkit start
         Entity entity = null;
         for (int i = 0; i < list.size(); ++i) {
             entity = (Entity) list.get(i);
-            // CraftBukkit start - fixed an NPE
             if (entity == null) {
                 continue;
             }
-            // CraftBukkit end
             this.entityList.add(entity);
-            // CraftBukkit end
             this.c((Entity) list.get(i));
         }
     }
@@ -2141,12 +2099,10 @@ public class World implements IBlockAccess {
             defaultReturn = i > 0 && block == null && block1.canPlace(this, j, k, l, i1); // CraftBukkit
         }
 
-        // CraftBukkit start
         BlockCanBuildEvent event = new BlockCanBuildEvent(this.getWorld().getBlockAt(j, k, l), i, defaultReturn);
         this.getServer().getPluginManager().callEvent(event);
 
         return event.isBuildable();
-        // CraftBukkit end
     }
 
     public PathEntity findPath(Entity entity, Entity entity1, float f) {
@@ -2215,11 +2171,9 @@ public class World implements IBlockAccess {
 
         for (int i = 0; i < this.players.size(); ++i) {
             EntityHuman entityhuman1 = (EntityHuman) this.players.get(i);
-            // CraftBukkit start - fixed an NPE
             if (entityhuman1 == null || entityhuman1.dead) {
                 continue;
             }
-            // CraftBukkit end
             double d5 = entityhuman1.e(d0, d1, d2);
 
             if ((d3 < 0.0D || d5 < d3 * d3) && (d4 == -1.0D || d5 < d4)) {
@@ -2363,7 +2317,6 @@ public class World implements IBlockAccess {
         }
     }
 
-    // CraftBukkit start
     // Calls the method that checks to see if players are sleeping
     // Called by CraftPlayer.setPermanentSleeping()
     public void checkSleepStatus() {
@@ -2371,7 +2324,6 @@ public class World implements IBlockAccess {
             this.everyoneSleeping();
         }
     }
-    // CraftBukkit end
 
     protected void s() {
         this.J = false;
@@ -2404,12 +2356,10 @@ public class World implements IBlockAccess {
                 }
 
                 entityhuman = (EntityHuman) iterator.next();
-                // CraftBukkit start
                 if (entityhuman.isDeeplySleeping()) {
                     foundActualSleepers = true;
                 }
             } while (entityhuman.isDeeplySleeping() || entityhuman.fauxSleeping);
-            // CraftBukkit end
 
             return false;
         } else {
@@ -2469,9 +2419,7 @@ public class World implements IBlockAccess {
         }
     }
 
-    // CraftBukkit start
     public UUID getUUID() {
         return this.w.getUUID();
     }
-    // CraftBukkit end
 }

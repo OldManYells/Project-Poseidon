@@ -18,8 +18,6 @@ import org.bukkit.event.player.PlayerEggThrowEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class EntityEgg extends Entity {
 
@@ -159,7 +157,6 @@ public class EntityEgg extends Entity {
         }
 
         if (movingobjectposition != null) {
-            // CraftBukkit start
             ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
             this.world.getServer().getPluginManager().callEvent(phe);
 
@@ -267,7 +264,6 @@ public class EntityEgg extends Entity {
                         entity.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, 0.0F);
                         this.world.addEntity(entity, SpawnReason.EGG);
                     }
-                    // CraftBukkit end
                 }
             }
 

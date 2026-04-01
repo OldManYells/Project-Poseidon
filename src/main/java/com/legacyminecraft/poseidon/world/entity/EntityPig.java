@@ -7,7 +7,6 @@ import com.legacyminecraft.poseidon.world.item.Item;
 import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.PigZapEvent;
-// CraftBukkit end
 
 public class EntityPig extends EntityAnimal {
 
@@ -72,14 +71,12 @@ public class EntityPig extends EntityAnimal {
         if (!this.world.isStatic) {
             EntityPigZombie entitypigzombie = new EntityPigZombie(this.world);
 
-            // CraftBukkit start
             PigZapEvent event = new PigZapEvent(this.getBukkitEntity(), entityweatherstorm.getBukkitEntity(), entitypigzombie.getBukkitEntity());
             this.world.getServer().getPluginManager().callEvent(event);
 
             if (event.isCancelled()) {
                 return;
             }
-            // CraftBukkit end
 
             entitypigzombie.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, this.pitch);
              // CraftBukkit - added a reason for spawning this creature

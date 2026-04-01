@@ -14,11 +14,9 @@ public class TileEntityDispenser extends TileEntity implements IInventory {
     private ItemStack[] items = new ItemStack[9];
     private Random b = new Random();
 
-    // CraftBukkit start
     public ItemStack[] getContents() {
         return this.items;
     }
-    // CraftBukkit end
 
     public TileEntityDispenser() {}
 
@@ -65,13 +63,11 @@ public class TileEntityDispenser extends TileEntity implements IInventory {
             }
         }
 
-        // CraftBukkit start
         return i;
     }
 
     public ItemStack b() {
         int i = this.findDispenseSlot();
-        // CraftBukkit end
 
         if (i >= 0) {
             return this.splitStack(i, 1);

@@ -17,8 +17,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class Explosion {
     public boolean setFire = false;
@@ -135,7 +133,6 @@ public class Explosion {
                 }
                 double d10 = (1.0D - d7) * d9;
 
-                // CraftBukkit start - explosion damage hook
                 org.bukkit.Server server = this.world.getServer();
                 org.bukkit.entity.Entity damagee = (entity == null) ? null : entity.getBukkitEntity();
                 int damageDone = (int) ((d10 * d10 + d10) / 2.0D * 8.0D * (double) this.size + 1.0D);
@@ -170,7 +167,6 @@ public class Explosion {
                         }
                     }
                 }
-                // CraftBukkit end
             }
         }
 
@@ -213,7 +209,6 @@ public class Explosion {
 
         ArrayList<ChunkPosition> blocksCopy = new ArrayList<>(this.blocks);
 
-        // CraftBukkit start
         org.bukkit.World bworld = this.world.getWorld();
         org.bukkit.entity.Entity explode = this.source == null ? null : this.source.getBukkitEntity();
         Location location = new Location(bworld, this.posX, this.posY, this.posZ);
@@ -241,7 +236,6 @@ public class Explosion {
             return;
         }
 
-        // Project Poseidon Start
         // Backport from newer CraftBukkit
         blocksCopy.clear();
         this.blocks.clear();
@@ -250,8 +244,6 @@ public class Explosion {
             blocksCopy.add(coords);
             this.blocks.add(coords);
         }
-        // Project Poseidon End
-        // CraftBukkit end
 
         for (int i = blocksCopy.size() - 1; i >= 0; --i) {
             ChunkPosition chunkposition = blocksCopy.get(i);

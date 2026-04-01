@@ -10,8 +10,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.*;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class ConsoleLogManager {
 
@@ -26,7 +24,6 @@ public class ConsoleLogManager {
         ConsoleLogFormatter consolelogformatter = new ConsoleLogFormatter();
 
         a.setUseParentHandlers(false);
-        // CraftBukkit start
         ConsoleHandler consolehandler = new TerminalConsoleHandler(server.reader);
 
         for (Handler handler : global.getHandlers()) {
@@ -35,12 +32,10 @@ public class ConsoleLogManager {
 
         consolehandler.setFormatter(new ShortConsoleLogFormatter(server));
         global.addHandler(consolehandler);
-        // CraftBukkit end
 
         a.addHandler(consolehandler);
 
         try {
-            //Project Poseidon Start
             FileHandler filehandler;
             if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.enabled")) {
                 //If latest log file is enabled, create a new log file for each day
@@ -60,15 +55,12 @@ public class ConsoleLogManager {
                     filehandler = new FileHandler("." + File.separator + "logs" + File.separator + logfile + ".log", true);
                 }
             } else {
-                // CraftBukkit start
                 String pattern = (String) server.options.valueOf("log-pattern");
                 int limit = ((Integer) server.options.valueOf("log-limit")).intValue();
                 int count = ((Integer) server.options.valueOf("log-count")).intValue();
                 boolean append = ((Boolean) server.options.valueOf("log-append")).booleanValue();
                 filehandler = new FileHandler(pattern, limit, count, append);
-                // CraftBukkit start
             }
-            //Project Poseidon End
 
             filehandler.setFormatter(consolelogformatter);
             a.addHandler(filehandler);

@@ -10,7 +10,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.Random;
 
-// CraftBukkit end
 
 public class BlockCactus extends Block {
 
@@ -86,7 +85,6 @@ public class BlockCactus extends Block {
     }
 
     public void a(World world, int i, int j, int k, Entity entity) {
-        // CraftBukkit start - ENTITY_DAMAGEBY_BLOCK event
         if (entity instanceof EntityLiving) {
             org.bukkit.block.Block damager = world.getWorld().getBlockAt(i, j, k);
             org.bukkit.entity.Entity damagee = (entity == null) ? null : entity.getBukkitEntity();
@@ -99,7 +97,6 @@ public class BlockCactus extends Block {
             }
             return;
         }
-        // CraftBukkit end
 
         entity.damageEntity((Entity) null, 1);
     }

@@ -50,7 +50,6 @@ public class ContainerPlayer extends Container {
     }
 
     public void a(IInventory iinventory) {
-        // CraftBukkit start
         ItemStack craftResult = CraftingManager.getInstance().craft(this.craftInventory);
         this.resultInventory.setItem(0, craftResult);
         if (super.listeners.size() < 1) {
@@ -59,7 +58,6 @@ public class ContainerPlayer extends Container {
 
         EntityPlayer player = (EntityPlayer) super.listeners.get(0); // TODO: Is this _always_ correct? Seems like it.
         player.netServerHandler.sendPacket(new Packet103SetSlot(player.activeContainer.windowId, 0, craftResult));
-        // CraftBukkit end
     }
 
     public void a(EntityHuman entityhuman) {

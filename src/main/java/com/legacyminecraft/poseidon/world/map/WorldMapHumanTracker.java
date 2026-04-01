@@ -5,7 +5,6 @@ import com.legacyminecraft.poseidon.world.item.ItemStack;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.map.RenderData;
 import org.bukkit.map.MapCursor;
-// CraftBukkit end
 
 public class WorldMapHumanTracker {
 
@@ -44,7 +43,6 @@ public class WorldMapHumanTracker {
 
             abyte[0] = 1;
 
-            // CraftBukkit start
             for (i = 0; i < render.cursors.size(); ++i) {
                 MapCursor cursor = render.cursors.get(i);
                 if (!cursor.isVisible()) continue;
@@ -54,7 +52,6 @@ public class WorldMapHumanTracker {
                 abyte[i * 3 + 2] = (byte) cursor.getX();
                 abyte[i * 3 + 3] = (byte) cursor.getY();
             }
-            // CraftBukkit end
 
             boolean flag = true;
 

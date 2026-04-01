@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.entity.EntityPainting;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.painting.PaintingPlaceEvent;
-// CraftBukkit end
 
 public class ItemPainting extends Item {
 
@@ -38,7 +37,6 @@ public class ItemPainting extends Item {
 
             if (entitypainting.h()) {
                 if (!world.isStatic) {
-                    // CraftBukkit start
                     Player who = (entityhuman == null) ? null : (Player) entityhuman.getBukkitEntity();
 
                     org.bukkit.block.Block blockClicked = world.getWorld().getBlockAt(i, j, k);
@@ -50,7 +48,6 @@ public class ItemPainting extends Item {
                     if (event.isCancelled()) {
                         return false;
                     }
-                    // CraftBukkit end
                     world.addEntity(entitypainting);
                 }
 

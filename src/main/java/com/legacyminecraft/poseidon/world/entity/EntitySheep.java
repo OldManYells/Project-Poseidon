@@ -28,7 +28,6 @@ public class EntitySheep extends EntityAnimal {
     }
 
     protected void q() {
-        // CraftBukkit start - whole method
         java.util.List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<org.bukkit.inventory.ItemStack>();
 
         if (!this.isSheared()) {
@@ -44,7 +43,6 @@ public class EntitySheep extends EntityAnimal {
         for (org.bukkit.inventory.ItemStack stack: event.getDrops()) {
             bworld.dropItemNaturally(entity.getLocation(), stack);
         }
-        // CraftBukkit end
     }
 
     protected int j() {

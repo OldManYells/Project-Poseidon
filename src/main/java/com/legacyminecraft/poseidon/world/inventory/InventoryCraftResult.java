@@ -8,11 +8,9 @@ public class InventoryCraftResult implements IInventory {
 
     private ItemStack[] items = new ItemStack[1];
 
-    // CraftBukkit start
     public ItemStack[] getContents() {
         return this.items;
     }
-    // CraftBukkit end
 
     public InventoryCraftResult() {}
 

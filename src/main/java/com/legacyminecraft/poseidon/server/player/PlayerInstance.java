@@ -42,11 +42,9 @@ class PlayerInstance {
         if (this.b.contains(entityplayer)) {
             throw new IllegalStateException("Failed to add player. " + entityplayer + " already is in chunk " + this.chunkX + ", " + this.chunkZ);
         } else {
-            // CraftBukkit start
             if (entityplayer.playerChunkCoordIntPairs.add(this.location)) {
                 entityplayer.netServerHandler.sendPacket(new Packet50PreChunk(this.location.x, this.location.z, true));
             }
-            // CraftBukkit end
 
             this.b.add(entityplayer);
             entityplayer.chunkCoordIntPairQueue.add(this.location);
@@ -169,11 +167,9 @@ class PlayerInstance {
                     this.sendAll(new Packet52MultiBlockChange(this.chunkX, this.chunkZ, this.dirtyBlocks, this.dirtyCount, worldserver));
 
                     for (i = 0; i < this.dirtyCount; ++i) {
-                        // CraftBukkit start - Fixes TileEntity updates occurring upon a multi-block change; dirtyCount -> dirtyBlocks[i]
                         j = this.chunkX * 16 + (this.dirtyBlocks[i] >> 12 & 15);
                         k = this.dirtyBlocks[i] & 255;
                         l = this.chunkZ * 16 + (this.dirtyBlocks[i] >> 8 & 15);
-                        // CraftBukkit end
 
                         if (Block.isTileEntity[worldserver.getTypeId(j, k, l)]) {
                             // System.out.println("Sending!"); // CraftBukkit

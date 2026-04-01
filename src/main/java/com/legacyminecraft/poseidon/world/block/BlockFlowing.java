@@ -8,8 +8,6 @@ import org.bukkit.event.block.BlockFromToEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockFlowing extends BlockFluids {
 
@@ -30,11 +28,9 @@ public class BlockFlowing extends BlockFluids {
     }
 
     public void a(World world, int i, int j, int k, Random random) {
-        // CraftBukkit start
         org.bukkit.World bworld = world.getWorld();
         org.bukkit.Server server = world.getServer();
         org.bukkit.block.Block source = bworld == null ? null : bworld.getBlockAt(i, j, k);
-        // CraftBukkit end
 
         int l = this.g(world, i, j, k);
         byte b0 = 1;
@@ -79,12 +75,10 @@ public class BlockFlowing extends BlockFluids {
             }
 
             if (this.material == Material.LAVA && l < 8 && i1 < 8 && i1 > l && random.nextInt(4) != 0) {
-                // Poseidon start - Fix flowing lava not disappearing
                 boolean fixFlowingLava = PoseidonConfig.getInstance().getConfigBoolean("world.settings.flowing-lava-fix.enabled", true);
                 if (!fixFlowingLava) {
                     i1 = l;
                 }
-                // Poseidon end
                 flag = false;
             }
 
@@ -105,7 +99,6 @@ public class BlockFlowing extends BlockFluids {
         }
 
         if (this.l(world, i, j - 1, k)) {
-            // CraftBukkit start - send "down" to the server
             BlockFromToEvent event = new BlockFromToEvent(source, BlockFace.DOWN);
             if (server != null) {
                 server.getPluginManager().callEvent(event);
@@ -118,7 +111,6 @@ public class BlockFlowing extends BlockFluids {
                     world.setTypeIdAndData(i, j - 1, k, this.id, l + 8);
                 }
             }
-            // CraftBukkit end
         } else if (l >= 0 && (l == 0 || this.k(world, i, j - 1, k))) {
             boolean[] aboolean = this.j(world, i, j, k);
 
@@ -131,7 +123,6 @@ public class BlockFlowing extends BlockFluids {
                 return;
             }
 
-            // CraftBukkit start - all four cardinal directions. Do not change the order!
             BlockFace[] faces = new BlockFace[] { BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST };
             int index = 0;
 
@@ -149,7 +140,6 @@ public class BlockFlowing extends BlockFluids {
                 }
                 index++;
             }
-            // CraftBukkit end
         }
     }
 

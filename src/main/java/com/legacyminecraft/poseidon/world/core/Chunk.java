@@ -52,13 +52,11 @@ public class Chunk {
             this.entitySlices[k] = new ArrayList();
         }
 
-        // CraftBukkit start
         org.bukkit.craftbukkit.CraftWorld cworld = this.world.getWorld();
             this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
     }
 
     public org.bukkit.Chunk bukkitChunk;
-    // CraftBukkit end
 
     public Chunk(World world, byte[] abyte, int i, int j) {
         this(world, i, j);
@@ -456,10 +454,8 @@ public class Chunk {
         if (this.getTypeId(i, j, k) != 0 && Block.byId[this.getTypeId(i, j, k)] instanceof BlockContainer) {
             tileentity.j();
             this.tileEntities.put(chunkposition, tileentity);
-            // Poseidon start - Backport of 0021-Remove-invalid-mob-spawner-tile-entities.patch from PaperSpigot
         } else if (tileentity instanceof TileEntityMobSpawner && !(Block.byId[this.getTypeId(i, j, k)] instanceof BlockMobSpawner)) {
             this.tileEntities.remove(chunkposition);
-            // Poseidon end
         } else {
             System.out.println("Attempted to place a tile entity where there was no entity tile!");
         }
@@ -497,7 +493,6 @@ public class Chunk {
         }
 
         for (int i = 0; i < this.entitySlices.length; ++i) {
-            // CraftBukkit start
             java.util.Iterator<Object> iter = this.entitySlices[i].iterator();
             while (iter.hasNext()) {
                 Entity entity = (Entity) iter.next();
@@ -510,7 +505,6 @@ public class Chunk {
                     iter.remove();
                 }
             }
-            // CraftBukkit end
 
             this.world.b(this.entitySlices[i]);
         }

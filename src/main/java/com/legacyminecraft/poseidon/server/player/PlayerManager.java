@@ -159,7 +159,6 @@ public class PlayerManager {
                 entityplayer.d = entityplayer.locX;
                 entityplayer.e = entityplayer.locZ;
 
-                // CraftBukkit start - send nearest chunks first
                 if (i1 > 1 || i1 < -1 || j1 > 1 || j1 < -1) {
                     final int x = i;
                     final int z = j;
@@ -171,7 +170,6 @@ public class PlayerManager {
                         }
                     });
                 }
-                // CraftBukkit end
             }
         }
     }

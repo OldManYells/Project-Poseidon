@@ -6,7 +6,6 @@ import com.legacyminecraft.poseidon.world.math.MathHelper;
 import com.legacyminecraft.poseidon.world.storage.nbt.NBTTagCompound;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
-// CraftBukkit end
 
 public class EntitySpider extends EntityMonster {
 
@@ -53,7 +52,6 @@ public class EntitySpider extends EntityMonster {
         float f1 = this.c(1.0F);
 
         if (f1 > 0.5F && this.random.nextInt(100) == 0) {
-            // CraftBukkit start
             EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), null, EntityTargetEvent.TargetReason.FORGOT_TARGET);
             this.world.getServer().getPluginManager().callEvent(event);
 
@@ -65,7 +63,6 @@ public class EntitySpider extends EntityMonster {
                 }
                 return;
             }
-            // CraftBukkit end
         } else {
             if (f > 2.0F && f < 6.0F && this.random.nextInt(10) == 0) {
                 if (this.onGround) {

@@ -13,11 +13,11 @@ public class Packet3Chat extends Packet {
     public Packet3Chat() {}
 
     public Packet3Chat(String s) {
-        /* CraftBukkit start - handle this later
+        /*
         if (s.length() > 119) {
             s = s.substring(0, 119);
         }
-        // CraftBukkit end */
+        */
 
         this.message = s;
     }

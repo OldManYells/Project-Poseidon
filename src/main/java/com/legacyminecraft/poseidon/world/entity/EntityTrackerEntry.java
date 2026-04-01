@@ -90,7 +90,6 @@ public class EntityTrackerEntry {
             
             boolean needsRotationUpdate = Math.abs(newEncodedRotationYaw - this.g) >= rotationUpdateTreshold || Math.abs(newEncodedRotationPitch - this.h) >= rotationUpdateTreshold;
 
-            // CraftBukkit start - Code moved from below
             if (needsPositionUpdate) {
                 this.d = newEncodedPosX;
                 this.e = newEncodedPosY;
@@ -101,7 +100,6 @@ public class EntityTrackerEntry {
                 this.g = newEncodedRotationYaw;
                 this.h = newEncodedRotationPitch;
             }
-            // CraftBukkit end
             
             if (encodedDiffX >= -128 && encodedDiffX < 128 && encodedDiffY >= -128 && encodedDiffY < 128 && encodedDiffZ >= -128 && encodedDiffZ < 128 && this.t <= 400) {
                 // entity has moved less than 4 blocks
@@ -120,11 +118,9 @@ public class EntityTrackerEntry {
                 //this.tracker.locZ = (double) k / 32.0D;
                 // entity has moved more than 4 blocks, send teleport
                 
-                // CraftBukkit start - Refresh list of who can see a player before sending teleport packet
                 if (this.tracker instanceof EntityPlayer) {
                     this.scanPlayers(new java.util.ArrayList(this.trackedPlayers));
                 }
-                // CraftBukkit end
                 
                 packet = new Packet34EntityTeleport(this.tracker.id, newEncodedPosX, newEncodedPosY, newEncodedPosZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
             }
@@ -154,7 +150,7 @@ public class EntityTrackerEntry {
                 this.b((Packet) (new Packet40EntityMetadata(this.tracker.id, datawatcher)));
             }
 
-            /* CraftBukkit start - Code moved up
+            /*
             if (needsPositionUpdate) {
                 this.d = newEncodedPosX;
                 this.e = newEncodedPosY;
@@ -165,12 +161,11 @@ public class EntityTrackerEntry {
                 this.g = newEncodedRotationYaw;
                 this.h = newEncodedRotationPitch;
             }
-            // Craftbukkit end */
+            */
             this.tracker.airBorne = false;
         }
 
         if (this.tracker.velocityChanged) {
-            // CraftBukkit start - create PlayerVelocity event
             boolean cancelled = false;
 
             if(this.tracker instanceof EntityPlayer) {
@@ -191,7 +186,6 @@ public class EntityTrackerEntry {
             if(!cancelled) {
                 this.b((Packet) (new Packet28EntityVelocity(this.tracker)));
             }
-            // CraftBukkit end
             this.tracker.velocityChanged = false;
         }
     }
@@ -214,7 +208,6 @@ public class EntityTrackerEntry {
     }
 
     public void a() {
-        // Poseidon start
         //this.a((Packet) (new Packet29DestroyEntity(this.tracker.id)));
         Iterator iterator = this.trackedPlayers.iterator();
 
@@ -223,7 +216,6 @@ public class EntityTrackerEntry {
 
             entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id));
         }
-        // Poseidon end
     }
 
     public void a(EntityPlayer entityplayer) {
@@ -240,7 +232,6 @@ public class EntityTrackerEntry {
 
             if (d0 >= (double) (-this.b) && d0 <= (double) this.b && d1 >= (double) (-this.b) && d1 <= (double) this.b) {
                 if (!this.trackedPlayers.contains(entityplayer) && this.d(entityplayer)) {
-                    // CraftBukkit start
                     if (tracker instanceof EntityPlayer) {
                         org.bukkit.entity.Player player = (Player) ((EntityPlayer) tracker).getBukkitEntity();
                         if (!((Player) entityplayer.getBukkitEntity()).canSee(player)) {
@@ -249,12 +240,10 @@ public class EntityTrackerEntry {
                     }
                     
                     entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.id));
-                    // CraftBukkit end
                     
                     this.trackedPlayers.add(entityplayer);
                     Packet packet = this.b();
                     entityplayer.netServerHandler.sendPacket(packet);
-                    // Poseidon Start
                     if (!this.tracker.datawatcher.getD()) {
                         entityplayer.netServerHandler.sendPacket(new Packet40EntityMetadata(this.tracker.id, this.tracker.datawatcher));
                     }
@@ -269,13 +258,10 @@ public class EntityTrackerEntry {
                     if (this.tracker.vehicle != null) {
                         entityplayer.netServerHandler.sendPacket(new Packet39AttachEntity(this.tracker, this.tracker.vehicle));
                     }
-                    // Poseidon end
                     
-                    // CraftBukkit start
                     if (this.tracker.passenger != null) {
                         entityplayer.netServerHandler.sendPacket(new Packet39AttachEntity(this.tracker.passenger, this.tracker));
                     }
-                    // CraftBukkit end
 
                     ItemStack[] aitemstack = this.tracker.getEquipment();
 
@@ -313,10 +299,8 @@ public class EntityTrackerEntry {
 
     private Packet b() {
         if (this.tracker.dead) { // Poseidon
-            // CraftBukkit start - Remove useless error spam, just return
             // System.out.println("Fetching addPacket for removed entity");
             return null;
-            // CraftBukkit end
         }
         
         if (this.tracker instanceof EntityItem) {
@@ -329,11 +313,9 @@ public class EntityTrackerEntry {
             //entityitem.locZ = (double) packet21pickupspawn.d / 32.0D;
             return packet21pickupspawn;
         } else if (this.tracker instanceof EntityPlayer) {
-            // CraftBukkit start - limit name length to 16 characters
             if (((EntityHuman) this.tracker).name.length() > 16) {
                 ((EntityHuman) this.tracker).name = ((EntityHuman) this.tracker).name.substring(0, 16);
             }
-            // CraftBukkit end
             return new Packet20NamedEntitySpawn((EntityHuman) this.tracker);
         } else {
             if (this.tracker instanceof EntityMinecart) {
@@ -366,10 +348,8 @@ public class EntityTrackerEntry {
                 return new Packet23VehicleSpawn(this.tracker, 61);
             } else if (this.tracker instanceof EntityFireball) {
                 EntityFireball entityfireball = (EntityFireball) this.tracker;
-                // CraftBukkit start - added check for null shooter
                 int shooter = ((EntityFireball) this.tracker).shooter != null ? ((EntityFireball) this.tracker).shooter.id : 1;
                 Packet23VehicleSpawn packet23vehiclespawn = new Packet23VehicleSpawn(this.tracker, 63, shooter);
-                // CraftBukkit end
 
                 packet23vehiclespawn.e = (int) (entityfireball.c * 8000.0D);
                 packet23vehiclespawn.f = (int) (entityfireball.d * 8000.0D);

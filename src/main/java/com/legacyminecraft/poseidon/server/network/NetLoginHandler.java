@@ -47,11 +47,9 @@ public class NetLoginHandler extends NetHandler {
         this.msgKickShutdown = PoseidonConfig.getInstance().getConfigString("message.kick.shutdown");
     }
 
-    // CraftBukkit start
     public Socket getSocket() {
         return this.networkManager.socket;
     }
-    // CraftBukkit end
 
     public void a() {
         if (this.h != null) {
@@ -126,7 +124,6 @@ public class NetLoginHandler extends NetHandler {
     }
 
     private boolean proxyHandler(Packet1Login packet1login) {
-        //Project Poseidon - Start (Release2Beta)
         if (packet1login.d == (byte) -999 || packet1login.d == (byte) 25) {
             connectionType = ConnectionType.RELEASE2BETA_OFFLINE_MODE_IP_FORWARDING;
         } else if (packet1login.d == (byte) 26) {
@@ -169,7 +166,6 @@ public class NetLoginHandler extends NetHandler {
                 return false;
             }
         }
-        //Project Poseidon - End (Release2Beta
 
         return true;
     }
@@ -198,12 +194,10 @@ public class NetLoginHandler extends NetHandler {
             WorldServer worldserver = (WorldServer) entityplayer.world; // CraftBukkit
             ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
             NetServerHandler netserverhandler = new NetServerHandler(this.server, this.networkManager, entityplayer);
-            //Poseidon Start
             netserverhandler.setUsingReleaseToBeta(usingReleaseToBeta);
             netserverhandler.setConnectionType(connectionType);
             netserverhandler.setRawConnectionType(rawConnectionType);
             netserverhandler.setReceivedKeepAlive(receivedKeepAlive);
-            //Poseidon End
             netserverhandler.sendPacket(new Packet1Login("", entityplayer.id, worldserver.getSeed(), (byte) worldserver.worldProvider.dimension));
             netserverhandler.sendPacket(new Packet6SpawnPosition(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z));
             this.server.serverConfigurationManager.a(entityplayer, worldserver);
@@ -213,11 +207,9 @@ public class NetLoginHandler extends NetHandler {
             this.server.networkListenThread.a(netserverhandler);
             netserverhandler.sendPacket(new Packet4UpdateTime(entityplayer.getPlayerTime())); // CraftBukkit - add support for player specific time
             entityplayer.syncInventory();
-            // poseidon start
             if (PoseidonConfig.getInstance().getBoolean("settings.support.modloader.enable", false)) {
                 ModLoaderMp.HandleAllLogins(entityplayer);
             }
-            // poseidon end
         }
 
         this.c = true;

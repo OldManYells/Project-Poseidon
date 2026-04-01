@@ -50,9 +50,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// CraftBukkit start
 //import com.projectposeidon.johnymuffin.UUIDCacheFile;
-// CraftBukkit end
 
 public class MinecraftServer implements Runnable, ICommandListener {
 
@@ -76,25 +74,20 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public boolean pvpMode;
     public boolean allowFlight;
 
-    // CraftBukkit start
     public List<WorldServer> worlds = new ArrayList<WorldServer>();
     public CraftServer server;
     public OptionSet options;
     public ColouredConsoleSender console;
     public ConsoleReader reader;
     public static int currentTick;
-    // CraftBukkit end
 
-    //Poseidon Start
 //    private WatchDogThread watchDogThread;
     private boolean modLoaderSupport = false;
 //    private PoseidonVersionChecker poseidonVersionChecker;
-    //Poseidon End
 
     public MinecraftServer(OptionSet options) { // CraftBukkit - adds argument OptionSet
         new ThreadSleepForever(this);
 
-        // CraftBukkit start
         this.options = options;
         try {
             this.reader = new ConsoleReader();
@@ -102,7 +95,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
             Logger.getLogger(MinecraftServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         Runtime.getRuntime().addShutdownHook(new ServerShutdownThread(this));
-        // CraftBukkit end
     }
 
     private boolean init() throws UnknownHostException { // CraftBukkit - added throws UnknownHostException
@@ -113,10 +105,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
         threadcommandreader.start();
         ConsoleLogManager.init(this); // CraftBukkit
 
-        // CraftBukkit start
         System.setOut(new PrintStream(new LoggerOutputStream(log, Level.INFO), true));
         System.setErr(new PrintStream(new LoggerOutputStream(log, Level.SEVERE), true));
-        // CraftBukkit end
 
         //If Poseidon Config DEBUG is enabled, enable debug mode
         if (options.has("debug-config")) {
@@ -193,11 +183,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
         log.info("Preparing level \"" + s1 + "\"");
         this.a(new WorldLoaderServer(new File(".")), s1, k);
 
-        //Project Poseidon Start
         Poseidon.getServer().initializeServer();
-        //Project Poseidon End
 
-        // CraftBukkit start
         long elapsed = System.nanoTime() - j;
         String time = String.format("%.3fs", elapsed / 10000000000.0D);
         log.info("Done (" + time + ")! For help, type \"help\" or \"?\"");
@@ -228,7 +215,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
             convertable.convert(s, new ConvertProgressUpdater(this));
         }
 
-        // CraftBukkit start
         for (int j = 0; j < (this.propertyManager.getBoolean("allow-nether", true) ? 2 : 1); ++j) {
             WorldServer world;
             int dimension = j == 0 ? 0 : -1;
@@ -284,18 +270,15 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.worlds.add(world);
             this.serverConfigurationManager.setPlayerFileData(this.worlds.toArray(new WorldServer[0]));
         }
-        // CraftBukkit end
 
         short short1 = 196;
         long k = System.currentTimeMillis();
 
-        // CraftBukkit start
         for (int l = 0; l < this.worlds.size(); ++l) {
             // if (l == 0 || this.propertyManager.getBoolean("allow-nether", true)) {
             WorldServer worldserver = this.worlds.get(l);
             log.info("Preparing start region for level " + l + " (Seed: " + worldserver.getSeed() + ")");
             if (worldserver.getWorld().getKeepSpawnInMemory()) {
-                // CraftBukkit end
                 ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
 
                 for (int i1 = -short1; i1 <= short1 && this.isRunning; i1 += 16) {
@@ -324,11 +307,9 @@ public class MinecraftServer implements Runnable, ICommandListener {
             } // CraftBukkit
         }
 
-        // CraftBukkit start
         for (World world : this.worlds) {
             this.server.getPluginManager().callEvent(new WorldLoadEvent(world.getWorld()));
         }
-        // CraftBukkit end
 
         this.e();
     }
@@ -349,7 +330,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
     void saveChunks() { // CraftBukkit - private -> default
         log.info("Saving chunks");
 
-        // CraftBukkit start
         for (int i = 0; i < this.worlds.size(); ++i) {
             WorldServer worldserver = this.worlds.get(i);
 
@@ -364,38 +344,30 @@ public class MinecraftServer implements Runnable, ICommandListener {
         if (!world.canSave) {
             this.serverConfigurationManager.savePlayers();
         }
-        // CraftBukkit end
     }
 
     public void stop() { // CraftBukkit - private -> public
         log.info("Stopping server");
 
-        //Project Poseidon Start
 
         // This is done before disablePlugins() to ensure the watchdog doesn't detect plugins disabling as a server hang
         Poseidon.getServer().shutdownServer();
 
-        //Project Poseidon End
 
-        // CraftBukkit start
         if (this.server != null) {
             this.server.disablePlugins();
         }
-        // CraftBukkit end
 
         if (this.serverConfigurationManager != null) {
             this.serverConfigurationManager.savePlayers();
         }
 
-        // CraftBukkit start - multiworld is handled in saveChunks() already.
         WorldServer worldserver = this.worlds.get(0);
 
         if (worldserver != null) {
             this.saveChunks();
         }
-        // CraftBukkit end
 
-        // Poseidon Start
         Map<String, PerformanceStatistic> listenerStatistics = new HashMap<>();
 
         // Only get the Listener Statistics if the Poseidon Server is not null. Prevents null pointer exceptions.
@@ -461,7 +433,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
                 }
             }
         }
-        // Poseidon End
     }
 
     public void a() {
@@ -541,7 +512,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
         }
     }
 
-    //Project Poseidon Start - Tick Update
     private final LinkedList<Double> tpsRecords = new LinkedList<>();
     private long lastTick = System.currentTimeMillis();
     private int tickCount = 0;
@@ -549,7 +519,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public LinkedList<Double> getTpsRecords() {
         return tpsRecords;
     }
-    //Project Poseidon End - Tick Update
 
     private void h() {
         ArrayList arraylist = new ArrayList();
@@ -578,7 +547,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
         ((CraftScheduler) this.server.getScheduler()).mainThreadHeartbeat(this.ticks); // CraftBukkit
 
-        //Project Poseidon Start - Tick Update
         long currentTime = System.currentTimeMillis();
         tickCount++;
 
@@ -594,7 +562,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
             lastTick = currentTime;
         }
 
-        //Project Poseidon End - Tick Update
 
 
         for (j = 0; j < this.worlds.size(); ++j) { // CraftBukkit
@@ -602,7 +569,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
             WorldServer worldserver = this.worlds.get(j); // CraftBukkit
 
             if (this.ticks % 20 == 0) {
-                // CraftBukkit start - only send timeupdates to the people in that world
                 for (int i = 0; i < worldserver.players.size(); ++i) { // Project Poseidon: serverConfigurationManager -> worldserver.players
                     EntityPlayer entityPlayer = (EntityPlayer) worldserver.players.get(i);
                     if (entityPlayer != null) {
@@ -610,7 +576,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
                     }
                 }
-                // CraftBukkit end
             }
 
             worldserver.doTick();
@@ -626,11 +591,9 @@ public class MinecraftServer implements Runnable, ICommandListener {
         this.networkListenThread.a();
         this.serverConfigurationManager.b();
 
-        // CraftBukkit start
         for (j = 0; j < this.worlds.size(); ++j) {
             this.worlds.get(j).tracker.updatePlayers();
         }
-        // CraftBukkit end
 
         for (j = 0; j < this.r.size(); ++j) {
             ((IUpdatePlayerListBox) this.r.get(j)).a();
@@ -651,11 +614,9 @@ public class MinecraftServer implements Runnable, ICommandListener {
         while (this.s.size() > 0) {
             ServerCommand servercommand = (ServerCommand) this.s.remove(0);
 
-            // CraftBukkit start - ServerCommand for preprocessing
             ServerCommandEvent event = new ServerCommandEvent(this.console, servercommand.command);
             this.server.getPluginManager().callEvent(event);
             servercommand = new ServerCommand(event.getCommand(), servercommand.b);
-            // CraftBukkit end
 
             // this.consoleCommandHandler.handle(servercommand); // CraftBukkit - Removed its now called in server.dispatchCommand
             this.server.dispatchCommand(this.console, servercommand); // CraftBukkit
@@ -697,7 +658,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
     }
 
     public WorldServer getWorldServer(int i) {
-        // CraftBukkit start
         for (WorldServer world : this.worlds) {
             if (world.dimension == i) {
                 return world;
@@ -705,7 +665,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
         }
 
         return this.worlds.get(0);
-        // CraftBukkit end
     }
 
     public EntityTracker getTracker(int i) {

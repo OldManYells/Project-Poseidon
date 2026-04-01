@@ -12,8 +12,6 @@ import org.bukkit.material.MaterialData;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockFire extends Block {
 
@@ -93,13 +91,11 @@ public class BlockFire extends Block {
                 this.a(world, i, j, k - 1, 300, random, l);
                 this.a(world, i, j, k + 1, 300, random, l);
 
-                // CraftBukkit start - Call to stop spread of fire.
                 org.bukkit.Server server = world.getServer();
                 org.bukkit.World bworld = world.getWorld();
 
                 IgniteCause igniteCause = BlockIgniteEvent.IgniteCause.SPREAD;
                 org.bukkit.block.Block fromBlock = bworld.getBlockAt(i, j, k);
-                // CraftBukkit end
 
                 for (int i1 = i - 1; i1 <= i + 1; ++i1) {
                     for (int j1 = k - 1; j1 <= k + 1; ++j1) {
@@ -122,7 +118,6 @@ public class BlockFire extends Block {
                                         if (k2 > 15) {
                                             k2 = 15;
                                         }
-                                        // CraftBukkit start - Call to stop spread of fire.
                                         org.bukkit.block.Block block = bworld.getBlockAt(i1, k1, j1);
 
                                         if (block.getTypeId() != Block.FIRE.id) {
@@ -144,7 +139,6 @@ public class BlockFire extends Block {
                                                 blockState.update(true);
                                             }
                                         }
-                                        // CraftBukkit end
                                     }
                                 }
                             }
@@ -160,7 +154,6 @@ public class BlockFire extends Block {
 
         if (random.nextInt(l) < j1) {
             boolean flag = world.getTypeId(i, j, k) == Block.TNT.id;
-            // CraftBukkit start
             org.bukkit.block.Block theBlock = world.getWorld().getBlockAt(i, j, k);
 
             BlockBurnEvent event = new BlockBurnEvent(theBlock);
@@ -169,7 +162,6 @@ public class BlockFire extends Block {
             if (event.isCancelled()) {
                 return;
             }
-            // CraftBukkit end
 
             if (random.nextInt(i1 + 10) < 5 && !world.s(i, j, k)) {
                 int k1 = i1 + random.nextInt(5) / 4;

@@ -9,7 +9,6 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
-// CraftBukkit end
 
 public class EntityMonster extends EntityCreature implements IMonster {
 
@@ -47,7 +46,6 @@ public class EntityMonster extends EntityCreature implements IMonster {
         if (super.damageEntity(entity, i)) {
             if (this.passenger != entity && this.vehicle != entity) {
                 if (entity != this) {
-                    // CraftBukkit start
                     org.bukkit.entity.Entity bukkitTarget = entity == null ? null : entity.getBukkitEntity();
 
                     EntityTargetEvent event = new EntityTargetEvent(this.getBukkitEntity(), bukkitTarget, EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY);
@@ -60,7 +58,6 @@ public class EntityMonster extends EntityCreature implements IMonster {
                             this.target = ((CraftEntity) event.getTarget()).getHandle();
                         }
                     }
-                    // CraftBukkit end
                 }
 
                 return true;
@@ -75,7 +72,6 @@ public class EntityMonster extends EntityCreature implements IMonster {
     protected void a(Entity entity, float f) {
         if (this.attackTicks <= 0 && f < 2.0F && entity.boundingBox.e > this.boundingBox.b && entity.boundingBox.b < this.boundingBox.e) {
             this.attackTicks = 20;
-            // CraftBukkit start - this is still duplicated here and EntityHuman because it's possible for lastDamage EntityMonster
             // to damage another EntityMonster, and we want to catch those events.
             // This does not fire events for slime attacks, av they're not lastDamage EntityMonster.
             if (entity instanceof EntityLiving && !(entity instanceof EntityHuman)) {
@@ -89,7 +85,6 @@ public class EntityMonster extends EntityCreature implements IMonster {
                 }
                 return;
             }
-            // CraftBukkit end
 
             entity.damageEntity(this, this.damage);
         }

@@ -10,8 +10,6 @@ import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
 
 public class BlockPortal extends BlockBreakable {
 
@@ -61,10 +59,8 @@ public class BlockPortal extends BlockBreakable {
         if (b0 == b1) {
             return false;
         } else {
-            // CraftBukkit start
             java.util.Collection<org.bukkit.block.Block> blocks = new java.util.HashSet<org.bukkit.block.Block>();
             org.bukkit.World bworld = world.getWorld();
-            // CraftBukkit end
 
             if (world.getTypeId(i - b0, j, k - b1) == 0) {
                 i -= b0;
@@ -94,7 +90,6 @@ public class BlockPortal extends BlockBreakable {
                 }
             }
 
-            // CraftBukkit start
             for (l = 0; l < 2; ++l) {
                 for (i1 = 0; i1 < 3; ++i1) {
                     blocks.add(bworld.getBlockAt(i + b0 * l, j + i1, k + b1 * l));
@@ -107,7 +102,6 @@ public class BlockPortal extends BlockBreakable {
             if (event.isCancelled()) {
                 return false;
             }
-            // CraftBukkit end
 
             world.suppressPhysics = true;
 
@@ -167,10 +161,8 @@ public class BlockPortal extends BlockBreakable {
 
     public void a(World world, int i, int j, int k, Entity entity) {
         if (entity.vehicle == null && entity.passenger == null) {
-            // CraftBukkit start - Entity in portal
             EntityPortalEnterEvent event = new EntityPortalEnterEvent(entity.getBukkitEntity(), new org.bukkit.Location(world.getWorld(), i, j, k));
             world.getServer().getPluginManager().callEvent(event);
-            // CraftBukkit end
 
             entity.P();
         }

@@ -154,9 +154,7 @@ public class BlockDoor extends Block {
             boolean flag = false;
 
             if (world.getTypeId(i, j + 1, k) != this.id) {
-                // Poseidon start
                 return;
-                // Poseidon end
             }
 
             if (!world.e(i, j - 1, k)) {
@@ -168,13 +166,10 @@ public class BlockDoor extends Block {
             }
 
             if (flag) {
-                // Poseidon start
                 if (!world.isStatic && (i1 & 8) == 0) {
-                // Poseidon end
                     this.g(world, i, j, k, i1);
                 }
             } else if (l > 0 && Block.byId[l].isPowerSource()) {
-                // CraftBukkit start
                 org.bukkit.World bworld = world.getWorld();
                 org.bukkit.block.Block block = bworld.getBlockAt(i, j, k);
                 org.bukkit.block.Block blockTop = bworld.getBlockAt(i, j + 1, k);
@@ -190,7 +185,6 @@ public class BlockDoor extends Block {
 
                     this.setDoor(world, i, j, k, eventRedstone.getNewCurrent() > 0);
                 }
-                // CraftBukkit end
             }
         }
     }
