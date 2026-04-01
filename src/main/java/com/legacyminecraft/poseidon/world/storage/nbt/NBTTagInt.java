@@ -1,29 +1,30 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.storage.nbt;
+import com.legacyminecraft.poseidon.*;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NBTTagLong extends NBTBase {
+public class NBTTagInt extends NBTBase {
 
-    public long a;
+    public int a;
 
-    public NBTTagLong() {}
+    public NBTTagInt() {}
 
-    public NBTTagLong(long i) {
+    public NBTTagInt(int i) {
         this.a = i;
     }
 
     void a(DataOutput dataoutput) throws IOException {
-        dataoutput.writeLong(this.a);
+        dataoutput.writeInt(this.a);
     }
 
     void a(DataInput datainput) throws IOException {
-        this.a = datainput.readLong();
+        this.a = datainput.readInt();
     }
 
     public byte a() {
-        return (byte) 4;
+        return (byte) 3;
     }
 
     public String toString() {

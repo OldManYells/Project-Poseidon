@@ -1,4 +1,5 @@
 package com.legacyminecraft.poseidon.world.entity;
+import com.legacyminecraft.poseidon.world.storage.nbt.*;
 import com.legacyminecraft.poseidon.*;
 
 public class EntityWaterAnimal extends EntityCreature implements IAnimal {

@@ -1,4 +1,5 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.storage.nbt;
+import com.legacyminecraft.poseidon.*;
 
 import java.io.DataInput;
 import java.io.DataOutput;
