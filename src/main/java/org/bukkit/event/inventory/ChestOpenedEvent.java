@@ -1,6 +1,6 @@
 package org.bukkit.event.inventory;
 
-import com.legacy.minecraft.poseidon.ItemStack;
+import com.legacyminecraft.poseidon.ItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

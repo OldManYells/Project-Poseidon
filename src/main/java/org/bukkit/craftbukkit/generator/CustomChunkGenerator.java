@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.generator;
 
-import com.legacy.minecraft.poseidon.*;
+import com.legacyminecraft.poseidon.*;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntitySlime;
+import com.legacyminecraft.poseidon.EntitySlime;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Slime;
 

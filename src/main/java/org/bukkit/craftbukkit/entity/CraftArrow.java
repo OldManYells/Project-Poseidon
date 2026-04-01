@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityArrow;
-import com.legacy.minecraft.poseidon.EntityLiving;
+import com.legacyminecraft.poseidon.EntityArrow;
+import com.legacyminecraft.poseidon.EntityLiving;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;

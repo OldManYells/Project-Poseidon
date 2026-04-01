@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityItem;
+import com.legacyminecraft.poseidon.EntityItem;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
@@ -19,7 +19,7 @@ public class CraftItem extends CraftEntity implements Item {
     }
 
     public void setItemStack(ItemStack stack) {
-        item.itemStack = new com.legacy.minecraft.poseidon.ItemStack(stack.getTypeId(), stack.getAmount(), stack.getDurability());
+        item.itemStack = new com.legacyminecraft.poseidon.ItemStack(stack.getTypeId(), stack.getAmount(), stack.getDurability());
     }
 
     @Override

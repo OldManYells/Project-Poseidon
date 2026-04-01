@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityLiving;
-import com.legacy.minecraft.poseidon.EntitySnowball;
+import com.legacyminecraft.poseidon.EntityLiving;
+import com.legacyminecraft.poseidon.EntitySnowball;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Snowball;

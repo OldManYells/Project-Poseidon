@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import com.legacy.minecraft.poseidon.MinecraftServer;
+import com.legacyminecraft.poseidon.MinecraftServer;
 
 import java.io.File;
 import java.io.IOException;

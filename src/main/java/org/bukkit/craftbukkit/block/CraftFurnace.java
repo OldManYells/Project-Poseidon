@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacy.minecraft.poseidon.TileEntityFurnace;
+import com.legacyminecraft.poseidon.TileEntityFurnace;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.craftbukkit.CraftWorld;

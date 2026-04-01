@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityFireball;
-import com.legacy.minecraft.poseidon.EntityLiving;
+import com.legacyminecraft.poseidon.EntityFireball;
+import com.legacyminecraft.poseidon.EntityLiving;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;

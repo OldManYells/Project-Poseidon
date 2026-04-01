@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
-import com.legacy.minecraft.poseidon.TileEntityNote;
+import com.legacyminecraft.poseidon.TileEntityNote;
 import org.bukkit.Instrument;
 import org.bukkit.Material;
 import org.bukkit.Note;

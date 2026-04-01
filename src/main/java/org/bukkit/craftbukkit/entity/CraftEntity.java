@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.collect.MapMaker;
-import com.legacy.minecraft.poseidon.*;
+import com.legacyminecraft.poseidon.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntitySkeleton;
+import com.legacyminecraft.poseidon.EntitySkeleton;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Skeleton;
 

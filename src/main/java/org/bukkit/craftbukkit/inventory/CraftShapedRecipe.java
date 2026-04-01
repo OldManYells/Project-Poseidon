@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.legacy.minecraft.poseidon.CraftingManager;
+import com.legacyminecraft.poseidon.CraftingManager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.material.MaterialData;
@@ -42,12 +42,12 @@ public class CraftShapedRecipe extends ShapedRecipe implements CraftRecipe {
             MaterialData mdata = ingred.get(c);
             int id = mdata.getItemTypeId();
             byte dmg = mdata.getData();
-            data[i] = new com.legacy.minecraft.poseidon.ItemStack(id, 1, dmg);
+            data[i] = new com.legacyminecraft.poseidon.ItemStack(id, 1, dmg);
             i++;
         }
         int id = this.getResult().getTypeId();
         int amount = this.getResult().getAmount();
         short durability = this.getResult().getDurability();
-        CraftingManager.getInstance().registerShapedRecipe(new com.legacy.minecraft.poseidon.ItemStack(id, amount, durability), data);
+        CraftingManager.getInstance().registerShapedRecipe(new com.legacyminecraft.poseidon.ItemStack(id, amount, durability), data);
     }
 }

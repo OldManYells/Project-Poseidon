@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.legacy.minecraft.poseidon.Slot;
+import com.legacyminecraft.poseidon.Slot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.command;
 
-import com.legacy.minecraft.poseidon.ICommandListener;
+import com.legacyminecraft.poseidon.ICommandListener;
 import org.bukkit.command.CommandSender;
 
 import java.lang.reflect.Method;

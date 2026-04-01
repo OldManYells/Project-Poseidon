@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityMonster;
+import com.legacyminecraft.poseidon.EntityMonster;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Monster;
 

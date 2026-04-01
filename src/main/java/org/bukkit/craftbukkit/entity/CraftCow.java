@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityCow;
+import com.legacyminecraft.poseidon.EntityCow;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Cow;
 

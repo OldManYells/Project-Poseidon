@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityWolf;
-import com.legacy.minecraft.poseidon.PathEntity;
+import com.legacyminecraft.poseidon.EntityWolf;
+import com.legacyminecraft.poseidon.PathEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;

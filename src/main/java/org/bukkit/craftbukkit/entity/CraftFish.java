@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityFish;
-import com.legacy.minecraft.poseidon.EntityHuman;
+import com.legacyminecraft.poseidon.EntityFish;
+import com.legacyminecraft.poseidon.EntityHuman;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Fish;
 import org.bukkit.entity.LivingEntity;

@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit;
 
 import com.google.common.collect.MapMaker;
-import com.legacy.minecraft.poseidon.BiomeBase;
-import com.legacy.minecraft.poseidon.ChunkPosition;
-import com.legacy.minecraft.poseidon.WorldChunkManager;
-import com.legacy.minecraft.poseidon.WorldServer;
+import com.legacyminecraft.poseidon.BiomeBase;
+import com.legacyminecraft.poseidon.ChunkPosition;
+import com.legacyminecraft.poseidon.WorldChunkManager;
+import com.legacyminecraft.poseidon.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
@@ -17,14 +17,14 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentMap;
 
 public class CraftChunk implements Chunk {
-    private WeakReference<com.legacy.minecraft.poseidon.Chunk> weakChunk;
+    private WeakReference<com.legacyminecraft.poseidon.Chunk> weakChunk;
     private final ConcurrentMap<Integer, Block> cache = new MapMaker().softValues().makeMap();
     private WorldServer worldServer;
     private int x;
     private int z;
 
-    public CraftChunk(com.legacy.minecraft.poseidon.Chunk chunk) {
-        this.weakChunk = new WeakReference<com.legacy.minecraft.poseidon.Chunk>(chunk);
+    public CraftChunk(com.legacyminecraft.poseidon.Chunk chunk) {
+        this.weakChunk = new WeakReference<com.legacyminecraft.poseidon.Chunk>(chunk);
         worldServer = (WorldServer) getHandle().world;
         x = getHandle().x;
         z = getHandle().z;
@@ -34,11 +34,11 @@ public class CraftChunk implements Chunk {
         return worldServer.getWorld();
     }
 
-    public com.legacy.minecraft.poseidon.Chunk getHandle() {
-        com.legacy.minecraft.poseidon.Chunk c = weakChunk.get();
+    public com.legacyminecraft.poseidon.Chunk getHandle() {
+        com.legacyminecraft.poseidon.Chunk c = weakChunk.get();
         if (c == null) {
             c = worldServer.getChunkAt(x, z);
-            weakChunk = new WeakReference<com.legacy.minecraft.poseidon.Chunk>(c);
+            weakChunk = new WeakReference<com.legacyminecraft.poseidon.Chunk>(c);
         }
         return c;
     }
@@ -77,7 +77,7 @@ public class CraftChunk implements Chunk {
 
     public Entity[] getEntities() {
         int count = 0, index = 0;
-        com.legacy.minecraft.poseidon.Chunk chunk = getHandle();
+        com.legacyminecraft.poseidon.Chunk chunk = getHandle();
         for (int i = 0; i < 8; i++) {
             count += chunk.entitySlices[i].size();
         }
@@ -85,10 +85,10 @@ public class CraftChunk implements Chunk {
         Entity[] entities = new Entity[count];
         for (int i = 0; i < 8; i++) {
             for (Object obj: chunk.entitySlices[i].toArray()) {
-                if (!(obj instanceof com.legacy.minecraft.poseidon.Entity)) {
+                if (!(obj instanceof com.legacyminecraft.poseidon.Entity)) {
                     continue;
                 }
-                entities[index++] = ((com.legacy.minecraft.poseidon.Entity) obj).getBukkitEntity();
+                entities[index++] = ((com.legacyminecraft.poseidon.Entity) obj).getBukkitEntity();
             }
         }
         return entities;
@@ -96,7 +96,7 @@ public class CraftChunk implements Chunk {
 
     public BlockState[] getTileEntities() {
         int index = 0;
-        com.legacy.minecraft.poseidon.Chunk chunk = getHandle();
+        com.legacyminecraft.poseidon.Chunk chunk = getHandle();
         BlockState[] entities = new BlockState[chunk.tileEntities.size()];
         for (Object obj : chunk.tileEntities.keySet().toArray()) {
             if (!(obj instanceof ChunkPosition)) {
@@ -137,7 +137,7 @@ public class CraftChunk implements Chunk {
     }
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain) {
-        com.legacy.minecraft.poseidon.Chunk chunk = getHandle();
+        com.legacyminecraft.poseidon.Chunk chunk = getHandle();
         byte[] buf = new byte[32768 + 16384 + 16384 + 16384]; // Get big enough buffer for whole chunk
         chunk.getData(buf, 0, 0, 0, 16, 128, 16, 0); // Get whole chunk
         byte[] hmap = null;

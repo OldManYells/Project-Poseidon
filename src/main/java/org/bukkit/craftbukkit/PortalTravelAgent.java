@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit;
 
-import com.legacy.minecraft.poseidon.Block;
-import com.legacy.minecraft.poseidon.WorldServer;
+import com.legacyminecraft.poseidon.Block;
+import com.legacyminecraft.poseidon.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.TravelAgent;
@@ -41,7 +41,7 @@ public class PortalTravelAgent implements TravelAgent {
     }
 
     public Location findPortal(Location location) {
-        com.legacy.minecraft.poseidon.World world = ((CraftWorld) location.getWorld()).getHandle();
+        com.legacyminecraft.poseidon.World world = ((CraftWorld) location.getWorld()).getHandle();
         // short short1 = 128;
         double d0 = -1.0D;
         int i = 0;
@@ -106,7 +106,7 @@ public class PortalTravelAgent implements TravelAgent {
     }
 
     public boolean createPortal(Location location) {
-        com.legacy.minecraft.poseidon.World world = ((CraftWorld) location.getWorld()).getHandle();
+        com.legacyminecraft.poseidon.World world = ((CraftWorld) location.getWorld()).getHandle();
         // byte b0 = 16;
         double d0 = -1.0D;
         int i = location.getBlockX();

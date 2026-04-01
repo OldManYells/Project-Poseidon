@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntitySquid;
+import com.legacyminecraft.poseidon.EntitySquid;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Squid;
 

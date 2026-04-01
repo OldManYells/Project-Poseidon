@@ -1,7 +1,7 @@
 
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityWeather;
+import com.legacyminecraft.poseidon.EntityWeather;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Weather;
 

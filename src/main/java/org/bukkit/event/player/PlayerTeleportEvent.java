@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import com.legacy.minecraft.poseidon.EntityPlayer;
+import com.legacyminecraft.poseidon.EntityPlayer;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;

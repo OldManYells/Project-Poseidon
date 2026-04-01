@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.legacy.minecraft.poseidon.EntityPig;
+import com.legacyminecraft.poseidon.EntityPig;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Pig;
 

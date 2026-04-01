@@ -4,8 +4,8 @@ import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import com.projectposeidon.johnymuffin.UUIDManager;
-import com.legacy.minecraft.poseidon.MinecraftServer;
-import com.legacy.minecraft.poseidon.NetServerHandler;
+import com.legacyminecraft.poseidon.MinecraftServer;
+import com.legacyminecraft.poseidon.NetServerHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
 

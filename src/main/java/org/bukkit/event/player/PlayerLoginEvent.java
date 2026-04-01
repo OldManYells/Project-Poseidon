@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import com.legacy.minecraft.poseidon.NetLoginHandler;
+import com.legacyminecraft.poseidon.NetLoginHandler;
 import org.bukkit.entity.Player;
 
 import java.net.InetAddress;
