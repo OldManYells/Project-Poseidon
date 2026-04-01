@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.plugin;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 import com.avaje.ebean.EbeanServer;
 import org.bukkit.Server;

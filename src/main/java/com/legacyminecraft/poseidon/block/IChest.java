@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.block;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 /**
  * Represents a chest.

@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.permissions;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 import org.bukkit.permissions.PermissionAttachment;
 

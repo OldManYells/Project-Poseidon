@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.server.thread;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 import com.legacyminecraft.poseidon.server.network.*;
 import com.legacyminecraft.poseidon.packets.*;
 import com.legacyminecraft.poseidon.*;

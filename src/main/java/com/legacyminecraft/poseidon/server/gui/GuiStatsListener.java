@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.server.gui;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.scheduler;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;

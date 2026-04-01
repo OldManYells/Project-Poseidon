@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.world.block.material;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 public class MaterialLogic extends Material {
 

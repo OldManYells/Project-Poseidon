@@ -1,4 +1,9 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.physics;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
+import com.legacyminecraft.poseidon.EnumMovingObjectType;
+import com.legacyminecraft.poseidon.world.math.Vec3D;
 import com.legacyminecraft.poseidon.world.entity.*;
 
 public class MovingObjectPosition {

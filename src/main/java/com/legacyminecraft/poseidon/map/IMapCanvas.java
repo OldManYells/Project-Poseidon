@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.map;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 import java.awt.Image;
 import org.bukkit.map.MapCursorCollection;

@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.permissions;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 /**
  * Represents an object that may become a server operator, such as a {@link org.bukkit.entity.Player}

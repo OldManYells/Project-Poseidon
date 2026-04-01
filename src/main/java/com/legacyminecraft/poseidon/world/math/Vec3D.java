@@ -1,4 +1,7 @@
-package com.legacyminecraft.poseidon;
+package com.legacyminecraft.poseidon.world.math;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 
 import java.util.ArrayList;
 import java.util.List;

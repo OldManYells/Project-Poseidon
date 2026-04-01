@@ -1,4 +1,7 @@
 package com.legacyminecraft.poseidon.inventory;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
 import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.inventory.Inventory;
