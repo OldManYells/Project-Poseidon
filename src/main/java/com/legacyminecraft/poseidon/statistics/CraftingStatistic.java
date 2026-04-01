@@ -1,0 +1,15 @@
+package com.legacyminecraft.poseidon.statistics;
+import com.legacyminecraft.poseidon.world.entity.data.*;
+import com.legacyminecraft.poseidon.world.pathfinding.*;
+import com.legacyminecraft.poseidon.world.physics.*;
+import com.legacyminecraft.poseidon.world.math.*;
+
+public class CraftingStatistic extends Statistic {
+
+    private final int a;
+
+    public CraftingStatistic(int i, String s, int j) {
+        super(i, s);
+        this.a = j;
+    }
+}
