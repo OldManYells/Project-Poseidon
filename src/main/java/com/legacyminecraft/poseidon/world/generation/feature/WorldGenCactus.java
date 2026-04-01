@@ -1,30 +1,33 @@
-package com.legacyminecraft.poseidon.world.generation;
+package com.legacyminecraft.poseidon.world.generation.feature;
+import com.legacyminecraft.poseidon.world.entity.data.*;
+import com.legacyminecraft.poseidon.statistics.*;
 import com.legacyminecraft.poseidon.world.pathfinding.*;
 import com.legacyminecraft.poseidon.world.physics.*;
 import com.legacyminecraft.poseidon.world.math.*;
 import com.legacyminecraft.poseidon.world.block.Block;
 import com.legacyminecraft.poseidon.world.core.*;
 import com.legacyminecraft.poseidon.*;
-import com.legacyminecraft.poseidon.world.block.*;
 
 import java.util.Random;
 
-public class WorldGenFlowers extends WorldGenerator {
+public class WorldGenCactus extends WorldGenerator {
 
-    private int a;
-
-    public WorldGenFlowers(int i) {
-        this.a = i;
-    }
+    public WorldGenCactus() {}
 
     public boolean a(World world, Random random, int i, int j, int k) {
-        for (int l = 0; l < 64; ++l) {
+        for (int l = 0; l < 10; ++l) {
             int i1 = i + random.nextInt(8) - random.nextInt(8);
             int j1 = j + random.nextInt(4) - random.nextInt(4);
             int k1 = k + random.nextInt(8) - random.nextInt(8);
 
-            if (world.isEmpty(i1, j1, k1) && ((BlockFlower) Block.byId[this.a]).f(world, i1, j1, k1)) {
-                world.setRawTypeId(i1, j1, k1, this.a);
+            if (world.isEmpty(i1, j1, k1)) {
+                int l1 = 1 + random.nextInt(random.nextInt(3) + 1);
+
+                for (int i2 = 0; i2 < l1; ++i2) {
+                    if (Block.CACTUS.f(world, i1, j1 + i2, k1)) {
+                        world.setRawTypeId(i1, j1 + i2, k1, Block.CACTUS.id);
+                    }
+                }
             }
         }
 
