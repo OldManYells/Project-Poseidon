@@ -1,4 +1,6 @@
 package org.bukkit.event.painting;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;

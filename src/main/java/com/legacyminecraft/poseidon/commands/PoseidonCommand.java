@@ -3,13 +3,10 @@ package com.legacyminecraft.poseidon.commands;
 import com.legacyminecraft.poseidon.Poseidon;
 import com.projectposeidon.api.PoseidonUUID;
 import com.projectposeidon.api.UUIDType;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.UUID;

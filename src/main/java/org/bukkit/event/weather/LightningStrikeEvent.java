@@ -1,4 +1,5 @@
 package org.bukkit.event.weather;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.World;
 import org.bukkit.entity.LightningStrike;

@@ -1,6 +1,7 @@
 package org.bukkit.event.player;
+import com.legacyminecraft.poseidon.server.network.*;
 
-import net.minecraft.server.NetLoginHandler;
+import com.legacyminecraft.poseidon.server.network.NetLoginHandler;
 import org.bukkit.entity.Player;
 
 import java.net.InetAddress;

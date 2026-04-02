@@ -1,4 +1,5 @@
 package org.bukkit.event.player;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;

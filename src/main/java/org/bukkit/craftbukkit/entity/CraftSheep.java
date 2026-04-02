@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import net.minecraft.server.EntitySheep;
+import com.legacyminecraft.poseidon.world.entity.EntitySheep;
 import org.bukkit.DyeColor;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Sheep;

@@ -1,6 +1,7 @@
 package org.bukkit.event.packet;
+import com.legacyminecraft.poseidon.packets.*;
 
-import net.minecraft.server.Packet;
+import com.legacyminecraft.poseidon.packets.Packet;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 

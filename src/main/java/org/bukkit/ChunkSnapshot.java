@@ -1,4 +1,5 @@
 package org.bukkit;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.block.Biome;
 /**

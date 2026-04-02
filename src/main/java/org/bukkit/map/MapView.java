@@ -1,4 +1,5 @@
 package org.bukkit.map;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.World;
 

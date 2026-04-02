@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.inventory.*;
+import com.legacyminecraft.poseidon.world.item.*;
 
-import net.minecraft.server.FurnaceRecipes;
+import com.legacyminecraft.poseidon.world.inventory.FurnaceRecipes;
 import org.bukkit.Material;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +30,6 @@ public class CraftFurnaceRecipe extends FurnaceRecipe implements CraftRecipe {
         int id = result.getTypeId();
         int amount = result.getAmount();
         int dmg = result.getDurability();
-        FurnaceRecipes.getInstance().registerRecipe(input.getItemTypeId(), new net.minecraft.server.ItemStack(id, amount, dmg));
+        FurnaceRecipes.getInstance().registerRecipe(input.getItemTypeId(), new com.legacyminecraft.poseidon.world.item.ItemStack(id, amount, dmg));
     }
 }

@@ -1,4 +1,8 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.core.*;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.api.*;
 
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
@@ -8,9 +12,16 @@ import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonServer;
+import com.legacyminecraft.poseidon.server.command.ServerCommand;
+import com.legacyminecraft.poseidon.server.config.PropertyManager;
+import com.legacyminecraft.poseidon.server.progress.ConvertProgressUpdater;
+import com.legacyminecraft.poseidon.server.player.ServerConfigurationManager;
+import com.legacyminecraft.poseidon.world.storage.ServerNBTManager;
+import com.legacyminecraft.poseidon.world.map.WorldMap;
+import com.legacyminecraft.poseidon.world.map.WorldMapCollection;
 import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import jline.ConsoleReader;
-import net.minecraft.server.*;
+import com.legacyminecraft.poseidon.*;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;

@@ -1,7 +1,7 @@
 package com.legacyminecraft.poseidon.util;
 
-import org.bukkit.Bukkit;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
+import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.*;
 
 public class ServerLogRotator {
     private final String latestLogFileName;

@@ -1,4 +1,6 @@
 package org.bukkit.event.block;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

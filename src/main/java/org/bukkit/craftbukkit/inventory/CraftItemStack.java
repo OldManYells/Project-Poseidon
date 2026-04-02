@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftItemStack extends ItemStack {
-    protected net.minecraft.server.ItemStack item;
+    protected com.legacyminecraft.poseidon.world.item.ItemStack item;
 
-    public CraftItemStack(net.minecraft.server.ItemStack item) {
+    public CraftItemStack(com.legacyminecraft.poseidon.world.item.ItemStack item) {
         super(
             item != null ? item.id: 0,
             item != null ? item.count : 0,
@@ -45,7 +46,7 @@ public class CraftItemStack extends ItemStack {
     }
 
     public CraftItemStack(int type, int amount, short damage, Byte data) {
-        this(new net.minecraft.server.ItemStack(type, amount, data != null ? data : damage));
+        this(new com.legacyminecraft.poseidon.world.item.ItemStack(type, amount, data != null ? data : damage));
     }
 
     /*
@@ -73,7 +74,7 @@ public class CraftItemStack extends ItemStack {
             item = null;
         } else {
             if (item == null) {
-                item = new net.minecraft.server.ItemStack(type, 1, 0);
+                item = new com.legacyminecraft.poseidon.world.item.ItemStack(type, 1, 0);
                 super.setAmount(1);
             } else {
                 item.id = type;

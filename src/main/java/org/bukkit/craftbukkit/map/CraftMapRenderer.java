@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.map;
 
-import net.minecraft.server.WorldMap;
-import net.minecraft.server.WorldMapOrienter;
+import com.legacyminecraft.poseidon.world.map.WorldMap;
+import com.legacyminecraft.poseidon.world.map.WorldMapOrienter;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapCursorCollection;

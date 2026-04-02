@@ -1,4 +1,5 @@
 package org.bukkit;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import com.avaje.ebean.config.ServerConfig;
 import org.bukkit.command.CommandSender;

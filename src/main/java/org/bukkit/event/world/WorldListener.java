@@ -1,4 +1,6 @@
 package org.bukkit.event.world;
+import com.legacyminecraft.poseidon.world.core.*;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.event.Listener;
 

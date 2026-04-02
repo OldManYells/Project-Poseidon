@@ -1,4 +1,5 @@
 package org.bukkit.event.painting;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Painting;

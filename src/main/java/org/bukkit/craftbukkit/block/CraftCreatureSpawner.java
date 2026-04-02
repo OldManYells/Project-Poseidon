@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.block.entity.*;
 
-import net.minecraft.server.TileEntityMobSpawner;
+import com.legacyminecraft.poseidon.world.block.entity.TileEntityMobSpawner;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.CraftWorld;

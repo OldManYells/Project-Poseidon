@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.generator;
+import com.legacyminecraft.poseidon.world.core.*;
 
-import net.minecraft.server.World;
+import com.legacyminecraft.poseidon.world.core.World;
 
 /**
  * This class is useless. Just fyi.

@@ -1,7 +1,11 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.core.*;
+import com.legacyminecraft.poseidon.server.network.*;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.packets.*;
 
 import com.projectposeidon.ConnectionType;
-import net.minecraft.server.*;
+import com.legacyminecraft.poseidon.*;
 import org.bukkit.Achievement;
 import org.bukkit.Material;
 import org.bukkit.Statistic;

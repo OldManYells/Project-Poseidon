@@ -1,7 +1,7 @@
 
 package org.bukkit.craftbukkit.util;
 
-import net.minecraft.server.MinecraftServer;
+import com.legacyminecraft.poseidon.MinecraftServer;
 
 public class ServerShutdownThread extends Thread {
     private final MinecraftServer server;

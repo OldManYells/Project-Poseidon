@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import net.minecraft.server.EntityWaterAnimal;
+import com.legacyminecraft.poseidon.world.entity.EntityWaterAnimal;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.WaterMob;
 

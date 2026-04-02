@@ -1,5 +1,6 @@
 
 package org.bukkit.craftbukkit.block;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -33,7 +34,7 @@ public class CraftBlockState implements BlockState {
         createData(block.getData());
     }
 
-    public static CraftBlockState getBlockState(net.minecraft.server.World world, int x, int y, int z) {
+    public static CraftBlockState getBlockState(com.legacyminecraft.poseidon.world.core.World world, int x, int y, int z) {
         return new CraftBlockState(world.getWorld().getBlockAt(x, y, z));
     }
 

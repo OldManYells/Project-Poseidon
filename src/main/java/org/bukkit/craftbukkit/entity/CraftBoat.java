@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import net.minecraft.server.EntityBoat;
+import com.legacyminecraft.poseidon.world.entity.EntityBoat;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Boat;
 

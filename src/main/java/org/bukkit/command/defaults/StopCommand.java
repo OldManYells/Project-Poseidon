@@ -1,4 +1,5 @@
 package org.bukkit.command.defaults;
+import com.legacyminecraft.poseidon.world.core.*;
 
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonConfig;

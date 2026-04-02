@@ -1,7 +1,15 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.generation.feature.*;
+import com.legacyminecraft.poseidon.world.core.*;
+import com.legacyminecraft.poseidon.world.block.entity.*;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.packets.*;
+import com.legacyminecraft.poseidon.world.item.*;
+import com.legacyminecraft.poseidon.world.block.*;
+import com.legacyminecraft.poseidon.world.generation.*;
 
 import com.google.common.collect.MapMaker;
-import net.minecraft.server.*;
+import com.legacyminecraft.poseidon.*;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.*;
@@ -110,7 +118,7 @@ public class CraftWorld implements World {
         org.bukkit.Chunk[] craftChunks = new CraftChunk[chunks.length];
 
         for (int i = 0; i < chunks.length; i++) {
-            net.minecraft.server.Chunk chunk = (net.minecraft.server.Chunk) chunks[i];
+            com.legacyminecraft.poseidon.world.core.Chunk chunk = (com.legacyminecraft.poseidon.world.core.Chunk) chunks[i];
             craftChunks[i] = chunk.bukkitChunk;
         }
 
@@ -152,7 +160,7 @@ public class CraftWorld implements World {
             return false;
         }
 
-        net.minecraft.server.Chunk chunk = world.chunkProviderServer.getOrCreateChunk(x, z);
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = world.chunkProviderServer.getOrCreateChunk(x, z);
 
         if (save && !chunk.isEmpty()) {
             chunk.removeEntities();
@@ -173,7 +181,7 @@ public class CraftWorld implements World {
 
         world.chunkProviderServer.unloadQueue.remove(x, z);
 
-        net.minecraft.server.Chunk chunk = null;
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = null;
 
         if (world.chunkProviderServer.chunkProvider == null) {
             chunk = world.chunkProviderServer.emptyChunk;
@@ -236,7 +244,7 @@ public class CraftWorld implements World {
         }
 
         world.chunkProviderServer.unloadQueue.remove(x, z);
-        net.minecraft.server.Chunk chunk = (net.minecraft.server.Chunk) world.chunkProviderServer.chunks.get(x, z);
+        com.legacyminecraft.poseidon.world.core.Chunk chunk = (com.legacyminecraft.poseidon.world.core.Chunk) world.chunkProviderServer.chunks.get(x, z);
 
         if (chunk == null) {
             chunk = world.chunkProviderServer.loadChunk(x, z);
@@ -247,7 +255,7 @@ public class CraftWorld implements World {
     }
 
     @SuppressWarnings("unchecked")
-    private void chunkLoadPostProcess(net.minecraft.server.Chunk chunk, int x, int z) {
+    private void chunkLoadPostProcess(com.legacyminecraft.poseidon.world.core.Chunk chunk, int x, int z) {
         if (chunk != null) {
             world.chunkProviderServer.chunks.put(x, z, chunk);
             world.chunkProviderServer.chunkList.add(chunk);
@@ -287,7 +295,7 @@ public class CraftWorld implements World {
     }
 
     public org.bukkit.entity.Item dropItem(Location loc, ItemStack item) {
-        net.minecraft.server.ItemStack stack = new net.minecraft.server.ItemStack(
+        com.legacyminecraft.poseidon.world.item.ItemStack stack = new com.legacyminecraft.poseidon.world.item.ItemStack(
             item.getTypeId(),
             item.getAmount(),
             item.getDurability()
@@ -526,8 +534,8 @@ public class CraftWorld implements World {
         List<Entity> list = new ArrayList<Entity>();
 
         for (Object o: world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof com.legacyminecraft.poseidon.world.entity.Entity) {
+                com.legacyminecraft.poseidon.world.entity.Entity mcEnt = (com.legacyminecraft.poseidon.world.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -544,8 +552,8 @@ public class CraftWorld implements World {
         List<LivingEntity> list = new ArrayList<LivingEntity>();
 
         for (Object o: world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof com.legacyminecraft.poseidon.world.entity.Entity) {
+                com.legacyminecraft.poseidon.world.entity.Entity mcEnt = (com.legacyminecraft.poseidon.world.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -562,8 +570,8 @@ public class CraftWorld implements World {
         List<Player> list = new ArrayList<Player>();
 
         for (Object o : world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+            if (o instanceof com.legacyminecraft.poseidon.world.entity.Entity) {
+                com.legacyminecraft.poseidon.world.entity.Entity mcEnt = (com.legacyminecraft.poseidon.world.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 if ((bukkitEntity != null) && (bukkitEntity instanceof Player)) {
@@ -688,7 +696,7 @@ public class CraftWorld implements World {
             throw new IllegalArgumentException("Location or entity class cannot be null");
         }
 
-        net.minecraft.server.Entity entity = null;
+        com.legacyminecraft.poseidon.world.entity.Entity entity = null;
 
         double x = location.getX();
         double y = location.getY();

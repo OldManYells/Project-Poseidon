@@ -1,4 +1,5 @@
 package org.bukkit.command.defaults;
+import com.legacyminecraft.poseidon.world.entity.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

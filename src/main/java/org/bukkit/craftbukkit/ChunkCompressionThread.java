@@ -1,8 +1,10 @@
 package org.bukkit.craftbukkit;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.packets.*;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet51MapChunk;
+import com.legacyminecraft.poseidon.world.entity.EntityPlayer;
+import com.legacyminecraft.poseidon.packets.Packet;
+import com.legacyminecraft.poseidon.packets.Packet51MapChunk;
 
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;

@@ -1,11 +1,13 @@
 package com.projectposeidon.johnymuffin;
+import com.legacyminecraft.poseidon.server.network.*;
+import com.legacyminecraft.poseidon.packets.*;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.uuid.ThreadUUIDFetcher;
-import net.minecraft.server.NetLoginHandler;
-import net.minecraft.server.Packet1Login;
-import net.minecraft.server.ThreadLoginVerifier;
+import com.legacyminecraft.poseidon.server.network.NetLoginHandler;
+import com.legacyminecraft.poseidon.packets.Packet1Login;
+import com.legacyminecraft.poseidon.server.thread.ThreadLoginVerifier;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;

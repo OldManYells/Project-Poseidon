@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.map;
+import com.legacyminecraft.poseidon.world.core.*;
 
-import net.minecraft.server.WorldMap;
+import com.legacyminecraft.poseidon.world.map.WorldMap;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;

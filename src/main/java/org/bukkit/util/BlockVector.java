@@ -1,4 +1,5 @@
 package org.bukkit.util;
+import com.legacyminecraft.poseidon.world.block.*;
 
 /**
  * A vector with a hash function that floors the X, Y, Z components, a la

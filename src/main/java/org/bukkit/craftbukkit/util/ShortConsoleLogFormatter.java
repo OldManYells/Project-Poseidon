@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.util;
 
 import joptsimple.OptionException;
 import joptsimple.OptionSet;
-import net.minecraft.server.MinecraftServer;
+import com.legacyminecraft.poseidon.MinecraftServer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,7 +1,6 @@
 package com.legacyminecraft.poseidon;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 import org.bukkit.craftbukkit.CraftServer;
 
 import java.util.LinkedList;

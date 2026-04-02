@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
 
-import net.minecraft.server.EntityAnimal;
+import com.legacyminecraft.poseidon.world.entity.EntityAnimal;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Animals;
 

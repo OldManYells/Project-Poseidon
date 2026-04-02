@@ -1,4 +1,6 @@
 package org.bukkit.event.entity;
+import com.legacyminecraft.poseidon.world.entity.*;
+import com.legacyminecraft.poseidon.world.item.*;
 
 import org.bukkit.event.Listener;
 import org.bukkit.event.painting.PaintingBreakEvent;

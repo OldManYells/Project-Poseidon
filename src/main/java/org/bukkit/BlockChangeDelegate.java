@@ -1,4 +1,5 @@
 package org.bukkit;
+import com.legacyminecraft.poseidon.world.block.*;
 
 /**
  * A delegate for handling block changes. This serves as a direct interface

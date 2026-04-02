@@ -1,10 +1,10 @@
 package com.legacyminecraft.poseidon.uuid;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.packets.Packet1Login;
 import com.legacyminecraft.poseidon.util.GetUUIDFetcher;
 import com.legacyminecraft.poseidon.util.UUIDResult;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
-import net.minecraft.server.Packet1Login;
 import org.bukkit.ChatColor;
 
 import java.util.UUID;

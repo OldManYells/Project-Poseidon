@@ -1,4 +1,5 @@
 package org.bukkit.event.block;
+import com.legacyminecraft.poseidon.world.block.*;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;

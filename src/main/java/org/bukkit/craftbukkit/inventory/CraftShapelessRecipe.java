@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.inventory;
+import com.legacyminecraft.poseidon.world.inventory.*;
+import com.legacyminecraft.poseidon.world.item.*;
 
-import net.minecraft.server.CraftingManager;
+import com.legacyminecraft.poseidon.world.inventory.CraftingManager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.material.MaterialData;
@@ -30,12 +32,12 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
         for (MaterialData mdata : ingred) {
             int id = mdata.getItemTypeId();
             byte dmg = mdata.getData();
-            data[i] = new net.minecraft.server.ItemStack(id, 1, dmg);
+            data[i] = new com.legacyminecraft.poseidon.world.item.ItemStack(id, 1, dmg);
             i++;
         }
         int id = this.getResult().getTypeId();
         int amount = this.getResult().getAmount();
         short durability = this.getResult().getDurability();
-        CraftingManager.getInstance().registerShapelessRecipe(new net.minecraft.server.ItemStack(id, amount, durability), data);
+        CraftingManager.getInstance().registerShapelessRecipe(new com.legacyminecraft.poseidon.world.item.ItemStack(id, amount, durability), data);
     }
 }
